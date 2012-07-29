@@ -9,9 +9,9 @@
             <column name="EVENT_ID" length="20" />
             <generator class="assigned" />
         </id>
-        <version name="timestamp" type="date">
+        <property name="timestamp" type="date">
             <column name="TIMESTAMP" length="7" not-null="true" />
-        </version>
+        </property>
         <many-to-one name="subscriber" class="com.rawabi.model.Subscriber" fetch="select">
             <column name="SUBSCRIBER_ID" precision="22" scale="0" not-null="true">
                 <comment>subscriber to which the balance was transferred</comment>

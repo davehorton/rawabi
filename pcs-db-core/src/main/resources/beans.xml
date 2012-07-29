@@ -1,15 +1,15 @@
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD  BEAN//EN" "file:////root/DOWNLOADS/SPRING/spring-framework-1.2.8/dist/spring-beans.dtd">
 <beans>
-	<bean id="logger" class="org.sipdev.framework.Log4jLogger"  init-method="init">
+	<bean id="logger" class="com.beachdog.frameworks.Log4jLogger"  init-method="init">
 	</bean>
 
-    <bean id="psprd1" class="org.sipdev.framework.CommonsPoolableDataSource"
+    <bean id="psprd1" class="com.beachdog.frameworks.CommonsPoolableDataSource"
                         destroy-method="close" init-method="createPool">
                         <property name="driverName">
                                 <value>oracle.jdbc.driver.OracleDriver</value>
                         </property>
                         <property name="connectionURL">
-                                <value>jdbc:oracle:thin:@77.92.180.12:1521:psprd1</value> 
+                                <value>jdbc:oracle:thin:@77.92.180.10:1521:psprd1</value> 
                         </property>
                         <property name="username">
                                 <value>pcsprod</value>
@@ -60,20 +60,19 @@
 		<!-- Pass in your table mappings here-->
    		 <property name="mappingResources">
 		 	<list>
+        		<value>com/rawabi/model/AccessNumber.hbm.xml</value>
         		<value>com/rawabi/model/AccountActivity.hbm.xml</value>
+        		<value>com/rawabi/model/CurrencyRef.hbm.xml</value>
         		<value>com/rawabi/model/EvtBalanceTransfer.hbm.xml</value>
-        		<value>com/rawabi/model/Lot.hbm.xml</value>
+        		<value>com/rawabi/model/LanguageRef.hbm.xml</value>
         		<value>com/rawabi/model/LockedPins.hbm.xml</value>
         		<value>com/rawabi/model/PreActivatedSubscribers.hbm.xml</value>
         		<value>com/rawabi/model/ProductOffering.hbm.xml</value>
+       			<value>com/rawabi/model/ServiceProvider.hbm.xml</value>
+      			<value>com/rawabi/model/ServiceProviderSettings.hbm.xml</value>
         		<value>com/rawabi/model/SubAuthAni.hbm.xml</value>
         		<value>com/rawabi/model/Subscriber.hbm.xml</value>
         		<value>com/rawabi/model/SvcPrepaidCalling.hbm.xml</value>
-        		<value>com/rawabi/model/CurrencyRef.hbm.xml</value>
-        		<value>com/rawabi/model/LanguageRef.hbm.xml</value>
-       			<value>com/rawabi/model/AccessNumber.hbm.xml</value>
-       			<value>com/rawabi/model/ServiceProvider.hbm.xml</value>
-      			<value>com/rawabi/model/ServiceProviderSettings.hbm.xml</value>
         	</list>
     	</property>
 		

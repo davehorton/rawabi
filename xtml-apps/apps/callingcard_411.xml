@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
-  <version sce-version="422a4" prev-sce-version="422a4" last-mod-time="Wednesday, July 25, 2012 12:20:42"/>
+  <version sce-version="422a4" prev-sce-version="422a4" last-mod-time="Sunday, July 29, 2012 17:36:20"/>
   <events >
     <event name="CSRBeginAssignment" display="CSRBeginAssignment" >
       <parameter name="strACDControllerIP" type="string"/>
@@ -243,7 +243,6 @@
     <var name="g_strCallingCardNumber" type="string" ></var>
     <var name="g_strPinNumber" type="string" ></var>
     <var name="g_breturnFromMain" type="boolean" >0</var>
-    <var name="g_oAutoAniArray" type="object" ></var>
     <var name="g_bAutoAniAccessNumber" type="boolean" >0</var>
   </global-vars>
   <shared-vars >
@@ -385,6 +384,8 @@
     <var name="s_nSTATE_CHECK_PIN_PRPD_OR_POPD" type="i4" >41</var>
     <var name="s_bPinPlayZeroForOperator" type="boolean" >0</var>
     <var name="s_nTREATMENT_CODE_AN_INIT" type="i4" >3</var>
+    <var name="s_oAutoAniArray" type="object" ></var>
+    <var name="s_strJavaClass" type="string" >com.rawabi.xtml.XtmlInterface</var>
   </shared-vars>
   <functions >
     <function name="Main" start="1" event="Main" returns="void" >
@@ -2450,7 +2451,7 @@ Session.g_oCallLegA.strFrom = js_check_to_strip_oli(Session.g_oAPI.strInfoDigits
 ]]></script>
           </scripts>
         </action>
-        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=389 y=809 ?>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=599 y=769 ?>
           <!--s_nSTATE_GET_PIN_PRPD_OR_POPD-->
           <return xmlns="www.pactolus.com:xtml:application" value="s_nSTATE_GET_PIN_PRPD_OR_POPD"/>
         </action>
@@ -2530,14 +2531,14 @@ Session.g_strAlarmPriority = "MAJOR";]]></script>
         </action>
         <action id="71" plug-in="Pactolus.Branch.1" ><?xtml-editor x=16 y=624 ?>
           <results >
-            <result name="Default" link="72" stubbed="1"/>
+            <result name="Default" link="72" stubbed="0"/>
             <result name="ACD.strGreetEnabled" link="89" stubbed="0" >g_oACD.strGreetEnabled match "T"</result>
             <result name="languagePrompt?" link="94" stubbed="0" >g_oAPI.strPromptLanguageMenuUrl.length &gt; 0
 
 
 
 OR g_oAPI.nPromptLanguageMenuIndex &gt; 0</result>
-            <result name="!bValidateByANI" link="5" stubbed="0" >g_bValidateByANI == false</result>
+            <result name="!bValidateByANI" link="113" stubbed="0" >g_bValidateByANI == false</result>
           </results>
           <scripts >
             <script language="javascript" timing="first" ><![CDATA[if (Session.g_oSUB.strUserPin.length <= 0)
@@ -2704,7 +2705,7 @@ else
         <action id="97" plug-in="Pactolus.Branch.1" ><?xtml-editor x=332 y=397 ?>
           <!--delay?-->
           <results >
-            <result name="Default" link="99" stubbed="1"/>
+            <result name="Default" link="99" stubbed="0"/>
             <result name="s_fPreStartCallDelay &gt; 0" link="98" stubbed="0" >s_fPreStartCallDelay &gt; 0.0</result>
           </results>
         </action>
@@ -2729,7 +2730,7 @@ else
           <!--Is Direct Call?-->
           <results >
             <result name="Default" link="106" stubbed="0"/>
-            <result name="Direct Call" link="100" stubbed="1" >g_oAPI.bANDirectCallFlag == true</result>
+            <result name="Direct Call" link="100" stubbed="0" >g_oAPI.bANDirectCallFlag == true</result>
           </results>
           <scripts >
             <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Direct Call Flag = " + Session.g_oAPI.bANDirectCallFlag);]]></script>
@@ -2841,7 +2842,7 @@ if (undefined == myTo.tag)
         <action id="106" plug-in="Pactolus.Branch.1" ><?xtml-editor x=32 y=529 ?>
           <results >
             <result name="Default" link="71" stubbed="1"/>
-            <result name="payPhoneSwipeFlag &amp; noPin" link="5" stubbed="0" >g_oAPI.bPayPhoneSwipeFlag  == true
+            <result name="payPhoneSwipeFlag &amp; noPin" link="113" stubbed="0" >g_oAPI.bPayPhoneSwipeFlag  == true
 AND g_bNullFlag == true</result>
             <result name="payPhoneSwipeFlag &amp; hasPin" link="72" stubbed="0" >g_oAPI.bPayPhoneSwipeFlag  == true
 AND g_bNullFlag == false</result>
@@ -2878,46 +2879,27 @@ Server.logInfo("Current State"+Session.g_nCurrentState);]]></script>
         <action id="109" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1125 y=265 ?>
           <results >
             <result name="Default" link="103" stubbed="0"/>
-            <result name="auto ANI access number" link="110" stubbed="0" >g_bAutoAniAccessNumber == true</result>
           </results>
         </action>
-        <action id="110" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1105 y=515 ?>
-          <!--direct caller to MS-->
-          <function xmlns="www.pactolus.com:xtml:application" name="&quot;DirectCallerToMS&quot;" return="f_nReturnCode" external-function="1" library="lib_mediaserver.xml" >
-            <parameter >g_oCallLegA</parameter>
-            <parameter >g_oMS</parameter>
-          </function>
-          <results >
-            <result name="Default" link="34" stubbed="1"/>
-            <result name="Success" link="111" stubbed="0" >f_nReturnCode == s_sSUCCESS</result>
-            <result name="Caller Hung Up" link="84" stubbed="1" >f_nReturnCode == s_sCALLERHUNGUP</result>
-          </results>
-          <scripts >
-            <script language="javascript" timing="last" ><![CDATA[if (1 == Result.id)
-{
-	Session.g_oAPI.nSessionTerminationReason = 12;
-	Session.g_bFailToConnectToMS = true;
-}
-else if (3 == Result.id)
-{
-	Session.g_oAPI.nSessionTerminationReason = 7;
-	Session.g_bFailToConnectToMS = true;
-}
-else
-{
-	Session.g_bSentFinalResponse = true;
-}]]></script>
-          </scripts>
-        </action>
-        <action id="111" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1332 y=593 ?>
+        <action id="111" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=605 y=851 ?>
           <!--RegisterAutoAni-->
-          <function xmlns="www.pactolus.com:xtml:application" name="&quot;RegisterAutoAni&quot;" return="g_nCurrentState" external-function="1" library=""/>
+          <function xmlns="www.pactolus.com:xtml:application" name="&quot;RegisterAuthAni&quot;" return="g_nCurrentState" external-function="0" library=""/>
           <results >
             <result name="Default" link="112" stubbed="0"/>
           </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Call was made on an auto-ANI access number with an unrecognized ANI; try to register this ANI") ;]]></script>
+          </scripts>
         </action>
-        <action id="112" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1554 y=599 ?>
+        <action id="112" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=845 y=851 ?>
+          <!--g_nCurrentState-->
           <return xmlns="www.pactolus.com:xtml:application" value="g_nCurrentState"/>
+        </action>
+        <action id="113" plug-in="Pactolus.Branch.1" ><?xtml-editor x=265 y=800 ?>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="auto ANI access number" link="111" stubbed="0" >g_bAutoAniAccessNumber == true</result>
+          </results>
         </action>
       </actions>
     </function>
@@ -9674,9 +9656,10 @@ if(Session.g_oSUB.nSecondsAnnounce > 0) {
         <var name="f_strUseFromHeaderForAni" type="string" ></var>
         <var name="f_strPlay0" type="string" ></var>
         <var name="strAutoAniList" type="string" ></var>
+        <var name="nReturn" type="i4" >0</var>
       </local-vars>
       <actions >
-        <action id="1" plug-in="Pactolus.UserFunction.1" ><?xtml-editor x=15 y=15 ?>
+        <action id="1" plug-in="Pactolus.UserFunction.1" ><?xtml-editor x=18 y=30 ?>
           <!--GET PSX IP from config-->
           <user-function xmlns="www.pactolus.com:xtml:application" process="&quot;PACTOLUS_ps_c_adaptor&quot;" function="&quot;get_property&quot;" timeout="s_nTIMEOUT" return="" async="0" >
             <parameter >"primary-softswitch"</parameter>
@@ -10035,13 +10018,15 @@ if(Session.f_strPlay0.length <= 0){
 	Session.s_bPinPlayZeroForOperator =  js_process_application_property(Session.f_strPlay0);
 }
 
-Session.g_oAutoAniArray.length = 0 ;
+Session.s_oAutoAniArray.length = 0 ;
 if( Session.strAutoAniList.length > 0 ) {
 	var arr = Session.strAutoAniList.split(",") ;
 	for( var i = 0; i < arr.length; i++ ) {
-		var s = arr[i].trim() ;
+		var s = new String( arr[i] ) ;
+		s = trimString( s ) ;
+		
 		Server.logInfo("Access number " + s + " will be an auto ANI access number") ;
-		Session.g_oAutoAniArray[i] = s ;
+		Session.s_oAutoAniArray[i] = s ;
 	}
 }
 ]]></script>
@@ -10085,8 +10070,22 @@ Server.unlockSharedVariables();]]></script>
             <parameter >s_strLocalHost</parameter>
           </function>
           <results >
-            <result name="Default" link="11" stubbed="0"/>
+            <result name="Default" link="19" stubbed="0"/>
           </results>
+        </action>
+        <action id="19" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=886 y=190 ?>
+          <!--Init-->
+          <java xmlns="www.pactolus.com:xtml:application" class="s_strJavaClass" method="&quot;Init&quot;" timeout="" return="" method-return-var="nReturn" method-return-type="0"/>
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Calling XtmlInterface.Init") ;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("Back from calling XtmlInterface.Init, return code " + Session.nReturn) ;]]></script>
+          </scripts>
         </action>
       </actions>
     </function>
@@ -19212,6 +19211,7 @@ Session.g_nNumRetry++;]]></script>
     <function name="RegisterAuthAni" start="1" event="BalanceTransfer" returns="i4" >
       <local-vars >
         <var name="strPin" type="string" ></var>
+        <var name="bGotPin" type="boolean" >0</var>
       </local-vars>
       <actions >
         <action id="1" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=95 y=110 ?>
@@ -19221,17 +19221,30 @@ Session.g_nNumRetry++;]]></script>
             <timeout-prompt type="index" >552</timeout-prompt>
           </play>
           <results >
-            <result name="Default"/>
+            <result name="Default" link="3" stubbed="0"/>
             <result name="Success"/>
             <result name="Error"/>
             <result name="Timeout"/>
-            <result name="collected pin" >strPin match "x.x"
-</result>
+            <result name="collected pin" link="2" stubbed="0" >bGotPin == true</result>
           </results>
           <scripts >
-            <script language="javascript" timing="first" ><![CDATA[
+            <script language="javascript" timing="first" ><![CDATA[Session.strPin = "" ;
+Session.bGotPin = false ;
 
 ]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if( Session.strPin.length > 0 ) {
+	Session.bGotPin = true ;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.EndSession.1" ><?xtml-editor x=446 y=268 ?>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Collected pin for auth ani validation: " + Session.strPin ) ;]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.EndSession.1" ><?xtml-editor x=436 y=109 ?>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Did not collect pin for auth ani") ;]]></script>
           </scripts>
         </action>
       </actions>
@@ -19241,14 +19254,18 @@ Session.g_nNumRetry++;]]></script>
 #include <dialing_plan_utils.jsh>
 
 function isAutoAni( phoneNumber ) {
-	for( var i = 0; i < Session.g_oAutoAniArray.length; i++ ) {
-		if( phoneNumber === Session.g_oAutoAniArray[i] ) {
+	for( var i = 0; i < Session.s_oAutoAniArray.length; i++ ) {
+		if( phoneNumber === Session.s_oAutoAniArray[i] ) {
 			Server.logInfo("DH: phone number " + phoneNumber + " is an auto ANI access number") ;
 			return true ;
 		}
 	}
 	Server.logInfo("DH: phone number " + phoneNumber + " is not an auto ANI access number") ;
 	return false ;
+}
+
+function trimString( str ) {
+	return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 }
 ]]></script>
   <properties >
