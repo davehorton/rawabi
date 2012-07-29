@@ -1,0 +1,1157 @@
+<?xml version="1.0"?>
+<xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
+  <version sce-version="6021" prev-sce-version="6021" last-mod-time="Tuesday, May 26, 2009 14:25:53"/>
+  <global-handlers >
+    <handler event="Pactolus.EveSessionTerminate.1" function="OnSipDialogTerminated" public="0" always-on="0"/>
+    <handler event="Standard.OnServiceLoad.1" function="OnServiceLoad" public="0" always-on="0"/>
+    <handler event="Standard.OnTimer.1" function="OnTimer" public="0" always-on="0"/>
+    <handler event="Pactolus.EveSessionSipMsg.1" function="OnSipMsgWithinDialog" public="0" always-on="0"/>
+    <handler event="Pactolus.EveSessionRequest.1" function="OnSipDialogRequested" public="1" always-on="0"/>
+  </global-handlers>
+  <global-vars >
+    <var name="g_bInitialPromptPlayed" type="boolean" >0</var>
+    <var name="g_nPromptTimerId" type="i4" >0</var>
+    <var name="g_epIvr" type="MediaEndpoint" ></var>
+    <var name="g_oInviteSipMsg" type="SipMessage" ></var>
+    <var name="g_oSipMsgB" type="SipMessage" ></var>
+    <var name="g_strFinalToHeaderOnBLeg" type="string" ></var>
+    <var name="g_dlg" type="SipDialogArray" ></var>
+    <var name="g_nCrankbackTimerId" type="i4" >0</var>
+    <var name="g_bPrimarySoftswitchResponded" type="boolean" >0</var>
+  </global-vars>
+  <shared-vars >
+    <var name="s_nShortTimeout" type="i4" >5</var>
+    <var name="s_bEnabled" type="boolean" >0</var>
+    <var name="s_nIntialPromptIndex" type="i4" >0</var>
+    <var name="s_nRepeatPromptIndex" type="i4" >0</var>
+    <var name="s_fInitalDelaySec" type="float" >0</var>
+    <var name="s_fRepeatDelaySec" type="float" >0</var>
+    <var name="s_strMSType" type="string" ></var>
+    <var name="s_nTimeout" type="i4" >30</var>
+    <var name="s_strPrimarySoftswitch" type="string" ></var>
+    <var name="s_strLocalUri" type="string" ></var>
+    <var name="s_strBackupSoftswitch" type="string" ></var>
+  </shared-vars>
+  <functions >
+    <function name="OnSipDialogRequested" start="3" event="SipDialogRequested" returns="void" >
+      <parameters >
+        <parameter name="oSipInviteMsg" type="SipMessage" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="bBackupConfigured" type="boolean" >0</var>
+      </local-vars>
+      <actions >
+        <action id="3" plug-in="Pactolus.DialogResponse.1" ><?xtml-editor x=43 y=60 ?>
+          <!--Send response to dialog, send a 183, do not send an OK-->
+          <session-response xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="g_dlg[0]" sip-dialog-invite-msg="g_oInviteSipMsg" action="0" redirect-to-address="" response-sip-status="" proxy-destination="" cancel-timeout="" cancel="0" proxy-stateful="0" exit-timeout="" exit="0" b2bua-outbound-session="" b2bua-destination="" b2bua-calling-number="" b2bua-called-number="" final-response-message="" b2bua-replace-from="0" b2bua-replace-to="0" b2bua-replace-calling-number="0" b2bua-replace-called-number="0" continue-without-rejecting="0" media-endpoint="g_epIvr" media-server-type="&quot;PCS&quot;" media-endpoint-type="&quot;ivr&quot;" media-allocate-new-endpoint="1" codec="0" telephone-events="0" media-status="" media-server-name="" send-183-provisional-response="1" continue-without-sending-200-ok="1" conference="" new-conference="0" persistent-conference="0" participant-mode="&quot;Full&quot;" coachee-endpoint="" max-parties="" dtmf-clamp-setting="0" max-talkers="" hysteresis="" time-constant="" active-speakers-to-report="" reporting-interval="" active-speaker-threshold="" media-sdp="" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </session-response>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="Success" link="4" stubbed="0"/>
+            <result name="No response from far end"/>
+            <result name="Not completed in time"/>
+            <result name="Canceled by requestor"/>
+            <result name="Session not established"/>
+            <result name="Media Resource Failure"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oInviteSipMsg = Session.oSipInviteMsg;
+
+Server.logInfo(" RECEIVED URI = <" + Session.oSipInviteMsg.request_uri +">");
+Server.logInfo(" Session.g_oInviteSipMsg = <" + Session.g_oInviteSipMsg.request_uri +">");]]></script>
+            <script language="javascript" timing="last" ><![CDATA[//Session.g_oInviteSipMsg.hdr.to = Session.g_dlg[0].dialog.to;]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=688 y=196 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=279 y=253 ?>
+          <!--OnTimer.  This will play the initial prompt and setup the next timer.-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;OnTimer&quot;" return="" external-function="0" library="" >
+            <parameter >g_nPromptTimerId</parameter>
+          </function>
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+          </results>
+        </action>
+        <action id="8" plug-in="Pactolus.DialogResponse.1" ><?xtml-editor x=350 y=31 ?>
+          <!--480 Temporarily Unavailable-->
+          <session-response xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="g_dlg[0]" sip-dialog-invite-msg="oSipInviteMsg" action="3" redirect-to-address="" response-sip-status="&quot;SIP/2.0 480 Temporarily Unavailable&quot;" proxy-destination="" cancel-timeout="" cancel="0" proxy-stateful="0" exit-timeout="" exit="0" b2bua-outbound-session="" b2bua-destination="" b2bua-calling-number="" b2bua-called-number="" final-response-message="" b2bua-replace-from="0" b2bua-replace-to="0" b2bua-replace-calling-number="0" b2bua-replace-called-number="0" continue-without-rejecting="0" media-endpoint="" media-server-type="&quot;PCS&quot;" media-endpoint-type="&quot;ivr&quot;" media-allocate-new-endpoint="1" codec="-1" telephone-events="0" media-status="" media-server-name="" send-183-provisional-response="0" continue-without-sending-200-ok="0" conference="" new-conference="0" persistent-conference="0" participant-mode="&quot;Full&quot;" coachee-endpoint="" max-parties="" dtmf-clamp-setting="0" max-talkers="" hysteresis="" time-constant="" active-speakers-to-report="" reporting-interval="" active-speaker-threshold="" media-sdp="" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </session-response>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="Success"/>
+            <result name="No response from far end"/>
+            <result name="Not completed in time"/>
+            <result name="Canceled by requestor"/>
+            <result name="Session not established"/>
+            <result name="Media Resource Failure"/>
+            <result name="Error"/>
+          </results>
+        </action>
+        <action id="9" plug-in="Standard.EndSession.1" ><?xtml-editor x=586 y=54 ?></action>
+        <action id="10" plug-in="Pactolus.SendSipMessage.1" ><?xtml-editor x=516 y=309 ?>
+          <!--Send invite to the far end, don't wait.  Responses handled by OnSipMsgWithinDialog.-->
+          <send-sip-message xmlns="urn:www.pactolus.com:xtml:sip-dialog" request-message="1" sip-message="g_oSipMsgB" sip-response-type="" request-proxy="0" send-message-within="0" session="g_dlg[0]" sip-address="s_strPrimarySoftswitch" sip-message-type="4" wait-response-message="0" proxy-response-message="0" sip-response-message="" timeout="" >
+            <sip-hdrs-A-leg >
+              <Contact >s_strLocalUri</Contact>
+              <Supported >"timer"</Supported>
+            </sip-hdrs-A-leg>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </send-sip-message>
+          <results >
+            <result name="Default" link="12" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="no backup softswitch" link="2" stubbed="1" >bBackupConfigured == false</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_dlg[0].state = SipDialog.STATE_EARLY_DIALOG ;
+
+Session.g_oSipMsgB = Session.oSipInviteMsg ;
+
+Session.g_oSipMsgB.request_uri = updateHost(Session.g_oSipMsgB.request_uri, Session.s_strPrimarySoftswitch);
+ 
+//var uri = new SipRequestUri( Session.g_oSipMsgB.request_uri ) ;
+//Server.logInfo("Aleg Request URI Before: <" + Session.g_oSipMsgB.request_uri + ">");
+//uri.url.host = Session.s_strPrimarySoftswitch + ";cic=" + uri.url.cic ;
+//Session.g_oSipMsgB.request_uri = uri ;
+Server.logInfo("Aleg Request URI After : <" + Session.g_oSipMsgB.request_uri + ">");
+Session.g_dlg[1].time.setup_time = Server.getUTCTime() ;
+
+Session.bBackupConfigured = ( Session.s_strBackupSoftswitch.length > 0 )  ;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.g_strFinalToHeaderOnBLeg = Session.g_oSipMsgB.hdr.to ;
+]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Standard.Timer.1" ><?xtml-editor x=764 y=401 ?>
+          <!--If primary softswitch doesn't respond in 4 secs; crank back to backup-->
+          <timer xmlns="urn:www.pactolus.com:xtml:application" start="1" id="g_nCrankbackTimerId" duration="4"/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="OnServiceLoad" start="1" event="ServiceLoad" returns="void" >
+      <parameters >
+        <parameter name="strAppName" type="string" pass="byref"/>
+        <parameter name="nSessionCount" type="i2" pass="byref"/>
+        <parameter name="nMaxIterations" type="i2" pass="byref"/>
+        <parameter name="nServerId" type="i2" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="strEnable" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.UserFunction.1" ><?xtml-editor x=50 y=43 ?>
+          <!--Get configuration properties-->
+          <user-function xmlns="urn:www.pactolus.com:xtml:application" process="&quot;PACTOLUS_ps_c_adaptor&quot;" function="&quot;get_property&quot;" timeout="s_nShortTimeout" return="" async="0" >
+            <parameter >"primary-softswitch"</parameter>
+            <parameter >s_strPrimarySoftswitch</parameter>
+            <parameter >"backup-softswitch"</parameter>
+            <parameter >s_strBackupSoftswitch</parameter>
+            <parameter >"media-server-type"</parameter>
+            <parameter >s_strMSType</parameter>
+            <parameter >"comfort-initial-prompt"</parameter>
+            <parameter >s_nIntialPromptIndex</parameter>
+            <parameter >"comfort-repeat-prompt"</parameter>
+            <parameter >s_nRepeatPromptIndex</parameter>
+            <parameter >"comfort-initial-delay"</parameter>
+            <parameter >s_fInitalDelaySec</parameter>
+            <parameter >"comfort-repeat-delay"</parameter>
+            <parameter >s_fRepeatDelaySec</parameter>
+            <parameter >"comfort-prompt-enable"</parameter>
+            <parameter >s_bEnabled</parameter>
+          </user-function>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[//Check for empty/missing properties and set defaults accordingly
+
+Session.s_strLocalUri = "<sip:" + Server.sipAddress + ":" + Server.sipPort + ">" ;
+
+if(Session.s_fInitalDelaySec == 0){
+Session.s_fInitalDelaySec = 5;
+}
+//
+if(Session.s_fRepeatDelaySec == 0){
+Session.s_fRepeatDelaySec = 10;
+}
+//
+if(Session.s_nIntialPromptIndex == 0){
+Session.s_nIntialPromptIndex = 517;
+}
+//
+if(Session.s_nRepeatPromptIndex == 0){
+Session.s_nRepeatPromptIndex = 904;
+}
+//
+if (Session.s_strMSType.length <= 0){
+	Server.logInfo("WARNING:  NO SETTING FOR MEDIA SERVER TYP, DEAULT WILL BE PCS.");
+	Session.s_strMSType = "PCS";
+}
+
+
+Server.logInfo("Session.s_bEnabled: "+Session.s_bEnabled);
+Server.logInfo("Session.s_fInitalDelaySec: "+Session.s_fInitalDelaySec);
+Server.logInfo("Session.s_fRepeatDelaySec: "+Session.s_fRepeatDelaySec);
+Server.logInfo("Session.s_nIntialPromptIndex: "+Session.s_nIntialPromptIndex);
+Server.logInfo("Session.s_nRepeatPromptIndex: "+Session.s_nRepeatPromptIndex);]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=287 y=80 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="OnTimer" start="13" event="Timer" returns="void" >
+      <parameters >
+        <parameter name="nTimerId" type="i4" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nPromptToPlay" type="i4" >0</var>
+        <var name="fTimerSec" type="float" >0</var>
+      </local-vars>
+      <actions >
+        <action id="13" plug-in="Pactolus.Branch.1" ><?xtml-editor x=16 y=40 ?>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="prompt timer" link="1" stubbed="0" >nTimerId == g_nPromptTimerId</result>
+            <result name="primary unresponsive" link="14" stubbed="0" >nTimerId == g_nCrankbackTimerId
+AND g_bPrimarySoftswitchResponded == false</result>
+          </results>
+        </action>
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=230 y=120 ?>
+          <!--MS Endpoint Connected?-->
+          <results >
+            <result name="Default" link="12" stubbed="0"/>
+            <result name="Not connected" link="4" stubbed="0" >g_epIvr.state == 0</result>
+            <result name="no prompt or no timer" link="4" stubbed="0" >fTimerSec == 0
+OR nPromptToPlay == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if(!Session.g_bInitialPromptPlayed){
+	Session.fTimerSec  = Session.s_fInitalDelaySec;
+	Session.nPromptToPlay = Session.s_nIntialPromptIndex;
+	Session.g_bInitialPromptPlayed = true;
+}else{
+	Session.fTimerSec  = Session.s_fRepeatDelaySec;
+	Session.nPromptToPlay = Session.s_nRepeatPromptIndex;
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.Timer.1" ><?xtml-editor x=728 y=170 ?>
+          <!--Setup the timer-->
+          <timer xmlns="urn:www.pactolus.com:xtml:application" start="1" id="g_nPromptTimerId" duration="fTimerSec"/>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+          </results>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=544 y=371 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="12" plug-in="Pactolus.Play.2" ><?xtml-editor x=486 y=55 ?>
+          <!--Play the comfort prompt-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" play-on-endpoint="1" media-endpoint="g_epIvr" conference="" timeout="" played-length="" digits="" terminating-char="" rc="" returns="" start-play="1" return-immediate="1" play-offset="" language="&quot;eng&quot;" retry-count="1" time-to-play="" interrupt="0" repeat="1" clear-digits="0" digit-map="" fdt="" idt="" ict="" terminating-digit="" >
+            <audio type="index" >nPromptToPlay</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First Digit Timeout"/>
+          </results>
+        </action>
+        <action id="14" plug-in="Pactolus.SendSipMessage.1" ><?xtml-editor x=274 y=406 ?>
+          <!--Send INVITE to backup softswitch-->
+          <send-sip-message xmlns="urn:www.pactolus.com:xtml:sip-dialog" request-message="1" sip-message="g_oSipMsgB" sip-response-type="" request-proxy="0" send-message-within="0" session="g_dlg[0]" sip-address="s_strBackupSoftswitch" sip-message-type="4" wait-response-message="0" proxy-response-message="0" sip-response-message="" timeout="" >
+            <sip-hdrs-A-leg >
+              <Contact >s_strLocalUri</Contact>
+              <Supported >"timer"</Supported>
+            </sip-hdrs-A-leg>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </send-sip-message>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[/* clear out and try again on the backup */
+Session.g_oSipMsgB.Clear() ;
+Session.g_dlg[1].Clear() ;
+
+Session.g_oSipMsgB = Session.g_oInviteSipMsg ;
+
+Session.g_oSipMsgB.request_uri = updateHost(Session.g_oSipMsgB.request_uri, Session.s_strBackupSoftswitch);
+//var uri = new SipRequestUri( Session.g_oSipMsgB.request_uri ) ;
+//uri.url.host = Session.s_strBackupSoftswitch + ";cic=" + uri.url.cic ;
+//Server.logInfo("Sending INVITE to request-uri: " + uri ) ;
+//Session.g_oSipMsgB.request_uri = uri ;
+
+Session.g_dlg[1].time.setup_time = Server.getUTCTime() ;
+
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.g_strFinalToHeaderOnBLeg = Session.g_oSipMsgB.hdr.to ;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnSipMsgWithinDialog" start="25" event="SipMsgWithinDialog" returns="void" >
+      <parameters >
+        <parameter name="oSipMsg" type="SipMessage" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nCallLeg" type="i4" >-1</var>
+        <var name="i" type="i4" >0</var>
+        <var name="msgResponse" type="SipMessage" ></var>
+        <var name="bCallConnected" type="boolean" >0</var>
+      </local-vars>
+      <actions >
+        <action id="25" plug-in="Pactolus.Branch.1" ><?xtml-editor x=29 y=178 ?>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+            <result name="call is connected" link="28" stubbed="0" >bCallConnected == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.bCallConnected = ( Session.g_dlg[1].state == SipDialog.STATE_DIALOG_CONNECTED ) ;
+]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Pactolus.Branch.1" ><?xtml-editor x=313 y=118 ?>
+          <results >
+            <result name="Default" link="23" stubbed="0"/>
+            <result name="Message From B" link="22" stubbed="0" >nCallLeg == 1</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[
+if( Session.oSipMsg.Matches( Session.g_dlg[0] ) ) {
+	Session.nCallLeg = 0 ;
+}
+else {
+	Session.nCallLeg = 1 ;
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="22" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=562 y=202 ?>
+          <!--doMsgFromB-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;doMsgFromB&quot;" return="" external-function="0" library="" >
+            <parameter >oSipMsg</parameter>
+          </function>
+          <results >
+            <result name="Default" link="24" stubbed="0"/>
+          </results>
+        </action>
+        <action id="23" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=545 y=37 ?>
+          <!--doCancelFromA-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;doCancelFromA&quot;" return="" external-function="0" library="" >
+            <parameter >oSipMsg</parameter>
+          </function>
+          <results >
+            <result name="Default" link="24" stubbed="0"/>
+          </results>
+        </action>
+        <action id="24" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=891 y=139 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="28" plug-in="Pactolus.Branch.1" ><?xtml-editor x=228 y=254 ?>
+          <results >
+            <result name="Default" link="29" stubbed="0"/>
+            <result name="msg is an ACK" link="30" stubbed="0" >oSipMsg.method == "ACK"</result>
+            <result name="msg is  response" link="24" stubbed="1" >oSipMsg.method == "RESPONSE"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.oSipMsg.LogInfo() ;
+
+if( Session.oSipMsg.Matches( Session.g_dlg[0] ) ) {
+	Session.i = 1 ;
+}
+else {
+	Session.i = 0 ;
+}
+
+Session.g_dlg[0].LogInfo() ;
+Session.g_dlg[1].LogInfo() ;]]></script>
+          </scripts>
+        </action>
+        <action id="29" plug-in="Pactolus.SendSipMessage.1" ><?xtml-editor x=483 y=328 ?>
+          <!--forward msg and wait for response-->
+          <send-sip-message xmlns="urn:www.pactolus.com:xtml:sip-dialog" request-message="1" sip-message="oSipMsg" sip-response-type="" request-proxy="0" send-message-within="1" session="g_dlg[i]" sip-address="" sip-message-type="15" wait-response-message="1" proxy-response-message="1" sip-response-message="msgResponse" timeout="4" >
+            <sip-hdrs-A-leg >
+              <Content >oSipMsg.hdr.content</Content>
+              <Content-Length >oSipMsg.hdr.content_length</Content-Length>
+              <Content-Type >oSipMsg.hdr.content_type</Content-Type>
+              <Session-Expires >oSipMsg.hdr.session_expires</Session-Expires>
+            </sip-hdrs-A-leg>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </send-sip-message>
+          <results >
+            <result name="Default" link="31" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout" link="24" stubbed="1"/>
+          </results>
+        </action>
+        <action id="30" plug-in="Pactolus.SendSipMessage.1" ><?xtml-editor x=423 y=531 ?>
+          <!--forward ACK and continue-->
+          <send-sip-message xmlns="urn:www.pactolus.com:xtml:sip-dialog" request-message="1" sip-message="oSipMsg" sip-response-type="" request-proxy="0" send-message-within="1" session="g_dlg[i]" sip-address="" sip-message-type="15" wait-response-message="0" proxy-response-message="1" sip-response-message="" timeout="" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </send-sip-message>
+          <results >
+            <result name="Default" link="24" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="31" plug-in="Pactolus.SendSipMessage.1" ><?xtml-editor x=718 y=375 ?>
+          <!--send response back-->
+          <send-sip-message xmlns="urn:www.pactolus.com:xtml:sip-dialog" request-message="0" sip-message="oSipMsg" sip-response-type="msgResponse.status" request-proxy="0" send-message-within="1" session="" sip-address="" sip-message-type="15" wait-response-message="1" proxy-response-message="1" sip-response-message="" timeout="" >
+            <sip-hdrs-A-leg >
+              <Contact >s_strLocalUri</Contact>
+              <Content >msgResponse.hdr.content</Content>
+              <Content-Length >msgResponse.hdr.content_length</Content-Length>
+              <Content-Type >msgResponse.hdr.content_type</Content-Type>
+              <Session-Expires >msgResponse.hdr.session_expires</Session-Expires>
+            </sip-hdrs-A-leg>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </send-sip-message>
+          <results >
+            <result name="Default" link="24" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="OnSipDialogTerminated" start="13" event="SipDialogTerminated" returns="void" >
+      <parameters >
+        <parameter name="oSipByeMsg" type="SipMessage" pass="byref"/>
+        <parameter name="nTerminationReason" type="i4" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nCallLeg" type="i4" >0</var>
+        <var name="bByeFromA" type="boolean" >0</var>
+      </local-vars>
+      <actions >
+        <action id="13" plug-in="Pactolus.SendSipMessage.1" ><?xtml-editor x=19 y=30 ?>
+          <!--200 OK-->
+          <send-sip-message xmlns="urn:www.pactolus.com:xtml:sip-dialog" request-message="0" sip-message="oSipByeMsg" sip-response-type="&quot;SIP/2.0 200 OK&quot;" request-proxy="0" send-message-within="1" session="" sip-address="" sip-message-type="15" wait-response-message="1" proxy-response-message="1" sip-response-message="" timeout="" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </send-sip-message>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="9" plug-in="Pactolus.Branch.1" ><?xtml-editor x=207 y=158 ?>
+          <results >
+            <result name="Default" link="12" stubbed="0"/>
+            <result name="BYE From A" link="10" stubbed="0" >bByeFromA == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if( Session.oSipByeMsg.Matches( Session.g_oInviteSipMsg ) ) {
+	Session.bByeFromA = true ;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Pactolus.SendSipMessage.1" ><?xtml-editor x=494 y=202 ?>
+          <!--BYE to B-->
+          <send-sip-message xmlns="urn:www.pactolus.com:xtml:sip-dialog" request-message="1" sip-message="g_oSipMsgB" sip-response-type="" request-proxy="0" send-message-within="1" session="g_dlg[1]" sip-address="" sip-message-type="1" wait-response-message="1" proxy-response-message="1" sip-response-message="" timeout="2" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </send-sip-message>
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="11" plug-in="Standard.EndSession.1" ><?xtml-editor x=759 y=69 ?></action>
+        <action id="12" plug-in="Pactolus.SendSipMessage.1" ><?xtml-editor x=457 y=14 ?>
+          <!--BYE to A-->
+          <send-sip-message xmlns="urn:www.pactolus.com:xtml:sip-dialog" request-message="1" sip-message="g_oInviteSipMsg" sip-response-type="" request-proxy="0" send-message-within="1" session="g_dlg[0]" sip-address="" sip-message-type="1" wait-response-message="1" proxy-response-message="1" sip-response-message="" timeout="2" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </send-sip-message>
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="doCancelFromA" start="13" event="" returns="void" >
+      <parameters >
+        <parameter name="oSipMsg" type="SipMessage" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="strRequestUri" type="string" ></var>
+        <var name="strTo" type="string" ></var>
+        <var name="strFrom" type="string" ></var>
+        <var name="strContact" type="string" ></var>
+        <var name="cancelMsg" type="SipMessage" ></var>
+        <var name="strCseq" type="string" ></var>
+        <var name="strCallId" type="string" ></var>
+        <var name="msgFinalResponseFromB" type="SipMessage" ></var>
+        <var name="nStatus" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="13" plug-in="Pactolus.SendSipMessage.1" ><?xtml-editor x=27 y=51 ?>
+          <!--200 OK-->
+          <send-sip-message xmlns="urn:www.pactolus.com:xtml:sip-dialog" request-message="0" sip-message="oSipMsg" sip-response-type="&quot;SIP/2.0 200 OK&quot;" request-proxy="0" send-message-within="0" session="" sip-address="" sip-message-type="15" wait-response-message="0" proxy-response-message="0" sip-response-message="" timeout="" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </send-sip-message>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="14" plug-in="Pactolus.SendSipMessage.1" ><?xtml-editor x=251 y=73 ?>
+          <!--487 Request Canceled-->
+          <send-sip-message xmlns="urn:www.pactolus.com:xtml:sip-dialog" request-message="0" sip-message="g_oInviteSipMsg" sip-response-type="&quot;SIP/2.0 487 Request Terminated&quot;" request-proxy="0" send-message-within="0" session="" sip-address="" sip-message-type="15" wait-response-message="0" proxy-response-message="0" sip-response-message="" timeout="" >
+            <sip-hdrs-A-leg >
+              <CSeq >g_oInviteSipMsg.hdr.cseq</CSeq>
+              <Content >""</Content>
+              <Content-Length >"0"</Content-Length>
+              <To >g_oInviteSipMsg.hdr.to</To>
+              <Via >g_oInviteSipMsg.hdr.via</Via>
+            </sip-hdrs-A-leg>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </send-sip-message>
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="15" plug-in="Pactolus.SendSipMessage.1" ><?xtml-editor x=481 y=100 ?>
+          <!--Cancel B-->
+          <send-sip-message xmlns="urn:www.pactolus.com:xtml:sip-dialog" request-message="1" sip-message="g_oSipMsgB" sip-response-type="" request-proxy="0" send-message-within="0" session="" sip-address="g_oSipMsgB.request_uri" sip-message-type="2" wait-response-message="0" proxy-response-message="1" sip-response-message="" timeout="2" >
+            <sip-hdrs-A-leg >
+              <Content >""</Content>
+              <Content-Length >"0"</Content-Length>
+            </sip-hdrs-A-leg>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </send-sip-message>
+          <results >
+            <result name="Default" link="17" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var cseq = new SipCSeq( Session.g_oSipMsgB.hdr.cseq ) ;
+cseq.method = "CANCEL" ;
+Session.g_oSipMsgB.hdr.cseq = cseq ;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.enableEvents(false) ;]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Standard.EndSession.1" ><?xtml-editor x=729 y=167 ?></action>
+        <action id="17" plug-in="Standard.WaitEvent.1" ><?xtml-editor x=85 y=323 ?>
+          <!--wait for 487 from B-->
+          <wait xmlns="urn:www.pactolus.com:xtml:communication" timeout="4" recv-name="" >
+            <msg name="Pactolus.EveSessionSipMsg.1" >
+              <parameter >msgFinalResponseFromB</parameter>
+            </msg>
+          </wait>
+          <results >
+            <result name="Default" link="17" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout" link="16" stubbed="0"/>
+            <result name="487 Response" link="18" stubbed="0" >nStatus == 487</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[/* DH: don't reenable events here.
+	There is a race condition where we get the 487 response first, 
+	then the 200 OK to the CANCEL.  In that case, with events
+	enabled, we jump to the doMsgFromB function, which we 
+	do not want to do.  We simply want to ignore the 200 OK, 
+	handle the 487, and exit.
+*/
+//Server.enableEvents(true) ;]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[Session.nStatus = 0 ;
+var status = new SipStatus( Session.msgFinalResponseFromB.status ) ;
+Session.nStatus = status.code ;]]></script>
+          </scripts>
+        </action>
+        <action id="18" plug-in="Pactolus.SendSipMessage.1" ><?xtml-editor x=328 y=451 ?>
+          <!--Ack B-->
+          <send-sip-message xmlns="urn:www.pactolus.com:xtml:sip-dialog" request-message="1" sip-message="g_oSipMsgB" sip-response-type="" request-proxy="0" send-message-within="0" session="" sip-address="g_oSipMsgB.request_uri" sip-message-type="0" wait-response-message="0" proxy-response-message="1" sip-response-message="" timeout="2" >
+            <sip-hdrs-A-leg >
+              <Content >""</Content>
+              <Content-Length >"0"</Content-Length>
+              <To >g_strFinalToHeaderOnBLeg</To>
+              <Via >g_oSipMsgB.hdr.via</Via>
+            </sip-hdrs-A-leg>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </send-sip-message>
+          <results >
+            <result name="Default" link="16" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var cseq = new SipCSeq( Session.g_oSipMsgB.hdr.cseq ) ;
+cseq.method = "ACK" ;
+Session.g_oSipMsgB.hdr.cseq = cseq ;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="doMsgFromB" start="15" event="" returns="void" >
+      <parameters >
+        <parameter name="oSipMsg" type="SipMessage" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="bIs1xxMsg" type="boolean" >0</var>
+        <var name="bIsOkMsg" type="boolean" >0</var>
+        <var name="bHasSdpData" type="boolean" >0</var>
+        <var name="bFinalMsg" type="boolean" >0</var>
+        <var name="strRequestUri" type="string" ></var>
+        <var name="strContact" type="string" ></var>
+        <var name="ackMsg" type="SipMessage" ></var>
+        <var name="nStatus" type="i4" >0</var>
+        <var name="strContactAddress" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="15" plug-in="Pactolus.Branch.1" ><?xtml-editor x=16 y=40 ?>
+          <!--Stop play unless this is a 1xx message without a SDP-->
+          <results >
+            <result name="Default" link="19" stubbed="0"/>
+            <result name="stop play" link="7" stubbed="0" >g_epIvr.state != 0
+AND (nStatus &gt;= 200
+OR oSipMsg.hdr.content.length &gt; 0)</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_bPrimarySoftswitchResponded = true ;
+Session.g_strFinalToHeaderOnBLeg = Session.oSipMsg.hdr.to ;
+
+var status = new SipStatus( Session.oSipMsg.status ) ;
+Session.nStatus = status.code ;
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=831 y=709 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="7" plug-in="Pactolus.DeleteConnection.2" ><?xtml-editor x=35 y=208 ?>
+          <!--delete endpoint-->
+          <dlcx xmlns="urn:www.pactolus.com:xtml:media" media-endpoint="g_epIvr" returns="" timeout="s_nShortTimeout" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </dlcx>
+          <results >
+            <result name="Default" link="19" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="11" plug-in="Pactolus.SendSipMessage.1" ><?xtml-editor x=791 y=50 ?>
+          <!--send response to A-->
+          <send-sip-message xmlns="urn:www.pactolus.com:xtml:sip-dialog" request-message="0" sip-message="g_oInviteSipMsg" sip-response-type="oSipMsg.status" request-proxy="0" send-message-within="1" session="g_dlg[0]" sip-address="" sip-message-type="15" wait-response-message="1" proxy-response-message="0" sip-response-message="" timeout="s_nTimeout" >
+            <sip-hdrs-A-leg >
+              <Contact >s_strLocalUri</Contact>
+              <Content >oSipMsg.hdr.content</Content>
+              <Content-Disposition >oSipMsg.hdr.content_disposition</Content-Disposition>
+              <Content-Length >oSipMsg.hdr.content_length</Content-Length>
+              <Content-Type >oSipMsg.hdr.content_type</Content-Type>
+              <Max-Forwards >oSipMsg.hdr.max_forwards</Max-Forwards>
+              <To >g_dlg[0].dialog.to</To>
+            </sip-hdrs-A-leg>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </send-sip-message>
+          <results >
+            <result name="Default" link="20" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var bDialIn = true;
+js_calculate_uri_and_route(bDialIn, Session.s_strSipVersion, Session.g_oInviteSipMsg.hdr.from, Session.g_oInviteSipMsg.hdr.contact, Session.g_oInviteSipMsg.hdr.record_route, Session.strlRequestUri, Session.strlRoute);
+Server.logInfo("Calculated request uri: " + Session.strlRequestUri);
+Session.g_oInviteSipMsg.hdr._request_uri_for_refresh = Session.strlRequestUri;]]></script>
+          </scripts>
+        </action>
+        <action id="17" plug-in="Pactolus.SendSipMessage.1" ><?xtml-editor x=211 y=452 ?>
+          <!--ACK B: non-success-->
+          <send-sip-message xmlns="urn:www.pactolus.com:xtml:sip-dialog" request-message="1" sip-message="g_oSipMsgB" sip-response-type="" request-proxy="0" send-message-within="0" session="" sip-address="g_oSipMsgB.request_uri" sip-message-type="0" wait-response-message="0" proxy-response-message="1" sip-response-message="" timeout="" >
+            <sip-hdrs-A-leg >
+              <Content >""</Content>
+              <Content-Length >"0"</Content-Length>
+              <To >oSipMsg.hdr.to</To>
+              <Via >g_oSipMsgB.hdr.via</Via>
+            </sip-hdrs-A-leg>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </send-sip-message>
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var cseq = new SipCSeq( Session.g_oSipMsgB.hdr.cseq ) ;
+cseq.method = "ACK" ;
+Session.g_oSipMsgB.hdr.cseq = cseq ;]]></script>
+          </scripts>
+        </action>
+        <action id="19" plug-in="Pactolus.Branch.1" ><?xtml-editor x=257 y=64 ?>
+          <results >
+            <result name="Default" link="22" stubbed="0"/>
+            <result name="final success" link="23" stubbed="0" >nStatus &gt;= 200
+AND nStatus &lt; 300</result>
+            <result name="final non-success" link="17" stubbed="0" >nStatus &gt;= 300</result>
+          </results>
+        </action>
+        <action id="20" plug-in="Pactolus.Branch.1" ><?xtml-editor x=855 y=458 ?>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="final non-success" link="21" stubbed="0" >nStatus &gt;= 300</result>
+          </results>
+        </action>
+        <action id="21" plug-in="Standard.EndSession.1" ><?xtml-editor x=873 y=599 ?></action>
+        <action id="22" plug-in="Pactolus.Branch.1" ><?xtml-editor x=513 y=55 ?>
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+            <result name="1xx with no sdp" link="6" stubbed="1" >nStatus &lt; 200
+AND oSipMsg.hdr.content.length == 0</result>
+            <result name="3xx redirect" link="25" stubbed="0" >nStatus &gt;= 300
+AND nStatus &lt;= 399
+AND oSipMsg.hdr.contact.length &gt; 0</result>
+          </results>
+        </action>
+        <action id="23" plug-in="Pactolus.SendSipMessage.1" ><?xtml-editor x=374 y=362 ?>
+          <!--ACK B: success-->
+          <send-sip-message xmlns="urn:www.pactolus.com:xtml:sip-dialog" request-message="1" sip-message="g_oSipMsgB" sip-response-type="" request-proxy="0" send-message-within="1" session="g_dlg[1]" sip-address="s_strPrimarySoftswitch" sip-message-type="0" wait-response-message="0" proxy-response-message="1" sip-response-message="" timeout="" >
+            <sip-hdrs-A-leg >
+              <Content >""</Content>
+              <Content-Length >"0"</Content-Length>
+              <To >oSipMsg.hdr.to</To>
+            </sip-hdrs-A-leg>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </send-sip-message>
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var cseq = new SipCSeq( Session.g_oSipMsgB.hdr.cseq ) ;
+cseq.method = "ACK" ;
+Session.g_oSipMsgB.hdr.cseq = cseq ;
+
+js_calculate_uri_and_route( false, "2.0", Session.oSipMsg.hdr.from, Session.oSipMsg.hdr.contact, Session.oSipMsg.hdr.record_route, 
+	Session.g_dlg[1].remote.uri, Session.g_dlg[1].remote.route ) ;
+	
+if( -1 == Session.g_dlg[1].remote.uri.indexOf("SIP/2.0") ) {
+	Session.g_dlg[1].remote.uri += " SIP/2.0" ;
+}
+	
+	
+/* set up properties for the outgoing dialog */
+var from = new SipFrom( Session.g_oSipMsgB.hdr.from ) ;
+var to = new SipTo( Session.g_strFinalToHeaderOnBLeg ) ;
+
+Session.g_dlg[1].dialog.call_id = Session.oSipMsg.hdr.call_id ;
+Session.g_dlg[1].dialog.from = Session.oSipMsg.hdr.from ;
+Session.g_dlg[1].dialog.to = Session.oSipMsg.hdr.to ;
+Session.g_dlg[1].remote.sdp = Session.oSipMsg.hdr.content ;
+Session.g_dlg[1].remote.tag = to.tag ;
+Session.g_dlg[1].local.cseq = Session.oSipMsg.hdr.cseq ;
+Session.g_dlg[1].local.sdp = Session.g_dlg[0].remote.sdp ;
+Session.g_dlg[1].local.tag = from.tag ;
+Session.g_dlg[1].role = SipDialog.ROLE_UAC ;
+Session.g_dlg[1].state = Session.g_dlg[0].state = SipDialog.STATE_DIALOG_CONNECTED ;
+Session.g_dlg[1].sip_status = "SIP/2.0 200 OK" ;
+Session.g_dlg[1].time.connect_time = Server.getUTCTime() ;]]></script>
+          </scripts>
+        </action>
+        <action id="24" plug-in="Pactolus.SendSipMessage.1" ><?xtml-editor x=614 y=547 ?>
+          <!--Redirect INVITE-->
+          <send-sip-message xmlns="urn:www.pactolus.com:xtml:sip-dialog" request-message="1" sip-message="g_oSipMsgB" sip-response-type="" request-proxy="0" send-message-within="0" session="g_dlg[0]" sip-address="strContactAddress" sip-message-type="4" wait-response-message="0" proxy-response-message="0" sip-response-message="" timeout="" >
+            <sip-hdrs-A-leg >
+              <Contact >s_strLocalUri</Contact>
+              <Supported >"timer"</Supported>
+            </sip-hdrs-A-leg>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </send-sip-message>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[/* clear out and try again on the backup */
+Session.g_oSipMsgB.Clear() ;
+Session.g_dlg[1].Clear() ;
+
+Session.g_oSipMsgB = Session.g_oInviteSipMsg ;
+
+var uri_array = Session.oSipMsg.hdr.contact.split(',') ;
+var uri = new SipUrl( uri_array[0] ) ;
+Session.g_oSipMsgB.request_uri = uri_array[0] ;
+
+Session.strContactAddress = uri.host ;
+if( uri.port != undefined ) {
+	Session.strContactAddress += ":" ;
+	Session.strContactAddress += uri.port ;
+}
+
+
+Session.g_dlg[1].time.setup_time = Server.getUTCTime() ;
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="25" plug-in="Pactolus.SendSipMessage.1" ><?xtml-editor x=572 y=251 ?>
+          <!--ACK B: non-success-->
+          <send-sip-message xmlns="urn:www.pactolus.com:xtml:sip-dialog" request-message="1" sip-message="g_oSipMsgB" sip-response-type="" request-proxy="0" send-message-within="0" session="" sip-address="g_oSipMsgB.request_uri" sip-message-type="0" wait-response-message="0" proxy-response-message="1" sip-response-message="" timeout="" >
+            <sip-hdrs-A-leg >
+              <Content >""</Content>
+              <Content-Length >"0"</Content-Length>
+              <To >oSipMsg.hdr.to</To>
+              <Via >g_oSipMsgB.hdr.via</Via>
+            </sip-hdrs-A-leg>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </send-sip-message>
+          <results >
+            <result name="Default" link="24" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var cseq = new SipCSeq( Session.g_oSipMsgB.hdr.cseq ) ;
+cseq.method = "ACK" ;
+Session.g_oSipMsgB.hdr.cseq = cseq ;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>
+//#include <dialing_plan_utils.jsh>
+
+function updateHost(strInput, strHost) {
+ var piece1, piece2, piece3 ;
+ var idxEnd1, idxEnd2;
+ 
+ 		idxEnd1 = strInput.indexOf("@");
+ 		   if (idxEnd1 == -1) {
+ 				idxEnd1 = strInput.indexOf("sip:") ;
+ 				if (idxEnd1 != -1){ idxEnd1 += 3 ;
+ 				}
+ 				if (idxEnd1 == -1 ){
+ 				
+ 		 Server.logInfo("BAD uri Returning originalString =" + strInput);
+ 		 return strInput;
+		    }	
+		   }		 		
+		piece1 = strInput.substring( 0, ++idxEnd1);
+Server.logInfo("PIECE1 =  " + piece1);		
+        //	 Get the host Piece (2)
+		strInput = strInput.substring( idxEnd1 );
+Server.logInfo("strInput after @ = " + strInput );
+		var idxSemiCln = strInput.indexOf(";");
+		var idxSpace = strInput.indexOf(" ");
+Server.logInfo("idxSemiCln = " + idxSemiCln);
+Server.logInfo("idxSpace = " + idxSpace );
+      if ( -1 == idxSemiCln && -1 == idxSpace )//{
+      idxEnd2 = -1;
+      //}
+    else  if ( (-1 != idxSemiCln && idxSemiCln < idxSpace) || ( -1 != idxSemiCln && -1 == idxSpace) )//{
+      idxEnd2 = idxSemiCln; 
+          //}
+      //}
+      else
+      		idxEnd2 = idxSpace;
+       if ( -1 == idxEnd2){
+       piece2 = strInput.substring(0);
+       } else { 
+        piece2 = strInput.substring( 0, idxEnd2);
+        }
+Server.logInfo("PIECE2  = " + piece2 );
+		/* Piece 3 is everything else */
+		if ( -1 == idxEnd2 )
+		piece3 = "";
+		else
+		piece3 = strInput.substring( idxEnd2 );
+	return piece1 + strHost + piece3;
+}
+]]></script>
+  <properties >
+    <property key="&quot;eng&quot;" value="C:/Pactolus/media/PCS_prompts_english.pmg"/>
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value="../Libs"/>
+    <property key="library-modules" value=""/>
+    <property key="library-path" value=""/>
+  </properties>
+</xtml>

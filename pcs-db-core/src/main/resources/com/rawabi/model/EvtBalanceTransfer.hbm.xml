@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Jul 24, 2012 12:30:10 PM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.rawabi.model.EvtBalanceTransfer" table="EVT_BALANCE_TRANSFER" schema="PCSPROD">
+        <comment>This table holds event info for a single balance transfer event.</comment>
+        <id name="eventId" type="string">
+            <column name="EVENT_ID" length="20" />
+            <generator class="assigned" />
+        </id>
+        <version name="timestamp" type="date">
+            <column name="TIMESTAMP" length="7" not-null="true" />
+        </version>
+        <many-to-one name="subscriber" class="com.rawabi.model.Subscriber" fetch="select">
+            <column name="SUBSCRIBER_ID" precision="22" scale="0" not-null="true">
+                <comment>subscriber to which the balance was transferred</comment>
+            </column>
+        </many-to-one>
+        <property name="amount" type="big_decimal">
+            <column name="AMOUNT" precision="22" scale="0" not-null="true" />
+        </property>
+        <property name="sessionId" type="string">
+            <column name="SESSION_ID" length="120">
+                <comment>database session id</comment>
+            </column>
+        </property>
+        <property name="sessionType" type="big_decimal">
+            <column name="SESSION_TYPE" precision="22" scale="0" />
+        </property>
+        <property name="fromSubscriberId" type="big_decimal">
+            <column name="FROM_SUBSCRIBER_ID" precision="22" scale="0">
+                <comment>subscriber from which the balance was transferred</comment>
+            </column>
+        </property>
+        <property name="auditId" type="big_decimal">
+            <column name="AUDIT_ID" precision="22" scale="0">
+                <comment>id of audit record, if performed by CSR</comment>
+            </column>
+        </property>
+        <property name="removeFlag" type="java.lang.Character">
+            <column name="REMOVE_FLAG" length="1" />
+        </property>
+    </class>
+</hibernate-mapping>

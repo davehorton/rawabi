@@ -1,0 +1,177 @@
+<?xml version="1.0"?>
+<xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
+  <version sce-version="6016" prev-sce-version="6016" last-mod-time="Thursday, August 16, 2007 15:55:47"/>
+  <global-handlers/>
+  <functions >
+    <function name="sip_hold" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="dlg" type="SipDialog" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nFailure" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.ModifyExistingDialog.1" ><?xtml-editor x=131 y=102 ?>
+          <!--put on hold-->
+          <modify-session xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="dlg" action="0" media-endpoint="" media-server-type="&quot;PCS&quot;" endpoint-type="&quot;ivr&quot;" media-sdp="" sip-address="" media-allocate-new-endpoint="0" transfer-mode="0" media-status="" codec="-1" telephone-events="0" media-server-name="" conference="" new-conference="0" persistent-conference="0" participant-mode="&quot;Full&quot;" coachee-endpoint="" max-parties="" dtmf-clamp-setting="0" max-talkers="" hysteresis="" time-constant="" active-speakers-to-report="" reporting-interval="" active-speaker-threshold="" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-B>
+          </modify-session>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="No response"/>
+            <result name="Not completed in time"/>
+            <result name="Caller hung up"/>
+            <result name="Media resource failure"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: sip_hold");
+Session.dlg.LogInfo();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("PUT ON HOLD EXIT ON BRANCH: " + Result.name);]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=388 y=72 ?>
+          <!--nFailure-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nFailure"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("FAIL TO PUT ON HOLD WITH RETURN CODE: " + Session.nReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=403 y=182 ?>
+          <!--nSuccess-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nSuccess"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS PUT ON HOLD") ;
+Session.dlg.LogInfo();]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="sip_terminate" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="dlg" type="SipDialog" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nFailure" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.TerminateDialog.1" ><?xtml-editor x=163 y=99 ?>
+          <!--hangup-->
+          <terminate-session xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="dlg"/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: sip_hold");
+Session.dlg.LogInfo();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("TERMINATE EXIT ON BRANCH: " + Result.name);]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=377 y=87 ?>
+          <!--nFailure-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nFailure"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("FAIL TO HANGUP WITH RETURN CODE: " + Session.nReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=392 y=197 ?>
+          <!--nSuccess-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nSuccess"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS HANGUP") ;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="sip_outdial" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="dlgUAC" type="SipDialog" pass="byref"/>
+        <parameter name="strGatewayIP" type="string"/>
+        <parameter name="strCallingNumber" type="SipDialog"/>
+        <parameter name="strCalledNumber" type="SipDialog"/>
+        <parameter name="dlgUAS" type="SipDialog" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nFailure" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+        <var name="msgResponse" type="SipMessage" ></var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.DialogRequest.1" ><?xtml-editor x=180 y=123 ?>
+          <session-request xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="dlgUAS" action="1" cancel="1" destination="strGatewayIP" cancel-timeout="30" exit="1" exit-timeout="40" use-numbers="1" calling-number="strCallingNumber" called-number="strCalledNumber" from="" to="" media-endpoint="" media-server-type="&quot;PCS&quot;" media-endpoint-type="&quot;ivr&quot;" media-allocate-new-endpoint="0" codec="-1" telephone-events="1" media-status="" media-server-name="" existing-session="dlgUAC" final-response-message="msgResponse" conference="" new-conference="0" persistent-conference="0" participant-mode="&quot;Full&quot;" coachee-endpoint="" max-parties="" dtmf-clamp-setting="0" max-talkers="" hysteresis="" time-constant="" active-speakers-to-report="" reporting-interval="" active-speaker-threshold="" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </session-request>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="No response from far end"/>
+            <result name="Not completed in time"/>
+            <result name="Canceled by requestor"/>
+            <result name="Session not established"/>
+            <result name="Media Resource Failure"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: sip_outdial");
+Session.dlgUAC.LogInfo();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("OUTDIAL EXIT ON BRANCH: " + Result.name + "  RESPONSE MESSAGE: " + Session.msgResponse.status);
+Session.msgResponse.LogInfo();]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=416 y=111 ?>
+          <!--nFailure-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nFailure"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("FAIL TO OUTDIAL");]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=431 y=221 ?>
+          <!--nSuccess-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nSuccess"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS OUTDIAL") ;
+Session.dlgUAC.LogInfo();
+Session.dlgUAS.LogInfo();]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value=""/>
+    <property key="library-modules" value=""/>
+    <property key="library-path" value=""/>
+  </properties>
+</xtml>

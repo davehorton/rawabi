@@ -1,0 +1,1766 @@
+<?xml version="1.0"?>
+<xtml version="1.0" >
+  <global-handlers >
+    <handler event="Standard.OnServiceLoad.1" function="OnServiceLoad" public="0" always-on="0"/>
+    <handler event="Standard.OnSessionStart.1" function="OnSessionStart" public="0" always-on="0"/>
+    <handler event="Standard.OnSessionEnd.1" function="OnSessionEnd" public="0" always-on="0"/>
+  </global-handlers>
+  <global-vars >
+    <var name="int_gReturnCode" type="i4" >0</var>
+    <var name="str_gFrom" type="string" ></var>
+    <var name="str_gTo" type="string" ></var>
+    <var name="str_gVia" type="string" ></var>
+    <var name="str_gContent" type="string" ></var>
+    <var name="str_gCallId" type="string" ></var>
+    <var name="str_gCSeq" type="string" ></var>
+    <var name="str_gRequestURI" type="string" ></var>
+    <var name="bool_gConnectedToMS" type="boolean" >0</var>
+    <var name="long_gStartTime" type="i8" >0</var>
+    <var name="long_gEndTime" type="i8" >0</var>
+    <var name="long_gMSConnectTime" type="i8" >0</var>
+    <var name="str_gOrigNbr" type="string" ></var>
+    <var name="str_gInfoDigits" type="string" ></var>
+    <var name="str_gConfResource" type="string" >ms0@pcs-ms1.pactolus.com</var>
+    <var name="str_gPassCode" type="string" >11</var>
+    <var name="str_gAccessNumber" type="string" >8003334567</var>
+    <var name="int_gScheduleDuration" type="i4" >0</var>
+    <var name="str_gScheduleStartTime" type="string" ></var>
+    <var name="long_gTimeAvailable" type="i8" >0</var>
+    <var name="str_gConfScheduleId" type="string" ></var>
+    <var name="str_gCallLegId" type="string" ></var>
+    <var name="str_gDBName" type="string" >pactolusdb</var>
+    <var name="int_gAccessNumberId" type="i4" >0</var>
+    <var name="str_gConfEventId" type="string" ></var>
+    <var name="long_gTimerId" type="i8" >0</var>
+    <var name="bool_gTimerSet" type="boolean" >0</var>
+    <var name="str_gMSCallId" type="string" ></var>
+    <var name="int_gCallMode" type="i4" >1</var>
+    <var name="int_gTerminationReason" type="i4" >0</var>
+    <var name="str_gMSConnectionId" type="string" ></var>
+    <var name="str_gMSSDP" type="string" ></var>
+    <var name="str_gMSEndPoint" type="string" ></var>
+    <var name="int_gJoinTonePrompt" type="i4" >4</var>
+    <var name="str_gConfControllerIP" type="string" >10.10.100.221</var>
+    <var name="int_gConfControllerPort" type="i4" >1234</var>
+    <var name="str_gModeratorFlag" type="string" ></var>
+    <var name="str_gCallerOrg" type="string" ></var>
+    <var name="str_gCallerName" type="string" ></var>
+    <var name="str_gReturnMsg" type="string" ></var>
+    <var name="int_gSoapPort" type="i4" >0</var>
+    <var name="str_gSessionID" type="string" ></var>
+    <var name="str_gApplicationName" type="string" ></var>
+    <var name="str_gSoapAddress" type="string" ></var>
+    <var name="str_gSipAddress" type="string" ></var>
+    <var name="str_gAppServerAddress" type="string" ></var>
+    <var name="int_gSipPort" type="i4" >0</var>
+    <var name="str_gDestNbr" type="string" >5087614657</var>
+    <var name="long_gServiceProviderID" type="i8" >0</var>
+    <var name="str_gRetryFlag" type="string" >F</var>
+    <var name="int_gAllowPasscodeTries" type="i4" >0</var>
+    <var name="int_gNumbPasscodeTries" type="i4" >0</var>
+    <var name="str_gOrigDomIntlFlag" type="string" >D</var>
+    <var name="int_gOrigCountryID" type="i4" >0</var>
+    <var name="str_gGWIpIngress" type="string" ></var>
+    <var name="int_gGWPortIngress" type="i4" >0</var>
+    <var name="str_gGWIpEngress" type="string" ></var>
+    <var name="int_gGWPortEngress" type="i4" >0</var>
+    <var name="int_gRtpClockRate" type="i4" >0</var>
+    <var name="int_gRtpEncoding" type="i4" >0</var>
+    <var name="str_gOutdialFlag" type="string" ></var>
+    <var name="int_gLanguageID" type="i4" >0</var>
+    <var name="int_gDialPlanID" type="i4" >0</var>
+    <var name="str_gDBSessionID" type="string" ></var>
+    <var name="str_gWelcomePromptType" type="string" ></var>
+    <var name="str_gWelcomePromptUrl" type="string" ></var>
+    <var name="int_gWelcomePromptIndex" type="i4" >0</var>
+    <var name="str_gCustomerServicePhone" type="string" ></var>
+    <var name="str_gDialOutCSeq" type="string" ></var>
+    <var name="str_gPartyPasscodeFlag" type="string" ></var>
+    <var name="intReturnCode" type="i4" >-50</var>
+    <var name="g_strLanguageID" type="string" ></var>
+    <var name="g_strOrigCallingCode" type="string" ></var>
+    <var name="g_strOrigAreaCode" type="string" ></var>
+    <var name="g_strSIPStatus" type="string" ></var>
+    <var name="g_strCallerLastName" type="string" ></var>
+    <var name="str_gMutedFlag" type="string" >""</var>
+    <var name="str_gConfPassCode" type="string" ></var>
+    <var name="int_gMaxHoldTime" type="i4" >0</var>
+    <var name="str_gModPasscode" type="string" >5678</var>
+    <var name="str_gPostpassPromptType" type="string" ></var>
+    <var name="int_gPostpassPromptIndex" type="i4" >0</var>
+    <var name="str_gPostpassPromptUrl" type="string" ></var>
+    <var name="str_gDestDomIntlFlag" type="string" >D</var>
+    <var name="int_gDestCountryID" type="i4" >232</var>
+    <var name="str_gModeratorFlag1" type="string" ></var>
+    <var name="str_gModeratorFlag2" type="string" ></var>
+    <var name="str_gModeratorFlag3" type="string" ></var>
+    <var name="long_gSubscriberID" type="i8" >0</var>
+    <var name="int_gServiceID" type="i4" >0</var>
+    <var name="str_gOutdialDestNbr" type="string" ></var>
+    <var name="str_gCallLegId4" type="string" ></var>
+    <var name="str_gPartySchedID" type="string" ></var>
+    <var name="str_intlPrependFlag" type="string" >F</var>
+    <var name="int_localGMTOffset" type="i4" >0</var>
+    <var name="str_strippedOrigNbr" type="string" ></var>
+    <var name="int_gConfOfferingID" type="i4" >4</var>
+    <var name="str_gSubPin" type="string" ></var>
+    <var name="str_gPopdAccount" type="string" ></var>
+    <var name="bool_gSignupTestFlag" type="boolean" >1</var>
+    <var name="long_gConfOfferingID" type="i8" >4</var>
+    <var name="long_gMSConnectTime1" type="i8" >0</var>
+    <var name="long_gMSConnectTime2" type="i8" >0</var>
+    <var name="long_gMSConnectTime3" type="i8" >0</var>
+    <var name="long_gMSConnectTime4" type="i8" >0</var>
+    <var name="str_gModRequiredFlag" type="string" ></var>
+    <var name="str_gACDEnabled" type="string" ></var>
+    <var name="str_gACDCSROnMaxLoginsEnabled" type="string" ></var>
+    <var name="str_gACDGreetingEnabled" type="string" ></var>
+    <var name="str_gACDControllerIP" type="string" ></var>
+    <var name="int_gACDControllerPort" type="i4" >0</var>
+    <var name="str_gACDControllerPort" type="string" ></var>
+    <var name="str_billingCodeFlag" type="string" ></var>
+    <var name="str_recordNamesFlag" type="string" ></var>
+    <var name="int_arriveDepartOption" type="i4" >0</var>
+    <var name="g_strOperatorFlag" type="string" >F</var>
+    <var name="g_strHoldBillingFlag" type="string" ></var>
+    <var name="g_intRoundSeconds" type="i4" >0</var>
+    <var name="g_strRechargeFlag" type="string" ></var>
+    <var name="int_gSubExpirationType" type="i4" >0</var>
+    <var name="int_gOfferingID" type="i4" >0</var>
+    <var name="str_gForceModeratorFlag" type="string" >F</var>
+    <var name="str_gForceMuteFlag" type="string" >F</var>
+    <var name="g_iAttendeeID" type="i4" >123</var>
+    <var name="g_sAnonCallerFlag" type="string" ></var>
+    <var name="g_iOperatorAssistType" type="i4" >0</var>
+    <var name="g_sCustConfID" type="string" ></var>
+    <var name="g_sQuickstartFlag" type="string" ></var>
+    <var name="g_intSiteId" type="i4" >0</var>
+    <var name="g_intRedirectStatus" type="i4" >0</var>
+    <var name="g_strAlternateSiteIP" type="string" ></var>
+    <var name="g_intAlternateSitePort" type="i4" >0</var>
+    <var name="g_strConfSiteMovedFlag" type="string" ></var>
+    <var name="g_strCCIPMovedFrom" type="string" ></var>
+    <var name="g_intCCPortMovedFrom" type="i4" >0</var>
+    <var name="g_strCCIPMovedTo" type="string" ></var>
+    <var name="g_intCCPortMovedTo" type="i4" >0</var>
+    <var name="g_strModeratorMutedFlag" type="string" ></var>
+    <var name="g_intMinutesTooEarly" type="i4" >0</var>
+    <var name="g_intOutdialOption" type="i4" >0</var>
+    <var name="g_strMutedParticipantPasscode" type="string" ></var>
+    <var name="g_intCurrentModCount" type="i4" >0</var>
+    <var name="g_strReservationlessFlag" type="string" ></var>
+    <var name="g_nDnisIdentifiedConfFlag" type="i4" >0</var>
+    <var name="g_nEventDnisType" type="i4" >0</var>
+  </global-vars>
+  <shared-vars >
+    <var name="int_sTIMEOUT" type="i4" >30</var>
+    <var name="int_sSTATE_GET_PASSCODE" type="i4" >2</var>
+    <var name="int_sSTATE_SET_CONFRESOURCE" type="i4" >4</var>
+    <var name="int_sSTATE_DIRECT_TO_MS" type="i4" >1</var>
+    <var name="int_sSTATE_END_CALL" type="i4" >10</var>
+    <var name="int_sSTATE_REPLY_UNAVAILABLE" type="i4" >9</var>
+    <var name="short_sMAX_RETRY" type="i2" >3</var>
+    <var name="int_sFAILURE" type="i4" >-1</var>
+    <var name="int_sSUCCESS" type="i4" >0</var>
+    <var name="int_sFIRSTCALLER" type="i4" >1</var>
+    <var name="int_sNONFIRSTCALLER" type="i4" >0</var>
+    <var name="int_sENDCALL" type="i4" >-2</var>
+    <var name="int_sSTATE_MS_TO_CALLER" type="i4" >3</var>
+    <var name="int_sSTATE_PLAY_PROMPT" type="i4" >5</var>
+    <var name="str_sCONFLEAVE" type="string" >ConfLeaveEvent</var>
+    <var name="str_sCONFJOIN" type="string" >ConfJoinEvent</var>
+    <var name="str_sCONFADDRESPONSE" type="string" >ConfAddPartyResponse</var>
+    <var name="str_sCONFREMOVERESPONSE" type="string" >ConfRemovePartyResponse</var>
+    <var name="str_sCONFMUTERESPONSE" type="string" >ConfMutePartyResponse</var>
+    <var name="str_sCONFUNMUTERESPONSE" type="string" >ConfUnMutePartyResponse</var>
+    <var name="int_sSTATE_INITIALIZE_CONF" type="i4" >0</var>
+    <var name="int_sPROMPT_DEPART_TONE" type="i4" >1</var>
+    <var name="int_sPROMPT_ADVERTISE" type="i4" >2</var>
+    <var name="int_sPROMPT_HELP" type="i4" >3</var>
+    <var name="int_sPROMPT_JOIN_TONE" type="i4" >4</var>
+    <var name="int_sPROMPT_LOGIN_FAIL" type="i4" >5</var>
+    <var name="int_sPROMPT_MOD_ALREADY_IN" type="i4" >6</var>
+    <var name="int_sPROMPT_MOD_IN" type="i4" >7</var>
+    <var name="int_sPROMPT_NO_RESPONSE" type="i4" >8</var>
+    <var name="int_sPROMPT_PASSWORD" type="i4" >9</var>
+    <var name="int_sPROMPT_SYSTEM_DOWN" type="i4" >10</var>
+    <var name="int_sPROMPT_TRY_AGAIN" type="i4" >11</var>
+    <var name="int_sPROMPT_USER_LOGIN" type="i4" >12</var>
+    <var name="int_sPROMPT_WELCOME" type="i4" >13</var>
+    <var name="int_sPROMPT_FIRST_CALLER" type="i4" >13</var>
+    <var name="int_sPROMPT_CONF_IN_PROGRESS" type="i4" >4</var>
+    <var name="int_sPROMPT_TO_EARLY" type="i4" >2</var>
+    <var name="int_sPROMPT_GOOD_BYE" type="i4" >1</var>
+    <var name="int_sSTATE_WAIT" type="i4" >-1</var>
+    <var name="int_sPROMPT_ACCEPT" type="i4" >4</var>
+    <var name="int_sPROMPT_DECLINE" type="i4" >1</var>
+    <var name="s_intMaxConf" type="i4" >2</var>
+    <var name="s_intConfNumberID" type="i4" >0</var>
+    <var name="s_intTimeout" type="i4" >30</var>
+    <var name="s_lServiceProviderID" type="i8" >1</var>
+    <var name="s_lServiceID" type="i8" >4</var>
+    <var name="s_lProductOfferingID" type="i8" >4</var>
+    <var name="str_sAccessNumber" type="i8" >8004444567</var>
+    <var name="int_sSiteID" type="i8" >121</var>
+  </shared-vars>
+  <functions >
+    <function name="OnSessionEnd" start="3" event="OnSessionEnd" returns="void" >
+      <parameters >
+        <parameter name="nSessionEndReason" type="i2"/>
+      </parameters>
+      <actions >
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=209 y=128 ?>
+          <return value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="javatest" start="53" event="javatest" returns="i4" >
+      <local-vars >
+        <var name="str_gOrigNbr1" type="string" >5086672273</var>
+        <var name="str_gOrigNbr2" type="string" >6174333747</var>
+        <var name="str_gOrigNbr3" type="string" >4014569304</var>
+        <var name="str_gCallLegId1" type="string" ></var>
+        <var name="str_gCallLegId2" type="string" ></var>
+        <var name="str_gCallLegId3" type="string" ></var>
+        <var name="str_gDestCallingCode" type="string" ></var>
+        <var name="str_gDestAreaCode" type="string" ></var>
+        <var name="str_gModeratorFlag4" type="string" ></var>
+        <var name="str_gSPTimeZone" type="string" ></var>
+        <var name="str_lMusicHoldFlag" type="string" ></var>
+        <var name="str_gSubLanguageCode" type="string" ></var>
+        <var name="str_gModOutdialFlag" type="string" >T</var>
+        <var name="int_gBillingType" type="i4" >0</var>
+        <var name="f_gSubBalance" type="float" >0</var>
+        <var name="f_gPrepaidMeteredRate" type="float" >0</var>
+        <var name="int_gCurrencyID" type="i4" >0</var>
+        <var name="str_lExistCallLegID" type="string" ></var>
+        <var name="str_lExistSessionID" type="string" ></var>
+        <var name="str_gPlayPartyCount" type="string" ></var>
+        <var name="int_gNumParties" type="i4" >0</var>
+        <var name="str_gSubscriberFlag" type="string" ></var>
+        <var name="payphoneSrchgRateID" type="i4" >0</var>
+        <var name="payphoneSrchgRateAmt" type="float" >0</var>
+        <var name="accessNumberRateID" type="i4" >0</var>
+        <var name="accessNumberRateAmt" type="float" >0</var>
+        <var name="accessNumberRateType" type="i4" >0</var>
+        <var name="meteredRate1ID" type="i4" >0</var>
+        <var name="meteredRate1Amt" type="float" >0</var>
+        <var name="meteredRate2ID" type="i4" >0</var>
+        <var name="meteredRate2Amt" type="float" >0</var>
+        <var name="fixedRate1ID" type="i4" >0</var>
+        <var name="fixedRate1Amt" type="float" >0</var>
+        <var name="fixedRate2ID" type="i4" >0</var>
+        <var name="fixedRate2Amt" type="float" >0</var>
+        <var name="totalMeteredRate" type="float" >0</var>
+        <var name="totalFixedRate" type="float" >0</var>
+        <var name="str_gSetStateGetResource" type="string" >F</var>
+        <var name="str_gConfSessionID" type="string" ></var>
+        <var name="l_gOutdialStartTime" type="i8" >0</var>
+        <var name="l_gOutdialConnectTime" type="i8" >0</var>
+        <var name="l_gHoldStartTime" type="i8" >0</var>
+        <var name="int_gPrepaidPinLength" type="i4" >0</var>
+        <var name="int_gPasscodeLength" type="i4" >0</var>
+        <var name="g_strPromptOnOutdial" type="string" ></var>
+        <var name="g_strAutoRecordFlag" type="string" ></var>
+        <var name="g_strConfRecordAllowed" type="string" ></var>
+        <var name="g_strHomeCallingCode" type="string" ></var>
+        <var name="g_intSubTimeZoneId" type="i4" >0</var>
+        <var name="g_strOutdialCLI" type="string" ></var>
+        <var name="g_intHomeCountryId" type="i4" >0</var>
+        <var name="g_sDefaultANIFlag" type="string" ></var>
+        <var name="sOrigTrunkGroup" type="string" >origTrunkGroup</var>
+        <var name="sDestTrunkGroup" type="string" >destTrunkGroup</var>
+        <var name="lPrivateTalkStartTime" type="i8" >0</var>
+        <var name="lPrivateTalkEndTime" type="i8" >0</var>
+        <var name="g_sMSResourceName" type="string" ></var>
+        <var name="f_strThirdPartyAcdOutdialNumber" type="string" >0</var>
+        <var name="f_strThirdPartyAcdOutdialAvail" type="string" >F</var>
+        <var name="f_iThirdPartyAcdOutdialDuration" type="i4" >0</var>
+        <var name="strBadANIRouteToCSR" type="string" >F</var>
+      </local-vars>
+      <actions >
+        <action id="53" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=28 y=93 ?>
+          <!--"initConfSession()"-->
+          <java class="&quot;com.pactolus.conferencing.psAPISceInitConfSession&quot;" method="&quot;initConfSession&quot;" timeout="int_sTIMEOUT" return="" method-return-var="int_gReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >str_gSessionID</parameter>
+            <parameter type="in" var-type="unknown" >str_gOrigNbr</parameter>
+            <parameter type="in" var-type="unknown" >str_gAccessNumber</parameter>
+            <parameter type="inout" var-type="unknown" >int_gAccessNumberId</parameter>
+            <parameter type="inout" var-type="unknown" >long_gServiceProviderID</parameter>
+            <parameter type="inout" var-type="unknown" >g_strLanguageID</parameter>
+            <parameter type="inout" var-type="unknown" >int_gNumbPasscodeTries</parameter>
+            <parameter type="inout" var-type="unknown" >int_gDialPlanID</parameter>
+            <parameter type="inout" var-type="unknown" >int_gOrigCountryID</parameter>
+            <parameter type="inout" var-type="unknown" >g_strOrigCallingCode</parameter>
+            <parameter type="inout" var-type="unknown" >g_strOrigAreaCode</parameter>
+            <parameter type="inout" var-type="unknown" >str_gOrigDomIntlFlag</parameter>
+            <parameter type="inout" var-type="unknown" >str_gDBName</parameter>
+            <parameter type="inout" var-type="unknown" >str_gWelcomePromptType</parameter>
+            <parameter type="inout" var-type="unknown" >str_gWelcomePromptUrl</parameter>
+            <parameter type="inout" var-type="unknown" >int_gWelcomePromptIndex</parameter>
+            <parameter type="inout" var-type="unknown" >str_gCustomerServicePhone</parameter>
+            <parameter type="inout" var-type="unknown" >str_gSPTimeZone</parameter>
+            <parameter type="inout" var-type="unknown" >int_localGMTOffset</parameter>
+            <parameter type="inout" var-type="unknown" >str_strippedOrigNbr</parameter>
+            <parameter type="inout" var-type="unknown" >str_gACDEnabled</parameter>
+            <parameter type="inout" var-type="unknown" >str_gACDCSROnMaxLoginsEnabled</parameter>
+            <parameter type="inout" var-type="unknown" >str_gACDGreetingEnabled</parameter>
+            <parameter type="inout" var-type="unknown" >str_gACDControllerIP</parameter>
+            <parameter type="inout" var-type="unknown" >int_gACDControllerPort</parameter>
+            <parameter type="inout" var-type="unknown" >str_lMusicHoldFlag</parameter>
+            <parameter type="inout" var-type="unknown" >int_gPasscodeLength</parameter>
+            <parameter type="inout" var-type="string" >f_strThirdPartyAcdOutdialNumber</parameter>
+            <parameter type="inout" var-type="string" >f_strThirdPartyAcdOutdialAvail</parameter>
+            <parameter type="inout" var-type="i4" >f_iThirdPartyAcdOutdialDuration</parameter>
+            <parameter type="inout" var-type="string" >strBadANIRouteToCSR</parameter>
+            <parameter type="inout" var-type="i4" >g_nDnisIdentifiedConfFlag</parameter>
+            <parameter type="inout" var-type="i4" >g_nEventDnisType</parameter>
+            <parameter type="inout" var-type="string" >str_gConfScheduleId</parameter>
+            <parameter type="inout" var-type="string" >str_gScheduleStartTime</parameter>
+          </java>
+          <results >
+            <result name="Default" link="13" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("*********JAVA CALLING INITIALIZE CONF *********");
+Session.int_gReturnCode = -50;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("JAVA initializeSession iJavaReturnCode " + Session.int_gReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=338 y=261 ?>
+          <!--validatePassCode()-->
+          <java class="&quot;com.pactolus.conferencing.psAPISceAuthConfPasscodeB&quot;" method="&quot;validateConfPassCode&quot;" timeout="int_sTIMEOUT" return="" method-return-var="int_gReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >str_gDBName</parameter>
+            <parameter type="in" var-type="unknown" >str_gSessionID</parameter>
+            <parameter type="in" var-type="unknown" >str_gApplicationName</parameter>
+            <parameter type="in" var-type="unknown" >str_gModPasscode</parameter>
+            <parameter type="in" var-type="unknown" >str_gOrigNbr1</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestNbr</parameter>
+            <parameter type="in" var-type="unknown" >int_gAccessNumberId</parameter>
+            <parameter type="in" var-type="unknown" >long_gServiceProviderID</parameter>
+            <parameter type="in" var-type="unknown" >str_gRetryFlag</parameter>
+            <parameter type="in" var-type="unknown" >str_gSoapAddress</parameter>
+            <parameter type="in" var-type="unknown" >int_gSoapPort</parameter>
+            <parameter type="in" var-type="unknown" >int_gAllowPasscodeTries</parameter>
+            <parameter type="in" var-type="unknown" >int_gNumbPasscodeTries</parameter>
+            <parameter type="in" var-type="unknown" >str_gOrigDomIntlFlag</parameter>
+            <parameter type="in" var-type="unknown" >int_gOrigCountryID</parameter>
+            <parameter type="in" var-type="unknown" >str_gInfoDigits</parameter>
+            <parameter type="in" var-type="unknown" >str_gFrom</parameter>
+            <parameter type="in" var-type="unknown" >str_gTo</parameter>
+            <parameter type="in" var-type="unknown" >str_gCallId</parameter>
+            <parameter type="in" var-type="unknown" >g_strSIPStatus</parameter>
+            <parameter type="in" var-type="unknown" >long_gStartTime</parameter>
+            <parameter type="in" var-type="unknown" >str_gGWIpIngress</parameter>
+            <parameter type="in" var-type="unknown" >int_gGWPortIngress</parameter>
+            <parameter type="in" var-type="unknown" >str_gGWIpEngress</parameter>
+            <parameter type="in" var-type="unknown" >int_gGWPortEngress</parameter>
+            <parameter type="in" var-type="unknown" >int_gRtpEncoding</parameter>
+            <parameter type="in" var-type="unknown" >int_gRtpClockRate</parameter>
+            <parameter type="in" var-type="unknown" >int_gCallMode</parameter>
+            <parameter type="in" var-type="unknown" >str_gOutdialFlag</parameter>
+            <parameter type="in" var-type="unknown" >g_strOrigCallingCode</parameter>
+            <parameter type="in" var-type="unknown" >g_strOrigAreaCode</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestDomIntlFlag</parameter>
+            <parameter type="in" var-type="unknown" >int_gDestCountryID</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestCallingCode</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestAreaCode</parameter>
+            <parameter type="in" var-type="unknown" >str_gSPTimeZone</parameter>
+            <parameter type="in" var-type="unknown" >str_gModOutdialFlag</parameter>
+            <parameter type="in" var-type="unknown" >g_strOperatorFlag</parameter>
+            <parameter type="in" var-type="unknown" >int_gDialPlanID</parameter>
+            <parameter type="in" var-type="unknown" >str_gForceModeratorFlag</parameter>
+            <parameter type="in" var-type="unknown" >str_gForceMuteFlag</parameter>
+            <parameter type="in" var-type="unknown" >g_sDefaultANIFlag</parameter>
+            <parameter type="in" var-type="unknown" >g_intSiteId</parameter>
+            <parameter type="in" var-type="unknown" >g_intRedirectStatus</parameter>
+            <parameter type="inout" var-type="unknown" >int_gScheduleDuration</parameter>
+            <parameter type="inout" var-type="unknown" >str_gScheduleStartTime</parameter>
+            <parameter type="inout" var-type="unknown" >long_gTimeAvailable</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfScheduleId</parameter>
+            <parameter type="inout" var-type="unknown" >str_gCallLegId1</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfResource</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfEventId</parameter>
+            <parameter type="inout" var-type="unknown" >str_gModeratorFlag1</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfControllerIP</parameter>
+            <parameter type="inout" var-type="unknown" >int_gConfControllerPort</parameter>
+            <parameter type="inout" var-type="unknown" >str_gCallerName</parameter>
+            <parameter type="inout" var-type="unknown" >g_strCallerLastName</parameter>
+            <parameter type="inout" var-type="unknown" >str_gCallerOrg</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPartyPasscodeFlag</parameter>
+            <parameter type="inout" var-type="unknown" >str_gMutedFlag</parameter>
+            <parameter type="inout" var-type="unknown" >g_strModeratorMutedFlag</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfPassCode</parameter>
+            <parameter type="inout" var-type="unknown" >int_gMaxHoldTime</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPostpassPromptType</parameter>
+            <parameter type="inout" var-type="unknown" >int_gPostpassPromptIndex</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPostpassPromptUrl</parameter>
+            <parameter type="inout" var-type="unknown" >int_gServiceID</parameter>
+            <parameter type="inout" var-type="unknown" >str_gModRequiredFlag</parameter>
+            <parameter type="inout" var-type="unknown" >str_billingCodeFlag</parameter>
+            <parameter type="inout" var-type="unknown" >str_recordNamesFlag</parameter>
+            <parameter type="inout" var-type="unknown" >int_arriveDepartOption</parameter>
+            <parameter type="inout" var-type="unknown" >str_gSubLanguageCode</parameter>
+            <parameter type="inout" var-type="unknown" >int_gBillingType</parameter>
+            <parameter type="inout" var-type="unknown" >f_gSubBalance</parameter>
+            <parameter type="inout" var-type="unknown" >int_gCurrencyID</parameter>
+            <parameter type="inout" var-type="unknown" >long_gSubscriberID</parameter>
+            <parameter type="inout" var-type="unknown" >str_lExistCallLegID</parameter>
+            <parameter type="inout" var-type="unknown" >str_lExistSessionID</parameter>
+            <parameter type="inout" var-type="unknown" >g_strHoldBillingFlag</parameter>
+            <parameter type="inout" var-type="unknown" >g_intRoundSeconds</parameter>
+            <parameter type="inout" var-type="unknown" >g_strRechargeFlag</parameter>
+            <parameter type="inout" var-type="unknown" >int_gSubExpirationType</parameter>
+            <parameter type="inout" var-type="unknown" >int_gOfferingID</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPopdAccount</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPlayPartyCount</parameter>
+            <parameter type="inout" var-type="unknown" >int_gNumParties</parameter>
+            <parameter type="inout" var-type="unknown" >str_gSubscriberFlag</parameter>
+            <parameter type="inout" var-type="unknown" >payphoneSrchgRateID</parameter>
+            <parameter type="inout" var-type="unknown" >payphoneSrchgRateAmt</parameter>
+            <parameter type="inout" var-type="unknown" >accessNumberRateID</parameter>
+            <parameter type="inout" var-type="unknown" >accessNumberRateAmt</parameter>
+            <parameter type="inout" var-type="unknown" >accessNumberRateType</parameter>
+            <parameter type="inout" var-type="unknown" >meteredRate1ID</parameter>
+            <parameter type="inout" var-type="unknown" >meteredRate1Amt</parameter>
+            <parameter type="inout" var-type="unknown" >meteredRate2ID</parameter>
+            <parameter type="inout" var-type="unknown" >meteredRate2Amt</parameter>
+            <parameter type="inout" var-type="unknown" >fixedRate1ID</parameter>
+            <parameter type="inout" var-type="unknown" >fixedRate1Amt</parameter>
+            <parameter type="inout" var-type="unknown" >fixedRate2ID</parameter>
+            <parameter type="inout" var-type="unknown" >fixedRate2Amt</parameter>
+            <parameter type="inout" var-type="unknown" >totalMeteredRate</parameter>
+            <parameter type="inout" var-type="unknown" >totalFixedRate</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfSessionID</parameter>
+            <parameter type="inout" var-type="unknown" >g_strPromptOnOutdial</parameter>
+            <parameter type="inout" var-type="unknown" >g_strAutoRecordFlag</parameter>
+            <parameter type="inout" var-type="unknown" >g_strConfRecordAllowed</parameter>
+            <parameter type="inout" var-type="unknown" >g_strHomeCallingCode</parameter>
+            <parameter type="inout" var-type="unknown" >g_intHomeCountryId</parameter>
+            <parameter type="inout" var-type="unknown" >g_strOutdialCLI</parameter>
+            <parameter type="inout" var-type="unknown" >g_iAttendeeID</parameter>
+            <parameter type="inout" var-type="unknown" >g_iOperatorAssistType</parameter>
+            <parameter type="inout" var-type="unknown" >g_sQuickstartFlag</parameter>
+            <parameter type="inout" var-type="unknown" >g_sMSResourceName</parameter>
+            <parameter type="inout" var-type="unknown" >g_strAlternateSiteIP</parameter>
+            <parameter type="inout" var-type="unknown" >g_intAlternateSitePort</parameter>
+            <parameter type="inout" var-type="unknown" >g_strConfSiteMovedFlag</parameter>
+            <parameter type="inout" var-type="unknown" >g_strCCIPMovedFrom</parameter>
+            <parameter type="inout" var-type="unknown" >g_intCCPortMovedFrom</parameter>
+            <parameter type="inout" var-type="unknown" >g_strCCIPMovedTo</parameter>
+            <parameter type="inout" var-type="unknown" >g_intCCPortMovedTo</parameter>
+            <parameter type="inout" var-type="unknown" >g_intMinutesTooEarly</parameter>
+            <parameter type="inout" var-type="unknown" >g_intOutdialOption</parameter>
+            <parameter type="inout" var-type="string" >g_strMutedParticipantPasscode</parameter>
+            <parameter type="inout" var-type="string" >g_strReservationlessFlag</parameter>
+          </java>
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.int_gReturnCode = -50;
+Server.logInfo("*********JAVA CALLING AuthConfPasscode with moderator passcode *********");
+Server.logInfo("BEFORE pass code = " + Session.str_gModPasscode);
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("JAVA authPasscode returned iJavaReturnCode " + Session.int_gReturnCode);
+Server.logInfo("AFTER sched duration = " + Session.int_gScheduleDuration);
+Server.logInfo("AFTER sched start time = " + Session.str_gScheduleStartTime);
+Server.logInfo("AFTER time available = " + Session.long_gTimeAvailable);
+Server.logInfo("AFTER sched ID = " + Session.str_gConfScheduleId);
+Server.logInfo("AFTER call leg ID = " + Session.str_gCallLegId);
+Server.logInfo("AFTER conf resource = " + Session.str_gConfResource);
+Server.logInfo("AFTER conf event ID = " + Session.str_gConfEventId);
+Session.long_gMSConnectTime1 = Server.getUTCTime();]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=801 y=486 ?>
+          <!--testSetConfResource()-->
+          <java class="&quot;com.pactolus.conferencing.psAPISceSetConfResource&quot;" method="&quot;setConfResource&quot;" timeout="int_sTIMEOUT" return="" method-return-var="int_gReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >str_gDBName</parameter>
+            <parameter type="in" var-type="unknown" >str_gSessionID</parameter>
+            <parameter type="in" var-type="unknown" >str_gConfEventId</parameter>
+            <parameter type="in" var-type="unknown" >str_gConfResource</parameter>
+            <parameter type="in" var-type="unknown" >g_sMSResourceName</parameter>
+          </java>
+          <results >
+            <result name="Default" link="16" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.int_gReturnCode = -50;
+Server.logInfo("*********JAVA CALLING SetConfResource *********");
+Server.logInfo("BEFORE sched ID = " + Session.str_gConfScheduleId);
+Session.str_gConfResource = "smokeTestConfResource";
+Session.g_sMSResourceName = "";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("JAVA setResource iJavaReturnCode " + Session.int_gReturnCode);
+]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=1653 y=984 ?>
+          <!--testSetConfCallLegCompletion()-->
+          <java class="&quot;com.pactolus.conferencing.psAPISceConfCallLegCompletion&quot;" method="&quot;procConfCallCompletion&quot;" timeout="int_sTIMEOUT" return="" method-return-var="int_gReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >str_gDBName</parameter>
+            <parameter type="in" var-type="unknown" >str_gSessionID</parameter>
+            <parameter type="in" var-type="unknown" >int_gTerminationReason</parameter>
+            <parameter type="in" var-type="unknown" >long_gEndTime</parameter>
+            <parameter type="in" var-type="unknown" >long_gMSConnectTime2</parameter>
+            <parameter type="in" var-type="unknown" >str_gConfEventId</parameter>
+            <parameter type="in" var-type="unknown" >str_gCallLegId2</parameter>
+            <parameter type="in" var-type="unknown" >str_gModeratorFlag2</parameter>
+            <parameter type="in" var-type="unknown" >str_gSPTimeZone</parameter>
+            <parameter type="in" var-type="unknown" >int_gAccessNumberId</parameter>
+            <parameter type="in" var-type="unknown" >int_gCallMode</parameter>
+            <parameter type="in" var-type="unknown" >str_gPartySchedID</parameter>
+            <parameter type="in" var-type="unknown" >long_gServiceProviderID</parameter>
+            <parameter type="in" var-type="unknown" >str_gInfoDigits</parameter>
+            <parameter type="in" var-type="unknown" >str_gOrigDomIntlFlag</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestDomIntlFlag</parameter>
+            <parameter type="in" var-type="unknown" >int_gOrigCountryID</parameter>
+            <parameter type="in" var-type="unknown" >str_gOrigNbr2</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestNbr</parameter>
+            <parameter type="in" var-type="unknown" >int_gRtpEncoding</parameter>
+            <parameter type="in" var-type="unknown" >int_gRtpClockRate</parameter>
+            <parameter type="in" var-type="unknown" >str_gFrom</parameter>
+            <parameter type="in" var-type="unknown" >str_gTo</parameter>
+            <parameter type="in" var-type="unknown" >str_gCallId</parameter>
+            <parameter type="in" var-type="unknown" >g_strSIPStatus</parameter>
+            <parameter type="in" var-type="unknown" >long_gStartTime</parameter>
+            <parameter type="in" var-type="unknown" >str_gGWIpIngress</parameter>
+            <parameter type="in" var-type="unknown" >int_gGWPortIngress</parameter>
+            <parameter type="in" var-type="unknown" >str_gGWIpEngress</parameter>
+            <parameter type="in" var-type="unknown" >int_gGWPortEngress</parameter>
+            <parameter type="in" var-type="unknown" >str_gApplicationName</parameter>
+            <parameter type="in" var-type="unknown" >str_gSoapAddress</parameter>
+            <parameter type="in" var-type="unknown" >int_gSoapPort</parameter>
+            <parameter type="in" var-type="unknown" >"F"</parameter>
+            <parameter type="in" var-type="unknown" >g_strOrigCallingCode</parameter>
+            <parameter type="in" var-type="unknown" >g_strOrigAreaCode</parameter>
+            <parameter type="in" var-type="unknown" >int_gDestCountryID</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestCallingCode</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestAreaCode</parameter>
+            <parameter type="in" var-type="unknown" >int_gBillingType</parameter>
+            <parameter type="in" var-type="unknown" >int_gCurrencyID</parameter>
+            <parameter type="in" var-type="unknown" >long_gSubscriberID</parameter>
+            <parameter type="in" var-type="unknown" >int_gServiceID</parameter>
+            <parameter type="in" var-type="unknown" >g_strOperatorFlag</parameter>
+            <parameter type="in" var-type="unknown" >g_intRoundSeconds</parameter>
+            <parameter type="in" var-type="unknown" >int_gSubExpirationType</parameter>
+            <parameter type="in" var-type="unknown" >payphoneSrchgRateID</parameter>
+            <parameter type="in" var-type="unknown" >payphoneSrchgRateAmt</parameter>
+            <parameter type="in" var-type="unknown" >accessNumberRateID</parameter>
+            <parameter type="in" var-type="unknown" >accessNumberRateAmt</parameter>
+            <parameter type="in" var-type="unknown" >accessNumberRateType</parameter>
+            <parameter type="in" var-type="unknown" >meteredRate1ID</parameter>
+            <parameter type="in" var-type="unknown" >meteredRate1Amt</parameter>
+            <parameter type="in" var-type="unknown" >meteredRate2ID</parameter>
+            <parameter type="in" var-type="unknown" >meteredRate2Amt</parameter>
+            <parameter type="in" var-type="unknown" >fixedRate1ID</parameter>
+            <parameter type="in" var-type="unknown" >fixedRate1Amt</parameter>
+            <parameter type="in" var-type="unknown" >fixedRate2ID</parameter>
+            <parameter type="in" var-type="unknown" >fixedRate2Amt</parameter>
+            <parameter type="in" var-type="unknown" >totalMeteredRate</parameter>
+            <parameter type="in" var-type="unknown" >totalFixedRate</parameter>
+            <parameter type="in" var-type="unknown" >str_gSetStateGetResource</parameter>
+            <parameter type="in" var-type="unknown" >str_gConfSessionID</parameter>
+            <parameter type="in" var-type="unknown" >l_gOutdialStartTime</parameter>
+            <parameter type="in" var-type="unknown" >l_gOutdialConnectTime</parameter>
+            <parameter type="in" var-type="unknown" >l_gHoldStartTime</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestNbr</parameter>
+            <parameter type="in" var-type="unknown" >sOrigTrunkGroup</parameter>
+            <parameter type="in" var-type="unknown" >sDestTrunkGroup</parameter>
+            <parameter type="in" var-type="unknown" >g_sCustConfID</parameter>
+            <parameter type="in" var-type="unknown" >lPrivateTalkStartTime</parameter>
+            <parameter type="in" var-type="unknown" >lPrivateTalkEndTime</parameter>
+          </java>
+          <results >
+            <result name="Default" link="21" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.int_gReturnCode = -50;
+Session.long_gEndTime = Server.getUTCTime();
+Session.l_gHoldStartTime = Server.getUTCTime()-10;
+Session.l_gOutdialConnectTime = Server.getUTCTime-15;
+Session.l_gOutdialStartTime = Server.getUTCTime-20;
+Server.logInfo("*********JAVA CALLING ConfCallLegComplettion *********");
+Server.logInfo("BEFORE DB name = " + Session.str_gDBName);
+Server.logInfo("BEFORE Session ID = " + Session.str_gSessionID);
+Server.logInfo("BEFORE termination reason = " + Session.int_gTerminationReason);
+Server.logInfo("BEFORE end time = " + Session.long_gEndTime);
+Server.logInfo("BEFORE MS connect time = " + Session.long_gMSConnectTime2);
+Server.logInfo("BEFORE conf event ID = " + Session.str_gConfEventId);
+Server.logInfo("BEFORE call leg ID = " + Session.str_gCallLegId2);
+
+
+
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("**** Conf Call Leg Completion returns " + Session.int_gReturnCode);
+Server.logInfo("BEFORE DB name = " + Session.str_gDBName);
+Server.logInfo("BEFORE Session ID = " + Session.str_gSessionID);
+Server.logInfo("BEFORE termination reason = " + Session.int_gTerminationReason);
+Server.logInfo("BEFORE end time = " + Session.long_gEndTime);
+Server.logInfo("BEFORE MS connect time = " + Session.long_gMSConnectTime);
+Server.logInfo("BEFORE conf event ID = " + Session.str_gConfEventId);
+Server.logInfo("BEFORE call leg ID = " + Session.str_gCallLegId);]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Pactolus.Branch.1" ><?xtml-editor x=225 y=164 ?>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+            <result name="success" link="4" stubbed="0" >int_gReturnCode == 0</result>
+          </results>
+        </action>
+        <action id="14" plug-in="Standard.EndSession.1" ><?xtml-editor x=1145 y=127 ?>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("error from java method, shutting down");]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Pactolus.Branch.1" ><?xtml-editor x=562 y=279 ?>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+            <result name="success" link="50" stubbed="0" >int_gReturnCode == 1</result>
+          </results>
+        </action>
+        <action id="16" plug-in="Pactolus.Branch.1" ><?xtml-editor x=984 y=524 ?>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+            <result name="success" link="36" stubbed="0" >int_gReturnCode == 0</result>
+          </results>
+        </action>
+        <action id="20" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1395 y=903 ?>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+            <result name="success" link="31" stubbed="0" >int_gReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("iJavaReturnCode with main conf passcode" + Session.int_gReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="21" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1857 y=939 ?>
+          <results >
+            <result name="Default" link="22" stubbed="0"/>
+            <result name="success" link="32" stubbed="0" >int_gReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("iJavaReturnCode " + Session.int_gReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="22" plug-in="Standard.EndSession.1" ><?xtml-editor x=2420 y=793 ?>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("error from java method, shutting down");]]></script>
+          </scripts>
+        </action>
+        <action id="25" plug-in="Pactolus.Branch.1" ><?xtml-editor x=2961 y=1426 ?>
+          <results >
+            <result name="Default" link="22" stubbed="0"/>
+            <result name="success" link="33" stubbed="0" >int_gReturnCode == 0</result>
+          </results>
+        </action>
+        <action id="27" plug-in="Pactolus.Branch.1" ><?xtml-editor x=3376 y=1465 ?>
+          <results >
+            <result name="Default" link="22" stubbed="0"/>
+            <result name="success" link="49" stubbed="0" >int_gReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("iJavaReturnCode " + Session.int_gReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="29" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=988 y=890 ?>
+          <sleep duration="2"/>
+          <results >
+            <result name="Default" link="35" stubbed="0"/>
+          </results>
+        </action>
+        <action id="31" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=1456 y=1110 ?>
+          <sleep duration="30"/>
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+          </results>
+        </action>
+        <action id="32" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=1892 y=1042 ?>
+          <sleep duration="2"/>
+          <results >
+            <result name="Default" link="39" stubbed="0"/>
+          </results>
+        </action>
+        <action id="33" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=2977 y=1603 ?>
+          <sleep duration="2"/>
+          <results >
+            <result name="Default" link="48" stubbed="0"/>
+          </results>
+        </action>
+        <action id="35" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=1195 y=1037 ?>
+          <!--validatePassCode()-->
+          <java class="&quot;com.pactolus.conferencing.psAPISceAuthConfPasscodeB&quot;" method="&quot;validateConfPassCode&quot;" timeout="int_sTIMEOUT" return="" method-return-var="int_gReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >str_gDBName</parameter>
+            <parameter type="in" var-type="unknown" >str_gSessionID</parameter>
+            <parameter type="in" var-type="unknown" >str_gApplicationName</parameter>
+            <parameter type="in" var-type="unknown" >str_gPassCode</parameter>
+            <parameter type="in" var-type="unknown" >str_gOrigNbr1</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestNbr</parameter>
+            <parameter type="in" var-type="unknown" >int_gAccessNumberId</parameter>
+            <parameter type="in" var-type="unknown" >long_gServiceProviderID</parameter>
+            <parameter type="in" var-type="unknown" >str_gRetryFlag</parameter>
+            <parameter type="in" var-type="unknown" >str_gSoapAddress</parameter>
+            <parameter type="in" var-type="unknown" >int_gSoapPort</parameter>
+            <parameter type="in" var-type="unknown" >int_gAllowPasscodeTries</parameter>
+            <parameter type="in" var-type="unknown" >int_gNumbPasscodeTries</parameter>
+            <parameter type="in" var-type="unknown" >str_gOrigDomIntlFlag</parameter>
+            <parameter type="in" var-type="unknown" >int_gOrigCountryID</parameter>
+            <parameter type="in" var-type="unknown" >str_gInfoDigits</parameter>
+            <parameter type="in" var-type="unknown" >str_gFrom</parameter>
+            <parameter type="in" var-type="unknown" >str_gTo</parameter>
+            <parameter type="in" var-type="unknown" >str_gCallId</parameter>
+            <parameter type="in" var-type="unknown" >g_strSIPStatus</parameter>
+            <parameter type="in" var-type="unknown" >long_gStartTime</parameter>
+            <parameter type="in" var-type="unknown" >str_gGWIpIngress</parameter>
+            <parameter type="in" var-type="unknown" >int_gGWPortIngress</parameter>
+            <parameter type="in" var-type="unknown" >str_gGWIpEngress</parameter>
+            <parameter type="in" var-type="unknown" >int_gGWPortEngress</parameter>
+            <parameter type="in" var-type="unknown" >int_gRtpEncoding</parameter>
+            <parameter type="in" var-type="unknown" >int_gRtpClockRate</parameter>
+            <parameter type="in" var-type="unknown" >int_gCallMode</parameter>
+            <parameter type="in" var-type="unknown" >str_gOutdialFlag</parameter>
+            <parameter type="in" var-type="unknown" >g_strOrigCallingCode</parameter>
+            <parameter type="in" var-type="unknown" >g_strOrigAreaCode</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestDomIntlFlag</parameter>
+            <parameter type="in" var-type="unknown" >int_gDestCountryID</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestCallingCode</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestAreaCode</parameter>
+            <parameter type="in" var-type="unknown" >str_gSPTimeZone</parameter>
+            <parameter type="in" var-type="unknown" >str_gModOutdialFlag</parameter>
+            <parameter type="in" var-type="unknown" >g_strOperatorFlag</parameter>
+            <parameter type="in" var-type="unknown" >int_gDialPlanID</parameter>
+            <parameter type="in" var-type="unknown" >str_gForceModeratorFlag</parameter>
+            <parameter type="in" var-type="unknown" >str_gForceMuteFlag</parameter>
+            <parameter type="in" var-type="unknown" >g_sDefaultANIFlag</parameter>
+            <parameter type="in" var-type="unknown" >g_intSiteId</parameter>
+            <parameter type="in" var-type="unknown" >g_intRedirectStatus</parameter>
+            <parameter type="inout" var-type="unknown" >int_gScheduleDuration</parameter>
+            <parameter type="inout" var-type="unknown" >str_gScheduleStartTime</parameter>
+            <parameter type="inout" var-type="unknown" >long_gTimeAvailable</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfScheduleId</parameter>
+            <parameter type="inout" var-type="unknown" >str_gCallLegId3</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfResource</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfEventId</parameter>
+            <parameter type="inout" var-type="unknown" >str_gModeratorFlag3</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfControllerIP</parameter>
+            <parameter type="inout" var-type="unknown" >int_gConfControllerPort</parameter>
+            <parameter type="inout" var-type="unknown" >str_gCallerName</parameter>
+            <parameter type="inout" var-type="unknown" >g_strCallerLastName</parameter>
+            <parameter type="inout" var-type="unknown" >str_gCallerOrg</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPartyPasscodeFlag</parameter>
+            <parameter type="inout" var-type="unknown" >str_gMutedFlag</parameter>
+            <parameter type="inout" var-type="unknown" >g_strModeratorMutedFlag</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfPassCode</parameter>
+            <parameter type="inout" var-type="unknown" >int_gMaxHoldTime</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPostpassPromptType</parameter>
+            <parameter type="inout" var-type="unknown" >int_gPostpassPromptIndex</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPostpassPromptUrl</parameter>
+            <parameter type="inout" var-type="unknown" >int_gServiceID</parameter>
+            <parameter type="inout" var-type="unknown" >str_gModRequiredFlag</parameter>
+            <parameter type="inout" var-type="unknown" >str_billingCodeFlag</parameter>
+            <parameter type="inout" var-type="unknown" >str_recordNamesFlag</parameter>
+            <parameter type="inout" var-type="unknown" >int_arriveDepartOption</parameter>
+            <parameter type="inout" var-type="unknown" >str_gSubLanguageCode</parameter>
+            <parameter type="inout" var-type="unknown" >int_gBillingType</parameter>
+            <parameter type="inout" var-type="unknown" >f_gSubBalance</parameter>
+            <parameter type="inout" var-type="unknown" >int_gCurrencyID</parameter>
+            <parameter type="inout" var-type="unknown" >long_gSubscriberID</parameter>
+            <parameter type="inout" var-type="unknown" >str_lExistCallLegID</parameter>
+            <parameter type="inout" var-type="unknown" >str_lExistSessionID</parameter>
+            <parameter type="inout" var-type="unknown" >g_strHoldBillingFlag</parameter>
+            <parameter type="inout" var-type="unknown" >g_intRoundSeconds</parameter>
+            <parameter type="inout" var-type="unknown" >g_strRechargeFlag</parameter>
+            <parameter type="inout" var-type="unknown" >int_gSubExpirationType</parameter>
+            <parameter type="inout" var-type="unknown" >int_gOfferingID</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPopdAccount</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPlayPartyCount</parameter>
+            <parameter type="inout" var-type="unknown" >int_gNumParties</parameter>
+            <parameter type="inout" var-type="unknown" >str_gSubscriberFlag</parameter>
+            <parameter type="inout" var-type="unknown" >payphoneSrchgRateID</parameter>
+            <parameter type="inout" var-type="unknown" >payphoneSrchgRateAmt</parameter>
+            <parameter type="inout" var-type="unknown" >accessNumberRateID</parameter>
+            <parameter type="inout" var-type="unknown" >accessNumberRateAmt</parameter>
+            <parameter type="inout" var-type="unknown" >accessNumberRateType</parameter>
+            <parameter type="inout" var-type="unknown" >meteredRate1ID</parameter>
+            <parameter type="inout" var-type="unknown" >meteredRate1Amt</parameter>
+            <parameter type="inout" var-type="unknown" >meteredRate2ID</parameter>
+            <parameter type="inout" var-type="unknown" >meteredRate2Amt</parameter>
+            <parameter type="inout" var-type="unknown" >fixedRate1ID</parameter>
+            <parameter type="inout" var-type="unknown" >fixedRate1Amt</parameter>
+            <parameter type="inout" var-type="unknown" >fixedRate2ID</parameter>
+            <parameter type="inout" var-type="unknown" >fixedRate2Amt</parameter>
+            <parameter type="inout" var-type="unknown" >totalMeteredRate</parameter>
+            <parameter type="inout" var-type="unknown" >totalFixedRate</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfSessionID</parameter>
+            <parameter type="inout" var-type="unknown" >g_strPromptOnOutdial</parameter>
+            <parameter type="inout" var-type="unknown" >g_strAutoRecordFlag</parameter>
+            <parameter type="inout" var-type="unknown" >g_strConfRecordAllowed</parameter>
+            <parameter type="inout" var-type="unknown" >g_strHomeCallingCode</parameter>
+            <parameter type="inout" var-type="unknown" >g_intHomeCountryId</parameter>
+            <parameter type="inout" var-type="unknown" >g_strOutdialCLI</parameter>
+            <parameter type="inout" var-type="unknown" >g_iAttendeeID</parameter>
+            <parameter type="inout" var-type="unknown" >g_iOperatorAssistType</parameter>
+            <parameter type="inout" var-type="unknown" >g_sQuickstartFlag</parameter>
+            <parameter type="inout" var-type="unknown" >g_sMSResourceName</parameter>
+            <parameter type="inout" var-type="unknown" >g_strAlternateSiteIP</parameter>
+            <parameter type="inout" var-type="unknown" >g_intAlternateSitePort</parameter>
+            <parameter type="inout" var-type="unknown" >g_strConfSiteMovedFlag</parameter>
+            <parameter type="inout" var-type="unknown" >g_strCCIPMovedFrom</parameter>
+            <parameter type="inout" var-type="unknown" >g_intCCPortMovedFrom</parameter>
+            <parameter type="inout" var-type="unknown" >g_strCCIPMovedTo</parameter>
+            <parameter type="inout" var-type="unknown" >g_intCCPortMovedTo</parameter>
+            <parameter type="inout" var-type="unknown" >g_intMinutesTooEarly</parameter>
+            <parameter type="inout" var-type="unknown" >g_intOutdialOption</parameter>
+            <parameter type="inout" var-type="string" >g_strMutedParticipantPasscode</parameter>
+            <parameter type="inout" var-type="string" >g_strReservationlessFlag</parameter>
+          </java>
+          <results >
+            <result name="Default" link="20" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.int_gReturnCode = -50;
+Server.logInfo("*********JAVA CALLING AuthConfPasscode with conf passcode *********");
+Server.logInfo("BEFORE pass code = " + Session.str_gPassCode);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("iJavaReturnCode " + Session.int_gReturnCode);
+Server.logInfo("AFTER sched duration = " + Session.int_gScheduleDuration);
+Server.logInfo("AFTER sched start time = " + Session.str_gScheduleStartTime);
+Server.logInfo("AFTER time available = " + Session.long_gTimeAvailable);
+Server.logInfo("AFTER sched ID = " + Session.str_gConfScheduleId);
+Server.logInfo("AFTER call leg ID = " + Session.str_gCallLegId3);
+Server.logInfo("AFTER conf resource = " + Session.str_gConfResource);
+Server.logInfo("AFTER conf event ID = " + Session.str_gConfEventId);
+Session.long_gMSConnectTime2 = Server.getUTCTime();]]></script>
+          </scripts>
+        </action>
+        <action id="36" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=600 y=648 ?>
+          <sleep duration="2"/>
+          <results >
+            <result name="Default" link="37" stubbed="0"/>
+          </results>
+        </action>
+        <action id="37" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=732 y=746 ?>
+          <!--validatePassCode()-->
+          <java class="&quot;com.pactolus.conferencing.psAPISceAuthConfPasscodeB&quot;" method="&quot;validateConfPassCode&quot;" timeout="int_sTIMEOUT" return="" method-return-var="int_gReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >str_gDBName</parameter>
+            <parameter type="in" var-type="unknown" >str_gSessionID</parameter>
+            <parameter type="in" var-type="unknown" >str_gApplicationName</parameter>
+            <parameter type="in" var-type="unknown" >str_gPassCode</parameter>
+            <parameter type="in" var-type="unknown" >str_gOrigNbr1</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestNbr</parameter>
+            <parameter type="in" var-type="unknown" >int_gAccessNumberId</parameter>
+            <parameter type="in" var-type="unknown" >long_gServiceProviderID</parameter>
+            <parameter type="in" var-type="unknown" >str_gRetryFlag</parameter>
+            <parameter type="in" var-type="unknown" >str_gSoapAddress</parameter>
+            <parameter type="in" var-type="unknown" >int_gSoapPort</parameter>
+            <parameter type="in" var-type="unknown" >int_gAllowPasscodeTries</parameter>
+            <parameter type="in" var-type="unknown" >int_gNumbPasscodeTries</parameter>
+            <parameter type="in" var-type="unknown" >str_gOrigDomIntlFlag</parameter>
+            <parameter type="in" var-type="unknown" >int_gOrigCountryID</parameter>
+            <parameter type="in" var-type="unknown" >str_gInfoDigits</parameter>
+            <parameter type="in" var-type="unknown" >str_gFrom</parameter>
+            <parameter type="in" var-type="unknown" >str_gTo</parameter>
+            <parameter type="in" var-type="unknown" >str_gCallId</parameter>
+            <parameter type="in" var-type="unknown" >g_strSIPStatus</parameter>
+            <parameter type="in" var-type="unknown" >long_gStartTime</parameter>
+            <parameter type="in" var-type="unknown" >str_gGWIpIngress</parameter>
+            <parameter type="in" var-type="unknown" >int_gGWPortIngress</parameter>
+            <parameter type="in" var-type="unknown" >str_gGWIpEngress</parameter>
+            <parameter type="in" var-type="unknown" >int_gGWPortEngress</parameter>
+            <parameter type="in" var-type="unknown" >int_gRtpEncoding</parameter>
+            <parameter type="in" var-type="unknown" >int_gRtpClockRate</parameter>
+            <parameter type="in" var-type="unknown" >int_gCallMode</parameter>
+            <parameter type="in" var-type="unknown" >str_gOutdialFlag</parameter>
+            <parameter type="in" var-type="unknown" >g_strOrigCallingCode</parameter>
+            <parameter type="in" var-type="unknown" >g_strOrigAreaCode</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestDomIntlFlag</parameter>
+            <parameter type="in" var-type="unknown" >int_gDestCountryID</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestCallingCode</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestAreaCode</parameter>
+            <parameter type="in" var-type="unknown" >str_gSPTimeZone</parameter>
+            <parameter type="in" var-type="unknown" >str_gModOutdialFlag</parameter>
+            <parameter type="in" var-type="unknown" >g_strOperatorFlag</parameter>
+            <parameter type="in" var-type="unknown" >int_gDialPlanID</parameter>
+            <parameter type="in" var-type="unknown" >str_gForceModeratorFlag</parameter>
+            <parameter type="in" var-type="unknown" >str_gForceMuteFlag</parameter>
+            <parameter type="in" var-type="unknown" >g_sDefaultANIFlag</parameter>
+            <parameter type="in" var-type="unknown" >g_intSiteId</parameter>
+            <parameter type="in" var-type="unknown" >g_intRedirectStatus</parameter>
+            <parameter type="inout" var-type="unknown" >int_gScheduleDuration</parameter>
+            <parameter type="inout" var-type="unknown" >str_gScheduleStartTime</parameter>
+            <parameter type="inout" var-type="unknown" >long_gTimeAvailable</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfScheduleId</parameter>
+            <parameter type="inout" var-type="unknown" >str_gCallLegId2</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfResource</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfEventId</parameter>
+            <parameter type="inout" var-type="unknown" >str_gModeratorFlag2</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfControllerIP</parameter>
+            <parameter type="inout" var-type="unknown" >int_gConfControllerPort</parameter>
+            <parameter type="inout" var-type="unknown" >str_gCallerName</parameter>
+            <parameter type="inout" var-type="unknown" >g_strCallerLastName</parameter>
+            <parameter type="inout" var-type="unknown" >str_gCallerOrg</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPartyPasscodeFlag</parameter>
+            <parameter type="inout" var-type="unknown" >str_gMutedFlag</parameter>
+            <parameter type="inout" var-type="unknown" >g_strModeratorMutedFlag</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfPassCode</parameter>
+            <parameter type="inout" var-type="unknown" >int_gMaxHoldTime</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPostpassPromptType</parameter>
+            <parameter type="inout" var-type="unknown" >int_gPostpassPromptIndex</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPostpassPromptUrl</parameter>
+            <parameter type="inout" var-type="unknown" >int_gServiceID</parameter>
+            <parameter type="inout" var-type="unknown" >str_gModRequiredFlag</parameter>
+            <parameter type="inout" var-type="unknown" >str_billingCodeFlag</parameter>
+            <parameter type="inout" var-type="unknown" >str_recordNamesFlag</parameter>
+            <parameter type="inout" var-type="unknown" >int_arriveDepartOption</parameter>
+            <parameter type="inout" var-type="unknown" >str_gSubLanguageCode</parameter>
+            <parameter type="inout" var-type="unknown" >int_gBillingType</parameter>
+            <parameter type="inout" var-type="unknown" >f_gSubBalance</parameter>
+            <parameter type="inout" var-type="unknown" >int_gCurrencyID</parameter>
+            <parameter type="inout" var-type="unknown" >long_gSubscriberID</parameter>
+            <parameter type="inout" var-type="unknown" >str_lExistCallLegID</parameter>
+            <parameter type="inout" var-type="unknown" >str_lExistSessionID</parameter>
+            <parameter type="inout" var-type="unknown" >g_strHoldBillingFlag</parameter>
+            <parameter type="inout" var-type="unknown" >g_intRoundSeconds</parameter>
+            <parameter type="inout" var-type="unknown" >g_strRechargeFlag</parameter>
+            <parameter type="inout" var-type="unknown" >int_gSubExpirationType</parameter>
+            <parameter type="inout" var-type="unknown" >int_gOfferingID</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPopdAccount</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPlayPartyCount</parameter>
+            <parameter type="inout" var-type="unknown" >int_gNumParties</parameter>
+            <parameter type="inout" var-type="unknown" >str_gSubscriberFlag</parameter>
+            <parameter type="inout" var-type="unknown" >payphoneSrchgRateID</parameter>
+            <parameter type="inout" var-type="unknown" >payphoneSrchgRateAmt</parameter>
+            <parameter type="inout" var-type="unknown" >accessNumberRateID</parameter>
+            <parameter type="inout" var-type="unknown" >accessNumberRateAmt</parameter>
+            <parameter type="inout" var-type="unknown" >accessNumberRateType</parameter>
+            <parameter type="inout" var-type="unknown" >meteredRate1ID</parameter>
+            <parameter type="inout" var-type="unknown" >meteredRate1Amt</parameter>
+            <parameter type="inout" var-type="unknown" >meteredRate2ID</parameter>
+            <parameter type="inout" var-type="unknown" >meteredRate2Amt</parameter>
+            <parameter type="inout" var-type="unknown" >fixedRate1ID</parameter>
+            <parameter type="inout" var-type="unknown" >fixedRate1Amt</parameter>
+            <parameter type="inout" var-type="unknown" >fixedRate2ID</parameter>
+            <parameter type="inout" var-type="unknown" >fixedRate2Amt</parameter>
+            <parameter type="inout" var-type="unknown" >totalMeteredRate</parameter>
+            <parameter type="inout" var-type="unknown" >totalFixedRate</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfSessionID</parameter>
+            <parameter type="inout" var-type="unknown" >g_strPromptOnOutdial</parameter>
+            <parameter type="inout" var-type="unknown" >g_strAutoRecordFlag</parameter>
+            <parameter type="inout" var-type="unknown" >g_strConfRecordAllowed</parameter>
+            <parameter type="inout" var-type="unknown" >g_strHomeCallingCode</parameter>
+            <parameter type="inout" var-type="unknown" >g_intHomeCountryId</parameter>
+            <parameter type="inout" var-type="unknown" >g_strOutdialCLI</parameter>
+            <parameter type="inout" var-type="unknown" >g_iAttendeeID</parameter>
+            <parameter type="inout" var-type="unknown" >g_iOperatorAssistType</parameter>
+            <parameter type="inout" var-type="unknown" >g_sQuickstartFlag</parameter>
+            <parameter type="inout" var-type="unknown" >g_sMSResourceName</parameter>
+            <parameter type="inout" var-type="unknown" >g_strAlternateSiteIP</parameter>
+            <parameter type="inout" var-type="unknown" >g_intAlternateSitePort</parameter>
+            <parameter type="inout" var-type="unknown" >g_strConfSiteMovedFlag</parameter>
+            <parameter type="inout" var-type="unknown" >g_strCCIPMovedFrom</parameter>
+            <parameter type="inout" var-type="unknown" >g_intCCPortMovedFrom</parameter>
+            <parameter type="inout" var-type="unknown" >g_strCCIPMovedTo</parameter>
+            <parameter type="inout" var-type="unknown" >g_intCCPortMovedTo</parameter>
+            <parameter type="inout" var-type="unknown" >g_intMinutesTooEarly</parameter>
+            <parameter type="inout" var-type="unknown" >g_intOutdialOption</parameter>
+            <parameter type="inout" var-type="string" >g_strMutedParticipantPasscode</parameter>
+            <parameter type="inout" var-type="string" >g_strReservationlessFlag</parameter>
+          </java>
+          <results >
+            <result name="Default" link="38" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.int_gReturnCode = -50;
+Server.logInfo("*********JAVA CALLING AuthConfPasscode with conf passcode for 1st time *********");
+Server.logInfo("conf passcode = " + Session.str_gPassCode);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("iJavaReturnCode = " + Session.int_gReturnCode);
+Server.logInfo("AFTER sched duration = " + Session.int_gScheduleDuration);
+Server.logInfo("AFTER sched start time = " + Session.str_gScheduleStartTime);
+Server.logInfo("AFTER time available = " + Session.long_gTimeAvailable);
+Server.logInfo("AFTER sched ID = " + Session.str_gConfScheduleId);
+Server.logInfo("AFTER conf resource = " + Session.str_gConfResource);
+Server.logInfo("AFTER conf event ID = " + Session.str_gConfEventId);
+Session.long_gMSConnectTime2 = Server.getUTCTime();]]></script>
+          </scripts>
+        </action>
+        <action id="38" plug-in="Pactolus.Branch.1" ><?xtml-editor x=938 y=711 ?>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+            <result name="success" link="29" stubbed="0" >int_gReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("iJavaReturnCode with moderator passcode " + Session.int_gReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="39" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=1814 y=1155 ?>
+          <!--authorizeDestination()-->
+          <java class="&quot;com.pactolus.conferencing.psAPISceConfAuthDest&quot;" method="&quot;authorizeDestination&quot;" timeout="int_sTIMEOUT" return="" method-return-var="int_gReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >str_gDBName</parameter>
+            <parameter type="in" var-type="unknown" >str_gSessionID</parameter>
+            <parameter type="in" var-type="unknown" >str_gApplicationName</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestNbr</parameter>
+            <parameter type="in" var-type="unknown" >long_gServiceProviderID</parameter>
+            <parameter type="in" var-type="unknown" >int_gServiceID</parameter>
+            <parameter type="in" var-type="unknown" >int_gDialPlanID</parameter>
+            <parameter type="in" var-type="unknown" >str_gConfEventId</parameter>
+            <parameter type="in" var-type="unknown" >g_strHomeCallingCode</parameter>
+            <parameter type="in" var-type="unknown" >g_intHomeCountryId</parameter>
+            <parameter type="inout" var-type="unknown" >str_gOutdialDestNbr</parameter>
+            <parameter type="inout" var-type="unknown" >int_gDestCountryID</parameter>
+            <parameter type="inout" var-type="unknown" >str_gDestDomIntlFlag</parameter>
+            <parameter type="inout" var-type="unknown" >str_gDestAreaCode</parameter>
+            <parameter type="inout" var-type="unknown" >str_gDestCallingCode</parameter>
+          </java>
+          <results >
+            <result name="Default" link="41" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.int_gReturnCode = -50;
+
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("iJavaReturnCode from authorizeDestination" + Session.int_gReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="40" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=2129 y=1365 ?>
+          <sleep duration="2"/>
+          <results >
+            <result name="Default" link="42" stubbed="0"/>
+          </results>
+        </action>
+        <action id="41" plug-in="Pactolus.Branch.1" ><?xtml-editor x=2037 y=1241 ?>
+          <results >
+            <result name="Default" link="22" stubbed="1"/>
+            <result name="success" link="40" stubbed="0" >int_gReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("iJavaReturnCode " + Session.int_gReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="42" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=2279 y=1126 ?>
+          <!--validatePassCode()-->
+          <java class="&quot;com.pactolus.conferencing.psAPISceAuthConfPasscodeB&quot;" method="&quot;validateConfPassCode&quot;" timeout="int_sTIMEOUT" return="" method-return-var="int_gReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >str_gDBName</parameter>
+            <parameter type="in" var-type="unknown" >str_gSessionID</parameter>
+            <parameter type="in" var-type="unknown" >str_gApplicationName</parameter>
+            <parameter type="in" var-type="unknown" >str_gPassCode</parameter>
+            <parameter type="in" var-type="unknown" >str_gOrigNbr1</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestNbr</parameter>
+            <parameter type="in" var-type="unknown" >int_gAccessNumberId</parameter>
+            <parameter type="in" var-type="unknown" >long_gServiceProviderID</parameter>
+            <parameter type="in" var-type="unknown" >str_gRetryFlag</parameter>
+            <parameter type="in" var-type="unknown" >str_gSoapAddress</parameter>
+            <parameter type="in" var-type="unknown" >int_gSoapPort</parameter>
+            <parameter type="in" var-type="unknown" >int_gAllowPasscodeTries</parameter>
+            <parameter type="in" var-type="unknown" >int_gNumbPasscodeTries</parameter>
+            <parameter type="in" var-type="unknown" >str_gOrigDomIntlFlag</parameter>
+            <parameter type="in" var-type="unknown" >int_gOrigCountryID</parameter>
+            <parameter type="in" var-type="unknown" >str_gInfoDigits</parameter>
+            <parameter type="in" var-type="unknown" >str_gFrom</parameter>
+            <parameter type="in" var-type="unknown" >str_gTo</parameter>
+            <parameter type="in" var-type="unknown" >str_gCallId</parameter>
+            <parameter type="in" var-type="unknown" >g_strSIPStatus</parameter>
+            <parameter type="in" var-type="unknown" >long_gStartTime</parameter>
+            <parameter type="in" var-type="unknown" >str_gGWIpIngress</parameter>
+            <parameter type="in" var-type="unknown" >int_gGWPortIngress</parameter>
+            <parameter type="in" var-type="unknown" >str_gGWIpEngress</parameter>
+            <parameter type="in" var-type="unknown" >int_gGWPortEngress</parameter>
+            <parameter type="in" var-type="unknown" >int_gRtpEncoding</parameter>
+            <parameter type="in" var-type="unknown" >int_gRtpClockRate</parameter>
+            <parameter type="in" var-type="unknown" >int_gCallMode</parameter>
+            <parameter type="in" var-type="unknown" >str_gOutdialFlag</parameter>
+            <parameter type="in" var-type="unknown" >g_strOrigCallingCode</parameter>
+            <parameter type="in" var-type="unknown" >g_strOrigAreaCode</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestDomIntlFlag</parameter>
+            <parameter type="in" var-type="unknown" >int_gDestCountryID</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestCallingCode</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestAreaCode</parameter>
+            <parameter type="in" var-type="unknown" >str_gSPTimeZone</parameter>
+            <parameter type="in" var-type="unknown" >str_gModOutdialFlag</parameter>
+            <parameter type="in" var-type="unknown" >g_strOperatorFlag</parameter>
+            <parameter type="in" var-type="unknown" >int_gDialPlanID</parameter>
+            <parameter type="in" var-type="unknown" >str_gForceModeratorFlag</parameter>
+            <parameter type="in" var-type="unknown" >str_gForceMuteFlag</parameter>
+            <parameter type="in" var-type="unknown" >g_sDefaultANIFlag</parameter>
+            <parameter type="in" var-type="unknown" >g_intSiteId</parameter>
+            <parameter type="in" var-type="unknown" >g_intRedirectStatus</parameter>
+            <parameter type="inout" var-type="unknown" >int_gScheduleDuration</parameter>
+            <parameter type="inout" var-type="unknown" >str_gScheduleStartTime</parameter>
+            <parameter type="inout" var-type="unknown" >long_gTimeAvailable</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfScheduleId</parameter>
+            <parameter type="inout" var-type="unknown" >str_gCallLegId4</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfResource</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfEventId</parameter>
+            <parameter type="inout" var-type="unknown" >str_gModeratorFlag4</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfControllerIP</parameter>
+            <parameter type="inout" var-type="unknown" >int_gConfControllerPort</parameter>
+            <parameter type="inout" var-type="unknown" >str_gCallerName</parameter>
+            <parameter type="inout" var-type="unknown" >g_strCallerLastName</parameter>
+            <parameter type="inout" var-type="unknown" >str_gCallerOrg</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPartyPasscodeFlag</parameter>
+            <parameter type="inout" var-type="unknown" >str_gMutedFlag</parameter>
+            <parameter type="inout" var-type="unknown" >g_strModeratorMutedFlag</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfPassCode</parameter>
+            <parameter type="inout" var-type="unknown" >int_gMaxHoldTime</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPostpassPromptType</parameter>
+            <parameter type="inout" var-type="unknown" >int_gPostpassPromptIndex</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPostpassPromptUrl</parameter>
+            <parameter type="inout" var-type="unknown" >int_gServiceID</parameter>
+            <parameter type="inout" var-type="unknown" >str_gModRequiredFlag</parameter>
+            <parameter type="inout" var-type="unknown" >str_billingCodeFlag</parameter>
+            <parameter type="inout" var-type="unknown" >str_recordNamesFlag</parameter>
+            <parameter type="inout" var-type="unknown" >int_arriveDepartOption</parameter>
+            <parameter type="inout" var-type="unknown" >str_gSubLanguageCode</parameter>
+            <parameter type="inout" var-type="unknown" >int_gBillingType</parameter>
+            <parameter type="inout" var-type="unknown" >f_gSubBalance</parameter>
+            <parameter type="inout" var-type="unknown" >int_gCurrencyID</parameter>
+            <parameter type="inout" var-type="unknown" >long_gSubscriberID</parameter>
+            <parameter type="inout" var-type="unknown" >str_lExistCallLegID</parameter>
+            <parameter type="inout" var-type="unknown" >str_lExistSessionID</parameter>
+            <parameter type="inout" var-type="unknown" >g_strHoldBillingFlag</parameter>
+            <parameter type="inout" var-type="unknown" >g_intRoundSeconds</parameter>
+            <parameter type="inout" var-type="unknown" >g_strRechargeFlag</parameter>
+            <parameter type="inout" var-type="unknown" >int_gSubExpirationType</parameter>
+            <parameter type="inout" var-type="unknown" >int_gOfferingID</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPopdAccount</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPlayPartyCount</parameter>
+            <parameter type="inout" var-type="unknown" >int_gNumParties</parameter>
+            <parameter type="inout" var-type="unknown" >str_gSubscriberFlag</parameter>
+            <parameter type="inout" var-type="unknown" >payphoneSrchgRateID</parameter>
+            <parameter type="inout" var-type="unknown" >payphoneSrchgRateAmt</parameter>
+            <parameter type="inout" var-type="unknown" >accessNumberRateID</parameter>
+            <parameter type="inout" var-type="unknown" >accessNumberRateAmt</parameter>
+            <parameter type="inout" var-type="unknown" >accessNumberRateType</parameter>
+            <parameter type="inout" var-type="unknown" >meteredRate1ID</parameter>
+            <parameter type="inout" var-type="unknown" >meteredRate1Amt</parameter>
+            <parameter type="inout" var-type="unknown" >meteredRate2ID</parameter>
+            <parameter type="inout" var-type="unknown" >meteredRate2Amt</parameter>
+            <parameter type="inout" var-type="unknown" >fixedRate1ID</parameter>
+            <parameter type="inout" var-type="unknown" >fixedRate1Amt</parameter>
+            <parameter type="inout" var-type="unknown" >fixedRate2ID</parameter>
+            <parameter type="inout" var-type="unknown" >fixedRate2Amt</parameter>
+            <parameter type="inout" var-type="unknown" >totalMeteredRate</parameter>
+            <parameter type="inout" var-type="unknown" >totalFixedRate</parameter>
+            <parameter type="inout" var-type="unknown" >str_gConfSessionID</parameter>
+            <parameter type="inout" var-type="unknown" >g_strPromptOnOutdial</parameter>
+            <parameter type="inout" var-type="unknown" >g_strAutoRecordFlag</parameter>
+            <parameter type="inout" var-type="unknown" >g_strConfRecordAllowed</parameter>
+            <parameter type="inout" var-type="unknown" >g_strHomeCallingCode</parameter>
+            <parameter type="inout" var-type="unknown" >g_intHomeCountryId</parameter>
+            <parameter type="inout" var-type="unknown" >g_strOutdialCLI</parameter>
+            <parameter type="inout" var-type="unknown" >g_iAttendeeID</parameter>
+            <parameter type="inout" var-type="unknown" >g_iOperatorAssistType</parameter>
+            <parameter type="inout" var-type="unknown" >g_sQuickstartFlag</parameter>
+            <parameter type="inout" var-type="unknown" >g_sMSResourceName</parameter>
+            <parameter type="inout" var-type="unknown" >g_strAlternateSiteIP</parameter>
+            <parameter type="inout" var-type="unknown" >g_intAlternateSitePort</parameter>
+            <parameter type="inout" var-type="unknown" >g_strConfSiteMovedFlag</parameter>
+            <parameter type="inout" var-type="unknown" >g_strCCIPMovedFrom</parameter>
+            <parameter type="inout" var-type="unknown" >g_intCCPortMovedFrom</parameter>
+            <parameter type="inout" var-type="unknown" >g_strCCIPMovedTo</parameter>
+            <parameter type="inout" var-type="unknown" >g_intCCPortMovedTo</parameter>
+            <parameter type="inout" var-type="unknown" >g_intMinutesTooEarly</parameter>
+            <parameter type="inout" var-type="unknown" >g_intOutdialOption</parameter>
+            <parameter type="inout" var-type="string" >g_strMutedParticipantPasscode</parameter>
+            <parameter type="inout" var-type="string" >g_strReservationlessFlag</parameter>
+          </java>
+          <results >
+            <result name="Default" link="43" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.int_gReturnCode = -50;
+Server.logInfo("*********JAVA CALLING AuthConfPasscode with conf passcode for 4th party *********");
+Server.logInfo("BEFORE pass code = " + Session.str_gPassCode);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("iJavaReturnCode " + Session.int_gReturnCode);
+Server.logInfo("AFTER sched duration = " + Session.int_gScheduleDuration);
+Server.logInfo("AFTER sched start time = " + Session.str_gScheduleStartTime);
+Server.logInfo("AFTER time available = " + Session.long_gTimeAvailable);
+Server.logInfo("AFTER sched ID = " + Session.str_gConfScheduleId);
+Server.logInfo("AFTER call leg ID = " + Session.str_gCallLegId);
+Server.logInfo("AFTER conf resource = " + Session.str_gConfResource);
+Server.logInfo("AFTER conf event ID = " + Session.str_gConfEventId);]]></script>
+          </scripts>
+        </action>
+        <action id="43" plug-in="Pactolus.Branch.1" ><?xtml-editor x=2487 y=1126 ?>
+          <results >
+            <result name="Default" link="22" stubbed="0"/>
+            <result name="success" link="44" stubbed="0" >int_gReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("iJavaReturnCode with main conf passcode" + Session.int_gReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="44" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=2627 y=1229 ?>
+          <sleep duration="2"/>
+          <results >
+            <result name="Default" link="47" stubbed="0"/>
+          </results>
+        </action>
+        <action id="46" plug-in="Pactolus.Branch.1" ><?xtml-editor x=3713 y=1273 ?>
+          <results >
+            <result name="Default" link="22" stubbed="0"/>
+            <result name="success" link="51" stubbed="0" >int_gReturnCode == 1</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("iJavaReturnCode " + Session.int_gReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="47" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=2712 y=1490 ?>
+          <!--testSetConfCallLegCompletion()-->
+          <java class="&quot;com.pactolus.conferencing.psAPISceConfCallLegCompletion&quot;" method="&quot;procConfCallCompletion&quot;" timeout="int_sTIMEOUT" return="" method-return-var="int_gReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >str_gDBName</parameter>
+            <parameter type="in" var-type="unknown" >str_gSessionID</parameter>
+            <parameter type="in" var-type="unknown" >int_gTerminationReason</parameter>
+            <parameter type="in" var-type="unknown" >long_gEndTime</parameter>
+            <parameter type="in" var-type="unknown" >long_gMSConnectTime3</parameter>
+            <parameter type="in" var-type="unknown" >str_gConfEventId</parameter>
+            <parameter type="in" var-type="unknown" >str_gCallLegId3</parameter>
+            <parameter type="in" var-type="unknown" >str_gModeratorFlag3</parameter>
+            <parameter type="in" var-type="unknown" >str_gSPTimeZone</parameter>
+            <parameter type="in" var-type="unknown" >int_gAccessNumberId</parameter>
+            <parameter type="in" var-type="unknown" >0</parameter>
+            <parameter type="in" var-type="unknown" >str_gPartySchedID</parameter>
+            <parameter type="in" var-type="unknown" >long_gServiceProviderID</parameter>
+            <parameter type="in" var-type="unknown" >str_gInfoDigits</parameter>
+            <parameter type="in" var-type="unknown" >str_gOrigDomIntlFlag</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestDomIntlFlag</parameter>
+            <parameter type="in" var-type="unknown" >int_gOrigCountryID</parameter>
+            <parameter type="in" var-type="unknown" >str_gOrigNbr3</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestNbr</parameter>
+            <parameter type="in" var-type="unknown" >int_gRtpEncoding</parameter>
+            <parameter type="in" var-type="unknown" >int_gRtpClockRate</parameter>
+            <parameter type="in" var-type="unknown" >str_gFrom</parameter>
+            <parameter type="in" var-type="unknown" >str_gTo</parameter>
+            <parameter type="in" var-type="unknown" >str_gCallId</parameter>
+            <parameter type="in" var-type="unknown" >g_strSIPStatus</parameter>
+            <parameter type="in" var-type="unknown" >long_gStartTime</parameter>
+            <parameter type="in" var-type="unknown" >str_gGWIpIngress</parameter>
+            <parameter type="in" var-type="unknown" >int_gGWPortIngress</parameter>
+            <parameter type="in" var-type="unknown" >str_gGWIpEngress</parameter>
+            <parameter type="in" var-type="unknown" >int_gGWPortEngress</parameter>
+            <parameter type="in" var-type="unknown" >str_gApplicationName</parameter>
+            <parameter type="in" var-type="unknown" >str_gSoapAddress</parameter>
+            <parameter type="in" var-type="unknown" >int_gSoapPort</parameter>
+            <parameter type="in" var-type="unknown" >"F"</parameter>
+            <parameter type="in" var-type="unknown" >g_strOrigCallingCode</parameter>
+            <parameter type="in" var-type="unknown" >g_strOrigAreaCode</parameter>
+            <parameter type="in" var-type="unknown" >int_gDestCountryID</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestCallingCode</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestAreaCode</parameter>
+            <parameter type="in" var-type="unknown" >int_gBillingType</parameter>
+            <parameter type="in" var-type="unknown" >int_gCurrencyID</parameter>
+            <parameter type="in" var-type="unknown" >long_gSubscriberID</parameter>
+            <parameter type="in" var-type="unknown" >int_gServiceID</parameter>
+            <parameter type="in" var-type="unknown" >g_strOperatorFlag</parameter>
+            <parameter type="in" var-type="unknown" >g_intRoundSeconds</parameter>
+            <parameter type="in" var-type="unknown" >int_gSubExpirationType</parameter>
+            <parameter type="in" var-type="unknown" >payphoneSrchgRateID</parameter>
+            <parameter type="in" var-type="unknown" >payphoneSrchgRateAmt</parameter>
+            <parameter type="in" var-type="unknown" >accessNumberRateID</parameter>
+            <parameter type="in" var-type="unknown" >accessNumberRateAmt</parameter>
+            <parameter type="in" var-type="unknown" >accessNumberRateType</parameter>
+            <parameter type="in" var-type="unknown" >meteredRate1ID</parameter>
+            <parameter type="in" var-type="unknown" >meteredRate1Amt</parameter>
+            <parameter type="in" var-type="unknown" >meteredRate2ID</parameter>
+            <parameter type="in" var-type="unknown" >meteredRate2Amt</parameter>
+            <parameter type="in" var-type="unknown" >fixedRate1ID</parameter>
+            <parameter type="in" var-type="unknown" >fixedRate1Amt</parameter>
+            <parameter type="in" var-type="unknown" >fixedRate2ID</parameter>
+            <parameter type="in" var-type="unknown" >fixedRate2Amt</parameter>
+            <parameter type="in" var-type="unknown" >totalMeteredRate</parameter>
+            <parameter type="in" var-type="unknown" >totalFixedRate</parameter>
+            <parameter type="in" var-type="unknown" >str_gSetStateGetResource</parameter>
+            <parameter type="in" var-type="unknown" >str_gConfSessionID</parameter>
+            <parameter type="in" var-type="unknown" >l_gOutdialStartTime</parameter>
+            <parameter type="in" var-type="unknown" >l_gOutdialConnectTime</parameter>
+            <parameter type="in" var-type="unknown" >l_gHoldStartTime</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestNbr</parameter>
+            <parameter type="in" var-type="unknown" >sOrigTrunkGroup</parameter>
+            <parameter type="in" var-type="unknown" >sDestTrunkGroup</parameter>
+            <parameter type="in" var-type="unknown" >g_sCustConfID</parameter>
+            <parameter type="in" var-type="unknown" >lPrivateTalkStartTime</parameter>
+            <parameter type="in" var-type="unknown" >lPrivateTalkEndTime</parameter>
+          </java>
+          <results >
+            <result name="Default" link="25" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.int_gReturnCode = -50;
+Session.long_gEndTime = Server.getUTCTime();
+Server.logInfo("*********JAVA CALLING ConfCallLegComplettion *********");
+Server.logInfo("BEFORE Session ID = " + Session.str_gSessionID);
+Server.logInfo("BEFORE termination reason = " + Session.int_gTerminationReason);
+Server.logInfo("BEFORE end time = " + Session.long_gEndTime);
+Server.logInfo("BEFORE conf event ID = " + Session.str_gConfEventId);
+Server.logInfo("BEFORE call leg ID = " + Session.str_gCallLegId3);
+
+
+
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("**** Conf Call Leg Completion returns " + Session.int_gReturnCode);
+Server.logInfo("BEFORE DB name = " + Session.str_gDBName);
+Server.logInfo("BEFORE Session ID = " + Session.str_gSessionID);
+Server.logInfo("BEFORE termination reason = " + Session.int_gTerminationReason);
+Server.logInfo("BEFORE end time = " + Session.long_gEndTime);
+Server.logInfo("BEFORE MS connect time = " + Session.long_gMSConnectTime);
+Server.logInfo("BEFORE conf event ID = " + Session.str_gConfEventId);
+Server.logInfo("BEFORE call leg ID = " + Session.str_gCallLegId);]]></script>
+          </scripts>
+        </action>
+        <action id="48" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=3180 y=1485 ?>
+          <!--testSetConfCallLegCompletion()-->
+          <java class="&quot;com.pactolus.conferencing.psAPISceConfCallLegCompletion&quot;" method="&quot;procConfCallCompletion&quot;" timeout="int_sTIMEOUT" return="" method-return-var="int_gReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >str_gDBName</parameter>
+            <parameter type="in" var-type="unknown" >str_gSessionID</parameter>
+            <parameter type="in" var-type="unknown" >int_gTerminationReason</parameter>
+            <parameter type="in" var-type="unknown" >long_gEndTime</parameter>
+            <parameter type="in" var-type="unknown" >long_gMSConnectTime4</parameter>
+            <parameter type="in" var-type="unknown" >str_gConfEventId</parameter>
+            <parameter type="in" var-type="unknown" >str_gCallLegId4</parameter>
+            <parameter type="in" var-type="unknown" >str_gModeratorFlag4</parameter>
+            <parameter type="in" var-type="unknown" >str_gSPTimeZone</parameter>
+            <parameter type="in" var-type="unknown" >int_gAccessNumberId</parameter>
+            <parameter type="in" var-type="unknown" >0</parameter>
+            <parameter type="in" var-type="unknown" >str_gPartySchedID</parameter>
+            <parameter type="in" var-type="unknown" >long_gServiceProviderID</parameter>
+            <parameter type="in" var-type="unknown" >str_gInfoDigits</parameter>
+            <parameter type="in" var-type="unknown" >str_gOrigDomIntlFlag</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestDomIntlFlag</parameter>
+            <parameter type="in" var-type="unknown" >int_gOrigCountryID</parameter>
+            <parameter type="in" var-type="unknown" >str_gOrigNbr3</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestNbr</parameter>
+            <parameter type="in" var-type="unknown" >int_gRtpEncoding</parameter>
+            <parameter type="in" var-type="unknown" >int_gRtpClockRate</parameter>
+            <parameter type="in" var-type="unknown" >str_gFrom</parameter>
+            <parameter type="in" var-type="unknown" >str_gTo</parameter>
+            <parameter type="in" var-type="unknown" >str_gCallId</parameter>
+            <parameter type="in" var-type="unknown" >g_strSIPStatus</parameter>
+            <parameter type="in" var-type="unknown" >long_gStartTime</parameter>
+            <parameter type="in" var-type="unknown" >str_gGWIpIngress</parameter>
+            <parameter type="in" var-type="unknown" >int_gGWPortIngress</parameter>
+            <parameter type="in" var-type="unknown" >str_gGWIpEngress</parameter>
+            <parameter type="in" var-type="unknown" >int_gGWPortEngress</parameter>
+            <parameter type="in" var-type="unknown" >str_gApplicationName</parameter>
+            <parameter type="in" var-type="unknown" >str_gSoapAddress</parameter>
+            <parameter type="in" var-type="unknown" >int_gSoapPort</parameter>
+            <parameter type="in" var-type="unknown" >"F"</parameter>
+            <parameter type="in" var-type="unknown" >g_strOrigCallingCode</parameter>
+            <parameter type="in" var-type="unknown" >g_strOrigAreaCode</parameter>
+            <parameter type="in" var-type="unknown" >int_gDestCountryID</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestCallingCode</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestAreaCode</parameter>
+            <parameter type="in" var-type="unknown" >int_gBillingType</parameter>
+            <parameter type="in" var-type="unknown" >int_gCurrencyID</parameter>
+            <parameter type="in" var-type="unknown" >long_gSubscriberID</parameter>
+            <parameter type="in" var-type="unknown" >int_gServiceID</parameter>
+            <parameter type="in" var-type="unknown" >g_strOperatorFlag</parameter>
+            <parameter type="in" var-type="unknown" >g_intRoundSeconds</parameter>
+            <parameter type="in" var-type="unknown" >int_gSubExpirationType</parameter>
+            <parameter type="in" var-type="unknown" >payphoneSrchgRateID</parameter>
+            <parameter type="in" var-type="unknown" >payphoneSrchgRateAmt</parameter>
+            <parameter type="in" var-type="unknown" >accessNumberRateID</parameter>
+            <parameter type="in" var-type="unknown" >accessNumberRateAmt</parameter>
+            <parameter type="in" var-type="unknown" >accessNumberRateType</parameter>
+            <parameter type="in" var-type="unknown" >meteredRate1ID</parameter>
+            <parameter type="in" var-type="unknown" >meteredRate1Amt</parameter>
+            <parameter type="in" var-type="unknown" >meteredRate2ID</parameter>
+            <parameter type="in" var-type="unknown" >meteredRate2Amt</parameter>
+            <parameter type="in" var-type="unknown" >fixedRate1ID</parameter>
+            <parameter type="in" var-type="unknown" >fixedRate1Amt</parameter>
+            <parameter type="in" var-type="unknown" >fixedRate2ID</parameter>
+            <parameter type="in" var-type="unknown" >fixedRate2Amt</parameter>
+            <parameter type="in" var-type="unknown" >totalMeteredRate</parameter>
+            <parameter type="in" var-type="unknown" >totalFixedRate</parameter>
+            <parameter type="in" var-type="unknown" >str_gSetStateGetResource</parameter>
+            <parameter type="in" var-type="unknown" >str_gConfSessionID</parameter>
+            <parameter type="in" var-type="unknown" >l_gOutdialStartTime</parameter>
+            <parameter type="in" var-type="unknown" >l_gOutdialConnectTime</parameter>
+            <parameter type="in" var-type="unknown" >l_gHoldStartTime</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestNbr</parameter>
+            <parameter type="in" var-type="unknown" >sOrigTrunkGroup</parameter>
+            <parameter type="in" var-type="unknown" >sDestTrunkGroup</parameter>
+            <parameter type="in" var-type="unknown" >g_sCustConfID</parameter>
+            <parameter type="in" var-type="unknown" >lPrivateTalkStartTime</parameter>
+            <parameter type="in" var-type="unknown" >lPrivateTalkEndTime</parameter>
+          </java>
+          <results >
+            <result name="Default" link="27" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.int_gReturnCode = -50;
+Session.long_gEndTime = Server.getUTCTime();
+Server.logInfo("*********JAVA CALLING ConfCallLegComplettion *********");
+Server.logInfo("BEFORE Session ID = " + Session.str_gSessionID);
+Server.logInfo("BEFORE termination reason = " + Session.int_gTerminationReason);
+Server.logInfo("BEFORE end time = " + Session.long_gEndTime);
+Server.logInfo("BEFORE conf event ID = " + Session.str_gConfEventId);
+Server.logInfo("BEFORE call leg ID = " + Session.str_gCallLegId4);
+
+
+
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("**** Conf Call Leg Completion returns " + Session.int_gReturnCode);
+Server.logInfo("BEFORE DB name = " + Session.str_gDBName);
+Server.logInfo("BEFORE Session ID = " + Session.str_gSessionID);
+Server.logInfo("BEFORE termination reason = " + Session.int_gTerminationReason);
+Server.logInfo("BEFORE end time = " + Session.long_gEndTime);
+Server.logInfo("BEFORE MS connect time = " + Session.long_gMSConnectTime);
+Server.logInfo("BEFORE conf event ID = " + Session.str_gConfEventId);
+Server.logInfo("BEFORE call leg ID = " + Session.str_gCallLegId);]]></script>
+          </scripts>
+        </action>
+        <action id="49" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=3432 y=1281 ?>
+          <!--testSetConfCallLegCompletion()-->
+          <java class="&quot;com.pactolus.conferencing.psAPISceConfCallLegCompletion&quot;" method="&quot;procConfCallCompletion&quot;" timeout="int_sTIMEOUT" return="" method-return-var="int_gReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >str_gDBName</parameter>
+            <parameter type="in" var-type="unknown" >str_gSessionID</parameter>
+            <parameter type="in" var-type="unknown" >int_gTerminationReason</parameter>
+            <parameter type="in" var-type="unknown" >long_gEndTime</parameter>
+            <parameter type="in" var-type="unknown" >long_gMSConnectTime1</parameter>
+            <parameter type="in" var-type="unknown" >str_gConfEventId</parameter>
+            <parameter type="in" var-type="unknown" >str_gCallLegId1</parameter>
+            <parameter type="in" var-type="unknown" >str_gModeratorFlag1</parameter>
+            <parameter type="in" var-type="unknown" >str_gSPTimeZone</parameter>
+            <parameter type="in" var-type="unknown" >int_gAccessNumberId</parameter>
+            <parameter type="in" var-type="unknown" >0</parameter>
+            <parameter type="in" var-type="unknown" >str_gPartySchedID</parameter>
+            <parameter type="in" var-type="unknown" >long_gServiceProviderID</parameter>
+            <parameter type="in" var-type="unknown" >str_gInfoDigits</parameter>
+            <parameter type="in" var-type="unknown" >str_gOrigDomIntlFlag</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestDomIntlFlag</parameter>
+            <parameter type="in" var-type="unknown" >int_gOrigCountryID</parameter>
+            <parameter type="in" var-type="unknown" >str_gOrigNbr3</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestNbr</parameter>
+            <parameter type="in" var-type="unknown" >int_gRtpEncoding</parameter>
+            <parameter type="in" var-type="unknown" >int_gRtpClockRate</parameter>
+            <parameter type="in" var-type="unknown" >str_gFrom</parameter>
+            <parameter type="in" var-type="unknown" >str_gTo</parameter>
+            <parameter type="in" var-type="unknown" >str_gCallId</parameter>
+            <parameter type="in" var-type="unknown" >g_strSIPStatus</parameter>
+            <parameter type="in" var-type="unknown" >long_gStartTime</parameter>
+            <parameter type="in" var-type="unknown" >str_gGWIpIngress</parameter>
+            <parameter type="in" var-type="unknown" >int_gGWPortIngress</parameter>
+            <parameter type="in" var-type="unknown" >str_gGWIpEngress</parameter>
+            <parameter type="in" var-type="unknown" >int_gGWPortEngress</parameter>
+            <parameter type="in" var-type="unknown" >str_gApplicationName</parameter>
+            <parameter type="in" var-type="unknown" >str_gSoapAddress</parameter>
+            <parameter type="in" var-type="unknown" >int_gSoapPort</parameter>
+            <parameter type="in" var-type="unknown" >"F"</parameter>
+            <parameter type="in" var-type="unknown" >g_strOrigCallingCode</parameter>
+            <parameter type="in" var-type="unknown" >g_strOrigAreaCode</parameter>
+            <parameter type="in" var-type="unknown" >int_gDestCountryID</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestCallingCode</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestAreaCode</parameter>
+            <parameter type="in" var-type="unknown" >int_gBillingType</parameter>
+            <parameter type="in" var-type="unknown" >int_gCurrencyID</parameter>
+            <parameter type="in" var-type="unknown" >long_gSubscriberID</parameter>
+            <parameter type="in" var-type="unknown" >int_gServiceID</parameter>
+            <parameter type="in" var-type="unknown" >g_strOperatorFlag</parameter>
+            <parameter type="in" var-type="unknown" >g_intRoundSeconds</parameter>
+            <parameter type="in" var-type="unknown" >int_gSubExpirationType</parameter>
+            <parameter type="in" var-type="unknown" >payphoneSrchgRateID</parameter>
+            <parameter type="in" var-type="unknown" >payphoneSrchgRateAmt</parameter>
+            <parameter type="in" var-type="unknown" >accessNumberRateID</parameter>
+            <parameter type="in" var-type="unknown" >accessNumberRateAmt</parameter>
+            <parameter type="in" var-type="unknown" >accessNumberRateType</parameter>
+            <parameter type="in" var-type="unknown" >meteredRate1ID</parameter>
+            <parameter type="in" var-type="unknown" >meteredRate1Amt</parameter>
+            <parameter type="in" var-type="unknown" >meteredRate2ID</parameter>
+            <parameter type="in" var-type="unknown" >meteredRate2Amt</parameter>
+            <parameter type="in" var-type="unknown" >fixedRate1ID</parameter>
+            <parameter type="in" var-type="unknown" >fixedRate1Amt</parameter>
+            <parameter type="in" var-type="unknown" >fixedRate2ID</parameter>
+            <parameter type="in" var-type="unknown" >fixedRate2Amt</parameter>
+            <parameter type="in" var-type="unknown" >totalMeteredRate</parameter>
+            <parameter type="in" var-type="unknown" >totalFixedRate</parameter>
+            <parameter type="in" var-type="unknown" >str_gSetStateGetResource</parameter>
+            <parameter type="in" var-type="unknown" >str_gConfSessionID</parameter>
+            <parameter type="in" var-type="unknown" >l_gOutdialStartTime</parameter>
+            <parameter type="in" var-type="unknown" >l_gOutdialConnectTime</parameter>
+            <parameter type="in" var-type="unknown" >l_gHoldStartTime</parameter>
+            <parameter type="in" var-type="unknown" >str_gDestNbr</parameter>
+            <parameter type="in" var-type="unknown" >sOrigTrunkGroup</parameter>
+            <parameter type="in" var-type="unknown" >sDestTrunkGroup</parameter>
+            <parameter type="in" var-type="unknown" >g_sCustConfID</parameter>
+            <parameter type="in" var-type="unknown" >lPrivateTalkStartTime</parameter>
+            <parameter type="in" var-type="unknown" >lPrivateTalkEndTime</parameter>
+          </java>
+          <results >
+            <result name="Default" link="46" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.int_gReturnCode = -50;
+Session.long_gEndTime = Server.getUTCTime();
+Server.logInfo("*********JAVA CALLING ConfCallLegComplettion *********");
+Server.logInfo("BEFORE Session ID = " + Session.str_gSessionID);
+Server.logInfo("BEFORE termination reason = " + Session.int_gTerminationReason);
+Server.logInfo("BEFORE end time = " + Session.long_gEndTime);
+Server.logInfo("BEFORE conf event ID = " + Session.str_gConfEventId);
+Server.logInfo("BEFORE call leg ID = " + Session.str_gCallLegId1);
+
+
+
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("**** Conf Call Leg Completion returns " + Session.int_gReturnCode);
+]]></script>
+          </scripts>
+        </action>
+        <action id="50" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=618 y=436 ?>
+          <sleep duration="3"/>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+          </results>
+        </action>
+        <action id="51" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=3816 y=1390 ?>
+          <return value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("completed successful iteration of javatest function");]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnServiceLoad" start="1" event="OnServiceLoad" returns="void" >
+      <parameters >
+        <parameter name="strAppName" type="string"/>
+        <parameter name="nSessionCount" type="i2"/>
+        <parameter name="nMaxIterations" type="i2"/>
+        <parameter name="nServerId" type="i2"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=20 y=33 ?>
+          <!--create conference-->
+          <java class="&quot;com.pactolus.psAPILoadTest&quot;" method="&quot;createConferences&quot;" timeout="s_intTimeout" return="" method-return-var="int_gReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >s_intMaxConf</parameter>
+            <parameter type="in" var-type="unknown" >s_lServiceProviderID</parameter>
+          </java>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="4" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("INFO: callToConference.OnServiceLoad.3: CREATE CONFERENCE.");
+Server.logInfo("*********JAVA START psAPILoadTest.createConferences *********");
+Server.logInfo("Number of conferences to create: " + Session.s_intMaxConf);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("INFO: callToConference.OnServiceLoad.3: CREATE CONFERENCE.");
+Server.logInfo("*********JAVA RETURN*********");
+Server.logInfo("psAPILoadTest.createConferences returned " + Session.int_gReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=377 y=59 ?>
+          <return value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: callToConference.OnServiceLoad2: FAILED TO CREATE CONFERENCE.");]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=460 y=300 ?>
+          <return value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("successfully created conferences");]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.Branch.1" ><?xtml-editor x=273 y=151 ?>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="success" link="3" stubbed="0" >int_gReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[
+]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnSessionStart" start="7" event="OnSessionStart" returns="void" >
+      <parameters >
+        <parameter name="strSessionId" type="string"/>
+        <parameter name="nIteration" type="i4"/>
+      </parameters>
+      <actions >
+        <action id="7" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=57 y=298 ?>
+          <!--GET PASSCODE-->
+          <java class="&quot;com.pactolus.psAPILoadTest&quot;" method="&quot;getConfPasscodes&quot;" timeout="s_intTimeout" return="" method-return-var="int_gReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >s_intConfNumberID</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPassCode</parameter>
+            <parameter type="inout" var-type="unknown" >str_gModPasscode</parameter>
+            <parameter type="inout" var-type="unknown" >g_intCurrentModCount</parameter>
+          </java>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="Success" link="5" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("INFO: callToConference.psAPIgetConfPassCode.1: GET CONFERENCE PASSCODE.");
+Server.logInfo("*********JAVA START psAPILoadTest.getConfPasscodes *********");
+Server.lockSharedVariables();
+	Session.s_intConfNumberID;
+	if (Session.s_intConfNumberID >= Session.s_intMaxConf)
+	{
+		Session.s_intConfNumberID = 1;
+	}
+	else
+	{
+		Session.s_intConfNumberID++;
+	}
+Server.unlockSharedVariables();
+Server.logInfo("INFO: conference number ID: " + Session.s_intConfNumberID);
+Session.str_gSessionID = Session._sessionId;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("INFO: callToConference.psAPIgetConfPassCode.1: GET CONFERENCE PASSCODE.");
+Server.logInfo("*********JAVA RETURN*********");
+Server.logInfo("psAPILoadTest.psAPIgetConfPassCode returned " + Session.int_gReturnCode);
+Server.logInfo("PASSCODE IS: " + Session.str_gPassCode);
+Server.logInfo("MODERATOR PASSCODE IS: " + Session.str_gModPasscode);]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=502 y=420 ?>
+          <!--javatest()-->
+          <function name="&quot;javatest&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.EndSession.1" ><?xtml-editor x=848 y=647 ?>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("successful run of conf_load.xml");]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.Branch.1" ><?xtml-editor x=265 y=371 ?>
+          <!--success-->
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="success" link="1" stubbed="0" >int_gReturnCode == 0</result>
+          </results>
+        </action>
+        <action id="8" plug-in="Standard.EndSession.1" ><?xtml-editor x=404 y=59 ?>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: conf_loader.psAPIgetConfPassCode.8: JAVA return NON SUCCESS");]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Pactolus.Branch.1" ><?xtml-editor x=655 y=518 ?>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="signup test on" link="11" stubbed="0" >bool_gSignupTestFlag == true</result>
+            <result name="signup test off" link="2" stubbed="0" >bool_gSignupTestFlag == false</result>
+          </results>
+        </action>
+        <action id="11" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=859 y=420 ?>
+          <!--SignupTest()-->
+          <function name="&quot;SignupTest&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("success from javatest, calling signup test function");]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.bool_gSignupTestFlag = false;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="SignupTest" start="1" event="SignupTest" returns="void" >
+      <local-vars >
+        <var name="long_gPostpaidOfferingID" type="i8" >5</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=0 y=26 ?>
+          <!--"signupTest"-->
+          <java class="&quot;com.pactolus.postpaid.PopdSignUpAPITest&quot;" method="&quot;testPOPDSignUp&quot;" timeout="int_sTIMEOUT" return="" method-return-var="int_gReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >long_gConfOfferingID</parameter>
+            <parameter type="inout" var-type="unknown" >str_gSubPin</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPopdAccount</parameter>
+            <parameter type="inout" var-type="unknown" >str_gPassCode</parameter>
+            <parameter type="inout" var-type="unknown" >str_gModPasscode</parameter>
+          </java>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("*********JAVA CALLING POPDSIGNUPAPITEST *********");
+Session.int_gReturnCode = -50;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("iJavaReturnCode " + Session.int_gReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.Branch.1" ><?xtml-editor x=243 y=88 ?>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="success" link="4" stubbed="0" >int_gReturnCode == 0</result>
+          </results>
+        </action>
+        <action id="3" plug-in="Standard.EndSession.1" ><?xtml-editor x=546 y=37 ?>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("error from PopdSignUpAPITest method, shutting down");]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=419 y=223 ?>
+          <return value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("success from signup test method, call javatest function with passcodes created");]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[function formatPhone(inPhone)
+{
+	var number = /\d/;
+	var i = 0;
+	var result;
+	var outPhone="";
+	
+	while(i < inPhone.length)
+	{
+		result = inPhone.charAt(i).match(number);
+		if ( result != null)
+		{
+			outPhone += inPhone.charAt(i);
+		}
+		i++;
+	}
+
+	Server.logInfo("RETURN VALUE: " + outPhone);
+	return outPhone;
+
+}]]></script>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value=""/>
+    <property key="library-modules" value=""/>
+    <property key="library-path" value=""/>
+  </properties>
+</xtml>

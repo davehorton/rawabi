@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Jul 24, 2012 12:30:10 PM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.rawabi.model.ServiceProviderSettings" table="SERVICE_PROVIDER_SETTINGS" schema="PCSPROD">
+        <comment>service_provider_id and name should be primary keys (unique constraint)</comment>
+        <composite-id name="id" class="com.rawabi.model.ServiceProviderSettingsId">
+            <key-property name="name" type="string">
+                <column name="NAME" length="30" />
+            </key-property>
+            <key-property name="serviceProviderId" type="big_decimal">
+                <column name="SERVICE_PROVIDER_ID" precision="22" scale="0" />
+            </key-property>
+        </composite-id>
+        <many-to-one name="serviceProvider" class="com.rawabi.model.ServiceProvider" update="false" insert="false" fetch="select">
+            <column name="SERVICE_PROVIDER_ID" precision="22" scale="0" not-null="true" />
+        </many-to-one>
+        <property name="spValue" type="string">
+            <column name="SP_VALUE" length="120" />
+        </property>
+    </class>
+</hibernate-mapping>

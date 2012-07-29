@@ -1,0 +1,527 @@
+<?xml version="1.0"?>
+<xtml version="1.0" >
+  <version sce-version="422a6" prev-sce-version="422a6" last-mod-time="Tuesday, August 16, 2005 08:48:57"/>
+  <global-handlers/>
+  <global-vars >
+    <var name="g_nTimeout" type="i4" >30</var>
+    <var name="g_nSuccess" type="i4" >0</var>
+    <var name="g_nFailure" type="i4" >-1</var>
+    <var name="g_strRandomAddDrop" type="string" ></var>
+    <var name="g_oMS" type="object" ></var>
+  </global-vars>
+  <shared-vars >
+    <var name="s_strMuteAllDigits" type="string" >*5</var>
+    <var name="s_strUnmuteAllDigits" type="string" >*5</var>
+    <var name="s_strLockConfDigits" type="string" >*4</var>
+    <var name="s_strUnlockConfDigit" type="string" >*4</var>
+    <var name="s_strAddPartyToConference" type="string" >*1</var>
+    <var name="s_strOutdialDestination" type="string" >5086160900</var>
+    <var name="s_strReturnToConf" type="string" >*</var>
+  </shared-vars>
+  <functions >
+    <function name="MuteAllRequest" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="p_strMSEndpoint" type="string"/>
+        <parameter name="p_strMSConnectionId" type="string"/>
+        <parameter name="p_strMSCallId" type="string"/>
+        <parameter name="p_strMSType" type="string"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Pactolus.PSDtmfPlay.1" ><?xtml-editor x=218 y=251 ?>
+          <!--play digit to mute all-->
+          <dtmf-play start-play="1" endpoint="p_strMSEndpoint" connection-id="p_strMSConnectionId" callid="p_strMSCallId" return-immediate="0" repeat="1" returns="" timeout="g_nTimeout" ms-type="p_strMSType" dg="s_strMuteAllDigits" di="3" dl="" da=""/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=495 y=197 ?>
+          <!--failure-->
+          <return value="g_nFailure"/>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=512 y=329 ?>
+          <!--success-->
+          <return value="g_nSuccess"/>
+        </action>
+      </actions>
+    </function>
+    <function name="UnmuteAllRequest" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="p_strMSEndpoint" type="string"/>
+        <parameter name="p_strMSConnectionId" type="string"/>
+        <parameter name="p_strMSCallId" type="string"/>
+        <parameter name="p_strMSType" type="string"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Pactolus.PSDtmfPlay.1" ><?xtml-editor x=218 y=251 ?>
+          <!--play digit to unmute all-->
+          <dtmf-play start-play="1" endpoint="p_strMSEndpoint" connection-id="p_strMSConnectionId" callid="p_strMSCallId" return-immediate="0" repeat="1" returns="" timeout="g_nTimeout" ms-type="p_strMSType" dg="s_strUnmuteAllDigits" di="3" dl="" da=""/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=495 y=197 ?>
+          <!--failure-->
+          <return value="g_nFailure"/>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=512 y=329 ?>
+          <!--success-->
+          <return value="g_nSuccess"/>
+        </action>
+      </actions>
+    </function>
+    <function name="LockConferenceRequest" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="p_strMSEndpoint" type="string"/>
+        <parameter name="p_strMSConnectionId" type="string"/>
+        <parameter name="p_strMSCallId" type="string"/>
+        <parameter name="p_strMSType" type="string"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Pactolus.PSDtmfPlay.1" ><?xtml-editor x=218 y=251 ?>
+          <!--play digit to lock conf-->
+          <dtmf-play start-play="1" endpoint="p_strMSEndpoint" connection-id="p_strMSConnectionId" callid="p_strMSCallId" return-immediate="0" repeat="1" returns="" timeout="g_nTimeout" ms-type="p_strMSType" dg="s_strLockConfDigits" di="3" dl="" da=""/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=495 y=197 ?>
+          <!--failure-->
+          <return value="g_nFailure"/>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=512 y=329 ?>
+          <!--success-->
+          <return value="g_nSuccess"/>
+        </action>
+      </actions>
+    </function>
+    <function name="UnlockConferenceRequest" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="p_strMSEndpoint" type="string"/>
+        <parameter name="p_strMSConnectionId" type="string"/>
+        <parameter name="p_strMSCallId" type="string"/>
+        <parameter name="p_strMSType" type="string"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Pactolus.PSDtmfPlay.1" ><?xtml-editor x=218 y=251 ?>
+          <!--play digit to unlock conf-->
+          <dtmf-play start-play="1" endpoint="p_strMSEndpoint" connection-id="p_strMSConnectionId" callid="p_strMSCallId" return-immediate="0" repeat="1" returns="" timeout="g_nTimeout" ms-type="p_strMSType" dg="s_strUnlockConfDigit" di="3" dl="" da=""/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=495 y=197 ?>
+          <!--failure-->
+          <return value="g_nFailure"/>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=512 y=329 ?>
+          <!--success-->
+          <return value="g_nSuccess"/>
+        </action>
+      </actions>
+    </function>
+    <function name="IVRAddPartyToConference" start="7" event="" returns="i4" >
+      <parameters >
+        <parameter name="p_strMSEndpoint" type="string"/>
+        <parameter name="p_strMSConnectionId" type="string"/>
+        <parameter name="p_strMSCallId" type="string"/>
+        <parameter name="p_strMSType" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="f_strCollectedDigit" type="string" ></var>
+        <var name="f_strRequestEvent" type="string" ></var>
+        <var name="f_strRequestId" type="string" ></var>
+        <var name="f_strEventReceived" type="string" ></var>
+        <var name="f_strSignal" type="string" ></var>
+        <var name="f_nReturnCode" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="7" plug-in="Pactolus.PSDtmfPlay.1" ><?xtml-editor x=108 y=359 ?>
+          <!--press *1-->
+          <dtmf-play start-play="1" endpoint="p_strMSEndpoint" connection-id="p_strMSConnectionId" callid="p_strMSCallId" return-immediate="0" repeat="1" returns="" timeout="g_nTimeout" ms-type="p_strMSType" dg="s_strAddPartyToConference" di="3" dl="" da=""/>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="16" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oMS.strEndpoint = Session.p_strMSEndpoint;
+Session.g_oMS.strConnectionId = Session.p_strMSConnectionId;
+Session.g_oMS.strCallId = Session.p_strMSCallId;
+Session.g_oMS.strMSType = Session.p_strMSType;]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=690 y=182 ?>
+          <!--failure-->
+          <return value="g_nFailure"/>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=688 y=263 ?>
+          <!--success-->
+          <return value="g_nSuccess"/>
+        </action>
+        <action id="6" plug-in="Standard.WaitEvent.1" ><?xtml-editor x=342 y=517 ?>
+          <!--wait for DTMF zero-->
+          <wait timeout="120" recv-name="f_strEventReceived" >
+            <msg name="Pactolus.MGCPDtmf.1" >
+              <parameter >p_strMSEndpoint</parameter>
+              <parameter >f_strRequestId</parameter>
+              <parameter >f_strCollectedDigit</parameter>
+            </msg>
+          </wait>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="8" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("WAITING FOR DIGIT ZERO, EXIT ON BRANCH: " + Result.name);
+Server.logInfo("DIGIT COLLECTED: " + Session.f_strCollectedDigit);]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Pactolus.Branch.1" ><?xtml-editor x=659 y=504 ?>
+          <!--got zero?-->
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="f_strCollectedDigit==0" link="9" stubbed="0" >f_strCollectedDigit match "0"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (1 == Result.id)
+	Server.logError("WAIT FOR ZERO, BUT DOESN'T GET ZERO.  GOT " + Session.f_strCollectedDigit);]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Pactolus.PSDtmfPlay.1" ><?xtml-editor x=911 y=505 ?>
+          <!--press 5086160900-->
+          <dtmf-play start-play="1" endpoint="p_strMSEndpoint" connection-id="p_strMSConnectionId" callid="p_strMSCallId" return-immediate="0" repeat="1" returns="" timeout="g_nTimeout" ms-type="p_strMSType" dg="s_strOutdialDestination" di="3" dl="" da=""/>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="17" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="10" plug-in="Standard.WaitEvent.1" ><?xtml-editor x=334 y=701 ?>
+          <!--wait for DTMF one-->
+          <wait timeout="180" recv-name="f_strEventReceived" >
+            <msg name="Pactolus.MGCPDtmf.1" >
+              <parameter >p_strMSEndpoint</parameter>
+              <parameter >f_strRequestId</parameter>
+              <parameter >f_strCollectedDigit</parameter>
+            </msg>
+          </wait>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="11" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_strCollectedDigit = "";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("WAITING FOR DIGIT ONE, EXIT ON BRANCH: " + Result.name);
+Server.logInfo("DIGIT COLLECTED: " + Session.f_strCollectedDigit);]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Pactolus.Branch.1" ><?xtml-editor x=558 y=700 ?>
+          <!--got one?-->
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="f_strCollectedDigit==1" link="12" stubbed="0" >f_strCollectedDigit match "1"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (1 == Result.id)
+	Server.logError("WAIT FOR ONE, BUT DOESN'T GET ONE.  GOT " + Session.f_strCollectedDigit);]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Pactolus.PSDtmfPlay.1" ><?xtml-editor x=798 y=693 ?>
+          <!--press random add/drop-->
+          <dtmf-play start-play="1" endpoint="p_strMSEndpoint" connection-id="p_strMSConnectionId" callid="p_strMSCallId" return-immediate="0" repeat="1" returns="" timeout="g_nTimeout" ms-type="p_strMSType" dg="g_strRandomAddDrop" di="3" dl="" da=""/>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="18" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var myTime = Server.getUTCTime();
+if (0 == myTime % 2)
+	Session.g_strRandomAddDrop = "*1";
+else
+	Session.g_strRandomAddDrop = "*2";]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Standard.WaitEvent.1" ><?xtml-editor x=98 y=866 ?>
+          <!--wait for DTMF two-->
+          <wait timeout="120" recv-name="f_strEventReceived" >
+            <msg name="Pactolus.MGCPDtmf.1" >
+              <parameter >p_strMSEndpoint</parameter>
+              <parameter >f_strRequestId</parameter>
+              <parameter >f_strCollectedDigit</parameter>
+            </msg>
+          </wait>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="14" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_strCollectedDigit = "";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("WAITING FOR DIGIT TWO, EXIT ON BRANCH: " + Result.name);
+Server.logInfo("DIGIT COLLECTED: " + Session.f_strCollectedDigit);]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Pactolus.Branch.1" ><?xtml-editor x=326 y=865 ?>
+          <!--got two?-->
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="f_strCollectedDigit==2" link="15" stubbed="0" >f_strCollectedDigit match "2"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (1 == Result.id)
+	Server.logError("WAIT FOR TWO, BUT DOESN'T GET TWO.  GOT " + Session.f_strCollectedDigit);]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Pactolus.PSDtmfPlay.1" ><?xtml-editor x=567 y=856 ?>
+          <!--press return to conf-->
+          <dtmf-play start-play="1" endpoint="p_strMSEndpoint" connection-id="p_strMSConnectionId" callid="p_strMSCallId" return-immediate="0" repeat="1" returns="" timeout="g_nTimeout" ms-type="p_strMSType" dg="s_strReturnToConf" di="3" dl="" da=""/>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="3" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var myTime = Server.getUTCTime();
+if (0 == myTime % 2)
+	Session.g_strRandomAddDrop = "*1";
+else
+	Session.g_strRandomAddDrop = "*2";]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Pactolus.MGCPNotifyRequest.1" ><?xtml-editor x=106 y=519 ?>
+          <!--Start Collecting DTMF-->
+          <rqnt connection-id="p_strMSConnectionId" endpoint="p_strMSEndpoint" callid="p_strMSCallId" timeout="g_nTimeout" returns="" ms-type="p_strMSType" >
+            <parameters >
+              <quarantine step="1" loop="0" process="0" discard="1"/>
+              <events ><![CDATA[f_strRequestEvent]]></events>
+              <signals ><![CDATA[f_strSignal]]></signals>
+              <digit-map ><![CDATA[(x)]]></digit-map>
+            </parameters>
+          </rqnt>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="6" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_strRequestEvent = "D/[0-9#*T]@" + Session.p_strMSConnectionId + "(D)";
+Session.f_strSignal = "D/cc@" + Session.p_strMSConnectionId + "(sit=1)";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+	Server.logError("ERROR RQNT TO COLLECT DTMF, EXIT ON BRANCH: " + Result.name);]]></script>
+          </scripts>
+        </action>
+        <action id="17" plug-in="Pactolus.MGCPNotifyRequest.1" ><?xtml-editor x=106 y=706 ?>
+          <!--Start Collecting DTMF-->
+          <rqnt connection-id="p_strMSConnectionId" endpoint="p_strMSEndpoint" callid="p_strMSCallId" timeout="g_nTimeout" returns="" ms-type="p_strMSType" >
+            <parameters >
+              <quarantine step="1" loop="0" process="0" discard="1"/>
+              <events ><![CDATA[f_strRequestEvent]]></events>
+              <signals ><![CDATA[f_strSignal]]></signals>
+              <digit-map ><![CDATA[(x)]]></digit-map>
+            </parameters>
+          </rqnt>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="10" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_strRequestEvent = "D/[0-9#*T]@" + Session.p_strMSConnectionId + "(D)";
+Session.f_strSignal = "D/cc@" + Session.p_strMSConnectionId + "(sit=1)";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+	Server.logError("ERROR RQNT TO COLLECT DTMF, EXIT ON BRANCH: " + Result.name);]]></script>
+          </scripts>
+        </action>
+        <action id="18" plug-in="Pactolus.MGCPNotifyRequest.1" ><?xtml-editor x=1052 y=684 ?>
+          <!--Start Collecting DTMF-->
+          <rqnt connection-id="p_strMSConnectionId" endpoint="p_strMSEndpoint" callid="p_strMSCallId" timeout="g_nTimeout" returns="" ms-type="p_strMSType" >
+            <parameters >
+              <quarantine step="1" loop="0" process="0" discard="1"/>
+              <events ><![CDATA[f_strRequestEvent]]></events>
+              <signals ><![CDATA[f_strSignal]]></signals>
+              <digit-map ><![CDATA[(x)]]></digit-map>
+            </parameters>
+          </rqnt>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="13" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_strRequestEvent = "D/[0-9#*T]@" + Session.p_strMSConnectionId + "(D)";
+Session.f_strSignal = "D/cc@" + Session.p_strMSConnectionId + "(sit=1)";
+
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+	Server.logError("ERROR RQNT TO COLLECT DTMF, EXIT ON BRANCH: " + Result.name);]]></script>
+          </scripts>
+        </action>
+        <action id="19" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=410 y=352 ?>
+          <!--turn "CollectDTMF" ON-->
+          <function name="&quot;CollectDTMF&quot;" return="f_nReturnCode" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="20" stubbed="0"/>
+          </results>
+        </action>
+        <action id="20" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=689 y=351 ?>
+          <!--f_nReturnCode-->
+          <return value="f_nReturnCode"/>
+        </action>
+      </actions>
+    </function>
+    <function name="OnDTMF" start="10" event="DTMF" returns="void" >
+      <parameters >
+        <parameter name="strEndpoint" type="string" pass="byref"/>
+        <parameter name="strRequestId" type="string" pass="byref"/>
+        <parameter name="strDtmf" type="string" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="10" plug-in="Pactolus.Branch.1" ><?xtml-editor x=115 y=401 ?>
+          <!--got zero?-->
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+            <result name="strDtmf==0" link="2" stubbed="0" >strDtmf match "0"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("RECEIVE DTMF: " + Session.strDtmf + "  ON ENDPOINT: " + Session.strEndpoint);]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.PSDtmfPlay.1" ><?xtml-editor x=349 y=575 ?>
+          <!--press 5086160900-->
+          <dtmf-play start-play="1" endpoint="g_oMS.strEndpoint" connection-id="g_oMS.strConnectionId" callid="g_oMS.strCallId" return-immediate="0" repeat="1" returns="" timeout="g_nTimeout" ms-type="g_oMS.strMSType" dg="s_strOutdialDestination" di="3" dl="" da=""/>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="4" plug-in="Pactolus.PSDtmfPlay.1" ><?xtml-editor x=573 y=349 ?>
+          <!--press random add/drop-->
+          <dtmf-play start-play="1" endpoint="g_oMS.strEndpoint" connection-id="g_oMS.strConnectionId" callid="g_oMS.strCallId" return-immediate="0" repeat="1" returns="" timeout="g_nTimeout" ms-type="g_oMS.strMSType" dg="g_strRandomAddDrop" di="3" dl="" da=""/>
+          <results >
+            <result name="Default" link="14" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var myTime = Server.getUTCTime();
+if (0 == myTime % 2)
+	Session.g_strRandomAddDrop = "*1";
+else
+	Session.g_strRandomAddDrop = "*2";]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.PSDtmfPlay.1" ><?xtml-editor x=834 y=137 ?>
+          <!--press return to conf-->
+          <dtmf-play start-play="1" endpoint="g_oMS.strEndpoint" connection-id="g_oMS.strConnectionId" callid="g_oMS.strCallId" return-immediate="0" repeat="1" returns="" timeout="g_nTimeout" ms-type="g_oMS.strMSType" dg="s_strReturnToConf" di="3" dl="" da=""/>
+          <results >
+            <result name="Default" link="14" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="11" plug-in="Pactolus.Branch.1" ><?xtml-editor x=333 y=234 ?>
+          <!--got one?-->
+          <results >
+            <result name="Default" link="12" stubbed="0"/>
+            <result name="strDtmf==1" link="4" stubbed="0" >strDtmf match "1"</result>
+          </results>
+        </action>
+        <action id="12" plug-in="Pactolus.Branch.1" ><?xtml-editor x=557 y=142 ?>
+          <!--got two?-->
+          <results >
+            <result name="Default" link="14" stubbed="1"/>
+            <result name="strDtmf==2" link="6" stubbed="0" >strDtmf match "2"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (1 == Result.id)
+	Server.logError("WAIT FOR TWO, BUT DOESN'T GET TWO.  GOT " + Session.f_strCollectedDigit);]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=864 y=565 ?>
+          <return value=""/>
+        </action>
+        <action id="14" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=585 y=566 ?>
+          <!--turn "CollectDTMF" ON-->
+          <function name="&quot;CollectDTMF&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="13" stubbed="0"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="CollectDTMF" start="1" event="" returns="i4" >
+      <local-vars >
+        <var name="f_strRequestEvent" type="string" ></var>
+        <var name="f_strSignal" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.MGCPNotifyRequest.1" ><?xtml-editor x=192 y=162 ?>
+          <!--Start Collecting DTMF-->
+          <rqnt connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndpoint" callid="g_oMS.strCallId" timeout="g_nTimeout" returns="" ms-type="g_oMS.strMSType" >
+            <parameters >
+              <quarantine step="1" loop="0" process="0" discard="1"/>
+              <events ><![CDATA[f_strRequestEvent]]></events>
+              <signals ><![CDATA[f_strSignal]]></signals>
+              <digit-map ><![CDATA[(x)]]></digit-map>
+            </parameters>
+          </rqnt>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_strRequestEvent = "D/[0-9#*T]@" + Session.g_oMS.strConnectionId + "(D)";
+Session.f_strSignal = "D/cc@" + Session.g_oMS.strConnectionId + "(sit=1)";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+	Server.logError("ERROR RQNT TO COLLECT DTMF, EXIT ON BRANCH: " + Result.name);]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=478 y=105 ?>
+          <!--failure-->
+          <return value="g_nFailure"/>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=495 y=237 ?>
+          <!--success-->
+          <return value="g_nSuccess"/>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value=""/>
+    <property key="library-modules" value=""/>
+    <property key="library-path" value=""/>
+  </properties>
+</xtml>

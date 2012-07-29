@@ -1,0 +1,969 @@
+<?xml version="1.0"?>
+<xtml version="1.0" >
+  <version sce-version="422a4" prev-sce-version="422a4" last-mod-time="Monday, September 27, 2004 16:05:40"/>
+  <events >
+    <event name="BeginWiretapRtpFaceIn" display="BeginWiretapRtpFaceIn" >
+      <parameter name="strWiretapDestination" type="string"/>
+      <parameter name="strSdp" type="string"/>
+      <parameter name="strEndpoint" type="string"/>
+      <parameter name="strConnectionId" type="string"/>
+      <parameter name="strMSCallId" type="string"/>
+      <parameter name="strMSType" type="string"/>
+      <parameter name="strFrom" type="string"/>
+      <parameter name="strCallerCallId" type="string"/>
+      <parameter name="strCaleaOriginationNumber" type="string"/>
+      <parameter name="strCaleaTerminationNumber" type="string"/>
+      <parameter name="strCaleaSurveiledNumber" type="string"/>
+    </event>
+    <event name="BeginWiretapRtpFaceOut" display="BeginWiretapRtpFaceOut" >
+      <parameter name="strSdp" type="string"/>
+      <parameter name="strEndpoint" type="string"/>
+      <parameter name="strConnectionId" type="string"/>
+      <parameter name="strCallId" type="string"/>
+      <parameter name="strMSType" type="string"/>
+      <parameter name="strTo" type="string"/>
+      <parameter name="strCalledCallId" type="string"/>
+    </event>
+    <event name="EndWiretap" display="EndWiretap" >
+      <parameter name="nFinalStatus" type="i4"/>
+    </event>
+  </events>
+  <global-handlers >
+    <handler event="Pactolus.EveSipNotify.1" function="OnNotify" public="0" always-on="0"/>
+    <handler event="Pactolus.EveSipBye.1" function="OnBye" public="0" always-on="0"/>
+    <handler event="Standard.OnServiceLoad.1" function="OnServiceLoad" public="0" always-on="0"/>
+    <handler event="Standard.OnTimer.1" function="OnTimer" public="0" always-on="0"/>
+    <handler event="BeginWiretapRtpFaceIn" function="OnBeginWiretapRtpFaceIn" public="1" always-on="0"/>
+    <handler event="BeginWiretapRtpFaceOut" function="OnBeginWiretapRtpFaceOut" public="0" always-on="0"/>
+    <handler event="EndWiretap" function="OnEndWiretap" public="0" always-on="0"/>
+  </global-handlers>
+  <global-vars >
+    <var name="g_oCaleaCallLeg" type="object" ></var>
+    <var name="g_oRtpRelay" type="object" ></var>
+    <var name="g_strStatus" type="string" ></var>
+    <var name="g_strConferenceEndpoint" type="string" ></var>
+    <var name="g_bSessionStarted" type="boolean" >0</var>
+  </global-vars>
+  <shared-vars >
+    <var name="s_strNiuAddress" type="string" ></var>
+    <var name="s_strMSType" type="string" ></var>
+    <var name="s_strPublicIpAddress" type="string" ></var>
+    <var name="s_nShortTimeout" type="i4" >5</var>
+    <var name="s_strLocalUri" type="string" ></var>
+    <var name="s_nReinviteTimer" type="i4" >1800</var>
+  </shared-vars>
+  <functions >
+    <function name="OnBeginWiretapRtpFaceIn" start="2" returns="void" >
+      <parameters >
+        <parameter name="strWiretapDestination" type="string" pass="byref"/>
+        <parameter name="strSdp" type="string" pass="byref"/>
+        <parameter name="strEndpoint" type="string" pass="byref"/>
+        <parameter name="strConnectionId" type="string" pass="byref"/>
+        <parameter name="strMSCallId" type="string" pass="byref"/>
+        <parameter name="strMSType" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strCallerCallId" type="string" pass="byref"/>
+        <parameter name="strCaleaOriginationNumber" type="string" pass="byref"/>
+        <parameter name="strCaleaTerminationNumber" type="string" pass="byref"/>
+        <parameter name="strCaleaSurveiledNumber" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_strSignal" type="string" ></var>
+        <var name="bEarlyInvite" type="boolean" >0</var>
+        <var name="nReInviteTimer" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="2" plug-in="Pactolus.SipInvite.1" ><?xtml-editor x=13 y=22 ?>
+          <!--to calea app-->
+          <sip-invite add-record-route="0" add-via="1" handle-responses="1" follow-redirection="0" final-response-status="g_strStatus" response-content="g_oCaleaCallLeg[0].strContent" response-content-type="g_oCaleaCallLeg[0].strContentType" final-request-uri="g_oCaleaCallLeg[0].strRemoteUri" timeout-for-final-response="8" timeout-for-provisional-response="4" record-route="g_oCaleaCallLeg[0].strRecordRoute" contact="g_oCaleaCallLeg[0].strContact" response-to="g_oCaleaCallLeg[0].strTo" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oCaleaCallLeg[0].strCallId</call-id>
+            <contact >s_strLocalUri</contact>
+            <content >g_oRtpRelay.ep[0].strSdp</content>
+            <content-type >"application/sdp"</content-type>
+            <cseq >g_oCaleaCallLeg[0].strCSeq</cseq>
+            <from >g_oCaleaCallLeg[0].strFrom</from>
+            <request-uri >g_oCaleaCallLeg[0].strRequestUri</request-uri>
+            <session-expires >g_oCaleaCallLeg[0].nSessionTimer</session-expires>
+            <subject >g_oCaleaCallLeg[0].strSubject</subject>
+            <to >g_oCaleaCallLeg[0].strTo</to>
+          </sip-invite>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success" link="1" stubbed="0"/>
+            <result name="Redirect (3xx)"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Provisional Timeout"/>
+            <result name="Final Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SENDING INVITE TO CALEA APP, NO ENDPOINTS ALLOCATED YET");
+
+Session.g_oCaleaCallLeg[0].bConnecting = Session.g_oCaleaCallLeg[0].bConnected = false ;
+Session.g_oCaleaCallLeg[1].bConnecting = Session.g_oCaleaCallLeg[1].bConnected = false ;
+
+Session.g_oRtpRelay.ep[0].strSdp = Session.strSdp;
+Session.g_oRtpRelay.ep[0].strEndpoint = Session.strEndpoint;
+Session.g_oRtpRelay.ep[0].strConnectionId = Session.strConnectionId;
+Session.g_oRtpRelay.ep[0].strCallId = Session.strMSCallId;
+Session.g_oRtpRelay.ep[0].strType = Session.strMSType;
+
+Server.enableEvents(false) ;
+Session.g_bSessionStarted = true ;
+
+Session.g_oCaleaCallLeg[0].bConnecting = true ;
+
+//init call leg
+Session.g_oCaleaCallLeg[0].strTo = "";
+Session.g_oCaleaCallLeg[0].strFrom = "";
+Session.g_oCaleaCallLeg[0].strCallId = "";
+Session.g_oCaleaCallLeg[0].strCSeq = "";
+Session.g_oCaleaCallLeg[0].strRemoteCSeq = "";
+Session.g_oCaleaCallLeg[0].strVia = "";
+Session.g_oCaleaCallLeg[0].strContent = "";
+Session.g_oCaleaCallLeg[0].strContentType = "";
+Session.g_oCaleaCallLeg[0].strContentDisposition = "";
+Session.g_oCaleaCallLeg[0].strContact = "";
+Session.g_oCaleaCallLeg[0].strRoute = "";
+Session.g_oCaleaCallLeg[0].strRecordRoute = "";
+Session.g_oCaleaCallLeg[0].strRequestUri = "";
+Session.g_oCaleaCallLeg[0].strRemoteSdp = "";
+Session.g_oCaleaCallLeg[0].strProxyAuthorization = "";
+Session.g_oCaleaCallLeg[0].strMinSE = "";
+Session.g_oCaleaCallLeg[0].strExpires = ""
+Session.g_oCaleaCallLeg[0].nSessionTimer =  Session.s_nReinviteTimer ;
+
+/* request-uri should be NIU in the internal network, with target app pcs_calea */
+Session.g_oCaleaCallLeg[0].strRequestUri = "sip:" ;
+Session.g_oCaleaCallLeg[0].strRequestUri += Session.strWiretapDestination ;
+Session.g_oCaleaCallLeg[0].strRequestUri += "@" ;
+Session.g_oCaleaCallLeg[0].strRequestUri += Session.s_strNiuAddress ;
+Session.g_oCaleaCallLeg[0].strRequestUri += ";target=pcs_calea" ;
+
+Session.g_oCaleaCallLeg[0].strTo = "<sip:" ;
+Session.g_oCaleaCallLeg[0].strTo += Session.strWiretapDestination ;
+Session.g_oCaleaCallLeg[0].strTo += "@" ;
+Session.g_oCaleaCallLeg[0].strTo += Session.s_strNiuAddress ;
+Session.g_oCaleaCallLeg[0].strTo += ">" ;
+
+Session.g_oCaleaCallLeg[0].strCallId = String("1_") + js_CreateUniqueCallId() ;
+Session.g_oCaleaCallLeg[0].strCSeq = "1 INVITE" ;
+Session.g_oCaleaCallLeg[0].strFrom = Session.strFrom;
+
+/* put summary details in the Subject header */
+Session.g_oCaleaCallLeg[0].strSubject = "calea;" ;
+
+Session.g_oCaleaCallLeg[0].strSubject += "on=\"" ;
+Session.g_oCaleaCallLeg[0].strSubject += Session.strCaleaOriginationNumber ;
+Session.g_oCaleaCallLeg[0].strSubject += "\";" ;
+
+Session.g_oCaleaCallLeg[0].strSubject += "tn=\"" ;
+Session.g_oCaleaCallLeg[0].strSubject += Session.strCaleaTerminationNumber ;
+Session.g_oCaleaCallLeg[0].strSubject += "\";" ;
+
+Session.g_oCaleaCallLeg[0].strSubject += "sn=\"" ;
+Session.g_oCaleaCallLeg[0].strSubject += Session.strCaleaSurveiledNumber ;
+Session.g_oCaleaCallLeg[0].strSubject += "\"" ;
+
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FACE IN FAIL TO SEND INVITE TO CALEA APP, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN STATUS IS: " + Session.g_strStatus);
+}
+else {
+	js_calculate_uri_and_route(false, "SIP/2.0", Session.g_oCaleaCallLeg[0].strFrom, 
+		Session.g_oCaleaCallLeg[0].strContact, Session.g_oCaleaCallLeg[0].strRecordRoute, 
+		Session.g_oCaleaCallLeg[0].strRemoteUri, Session.g_oCaleaCallLeg[0].strRoute ) ;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Pactolus.MGCPNotifyRequest.1" ><?xtml-editor x=245 y=130 ?>
+          <!--fork Rtp-->
+          <rqnt connection-id="g_oRtpRelay.ep[0].strConnectionId" endpoint="g_oRtpRelay.ep[0].strEndpoint" callid="g_oRtpRelay.ep[0].strCallId" timeout="s_nShortTimeout" returns="" ms-type="g_oRtpRelay.ep[0].strType" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[f_strSignal]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </rqnt>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success" link="8" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oCaleaCallLeg[0].bConnected = true ;
+Session.g_oCaleaCallLeg[0].bConnecting = false ;
+
+Server.logInfo("FORK RTP");
+Server.logInfo("SDP OF CALEA IS: " + Session.g_oCaleaCallLeg[0].strContent);
+var mySDP = new Sdp(Session.g_oCaleaCallLeg[0].strContent.toString());
+var myMedia = new SdpMedia(mySDP.media[0].toString());
+Session.f_strSignal = "A/rtp-fork address=" + mySDP.connection.address + " port=" + myMedia.port;
+Server.logInfo("SIGNAL IS: " + Session.f_strSignal);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO FORK FACE OUT RTP STREAM, EXIT ON: " + Result.name);
+	Server.logError("ERROR: Session.g_oRtpRelay.ep[0].strConnectionId: " + Session.g_oRtpRelay.ep[0].strConnectionId);
+	Server.logError("ERROR: Session.g_oRtpRelay.ep[0].strEndpoint: " + Session.g_oRtpRelay.ep[0].strEndpoint);
+	Server.logError("ERROR: Session.g_oRtpRelay.ep[0].strCallId: " + Session.g_oRtpRelay.ep[0].strCallId);
+	Server.logError("ERROR: Session.f_strSignal " + Session.f_strSignal);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.EndSession.1" ><?xtml-editor x=278 y=38 ?></action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=499 y=230 ?>
+          <return value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.enableEvents(true) ;]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.Timer.1" ><?xtml-editor x=490 y=102 ?>
+          <timer start="1" id="g_oCaleaCallLeg[0].nTimerId" duration="nReInviteTimer"/>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nReInviteTimer = Session.g_oCaleaCallLeg[0].nSessionTimer / 2 ;
+Server.logInfo("Setting timer to send reINVITE to " + Session.nReInviteTimer + " seconds") ;
+]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnServiceLoad" start="2" returns="void" >
+      <parameters >
+        <parameter name="strAppName" type="string" pass="byref"/>
+        <parameter name="nSessionCount" type="i2" pass="byref"/>
+        <parameter name="nMaxIterations" type="i2" pass="byref"/>
+        <parameter name="nServerId" type="i2" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_strSignal" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="2" plug-in="Pactolus.UserFunction.1" ><?xtml-editor x=204 y=225 ?>
+          <!--Get configuration parameters-->
+          <user-function process="&quot;PACTOLUS_ps_c_adaptor&quot;" function="&quot;get_property&quot;" timeout="s_nShortTimeout" return="" async="0" >
+            <parameter >"niu-address"</parameter>
+            <parameter >s_strNiuAddress</parameter>
+            <parameter >"media-server-type"</parameter>
+            <parameter >s_strMSType</parameter>
+            <parameter >"calea-session-expires"</parameter>
+            <parameter >s_nReinviteTimer</parameter>
+            <parameter >"public-ip-address"</parameter>
+            <parameter >s_strPublicIpAddress</parameter>
+          </user-function>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=438 y=220 ?>
+          <return value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.s_strApplication = Session._appName;
+
+if( Session.s_strNiuAddress.length > 0 ) {
+	Server.logInfo( Session.s_strApplication + ": NIU address: " + Session.s_strNiuAddress ) ;
+}
+else {
+	Server.logError( Session.s_strApplication + ": 'niu-address' was not provided in application properties" ) ;
+}
+Server.logInfo("media server type: " + Session.s_strMSType ) ;
+
+/* hardcode lengthy Session timer intervals */
+if( Session.s_nReinviteTimer > 0 ) {
+	Server.logInfo("Session timer interval is " + Session.s_nReinviteTimer + " seconds; we are refresher") ;
+}
+else {
+	Session.s_nReinviteTimer = 1800 ;
+}
+
+Session.s_strLocalUri = "<sip:" ;
+Session.s_strLocalUri += Server.sipAddress ;
+if( 5060 != Server.sipPort ) {
+	Session.s_strLocalUri += ":" ;
+	Session.s_strLocalUri += Server.sipPort ;
+}
+Session.s_strLocalUri += ">" ; 
+Server.logInfo("Local uri is: " + Session.s_strLocalUri ) ;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnBeginWiretapRtpFaceOut" start="5" returns="void" >
+      <parameters >
+        <parameter name="strSdp" type="string" pass="byref"/>
+        <parameter name="strEndpoint" type="string" pass="byref"/>
+        <parameter name="strConnectionId" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strMSType" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strCalledCallId" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_strSignal" type="string" ></var>
+        <var name="nReInviteTimer" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="5" plug-in="Pactolus.SipInvite.1" ><?xtml-editor x=38 y=26 ?>
+          <!--to calea app-->
+          <sip-invite add-record-route="0" add-via="1" handle-responses="1" follow-redirection="0" final-response-status="g_strStatus" response-content="g_oCaleaCallLeg[1].strContent" response-content-type="g_oCaleaCallLeg[1].strContentType" final-request-uri="g_oCaleaCallLeg[1].strRemoteUri" timeout-for-final-response="8" timeout-for-provisional-response="4" record-route="g_oCaleaCallLeg[1].strRecordRoute" contact="g_oCaleaCallLeg[1].strContact" response-to="g_oCaleaCallLeg[1].strTo" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oCaleaCallLeg[1].strCallId</call-id>
+            <contact >s_strLocalUri</contact>
+            <content >g_oRtpRelay.ep[1].strSdp</content>
+            <content-type >"application/sdp"</content-type>
+            <cseq >g_oCaleaCallLeg[1].strCSeq</cseq>
+            <expires >g_oCaleaCallLeg[1].nSessionTimer</expires>
+            <from >g_oCaleaCallLeg[1].strFrom</from>
+            <request-uri >g_oCaleaCallLeg[1].strRequestUri</request-uri>
+            <session-expires >g_oCaleaCallLeg[1].nSessionTimer</session-expires>
+            <subject >g_oCaleaCallLeg[1].strSubject</subject>
+            <to >g_oCaleaCallLeg[1].strTo</to>
+          </sip-invite>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success" link="2" stubbed="0"/>
+            <result name="Redirect (3xx)"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Provisional Timeout"/>
+            <result name="Final Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SENDING INVITE TO CALEA APP, FACE OUT");
+
+Session.g_oCaleaCallLeg[1].bConnecting = true ;
+
+Session.g_oRtpRelay.ep[1].strSdp = Session.strSdp;
+Session.g_oRtpRelay.ep[1].strEndpoint = Session.strEndpoint;
+Session.g_oRtpRelay.ep[1].strConnectionId = Session.strConnectionId;
+Session.g_oRtpRelay.ep[1].strCallId = Session.strCallId;
+Session.g_oRtpRelay.ep[1].strType = Session.strMSType;
+//init call leg
+Session.g_oCaleaCallLeg[1].strTo = "";
+Session.g_oCaleaCallLeg[1].strFrom = "";
+Session.g_oCaleaCallLeg[1].strCallId = "";
+Session.g_oCaleaCallLeg[1].strCSeq = "";
+Session.g_oCaleaCallLeg[1].strRemoteCSeq = "";
+Session.g_oCaleaCallLeg[1].strVia = "";
+Session.g_oCaleaCallLeg[1].strContent = "";
+Session.g_oCaleaCallLeg[1].strContentType = "";
+Session.g_oCaleaCallLeg[1].strContentDisposition = "";
+Session.g_oCaleaCallLeg[1].strContact = "";
+Session.g_oCaleaCallLeg[1].strRoute = "";
+Session.g_oCaleaCallLeg[1].strRecordRoute = "";
+Session.g_oCaleaCallLeg[1].strRequestUri = "";
+Session.g_oCaleaCallLeg[1].strRemoteSdp = "";
+Session.g_oCaleaCallLeg[1].strProxyAuthorization = "";
+Session.g_oCaleaCallLeg[1].strMinSE = "";
+Session.g_oCaleaCallLeg[1].strExpires = ""
+Session.g_oCaleaCallLeg[1].nSessionTimer = Session.s_nReinviteTimer ;
+
+/* request-uri should be NIU in the internal network, with target app pcs_calea */
+Session.g_oCaleaCallLeg[1].strRequestUri = "sip:" ;
+//Session.g_oCaleaCallLeg[1].strRequestUri += Session.strWiretapDestination ;
+//Session.g_oCaleaCallLeg[1].strRequestUri += "@" ;
+Session.g_oCaleaCallLeg[1].strRequestUri += Session.s_strNiuAddress ;
+Session.g_oCaleaCallLeg[1].strRequestUri += ";target=pcs_calea";
+Server.logInfo("Request-URI: " + Session.g_oCaleaCallLeg[1].strRequestUri ) ;
+
+/* put the conference id in the Subject header */
+Session.g_oCaleaCallLeg[1].strSubject = "endpoint=" ;
+Session.g_oCaleaCallLeg[1].strSubject += Session.g_strConferenceEndpoint ;
+
+Session.g_oCaleaCallLeg[1].strTo = Session.strTo;
+Session.g_oCaleaCallLeg[1].strCallId = String("2_") + js_CreateUniqueCallId() ;
+Session.g_oCaleaCallLeg[1].strCSeq = "101 INVITE" ;
+Session.g_oCaleaCallLeg[1].strFrom = Session.g_oCaleaCallLeg[0].strFrom;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FACE OUT FAIL TO SEND INVITE TO CALEA APP, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN STATUS IS: " + Session.g_strStatus);
+}
+else {
+	js_calculate_uri_and_route(false, "SIP/2.0", Session.g_oCaleaCallLeg[1].strFrom, 
+		Session.g_oCaleaCallLeg[1].strContact, Session.g_oCaleaCallLeg[1].strRecordRoute, 
+		Session.g_oCaleaCallLeg[1].strRemoteUri, Session.g_oCaleaCallLeg[1].strRoute ) ;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.MGCPNotifyRequest.1" ><?xtml-editor x=292 y=164 ?>
+          <!--fork Rtp-->
+          <rqnt connection-id="g_oRtpRelay.ep[1].strConnectionId" endpoint="g_oRtpRelay.ep[1].strEndpoint" callid="g_oRtpRelay.ep[1].strCallId" timeout="s_nShortTimeout" returns="" ms-type="g_oRtpRelay.ep[1].strType" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[f_strSignal]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </rqnt>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="6" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oCaleaCallLeg[1].bConnected = true ;
+Session.g_oCaleaCallLeg[1].bConnecting = false ;
+
+var mySDP = new Sdp(Session.g_oCaleaCallLeg[1].strContent.toString());
+var myMedia = new SdpMedia(mySDP.media[0].toString());
+Session.f_strSignal = "A/rtp-fork address=" + mySDP.connection.address + " port=" + myMedia.port;
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO FORK FACE OUT RTP STREAM, EXIT ON: " + Result.name);
+	Server.logError("ERROR: Session.g_oRtpRelay.ep[1].strConnectionId: " + Session.g_oRtpRelay.ep[1].strConnectionId);
+	Server.logError("ERROR: Session.g_oRtpRelay.ep[1].strEndpoint: " + Session.g_oRtpRelay.ep[1].strEndpoint);
+	Server.logError("ERROR: Session.g_oRtpRelay.ep[1].strCallId: " + Session.g_oRtpRelay.ep[1].strCallId);
+	Server.logError("ERROR: Session.f_strSignal " + Session.f_strSignal);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.EndSession.1" ><?xtml-editor x=281 y=50 ?></action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=642 y=264 ?>
+          <return value=""/>
+        </action>
+        <action id="6" plug-in="Standard.Timer.1" ><?xtml-editor x=557 y=148 ?>
+          <timer start="1" id="g_oCaleaCallLeg[1].nTimerId" duration="nReInviteTimer"/>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nReInviteTimer = Session.g_oCaleaCallLeg[1].nSessionTimer / 2 ;
+Server.logInfo("Setting timer to send reINVITE to " + Session.nReInviteTimer + " seconds") ;
+]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnNotify" start="1" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string" pass="byref"/>
+        <parameter name="strAcceptEncoding" type="string" pass="byref"/>
+        <parameter name="strAcceptLanguage" type="string" pass="byref"/>
+        <parameter name="strAllow" type="string" pass="byref"/>
+        <parameter name="strAllowEvents" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strContact" type="string" pass="byref"/>
+        <parameter name="strContent" type="string" pass="byref"/>
+        <parameter name="strContentDisposition" type="string" pass="byref"/>
+        <parameter name="strContentType" type="string" pass="byref"/>
+        <parameter name="strCSeq" type="string" pass="byref"/>
+        <parameter name="strDate" type="string" pass="byref"/>
+        <parameter name="strEncryption" type="string" pass="byref"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strEvent" type="string" pass="byref"/>
+        <parameter name="strExpires" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strMaxForwards" type="string" pass="byref"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string" pass="byref"/>
+        <parameter name="strProxyRequire" type="string" pass="byref"/>
+        <parameter name="strRecordRoute" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string" pass="byref"/>
+        <parameter name="strRequire" type="string" pass="byref"/>
+        <parameter name="strResponseKey" type="string" pass="byref"/>
+        <parameter name="strRoute" type="string" pass="byref"/>
+        <parameter name="strSubscriptionState" type="string" pass="byref"/>
+        <parameter name="strSupported" type="string" pass="byref"/>
+        <parameter name="strTimestamp" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=137 y=146 ?>
+          <sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="1" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 200 OK"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strConferenceEndpoint = Session.strEvent;
+Server.logInfo("RECEIVE NOTIFY WITH CONFERENCE ENDPOINT: " + Session.g_strConferenceEndpoint);]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=390 y=146 ?>
+          <return value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="OnEndWiretap" start="4" returns="void" >
+      <parameters >
+        <parameter name="nFinalStatus" type="i4" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="bFaceOutConnected" type="boolean" >0</var>
+        <var name="bFaceOutConnecting" type="boolean" >0</var>
+        <var name="bFaceInConnected" type="boolean" >0</var>
+        <var name="bFaceInConnecting" type="boolean" >0</var>
+      </local-vars>
+      <actions >
+        <action id="4" plug-in="Pactolus.Branch.1" ><?xtml-editor x=28 y=40 ?>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="face in leg connecting" link="5" stubbed="0" >g_oCaleaCallLeg[0].bConnecting == true</result>
+            <result name="face in leg connected" link="1" stubbed="0" >g_oCaleaCallLeg[0].bConnected == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Received OnEndWiretap") ;
+]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Pactolus.SipBye.1" ><?xtml-editor x=134 y=359 ?>
+          <!--to Face In-->
+          <sip-bye add-record-route="0" add-via="1" timeout="s_nShortTimeout" final-response-status="g_strStatus" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oCaleaCallLeg[0].strCallId</call-id>
+            <contact >s_strLocalUri</contact>
+            <cseq >g_oCaleaCallLeg[0].strCSeq</cseq>
+            <from >g_oCaleaCallLeg[0].strFrom</from>
+            <request-uri >g_oCaleaCallLeg[0].strRemoteUri</request-uri>
+            <to >g_oCaleaCallLeg[0].strTo</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strStatus = "";
+
+/* add the final status as a parameter to the uri */
+Session.g_oCaleaCallLeg[0].strRemoteUri += ";connect_status=" ;
+Session.g_oCaleaCallLeg[0].strRemoteUri += Session.nFinalStatus ;
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("FAIL TO SEND BYE, EXIT ON BRANCH: " + Result.name);
+	Server.logError("RESPONSE STATUS IS: " + Session.g_strStatus);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.SipBye.1" ><?xtml-editor x=701 y=371 ?>
+          <!--to Face Out-->
+          <sip-bye add-record-route="0" add-via="1" timeout="s_nShortTimeout" final-response-status="g_strStatus" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oCaleaCallLeg[1].strCallId</call-id>
+            <contact >s_strLocalUri</contact>
+            <cseq >g_oCaleaCallLeg[1].strCSeq</cseq>
+            <from >g_oCaleaCallLeg[1].strFrom</from>
+            <request-uri >g_oCaleaCallLeg[1].strRemoteUri</request-uri>
+            <to >g_oCaleaCallLeg[1].strTo</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strStatus = "";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("FAIL TO SEND BYE, EXIT ON BRANCH: " + Result.name);
+	Server.logError("RESPONSE STATUS IS: " + Session.g_strStatus);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.EndSession.1" ><?xtml-editor x=940 y=389 ?></action>
+        <action id="5" plug-in="Pactolus.SipCancel.1" ><?xtml-editor x=256 y=157 ?>
+          <!--to Face in-->
+          <sip-bye add-record-route="0" add-via="1" timeout="5" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oCaleaCallLeg[0].strCallId</call-id>
+            <cseq >g_oCaleaCallLeg[0].strCSeq</cseq>
+            <from >g_oCaleaCallLeg[0].strFrom</from>
+            <request-uri >g_oCaleaCallLeg[0].strRequestUri</request-uri>
+            <to >g_oCaleaCallLeg[0].strTo</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+        </action>
+        <action id="6" plug-in="Pactolus.Branch.1" ><?xtml-editor x=451 y=40 ?>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="face out leg connecting" link="7" stubbed="0" >g_oCaleaCallLeg[1].bConnecting == true</result>
+            <result name="face out leg connected" link="2" stubbed="0" >g_oCaleaCallLeg[1].bConnected == true</result>
+          </results>
+        </action>
+        <action id="7" plug-in="Pactolus.SipCancel.1" ><?xtml-editor x=717 y=158 ?>
+          <!--to Face out-->
+          <sip-bye add-record-route="0" add-via="1" timeout="5" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oCaleaCallLeg[1].strCallId</call-id>
+            <cseq >g_oCaleaCallLeg[1].strCSeq</cseq>
+            <from >g_oCaleaCallLeg[1].strFrom</from>
+            <request-uri >g_oCaleaCallLeg[1].strRequestUri</request-uri>
+            <to >g_oCaleaCallLeg[1].strTo</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="OnBye" start="1" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string" pass="byref"/>
+        <parameter name="strAcceptEncoding" type="string" pass="byref"/>
+        <parameter name="strAcceptLanguage" type="string" pass="byref"/>
+        <parameter name="strAllow" type="string" pass="byref"/>
+        <parameter name="strAllowEvents" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strCSeq" type="string" pass="byref"/>
+        <parameter name="strDate" type="string" pass="byref"/>
+        <parameter name="strEncryption" type="string" pass="byref"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strMaxForwards" type="string" pass="byref"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string" pass="byref"/>
+        <parameter name="strProxyRequire" type="string" pass="byref"/>
+        <parameter name="strRecordRoute" type="string" pass="byref"/>
+        <parameter name="strReferredBy" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string" pass="byref"/>
+        <parameter name="strRequire" type="string" pass="byref"/>
+        <parameter name="strResponseKey" type="string" pass="byref"/>
+        <parameter name="strRoute" type="string" pass="byref"/>
+        <parameter name="strSupported" type="string" pass="byref"/>
+        <parameter name="strTimestamp" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=26 y=125 ?>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="first leg" link="3" stubbed="0" >g_oCaleaCallLeg[0].strCallId == strCallId</result>
+            <result name="second leg" link="4" stubbed="0" >g_oCaleaCallLeg[1].strCallId == strCallId</result>
+          </results>
+        </action>
+        <action id="2" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=287 y=31 ?>
+          <!--481 Call Leg/Transaction Does Not Exist-->
+          <sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 481 Call Leg/Transaction Does Not Exist"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="3" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=288 y=183 ?>
+          <!--200 OK-->
+          <sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 200 OK"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="4" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=291 y=347 ?>
+          <!--200 OK-->
+          <sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 200 OK"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=575 y=51 ?>
+          <return value=""/>
+        </action>
+        <action id="6" plug-in="Pactolus.Branch.1" ><?xtml-editor x=531 y=302 ?>
+          <results >
+            <result name="Default" link="9" stubbed="1"/>
+            <result name="second leg connecting" link="11" stubbed="0" >g_oCaleaCallLeg[1].bConnecting == true</result>
+            <result name="second leg connected" link="12" stubbed="0" >g_oCaleaCallLeg[1].bConnected == true</result>
+          </results>
+        </action>
+        <action id="7" plug-in="Pactolus.SipCancel.1" ><?xtml-editor x=822 y=623 ?>
+          <!--to Face in-->
+          <sip-bye add-record-route="0" add-via="1" timeout="5" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oCaleaCallLeg[0].strCallId</call-id>
+            <cseq >g_oCaleaCallLeg[0].strCSeq</cseq>
+            <from >g_oCaleaCallLeg[0].strFrom</from>
+            <request-uri >g_oCaleaCallLeg[0].strRequestUri</request-uri>
+            <to >g_oCaleaCallLeg[0].strTo</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+        </action>
+        <action id="8" plug-in="Pactolus.SipBye.1" ><?xtml-editor x=819 y=784 ?>
+          <!--to Face In-->
+          <sip-bye add-record-route="0" add-via="1" timeout="s_nShortTimeout" final-response-status="g_strStatus" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oCaleaCallLeg[0].strCallId</call-id>
+            <contact >s_strLocalUri</contact>
+            <cseq >g_oCaleaCallLeg[0].strCSeq</cseq>
+            <from >g_oCaleaCallLeg[0].strFrom</from>
+            <request-uri >g_oCaleaCallLeg[0].strRemoteUri</request-uri>
+            <to >g_oCaleaCallLeg[0].strTo</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strStatus = "";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("FAIL TO SEND BYE, EXIT ON BRANCH: " + Result.name);
+	Server.logError("RESPONSE STATUS IS: " + Session.g_strStatus);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.EndSession.1" ><?xtml-editor x=1107 y=308 ?>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Ending session due to release from wiretap destination") ;]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Pactolus.Branch.1" ><?xtml-editor x=503 y=635 ?>
+          <results >
+            <result name="Default" link="9" stubbed="1"/>
+            <result name="first leg connecting" link="7" stubbed="0" >g_oCaleaCallLeg[0].bConnecting == true</result>
+            <result name="first leg connected" link="8" stubbed="0" >g_oCaleaCallLeg[0].bConnected == true</result>
+          </results>
+        </action>
+        <action id="11" plug-in="Pactolus.SipCancel.1" ><?xtml-editor x=807 y=193 ?>
+          <!--to Face out-->
+          <sip-bye add-record-route="0" add-via="1" timeout="5" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oCaleaCallLeg[1].strCallId</call-id>
+            <cseq >g_oCaleaCallLeg[1].strCSeq</cseq>
+            <from >g_oCaleaCallLeg[1].strFrom</from>
+            <request-uri >g_oCaleaCallLeg[1].strRequestUri</request-uri>
+            <to >g_oCaleaCallLeg[1].strTo</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+        </action>
+        <action id="12" plug-in="Pactolus.SipBye.1" ><?xtml-editor x=790 y=407 ?>
+          <!--to Face Out-->
+          <sip-bye add-record-route="0" add-via="1" timeout="s_nShortTimeout" final-response-status="g_strStatus" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oCaleaCallLeg[1].strCallId</call-id>
+            <contact >s_strLocalUri</contact>
+            <cseq >g_oCaleaCallLeg[1].strCSeq</cseq>
+            <from >g_oCaleaCallLeg[1].strFrom</from>
+            <request-uri >g_oCaleaCallLeg[1].strRemoteUri</request-uri>
+            <to >g_oCaleaCallLeg[1].strTo</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strStatus = "";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("FAIL TO SEND BYE, EXIT ON BRANCH: " + Result.name);
+	Server.logError("RESPONSE STATUS IS: " + Session.g_strStatus);
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnTimer" start="1" returns="void" >
+      <parameters >
+        <parameter name="nTimerId" type="i4" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nReInviteTimer" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=47 y=75 ?>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="session timer in" link="3" stubbed="0" >g_oCaleaCallLeg[0].nTimerId == nTimerId</result>
+            <result name="session timer out" link="6" stubbed="0" >g_oCaleaCallLeg[1].nTimerId == nTimerId</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.enableEvents(false) ;]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=382 y=16 ?>
+          <return value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.enableEvents(true) ;]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Pactolus.SipInvite.1" ><?xtml-editor x=371 y=134 ?>
+          <!--to calea app-->
+          <sip-invite add-record-route="0" add-via="1" handle-responses="1" follow-redirection="0" final-response-status="" response-content="" response-content-type="" final-request-uri="" timeout-for-final-response="8" timeout-for-provisional-response="4" record-route="" contact="" response-to="" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oCaleaCallLeg[0].strCallId</call-id>
+            <contact >s_strLocalUri</contact>
+            <content >g_oRtpRelay.ep[0].strSdp</content>
+            <content-type >"application/sdp"</content-type>
+            <cseq >g_oCaleaCallLeg[0].strCSeq</cseq>
+            <expires >g_oCaleaCallLeg[0].nSessionTimer</expires>
+            <from >g_oCaleaCallLeg[0].strFrom</from>
+            <request-uri >g_oCaleaCallLeg[0].strRemoteUri</request-uri>
+            <route >g_oCaleaCallLeg[0].strRoute</route>
+            <session-expires >g_oCaleaCallLeg[0].nSessionTimer</session-expires>
+            <to >g_oCaleaCallLeg[0].strTo</to>
+          </sip-invite>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success" link="7" stubbed="0"/>
+            <result name="Redirect (3xx)"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Provisional Timeout"/>
+            <result name="Final Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Sending reINVITE on first leg") ;]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=599 y=264 ?>
+          <function name="&quot;OnEndWiretap&quot;" return="" external-function="0" library="" >
+            <parameter >0</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.enableEvents(true) ;]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.EndSession.1" ><?xtml-editor x=821 y=261 ?></action>
+        <action id="6" plug-in="Pactolus.SipInvite.1" ><?xtml-editor x=376 y=383 ?>
+          <!--to calea app-->
+          <sip-invite add-record-route="0" add-via="1" handle-responses="1" follow-redirection="0" final-response-status="" response-content="" response-content-type="" final-request-uri="" timeout-for-final-response="8" timeout-for-provisional-response="4" record-route="" contact="" response-to="" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oCaleaCallLeg[1].strCallId</call-id>
+            <contact >s_strLocalUri</contact>
+            <content >g_oRtpRelay.ep[1].strSdp</content>
+            <content-type >"application/sdp"</content-type>
+            <cseq >g_oCaleaCallLeg[1].strCSeq</cseq>
+            <expires >g_oCaleaCallLeg[1].nSessionTimer</expires>
+            <from >g_oCaleaCallLeg[1].strFrom</from>
+            <request-uri >g_oCaleaCallLeg[1].strRemoteUri</request-uri>
+            <route >g_oCaleaCallLeg[1].strRoute</route>
+            <session-expires >g_oCaleaCallLeg[1].nSessionTimer</session-expires>
+            <subject >g_oCaleaCallLeg[1].strSubject</subject>
+            <to >g_oCaleaCallLeg[1].strTo</to>
+          </sip-invite>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success" link="8" stubbed="0"/>
+            <result name="Redirect (3xx)"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Provisional Timeout"/>
+            <result name="Final Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Sending reINVITE on first leg") ;]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.Timer.1" ><?xtml-editor x=617 y=129 ?>
+          <timer start="1" id="g_oCaleaCallLeg[0].nTimerId" duration="nReInviteTimer"/>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nReInviteTimer = Session.g_oCaleaCallLeg[0].nSessionTimer / 2 ;]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.Timer.1" ><?xtml-editor x=620 y=419 ?>
+          <timer start="1" id="g_oCaleaCallLeg[1].nTimerId" duration="nReInviteTimer"/>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nReInviteTimer = Session.g_oCaleaCallLeg[1].nSessionTimer / 2 ;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>]]></script>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value="C:/Applications/InternalProduct/SceXMLScripts/Libs"/>
+    <property key="library-modules" value=""/>
+    <property key="library-path" value=""/>
+  </properties>
+  <application-version >
+    <revision >$Id: pcs_calea_audio_copy.xml,v 1.10 2006/04/18 17:00:52 kfitzgerald Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

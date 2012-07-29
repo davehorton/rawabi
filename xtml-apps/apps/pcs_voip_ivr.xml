@@ -1,0 +1,1567 @@
+<?xml version="1.0"?>
+<xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
+  <version sce-version="6015" prev-sce-version="6015" last-mod-time="Friday, June 13, 2008 11:56:27"/>
+  <global-handlers >
+    <handler event="Pactolus.EveSipInvite.1" function="OnInvite" public="1" always-on="0"/>
+    <handler event="Pactolus.EveSipBye.1" function="OnBye" public="0" always-on="0"/>
+    <handler event="Standard.OnServiceLoad.1" function="OnServiceLoad" public="0" always-on="0"/>
+    <handler event="Standard.OnSessionEnd.1" function="OnSessionEnd" public="0" always-on="0"/>
+    <handler event="Pactolus.MGCPDtmf.1" function="OnDTMF" public="0" always-on="0"/>
+  </global-handlers>
+  <global-vars >
+    <var name="g_sSTATE" type="i2" >0</var>
+    <var name="g_oCallLegs" type="object" ></var>
+    <var name="g_oMS" type="object" ></var>
+    <var name="g_oAPI" type="object" ></var>
+    <var name="g_strMailbox" type="string" >IVR</var>
+    <var name="g_oAccessLine" type="object" ></var>
+    <var name="g_oMenu" type="object" ></var>
+    <var name="g_strDigitMap" type="string" ></var>
+    <var name="g_sErrorCode" type="i2" >-99</var>
+    <var name="g_strPinDigitMap" type="string" >([0-9]xxx.#|xxx.T|xx.*)</var>
+    <var name="g_strSessionId" type="string" ></var>
+    <var name="g_oIVR" type="object" ></var>
+    <var name="nAPIReturnCode" type="i4" >0</var>
+    <var name="g_nIdx" type="i4" >0</var>
+    <var name="g_strOutdialDest" type="string" ></var>
+    <var name="g_strActionValue" type="string" ></var>
+  </global-vars>
+  <shared-vars >
+    <var name="s_strDBName" type="string" >pactolusdb</var>
+    <var name="s_nPacketizationPeriod" type="i4" >0</var>
+    <var name="s_strMediaServerType" type="string" ></var>
+    <var name="s_nTimeout" type="i4" >10</var>
+    <var name="s_strLocalUri" type="string" ></var>
+    <var name="s_strNiuAddress" type="string" ></var>
+    <var name="s_sAWAITING_CALL" type="i2" >0</var>
+    <var name="s_sPROCESS_REINVITE" type="i2" >1</var>
+    <var name="s_nRingNoAnswerTimeout" type="i4" >0</var>
+    <var name="s_sCONNECT_TO_MS" type="i2" >2</var>
+    <var name="s_sACTION_RECORDING" type="i2" >2</var>
+    <var name="s_sACTION_TRANSFER_EXTERNAL_NO" type="i2" >10</var>
+    <var name="s_sACTION_TRANSFER_VM_DEPOSIT" type="i2" >8</var>
+    <var name="s_sACTION_MAIN_GREETING" type="i2" >11</var>
+    <var name="s_sACTION_COMPANY_DIR" type="i2" >3</var>
+    <var name="s_sACTION_EXIT" type="i2" >6</var>
+    <var name="s_sACTION_REPEAT" type="i2" >12</var>
+    <var name="s_sPLAY_GOODBYE" type="i2" >22</var>
+    <var name="s_sHANG_UP_PARTY" type="i2" >21</var>
+    <var name="s_sDISCONNECT_FROM_MS" type="i2" >20</var>
+    <var name="s_sACTION_LOAD_IVR_FORWARD" type="i2" >7</var>
+    <var name="s_sACTION_LOAD_IVR_REVERSE" type="i2" >4</var>
+    <var name="s_sACTION_LOAD_ROOT_IVR" type="i2" >5</var>
+    <var name="s_sACTION_TRANSFER_EXTENSION" type="i2" >1</var>
+    <var name="s_sACTION_TRANSFER_VM_RETRIEVE" type="i2" >9</var>
+    <var name="s_strTTSFlag" type="string" ></var>
+  </shared-vars>
+  <functions >
+    <function name="OnServiceLoad" start="2" event="ServiceLoad" returns="void" >
+      <parameters >
+        <parameter name="strAppName" type="string" pass="byref"/>
+        <parameter name="nSessionCount" type="i2" pass="byref"/>
+        <parameter name="nMaxIterations" type="i2" pass="byref"/>
+        <parameter name="nServerId" type="i2" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="2" plug-in="Pactolus.UserFunction.1" ><?xtml-editor x=102 y=119 ?>
+          <user-function xmlns="urn:www.pactolus.com:xtml:application" process="&quot;PACTOLUS_ps_c_adaptor&quot;" function="&quot;get_property&quot;" timeout="s_nTimeout" return="" async="0" >
+            <parameter >"niu-address"</parameter>
+            <parameter >s_strNiuAddress</parameter>
+            <parameter >"media-server-type"</parameter>
+            <parameter >s_strMediaServerType</parameter>
+            <parameter >"packetization-period"</parameter>
+            <parameter >s_nPacketizationPeriod</parameter>
+            <parameter >"ring-no-answer-time"</parameter>
+            <parameter >s_nRingNoAnswerTimeout</parameter>
+            <parameter >"tts-flag"</parameter>
+            <parameter >s_strTTSFlag</parameter>
+          </user-function>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Session.s_strLocalUri = "<sip:" + Server.sipAddress ;
+if( 5060 != Server.sipPort ) {
+	Session.s_strLocalUri += ":" ;
+	Session.s_strLocalUri += Server.sipPort ;
+}
+Session.s_strLocalUri += ">";
+
+if( 0 == Session.s_strNiuAddress.length ) {
+	Server.logError("NIU sip address must be supplied and was not") ;
+}
+else {
+	Server.logInfo("NIU sip address: " + Session.s_strNiuAddress) ;
+}
+
+if ( 0 == Session.s_nPacketizationPeriod ) {
+	Server.logError("Application Properties: Packetization Period not defined; setting to 20");
+	Session.s_nPacketizationPeriod = 20;
+}
+
+if ( 0 == Session.s_nRingNoAnswerTimeout ) {
+	Server.logError("Application Properties: Ring No Answer Timeout not defined; setting to 120");
+	Session.s_nRingNoAnswerTimeout = 120;
+}
+	
+Server.logInfo("Media Server Type: " + Session.s_strMediaServerType);
+
+js_process_string_application_property(Session.s_strTTSFlag);
+Server.logInfo("TTS enabled: " + Session.s_strTTSFlag);
+
+
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=370 y=192 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="OnSessionEnd" start="5" event="SessionEnd" returns="void" >
+      <parameters >
+        <parameter name="nSessionEndReason" type="i2" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nReturnValue" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="5" plug-in="Pactolus.Branch.1" ><?xtml-editor x=68 y=147 ?>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="connected to MS" link="6" stubbed="0" >g_oCallLegs[0].bConnectedToMS == true</result>
+          </results>
+        </action>
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=408 y=150 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="6" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=337 y=308 ?>
+          <!--DeleteMSConnection-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteMSConnection&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >g_oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="OnBye" start="2" event="Bye" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string" pass="byref"/>
+        <parameter name="strAcceptEncoding" type="string" pass="byref"/>
+        <parameter name="strAcceptLanguage" type="string" pass="byref"/>
+        <parameter name="strAllow" type="string" pass="byref"/>
+        <parameter name="strAllowEvents" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strCSeq" type="string" pass="byref"/>
+        <parameter name="strDate" type="string" pass="byref"/>
+        <parameter name="strEncryption" type="string" pass="byref"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strMaxForwards" type="string" pass="byref"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string" pass="byref"/>
+        <parameter name="strProxyRequire" type="string" pass="byref"/>
+        <parameter name="strRecordRoute" type="string" pass="byref"/>
+        <parameter name="strReferredBy" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string" pass="byref"/>
+        <parameter name="strRequire" type="string" pass="byref"/>
+        <parameter name="strResponseKey" type="string" pass="byref"/>
+        <parameter name="strRoute" type="string" pass="byref"/>
+        <parameter name="strSupported" type="string" pass="byref"/>
+        <parameter name="strTimestamp" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="2" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=302 y=221 ?>
+          <!--200 OK-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 200 OK"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="1" plug-in="Standard.EndSession.1" ><?xtml-editor x=620 y=269 ?></action>
+      </actions>
+    </function>
+    <function name="OnInvite" start="1" event="Invite" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string" pass="byref"/>
+        <parameter name="strAcceptEncoding" type="string" pass="byref"/>
+        <parameter name="strAcceptLanguage" type="string" pass="byref"/>
+        <parameter name="strAlertInfo" type="string" pass="byref"/>
+        <parameter name="strAllow" type="string" pass="byref"/>
+        <parameter name="strAllowEvents" type="string" pass="byref"/>
+        <parameter name="strAnonymity" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strCallInfo" type="string" pass="byref"/>
+        <parameter name="strContact" type="string" pass="byref"/>
+        <parameter name="strContent" type="string" pass="byref"/>
+        <parameter name="strContentDisposition" type="string" pass="byref"/>
+        <parameter name="strContentEncoding" type="string" pass="byref"/>
+        <parameter name="strContentLanguage" type="string" pass="byref"/>
+        <parameter name="strContentType" type="string" pass="byref"/>
+        <parameter name="strCSeq" type="string" pass="byref"/>
+        <parameter name="strDate" type="string" pass="byref"/>
+        <parameter name="strEncryption" type="string" pass="byref"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strExpires" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strInReplyTo" type="string" pass="byref"/>
+        <parameter name="strMaxForwards" type="string" pass="byref"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strMinSE" type="string" pass="byref"/>
+        <parameter name="strOrganization" type="string" pass="byref"/>
+        <parameter name="strPriority" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string" pass="byref"/>
+        <parameter name="strProxyRequire" type="string" pass="byref"/>
+        <parameter name="strRecordRoute" type="string" pass="byref"/>
+        <parameter name="strReferredBy" type="string" pass="byref"/>
+        <parameter name="strRemotePartyID" type="string" pass="byref"/>
+        <parameter name="strReplaces" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string" pass="byref"/>
+        <parameter name="strRequire" type="string" pass="byref"/>
+        <parameter name="strResponseKey" type="string" pass="byref"/>
+        <parameter name="strRoute" type="string" pass="byref"/>
+        <parameter name="strSessionExpires" type="string" pass="byref"/>
+        <parameter name="strSubject" type="string" pass="byref"/>
+        <parameter name="strSupported" type="string" pass="byref"/>
+        <parameter name="strTimestamp" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nReturnValue" type="i4" >-50</var>
+        <var name="nReturnCode" type="i4" >0</var>
+        <var name="oSipMessage" type="object" ></var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=63 y=190 ?>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="New Call" link="12" stubbed="0" >g_sSTATE == s_sAWAITING_CALL</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strSessionId = Session._sessionId;]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=637 y=378 ?>
+          <!--DirectCallerToMS-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DirectCallerToMS&quot;" return="nReturnValue" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >g_oCallLegs[0]</parameter>
+            <parameter >g_oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success" link="10" stubbed="0" >nReturnValue == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nReturnValue = -50;
+
+Session.g_oMS.strType = Session.s_strMediaServerType;
+Session.g_oMS.strCodec = "no preference" ;
+]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=315 y=79 ?>
+          <!--OnReInvite-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;OnReInvite&quot;" return="" external-function="0" library="" >
+            <parameter >oSipMessage</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_sSTATE = Session.s_sPROCESS_REINVITE ;
+
+Session.oSipMessage.strCallId = Session.strCallId;
+Session.oSipMessage.strContact = Session.strContact;
+Session.oSipMessage.strContent = Session.strContent;
+Session.oSipMessage.strContentDisposition = Session.strContentDisposition;
+Session.oSipMessage.strContentEncoding = Session.strContentEncoding;
+Session.oSipMessage.strContentLanguage = Session.strContentLanguage;
+Session.oSipMessage.ContentType = Session.strContentType;
+Session.oSipMessage.strRemoteCSeq = Session.strCSeq;
+Session.oSipMessage.strExpires = Session.strExpires;
+Session.oSipMessage.strFrom = Session.strFrom;
+Session.oSipMessage.strProxyAuthorization = Session.strProxyAuthorization;
+Session.oSipMessage.strRecordRoute = Session.strRecordRoute;
+Session.oSipMessage.strRemotePartyId = Session.strRemotePartyID;
+Session.oSipMessage.strRequestUri = Session.strRequestURI;
+Session.oSipMessage.strRoute = Session.strRoute;
+Session.oSipMessage.strSessionExpires = Session.strSessionExpires;
+Session.oSipMessage.strSupported = Session.strSupported;
+Session.oSipMessage.strTo = Session.strTo;
+Session.oSipMessage.strUserAgent = Session.strUserAgent;
+Session.oSipMessage.strVia = Session.strVia;
+]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=612 y=84 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="6" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=798 y=585 ?>
+          <!--503 Service Unavailable-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 503 Service Unavailable"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="7" plug-in="Standard.EndSession.1" ><?xtml-editor x=1057 y=640 ?></action>
+        <action id="10" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=939 y=394 ?>
+          <!--Main-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;Main&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oCallLegs[0].bConnectedToMS = true;
+Session.g_sSTATE = Session.s_sACTION_MAIN_GREETING;]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1184 y=398 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="12" plug-in="Pactolus.Branch.1" ><?xtml-editor x=90 y=383 ?>
+          <!--save SIP values-->
+          <results >
+            <result name="Default" link="13" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[InitVars();
+
+Session.g_oCallLegs[0].strCallId = Session.strCallId;
+Session.g_oCallLegs[0].strContact = Session.strContact;
+Session.g_oCallLegs[0].strContent = Session.strContent;
+Session.g_oCallLegs[0].strContentDisposition = Session.strContentDisposition;
+Session.g_oCallLegs[0].strContentEncoding = Session.strContentEncoding;
+Session.g_oCallLegs[0].strContentLanguage = Session.strContentLanguage;
+Session.g_oCallLegs[0].ContentType = Session.strContentType;
+Session.g_oCallLegs[0].strRemoteCSeq = Session.strCSeq;
+Session.g_oCallLegs[0].strCSeq = 100; //set local CSeq for this call leg
+Session.g_oCallLegs[0].strExpires = Session.strExpires;
+Session.g_oCallLegs[0].strFrom = Session.strFrom;
+Session.g_oCallLegs[0].strProxyAuthorization = Session.strProxyAuthorization;
+Session.g_oCallLegs[0].strRecordRoute = Session.strRecordRoute;
+Session.g_oCallLegs[0].strRemotePartyId = Session.strRemotePartyID;
+Session.g_oCallLegs[0].strRequestUri = Session.strRequestURI;
+Session.g_oCallLegs[0].strRoute = Session.strRoute;
+Session.g_oCallLegs[0].strSessionExpires = Session.strSessionExpires;
+Session.g_oCallLegs[0].strSupported = Session.strSupported;
+Session.g_oCallLegs[0].strTo = Session.g_oCallLegs[0].strOriginalTo = Session.strTo;
+Session.g_oCallLegs[0].strUserAgent = Session.strUserAgent;
+Session.g_oCallLegs[0].strVia = Session.strVia;
+
+Session.g_oCallLegs[0].bUac = false;
+Session.g_oCallLegs[0].bReverseFromTo = true;
+
+
+js_calculate_uri_and_route( true, "SIP/2.0", 
+	Session.strFrom.toString(), 
+	Session.strContact.toString(), 
+	Session.strRecordRoute.toString(), 
+	Session.g_oCallLegs[0].strRemoteUri, 
+	Session.g_oCallLegs[0].strRoute ) ;
+	
+Session.g_oCallLegs[0].strRequestUri = Session.g_oCallLegs[0].strRemoteUri;
+		
+var uri = new SipRequestUri( Session.strRequestURI.toString() ) ;
+var myArray = uri.url.phoneNumber.toString().split(";"); 
+Session.g_oAPI.strDestReceived = Session.g_oCallLegs[0].strCalledNumber = myArray[0] ;
+
+var from = new SipFrom( Session.strFrom.toString() ) ;
+if( null != from.url.phoneNumber ) {
+	Session.g_oAPI.strAniReceived = Session.g_oCallLegs[0].strCallingNumber = from.url.phoneNumber ;
+}
+else {
+	Session.g_oAPI.strAniReceived =  Session.g_oCallLegs[0].strCallingNumber = "" ;
+}
+
+//target information will come in the format of ";target=pcs_voip_ivr;ivr_id=xxx"
+var i = Session.strRequestURI.indexOf("ivr_id=");
+Session.g_oIVR[Session.g_nIdx].lIVRId = Session.strRequestURI.substr((i + 7));
+var j = Session.g_oIVR[Session.g_nIdx].lIVRId.toString().indexOf(" SIP");
+Session.g_oIVR[Session.g_nIdx].lIVRId = Session.g_oIVR[Session.g_nIdx].lIVRId.toString().substring(0, j);
+Server.logInfo("IVR ID: " + Session.g_oIVR[Session.g_nIdx].lIVRId);]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=358 y=388 ?>
+          <!--LoadIVR-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;LoadIVR&quot;" return="nReturnValue" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="OnReInvite" start="1" event="" returns="void" >
+      <parameters >
+        <parameter name="oSipMsg" type="object" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="bUnknownCallId" type="boolean" >0</var>
+        <var name="bProxyFinalNonSuccess" type="boolean" >1</var>
+        <var name="nFinalStatus" type="i4" >0</var>
+        <var name="bALegHungUp" type="boolean" >0</var>
+        <var name="nReturnValue" type="i4" >-50</var>
+        <var name="nIdxA" type="i4" >0</var>
+        <var name="nIdxB" type="i4" >0</var>
+        <var name="bReInvite" type="boolean" >0</var>
+        <var name="bInviteOnHold" type="boolean" >0</var>
+        <var name="nSessionTimerA" type="i4" >0</var>
+        <var name="nSessionTimerB" type="i4" >0</var>
+        <var name="strSessionExpires" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=175 y=318 ?>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="unknown call id" link="2" stubbed="0" >bUnknownCallId == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.bUnknownCallId = false ;
+if( Session.oSipMsg.strCallId != Session.g_oCallLegs[0].strCallId &&
+	Session.oSipMsg.strCallId != Session.g_oCallLegs[1].strCallId ) {
+		
+		Session.bUnknownCallId = true ;
+}
+
+
+/* determine which leg we're sending on, and whether we are a UAC or a UAS on that leg */
+if( Session.oSipMsg.strCallId == Session.g_oCallLegs[0].strCallId ) {
+	Session.nIdxA = 0 ;
+	Session.nIdxB = 1 ;
+}
+else {
+	Session.nIdxA = 1 ;
+	Session.nIdxB = 0 ;
+}
+
+Session.g_oCallLegs[Session.nIdxA].strRemoteCSeq = Session.oSipMsg.strCSeq ;
+Session.g_oCallLegs[Session.nIdxA].strVia = Session.oSipMsg.strVia ;
+
+if( Session.oSipMsg.strContent == Session.g_oCallLegs[Session.nIdxA].strRemoteSdp ) {
+	Server.logInfo("Received a session timer reINVITE") ;
+	Session.bReInvite = true ;
+	return ;
+}
+if( -1 != Session.oSipMsg.strContent.toString().indexOf("0.0.0.0") ) {
+	Session.bInviteOnHold = true ;
+}
+
+Server.logInfo("New SDP: " + Session.oSipMsg.strContent ) ;
+Server.logInfo("Old SDP: " + Session.g_oCallLegs[Session.nIdxA].strRemoteSdp ) ;
+
+Session.g_oCallLegs[Session.nIdxA].strRemoteSdp = Session.oSipMsg.strContent ;
+
+/* we do not want to be the refresher on either leg*/
+Session.nSessionTimerA = Clib.atoi( Session.oSipMsg.strSessionExpires ) ;
+Session.g_oCallLegs[Session.nIdxA].bRefresher = false ;
+Session.nSessionTimerB = Clib.atoi( Session.g_oCallLegs[Session.nIdxB].strSessionExpires ) ;
+Session.g_oCallLegs[Session.nIdxB].bRefresher = false ;
+]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=509 y=434 ?>
+          <!--481 Call Leg/Transaction Does Not Exist-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >oSipMsg.strCallId</call-id>
+            <cseq >oSipMsg.strRemoteCSeq</cseq>
+            <from >oSipMsg.strFrom</from>
+            <status >"SIP/2.0 481 Call Leg/Transaction Does Not Exist"</status>
+            <to >oSipMsg.strTo</to>
+            <via >oSipMsg.strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=845 y=338 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="6" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=516 y=173 ?>
+          <!--200 OK with our SDP-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >oSipMsg.strCallId</call-id>
+            <contact >s_strLocalUri</contact>
+            <content >g_oMS.strContent</content>
+            <content-type >"application/sdp"</content-type>
+            <cseq >oSipMsg.strRemoteCSeq</cseq>
+            <from >oSipMsg.strFrom</from>
+            <session-expires >strSessionExpires</session-expires>
+            <status >"SIP/2.0 200 OK"</status>
+            <to >oSipMsg.strTo</to>
+            <via >oSipMsg.strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[
+
+
+		]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="Main" start="1" event="" returns="void" >
+      <local-vars >
+        <var name="nReturnValue" type="i4" >-50</var>
+        <var name="nFinalStatus" type="i4" >0</var>
+        <var name="bALegHungUp" type="boolean" >0</var>
+        <var name="strContent" type="string" ></var>
+        <var name="nErrorMessage" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=56 y=98 ?>
+          <results >
+            <result name="Default" link="14" stubbed="1"/>
+            <result name="CompanyDirectory" link="7" stubbed="1" >g_sSTATE == s_sACTION_COMPANY_DIR</result>
+            <result name="TransferToNumber" link="8" stubbed="1" >g_sSTATE == s_sACTION_TRANSFER_EXTERNAL_NO
+OR g_sSTATE == s_sACTION_TRANSFER_EXTENSION</result>
+            <result name="TransferToVoiceMail" link="9" stubbed="1" >g_sSTATE == s_sACTION_TRANSFER_VM_DEPOSIT
+OR g_sSTATE == s_sACTION_TRANSFER_VM_RETRIEVE</result>
+            <result name="Play Recording" link="6" stubbed="1" >g_sSTATE == s_sACTION_RECORDING</result>
+            <result name="Main Greeting" link="10" stubbed="1" >g_sSTATE == s_sACTION_MAIN_GREETING</result>
+            <result name="Load IVR" link="13" stubbed="1" >g_sSTATE == s_sACTION_LOAD_IVR_FORWARD
+OR g_sSTATE == s_sACTION_LOAD_IVR_REVERSE
+OR g_sSTATE == s_sACTION_LOAD_ROOT_IVR</result>
+            <result name="HangUpParty" link="11" stubbed="1" >g_sSTATE == s_sHANG_UP_PARTY</result>
+            <result name="DisconnectFromMS" link="12" stubbed="1" >g_sSTATE == s_sDISCONNECT_FROM_MS</result>
+            <result name="PlayGoodBye" link="15" stubbed="1" >g_sSTATE == s_sPLAY_GOODBYE
+OR g_sSTATE == s_sACTION_EXIT</result>
+          </results>
+        </action>
+        <action id="6" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=417 y=146 ?>
+          <!--ReadMessage-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ReadMessage&quot;" return="nReturnValue" external-function="1" library="lib_vmail.xml" >
+            <parameter >g_oIVR[g_nIdx].strAcctName</parameter>
+            <parameter >g_oIVR[g_nIdx].strAcctPswd</parameter>
+            <parameter >g_strMailbox</parameter>
+            <parameter >g_strActionValue</parameter>
+            <parameter >g_oMS</parameter>
+            <parameter >g_oIVR[g_nIdx].strLanguage</parameter>
+            <parameter >g_oIVR[g_nIdx].nMaxRecordingLength</parameter>
+          </function>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Session.g_sSTATE = Session.s_sACTION_MAIN_GREETING;]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=418 y=468 ?>
+          <!--CompanyDirectory-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;CompanyDirectory&quot;" return="nReturnValue" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+          </results>
+        </action>
+        <action id="8" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=416 y=361 ?>
+          <!--TransferToNumber-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;SendInfoMsg&quot;" return="nReturnValue" external-function="0" library="" >
+            <parameter >strContent</parameter>
+          </function>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if ( Session.g_sSTATE == Session.s_sACTION_TRANSFER_EXTERNAL_NO ) {
+	Session.strContent = "IVR_External_";
+}
+else if ( Session.g_sSTATE == Session.s_sACTION_TRANSFER_EXTENSION ) {
+	Session.strContent = "IVR_Extension_";
+}
+	]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=417 y=251 ?>
+          <!--TransferToVM-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;SendInfoMsg&quot;" return="nReturnValue" external-function="0" library="" >
+            <parameter >strContent</parameter>
+          </function>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strContent = "VM_deposit_";]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=414 y=37 ?>
+          <!--MainGreeting-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;MainGreeting&quot;" return="nReturnValue" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+          </results>
+        </action>
+        <action id="11" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=74 y=436 ?>
+          <!--HangUpParty-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpParty&quot;" return="nReturnValue" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >g_oCallLegs[0]</parameter>
+            <parameter >s_strLocalUri</parameter>
+          </function>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nReturnValue = -50;]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=78 y=568 ?>
+          <!--DeleteMSConnection-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteMSConnection&quot;" return="nReturnValue" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >g_oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nReturnValue = -50;]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=419 y=578 ?>
+          <!--Load IVR-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;LoadIVR&quot;" return="nReturnValue" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if ( Session.g_sSTATE == Session.s_sACTION_LOAD_IVR_FORWARD ) {
+	Server.logInfo("Leaving IVR level " + Session.g_nIdx);
+	Session.g_nIdx++;
+	Session.g_oIVR[Session.g_nIdx].lIVRId = Session.g_strActionValue;
+}
+else if ( Session.g_sSTATE == Session.s_sACTION_LOAD_IVR_REVERSE ) {
+	Server.logInfo("Leaving IVR level " + Session.g_nIdx);
+	Session.g_nIdx--;
+	Session.g_oIVR[Session.g_nIdx].lIVRId = Session.g_strActionValue;
+}
+else if ( Session.g_sSTATE == Session.s_sACTION_LOAD_ROOT_IVR ) {
+	Server.logInfo("Returning to root IVR");
+	Session.g_nIdx = 0;
+}
+
+Server.logInfo("Loading IVR ID <" + Session.g_oIVR[Session.g_nIdx].lIVRId + "> as level <" + Session.g_nIdx + ">");
+]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Standard.EndSession.1" ><?xtml-editor x=68 y=332 ?></action>
+        <action id="15" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=419 y=686 ?>
+          <!--PlayGoodBye-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PlayGoodBye&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+          </results>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="718" y-coord="232" width="241" height="220" text="In the initial release of Business Broadband, the only options available are:
+Transfer to Number,
+Transfer to VM deposit,
+Play main greeting,
+Play recording,
+Company Directory,
+Exit" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="MainGreeting" start="1" event="" returns="void" >
+      <local-vars >
+        <var name="oUrgent" type="object" ></var>
+        <var name="nUrgentCount" type="i4" >0</var>
+        <var name="nUnseenCount" type="i4" >0</var>
+        <var name="nSavedCount" type="i4" >0</var>
+        <var name="oUnseen" type="object" ></var>
+        <var name="oSaved" type="object" ></var>
+        <var name="nReturnValue" type="i4" >0</var>
+        <var name="strQuery" type="string" ></var>
+        <var name="oSearchID" type="object" ></var>
+        <var name="strAttachment" type="string" ></var>
+        <var name="strDigits" type="string" ></var>
+        <var name="bInvalidEntry" type="boolean" >0</var>
+        <var name="nRetryCount" type="i4" >0</var>
+        <var name="nRetryPrompt" type="i4" >99</var>
+        <var name="bMaxRetries" type="boolean" >0</var>
+        <var name="strEndKey" type="string" ></var>
+        <var name="bFoundGreeting" type="boolean" >0</var>
+        <var name="bTakeNoActionPath" type="boolean" >0</var>
+        <var name="nReturnCode" type="i4" >-99</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.MailboxStatus.1" ><?xtml-editor x=76 y=164 ?>
+          <imap-status xmlns="urn:www.pactolus.com:xtml:imap" username="g_oIVR[g_nIdx].strAcctName" password="g_oIVR[g_nIdx].strAcctPswd" mailbox="g_strMailbox" flagged-count="nUrgentCount" unseen-count="nUnseenCount" saved-count="nSavedCount" flagged="oUrgent" unseen="oUnseen" saved="oSaved" returns="nReturnValue" timeout="s_nTimeout"/>
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+            <result name="Success" link="2" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="2" plug-in="Pactolus.MailboxSearch.1" ><?xtml-editor x=323 y=169 ?>
+          <search-mailbox xmlns="urn:www.pactolus.com:xtml:imap" username="g_oIVR[g_nIdx].strAcctName" password="g_oIVR[g_nIdx].strAcctPswd" mailbox="g_strMailbox" query-string="strQuery" search-result="oSearchID" timeout="s_nTimeout" returns="nReturnValue"/>
+          <results >
+            <result name="Default" link="13" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="bFoundGreeting" link="3" stubbed="0" >bFoundGreeting == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strQuery = "SUBJECT \"" + Session.g_oIVR[Session.g_nIdx].strGreeting + "\"" ;]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( 0 < Session.oSearchID.length ) {
+	Session.bFoundGreeting = true;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Pactolus.ReadMail.1" ><?xtml-editor x=574 y=167 ?>
+          <imap-read xmlns="urn:www.pactolus.com:xtml:imap" username="g_oIVR[g_nIdx].strAcctName" password="g_oIVR[g_nIdx].strAcctPswd" mailbox="g_strMailbox" msg-uid="oSearchID[0]" to="" from="" cc="" subject="" body="" attachment1="strAttachment" attachment2="" attachment3="" timeout="s_nTimeout" returns="nReturnValue" timestamp=""/>
+          <results >
+            <result name="Default" link="11" stubbed="1"/>
+            <result name="Success" link="4" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="4" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=856 y=161 ?>
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="g_oIVR[g_nIdx].nMaxRecordingLength" ms-type="g_oMS.strType" played-length="" digits="strDigits" terminating-char="" rc="" returns="nReturnValue" play-offset="" language="g_oIVR[g_nIdx].strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="g_strDigitMap" fdt="50" idt="5" ict="10" terminating-digit="strEndKey" >
+            <audio type="url" >strAttachment</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="16" stubbed="0"/>
+            <result name="Success" link="16" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First/Inter Digit Timeout" link="15" stubbed="0"/>
+            <result name="InvalidEntry" link="15" stubbed="0" >bInvalidEntry == true</result>
+            <result name="&quot;no response&quot; action" link="16" stubbed="0" >bTakeNoActionPath == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if ( "T" == Session.g_oIVR[Session.g_nIdx].strExtensionDialingFlag ) {
+	var extDigits = "x";
+	for ( var i = 1; i < Session.g_oIVR[Session.g_nIdx].nExtensionLength; i++ ) {
+		extDigits += "x";	
+	}
+	Session.g_strDigitMap = "(#|*|" ;
+	Session.g_strDigitMap += extDigits;
+	Session.g_strDigitMap += "|x.T)";
+	Session.strEndKey = "T";
+	Server.logInfo("Main Greeting digit map is set to: " + Session.g_strDigitMap);
+}
+else {
+	Session.g_strDigitMap = "(x|#|*)";
+	Server.logInfo("Extension dialing is not allowed in this IVR");
+}
+
+Session.strDigits = "";]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[Session.g_sSTATE = 0;
+Session.bInvalidEntry = false;
+
+if ( "T" == Session.g_oIVR[Session.g_nIdx].strExtensionDialingFlag &&
+		Session.g_oIVR[Session.g_nIdx].nExtensionLength == Session.strDigits.length ) {
+	Server.logInfo("During main IVR greeting, caller requested extension <" + Session.strDigits + ">");
+	Session.g_strActionValue = Session.strDigits;
+	Session.g_sSTATE = Session.s_sACTION_TRANSFER_EXTENSION ;
+	return ;
+}
+else {
+	switch(Session.strDigits){
+		case "0":
+			Session.g_sSTATE = Session.g_oIVR[Session.g_nIdx].str0ActionType;
+			Session.g_strActionValue = Session.g_oIVR[Session.g_nIdx].str0ActionValue;
+			break;
+		case "1":
+			Session.g_sSTATE = Session.g_oIVR[Session.g_nIdx].str1ActionType;
+			Session.g_strActionValue = Session.g_oIVR[Session.g_nIdx].str1ActionValue;
+			break;
+		case "2":
+			Session.g_sSTATE = Session.g_oIVR[Session.g_nIdx].str2ActionType;
+			Session.g_strActionValue = Session.g_oIVR[Session.g_nIdx].str2ActionValue;
+			break;
+		case "3":
+			Session.g_sSTATE = Session.g_oIVR[Session.g_nIdx].str3ActionType;
+			Session.g_strActionValue = Session.g_oIVR[Session.g_nIdx].str3ActionValue;
+			break;
+		case "4":
+			Session.g_sSTATE = Session.g_oIVR[Session.g_nIdx].str4ActionType;
+			Session.g_strActionValue = Session.g_oIVR[Session.g_nIdx].str4ActionValue;
+			break;
+		case "5":
+			Session.g_sSTATE = Session.g_oIVR[Session.g_nIdx].str5ActionType;
+			Session.g_strActionValue = Session.g_oIVR[Session.g_nIdx].str5ActionValue;
+			break;
+		case "6":
+			Session.g_sSTATE = Session.g_oIVR[Session.g_nIdx].str6ActionType;
+			Session.g_strActionValue = Session.g_oIVR[Session.g_nIdx].str6ActionValue;
+			break;
+		case "7":
+			Session.g_sSTATE = Session.g_oIVR[Session.g_nIdx].str7ActionType;
+			Session.g_strActionValue = Session.g_oIVR[Session.g_nIdx].str7ActionValue;
+			break;
+		case "8":
+			Session.g_sSTATE = Session.g_oIVR[Session.g_nIdx].str8ActionType;
+			Session.g_strActionValue = Session.g_oIVR[Session.g_nIdx].str8ActionValue;
+			break;
+		case "9":
+			Session.g_sSTATE = Session.g_oIVR[Session.g_nIdx].str9ActionType;
+			Session.g_strActionValue = Session.g_oIVR[Session.g_nIdx].str9ActionValue;
+			break;
+		case "*":
+			Session.g_sSTATE = Session.g_oIVR[Session.g_nIdx].strStarActionType;
+			Session.g_strActionValue = Session.g_oIVR[Session.g_nIdx].strStarActionValue;
+			break;
+		case "#":
+			Session.g_sSTATE = Session.g_oIVR[Session.g_nIdx].strHashActionType;
+			Session.g_strActionValue = Session.g_oIVR[Session.g_nIdx].strHashActionValue;
+			break;
+	}
+}
+
+if ( Session.g_sSTATE == Session.s_sACTION_EXIT ) {
+	Session.g_sErrorCode = -99;
+}
+
+if ( 2 == Session.nRetryCount ) {
+	if ( "null" != Session.g_oIVR[Session.g_nIdx].strNoActionType ) {
+		Session.g_sSTATE = Session.g_oIVR[Session.g_nIdx].strNoActionType;
+		Session.g_strActionValue = Session.g_oIVR[Session.g_nIdx].strNoActionValue;
+		Server.logInfo("Max retries reached and still no action selected. Following user defined exit path: " + Session.g_oIVR[Session.g_nIdx].strNoActionType);
+	}
+	else {
+		Session.g_sSTATE = Session.s_sACTION_EXIT;
+		Server.logInfo("Max retries reached. Ending call.")
+	}
+}
+else if ( 0 == Session.strDigits.length ) {
+	Session.nRetryPrompt = 552; //I did not hear a response
+	if( 0 ==  Session.g_oIVR[Session.g_nIdx].strNoActionType.length ) {
+		Server.logInfo("No digits collected");
+	}
+	else {
+		Session.g_sSTATE = Session.g_oIVR[Session.g_nIdx].strNoActionType;
+		Session.g_strActionValue = Session.g_oIVR[Session.g_nIdx].strNoActionValue;		
+		Session.bTakeNoActionPath = true ;
+		Server.logInfo("No digits collected, but there is a no input path, so take it") ;
+	}
+}
+else if ( 0 == Session.g_sSTATE ){
+	Session.bInvalidEntry = true;
+	Session.nRetryPrompt = 337; //invalid option
+	Server.logInfo("User selected an option that has no state defined");
+}
+else if ( Session.s_sACTION_LOAD_IVR_REVERSE == Session.g_sSTATE && 0 == Session.g_nIdx ) {
+	Session.bInvalidEntry = true;
+	Session.nRetryPrompt = 337;
+}
+else {
+	Session.nRetryCount = 0;
+	Session.nRetryPrompt = 99;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("User selected: " + Session.strDigits);
+
+Server.logInfo("exiting on result id: " + Result.id);
+
+
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1395 y=28 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("ACTION TO TAKE: " + Session.g_sSTATE);]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1277 y=506 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if ( 0 == Session.g_sSTATE ) {
+	Session.g_sSTATE = Session.s_sPLAY_GOODBYE;
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1272 y=330 ?>
+          <!--RetryPrompt-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTimeout" ms-type="g_oMS.strType" returns="nReturnValue" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_oIVR[g_nIdx].strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >nRetryPrompt</audio>
+            <audio type="silence" >.5</audio>
+          </play>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nRetryCount++;]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=296 y=499 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("Error fetching IVR greeting");
+
+Session.g_sSTATE = Session.s_sPLAY_GOODBYE ;
+Session.g_sErrorCode = 8007;]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=503 y=496 ?>
+          <!--No greetings found.-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTimeout" ms-type="s_strMediaServerType" returns="" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_oAPI.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >2043</audio>
+            <audio type="silence" >.5</audio>
+            <audio type="index" >322</audio>
+          </play>
+          <results >
+            <result name="Default" link="18" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="14" plug-in="Standard.EndSession.1" ><?xtml-editor x=961 y=546 ?></action>
+        <action id="15" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1050 y=369 ?>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="bMaxRetries" link="8" stubbed="0" >nRetryCount &gt;= 2</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("nRetryCount: " + Session.nRetryCount);]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1059 y=81 ?>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="validate extension" link="17" stubbed="0" >g_sSTATE == s_sACTION_TRANSFER_EXTENSION</result>
+          </results>
+        </action>
+        <action id="17" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1251 y=176 ?>
+          <!--VoipValidateExtension-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;VoipValidateExtension&quot;" return="nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >s_strDBName</parameter>
+            <parameter >g_strSessionId</parameter>
+            <parameter >g_strActionValue</parameter>
+            <parameter >g_oAPI.lCorpDeptId</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="invalid extension" link="15" stubbed="0" >nReturnCode != 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nReturnCode = -99 ;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if( 0 != Session.nReturnCode ) {
+	Session.g_sSTATE = 0 ;
+	Session.bInvalidEntry = true;
+	Session.nRetryPrompt = 337; //invalid option	
+}]]></script>
+          </scripts>
+        </action>
+        <action id="18" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=747 y=582 ?>
+          <!--HangUpParty-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpParty&quot;" return="nReturnValue" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >g_oCallLegs[0]</parameter>
+            <parameter >s_strLocalUri</parameter>
+          </function>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="CompanyDirectory" start="1" event="" returns="i4" >
+      <local-vars >
+        <var name="strDigits" type="string" ></var>
+        <var name="nReturnCode" type="i4" >-50</var>
+        <var name="nGroupSearchPrompt" type="i4" >99</var>
+        <var name="nRetryPrompt" type="i4" >99</var>
+        <var name="nRetryCount" type="i4" >0</var>
+        <var name="nReturnValue" type="i4" >0</var>
+        <var name="oTarget" type="object" ></var>
+        <var name="strMoreMatchesFlag" type="string" ></var>
+        <var name="nIdx" type="i4" >0</var>
+        <var name="bMoreMatches" type="boolean" >0</var>
+        <var name="nSearchCounter" type="i4" >0</var>
+        <var name="strTermDigit" type="string" ></var>
+        <var name="bCancelled" type="boolean" >0</var>
+        <var name="nNextMatchPrompt" type="i4" >0</var>
+        <var name="bSuccess" type="boolean" >0</var>
+        <var name="nHuntGroupSearchPrompt" type="i4" >0</var>
+        <var name="nTotalMatches" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=140 y=158 ?>
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="s_nTimeout" ms-type="g_oMS.strType" played-length="" digits="strDigits" terminating-char="strTermDigit" rc="" returns="nReturnValue" play-offset="" language="g_oIVR[g_nIdx].strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="&quot;(x.*|*)&quot;" fdt="50" idt="5" ict="16" terminating-digit="&quot;#T&quot;" >
+            <audio type="index" >nRetryPrompt</audio>
+            <audio type="index" >2019</audio>
+            <audio type="index" >2054</audio>
+            <audio type="index" >nGroupSearchPrompt</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="18" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match" link="1" stubbed="1"/>
+            <result name="First/Inter Digit Timeout"/>
+            <result name="* - Return to Main" link="2" stubbed="1" >strDigits match "*"</result>
+            <result name="MaxRetries" link="2" stubbed="1" >nRetryCount == 2</result>
+            <result name="bCancelled" link="2" stubbed="1" >bCancelled == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strDigits = "";
+Session.strTermDigit = "";
+
+if ( "T" == Session.g_oIVR[Session.g_nIdx].strSearchByGroup ){
+	Session.nHuntGroupSearchPrompt = 2017;
+}
+else {
+	Session.nHuntGroupSearchPrompt = 99;
+}]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( -1 != Session.strDigits.indexOf("*") ) {
+	Session.bCancelled = true;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 5 == Result.id ) {
+	Session.nRetryCount++;
+	Session.nRetryPrompt = 337;
+}
+else {
+	Session.nRetryCount = 0;
+	Session.nRetryPrompt = 99;
+}
+
+Server.logInfo("Exiting on result path <" + Result.name + ">");]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=148 y=404 ?>
+          <!--MainGreeting-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_sSTATE = Session.s_sACTION_MAIN_GREETING;]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1630 y=556 ?>
+          <!--TransferToExtension-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_sSTATE = Session.s_sACTION_TRANSFER_EXTENSION;
+
+Session.g_strActionValue = Session.oTarget[Session.nIdx].strDestPhone;
+
+Server.logInfo("Leaving Company Directory. Call will be transferred to phone: " + Session.g_strActionValue);]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=789 y=345 ?>
+          <!--ReadMessage-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ReadMessage&quot;" return="nReturnValue" external-function="1" library="lib_vmail.xml" >
+            <parameter >oTarget[nIdx].strAccountName</parameter>
+            <parameter >oTarget[nIdx].strAccountPswd</parameter>
+            <parameter >"Greetings"</parameter>
+            <parameter >"Name_Greeting"</parameter>
+            <parameter >g_oMS</parameter>
+            <parameter >g_oIVR[g_nIdx].strLanguage</parameter>
+            <parameter >g_oAPI.nMaxRecordingTime</parameter>
+          </function>
+          <results >
+            <result name="Default" link="16" stubbed="1"/>
+            <result name="Success" link="16" stubbed="1" >nReturnValue == 0</result>
+            <result name="play name with TTS" link="13" stubbed="1" >nReturnCode != 0
+AND s_strTTSFlag match "T"</result>
+          </results>
+        </action>
+        <action id="12" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=1335 y=521 ?>
+          <!--Confirm selection-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="s_nTimeout" ms-type="g_oMS.strType" played-length="" digits="strDigits" terminating-char="" rc="" returns="nReturnValue" play-offset="" language="g_oIVR[g_nIdx].strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="&quot;([1-2]|*)&quot;" fdt="50" idt="40" ict="16" terminating-digit="" >
+            <audio type="index" >2020</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >2021</audio>
+            <audio type="index" >312</audio>
+            <audio type="index" >2022</audio>
+            <audio type="index" >320</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First/Inter Digit Timeout"/>
+            <result name="1 - accept" link="5" stubbed="0" >strDigits match "1"</result>
+            <result name="2 - reject" link="14" stubbed="1" >strDigits match "2"</result>
+            <result name="* -search again" link="1" stubbed="1" >strDigits match "*"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strDigits = "";
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=922 y=553 ?>
+          <!--Play Name Text-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTimeout" ms-type="g_oMS.strType" returns="nReturnValue" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_oIVR[g_nIdx].strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="text" >oTarget[nIdx].strNameText</audio>
+          </play>
+          <results >
+            <result name="Default" link="16" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nReturnValue = -50;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("Text to Speech Play returns: " + Session.nReturnValue);
+Server.logInfo("Text to Speech Play exiting on: " + Result.name);]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1391 y=333 ?>
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+            <result name="bMoreMatches" link="10" stubbed="0" >bMoreMatches == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nIdx++;
+
+if ( 6 > Session.nIdx && 0 < Session.oTarget[Session.nIdx].strDestPhone.length ) {
+	Session.bMoreMatches = true;
+}
+else {
+	Session.bMoreMatches = false;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1700 y=312 ?>
+          <!--No more matches-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTimeout" ms-type="g_oMS.strType" returns="nReturnValue" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_oIVR[g_nIdx].strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >2018</audio>
+          </play>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="16" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1093 y=355 ?>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="more than one match" link="12" stubbed="0" >bMoreMatches == true
+AND nReturnValue == 0</result>
+            <result name="more matches, Play failed" link="14" stubbed="0" >bMoreMatches == true
+AND nReturnValue != 0</result>
+          </results>
+        </action>
+        <action id="17" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=766 y=76 ?>
+          <!--No matches found-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTimeout" ms-type="g_oMS.strType" returns="nReturnValue" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_oIVR[g_nIdx].strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >301</audio>
+            <audio type="index" >2057</audio>
+          </play>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="18" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=472 y=203 ?>
+          <!--VoipIVRSearchCompanyDirectory-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;VoipIVRSearchCompanyDirectory&quot;" return="nReturnValue" external-function="1" library="lib_APISce.xml" >
+            <parameter >s_strDBName</parameter>
+            <parameter >strDigits</parameter>
+            <parameter >g_strSessionId</parameter>
+            <parameter >g_oAPI.lCorpDeptId</parameter>
+            <parameter >g_oAPI.lServiceProviderId</parameter>
+            <parameter >oTarget</parameter>
+          </function>
+          <results >
+            <result name="Default" link="17" stubbed="0"/>
+            <result name="Success" link="10" stubbed="0" >bSuccess == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.oTarget.length = 0;
+Session.nIdx = 0;
+Session.bMoreMatches = false;]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[Session.bSuccess = false;
+
+if ( 0 == Session.nReturnValue && 0 < Session.oTarget[0].strDestPhone.length ) {
+	Session.bSuccess = true;
+}
+
+while ( 0 < Session.oTarget[Session.nIdx].strDestPhone.length ) {
+	Session.nIdx++;
+	Session.nTotalMatches++;
+}
+
+Server.logInfo("Search returned <" + Session.nTotalMatches + "> matches");
+if ( 1 < Session.nTotalMatches ) {
+	Session.bMoreMatches = true;
+}
+Session.nIdx = 0;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="SendInfoMsg" start="1" event="" returns="void" >
+      <parameters >
+        <parameter name="strContent" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="strContent" type="string" ></var>
+        <var name="strStatus" type="string" ></var>
+        <var name="strEventRcvd" type="string" ></var>
+        <var name="nStatus" type="i4" >0</var>
+        <var name="nReturnValue" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.SipInfo.1" ><?xtml-editor x=160 y=179 ?>
+          <element-tag increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oCallLegs[0].strCallId</call-id>
+            <contact >s_strLocalUri</contact>
+            <content >strContent</content>
+            <content-type >"text/plain"</content-type>
+            <cseq >g_oCallLegs[0].strCSeq</cseq>
+            <from >g_oCallLegs[0].strTo</from>
+            <record-route >g_oCallLegs[0].strRecordRoute</record-route>
+            <request-uri >g_oCallLegs[0].strRemoteUri</request-uri>
+            <route >g_oCallLegs[0].strRoute</route>
+            <to >g_oCallLegs[0].strFrom</to>
+            <via >g_oCallLegs[0].strMyVia</via>
+          </element-tag>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if ( Session.g_sSTATE == Session.s_sACTION_TRANSFER_EXTERNAL_NO ) {
+	Session.strContent += Session.g_strActionValue ;
+	Session.strContent += ";SvcId=" ;
+	Session.strContent += Session.g_oAPI.lVoipServiceId ;
+	Session.strContent += ";DpId=" ;
+	Session.strContent += Session.g_oAPI.nDialingPlanId ;
+}
+else if (Session.g_sSTATE == Session.s_sACTION_TRANSFER_EXTENSION) {
+	Session.strContent += Session.g_strActionValue;
+	Session.strContent += ";DeptId=";
+	Session.strContent += Session.g_oAPI.lCorpDeptId;
+}
+else {
+	Session.strContent += Session.g_strActionValue ;
+}
+
+Session.strContent += ";IVRId=" ;
+Session.strContent += Session.g_oIVR[Session.g_nIdx].lIVRId + "\r\n" ;
+
+
+Session.g_oCallLegs[0].strMyVia = "SIP/2.0/UDP " + Server.sipAddress;
+if ( 5060 != Server.sipPort ) {
+	Session.g_oCallLegs[0].strMyVia += ":" ;
+	Session.g_oCallLegs[0].strMyVia += Server.sipPort;
+}
+Session.g_oCallLegs[0].strMyVia += ";branch=z9hG4bK_" ;
+Session.g_oCallLegs[0].strMyVia += Session._iteration;
+Session.g_oCallLegs[0].strMyVia += "_" ;
+Session.g_oCallLegs[0].strMyVia += Server.getUTCTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.enableEvents(false) ;]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.WaitEvent.1" ><?xtml-editor x=433 y=172 ?>
+          <wait xmlns="urn:www.pactolus.com:xtml:communication" timeout="s_nTimeout" recv-name="strEventRcvd" >
+            <msg name="Pactolus.EveSipResponse.1" >
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter >strStatus</parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+            </msg>
+          </wait>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="200 OK" link="6" stubbed="0" >nStatus == 200</result>
+            <result name="481 Call leg does not exist" link="3" stubbed="0" >nStatus == 481</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.enableEvents(true) ;]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[var status = new SipStatus(Session.strStatus);
+Session.nStatus = status.code;
+if ( 200 == Session.nStatus ) {
+	Server.logInfo("SIP INFO was accepted, pcs_voip_ivr will exit now.");
+}
+else {
+	Server.logError("SIP INFO failed. Received response: " + Session.nStatus);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.EndSession.1" ><?xtml-editor x=884 y=307 ?>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oCallLegs[0].bConnected = false;]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=713 y=159 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_sSTATE = Session.s_sPLAY_GOODBYE;
+Session.g_sErrorCode = 8101;
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=635 y=344 ?>
+          <!--wait for BYE from originate app-->
+          <sleep xmlns="urn:www.pactolus.com:xtml:application" duration="2"/>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="LoadIVR" start="3" event="" returns="void" >
+      <local-vars >
+        <var name="nReturnValue" type="i4" >0</var>
+        <var name="nErrorPrompt" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=90 y=148 ?>
+          <!--loadIVR-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;VoipLoadIVR&quot;" return="nReturnValue" external-function="1" library="lib_APISce.xml" >
+            <parameter >s_strDBName</parameter>
+            <parameter >g_strSessionId</parameter>
+            <parameter >g_oIVR[g_nIdx].lIVRId</parameter>
+            <parameter >g_oAPI</parameter>
+            <parameter >g_oIVR[g_nIdx]</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success" link="2" stubbed="0" >nReturnValue == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if ( 0 == Session.g_oIVR[Session.g_nIdx].nMaxRecordingLength ) {
+	Session.g_oIVR[Session.g_nIdx].nMaxRecordingLength = 300;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=418 y=324 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="6" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=385 y=110 ?>
+          <!--PlayErrorMessage-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PlayGoodBye&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("Failed in LoadIVR. Return code <" + Session.nReturnValue + ">");
+
+if ( -2 == Session.nReturnValue ) {
+	Session.g_sErrorCode = 8100;
+}
+else if ( -5 == Session.nReturnValue ) {
+	Session.g_sErrorCode = 8001;
+}
+]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnDTMF" start="1" event="DTMF" returns="void" >
+      <parameters >
+        <parameter name="strEndpoint" type="string" pass="byref"/>
+        <parameter name="strRequestID" type="string" pass="byref"/>
+        <parameter name="strDtmf" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nReturnValue" type="i4" >0</var>
+        <var name="strContent" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=164 y=179 ?>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="* - cancel transfer" link="4" stubbed="0" >strDtmf match "*"</result>
+          </results>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=439 y=126 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=438 y=293 ?>
+          <!--SendInfoMsg-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;SendInfoMsg&quot;" return="nReturnValue" external-function="0" library="" >
+            <parameter >strContent</parameter>
+          </function>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strContent = "CANCEL, ";
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.g_sSTATE = Session.s_sPLAY_MAIN_GREETING;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="PlayGoodBye" start="3" event="" returns="void" >
+      <actions >
+        <action id="3" plug-in="Pactolus.Branch.1" ><?xtml-editor x=96 y=193 ?>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="no error message" link="4" stubbed="0" >g_sErrorCode == -99
+OR g_sSTATE == s_sACTION_EXIT</result>
+          </results>
+        </action>
+        <action id="1" plug-in="Standard.EndSession.1" ><?xtml-editor x=830 y=363 ?></action>
+        <action id="2" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=348 y=83 ?>
+          <!--Error message-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTimeout" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_oIVR[g_nIdx].strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >365</audio>
+            <audio type="number" >g_sErrorCode</audio>
+          </play>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if ( 0 == Session.g_sErrorCode ) {
+	Session.g_sErrorCode = 1001; //general db error
+}]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=340 y=318 ?>
+          <!--thank you, goodbye-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTimeout" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_oIVR[g_nIdx].strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >304</audio>
+            <audio type="silence" >.5</audio>
+            <audio type="index" >322</audio>
+          </play>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=662 y=107 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_sSTATE = Session.s_sACTION_MAIN_GREETING;]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=573 y=351 ?>
+          <!--HangUpParty-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpParty&quot;" return="" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >g_oCallLegs[0]</parameter>
+            <parameter >s_strLocalUri</parameter>
+          </function>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>
+
+function InitVars() 
+{
+	js_initVoipCallLeg( Session.g_oCallLegs[0] ); 
+	js_initVoipCallLeg( Session.g_oCallLegs[1] ); 
+	js_initAPI( Session.g_oAPI ) ;
+	js_initMS( Session.g_oMS, Session.s_strMediaServerType ) ;
+		
+	Session.g_oMS.strCodec = "PCMU" ;
+	Session.g_oAPI.strBroadbandCallingFlag = "T" ;
+	Session.g_oCallLegs[0].nState = Session.s_LEG_STATE_NONE ;
+	Session.g_oCallLegs[1].nState = Session.s_LEG_STATE_NONE ;
+	Session.g_oCallLegs[0].bUac = false ;
+	Session.g_oCallLegs[1].bUac = true ;
+	Session.g_strSessionId = Session._sessionId ;
+	
+}]]></script>
+  <properties >
+    <property key="default" value="C:/pactolus_app_server/prompts/pcs_english.vox"/>
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value="../libs"/>
+    <property key="library-modules" value="lib_mediaserver.xml;lib_callcontrol.xml;lib_voip.xml;lib_vmail.xml;lib_APISce.xml"/>
+    <property key="library-path" value="../libs"/>
+  </properties>
+  <application-version >
+    <revision >$Id: pcs_voip_ivr.xml,v 1.37 2008/08/21 21:36:17 erobbins Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

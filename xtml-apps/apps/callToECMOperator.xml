@@ -1,0 +1,2162 @@
+<?xml version="1.0"?>
+<xtml version="1.0" >
+  <version sce-version="422a6" prev-sce-version="422a6" last-mod-time="Thursday, October 27, 2005 14:24:21"/>
+  <global-handlers >
+    <handler event="Pactolus.EveSipInvite.1" function="OnInvite" public="0" always-on="0"/>
+    <handler event="Pactolus.EveSipBye.1" function="OnBye" public="0" always-on="0"/>
+    <handler event="Standard.OnServiceLoad.1" function="OnServiceLoad" public="0" always-on="0"/>
+    <handler event="Standard.OnServiceUnload.1" function="OnServiceUnload" public="0" always-on="0"/>
+    <handler event="Standard.OnSessionStart.1" function="OnSessionStart" public="0" always-on="0"/>
+    <handler event="Standard.OnSessionEnd.1" function="OnSessionEnd" public="0" always-on="0"/>
+    <handler event="Standard.OnTimer.1" function="OnTimer" public="0" always-on="0"/>
+    <handler event="Pactolus.EveSipAck.1" function="OnAck" public="0" always-on="0"/>
+  </global-handlers>
+  <global-vars >
+    <var name="g_strMSCallId" type="string" ></var>
+    <var name="g_strMSEndPoint" type="string" ></var>
+    <var name="g_strMSConnectionId" type="string" ></var>
+    <var name="g_strMSSDP" type="string" ></var>
+    <var name="g_strPassCode" type="string" ></var>
+    <var name="g_intReturnCode" type="i4" >-1</var>
+    <var name="g_strCallId" type="string" ></var>
+    <var name="g_strCSeq" type="string" ></var>
+    <var name="g_strFrom" type="string" ></var>
+    <var name="g_strTo" type="string" ></var>
+    <var name="g_strCallIdA" type="string" ></var>
+    <var name="g_strCSeqA" type="string" ></var>
+    <var name="g_strStatus" type="string" ></var>
+    <var name="g_strEvtReceive" type="string" ></var>
+    <var name="g_strConferenceSDP" type="string" ></var>
+    <var name="g_strLanguage" type="string" >eng</var>
+    <var name="g_longDurationTimerID" type="i8" >0</var>
+    <var name="g_longPlayDTMFTimerID" type="i8" >0</var>
+    <var name="g_boolDurationTimerStarted" type="boolean" >0</var>
+    <var name="g_boolPlayDTMFTimerStarted" type="boolean" >0</var>
+    <var name="g_strModPassCode" type="string" ></var>
+    <var name="g_boolConnectedToMS" type="boolean" >0</var>
+    <var name="g_intPromptNumber" type="i4" >0</var>
+    <var name="g_strToFromResponse" type="string" ></var>
+    <var name="g_strReason" type="string" ></var>
+    <var name="g_strSignal" type="string" ></var>
+    <var name="g_strRemoteUri" type="string" ></var>
+    <var name="g_intRandomSleepTime" type="i4" >0</var>
+    <var name="g_intCallDuration" type="i4" >0</var>
+    <var name="g_intCurrentModCount" type="i4" >0</var>
+    <var name="g_bUseModPassCode" type="boolean" >0</var>
+    <var name="g_bIamMod" type="boolean" >0</var>
+    <var name="g_intCurrentlyInArray" type="i4" >0</var>
+    <var name="g_bFirstTimeAround" type="boolean" >1</var>
+    <var name="g_strContact" type="string" ></var>
+    <var name="g_strACDPassCode" type="string" >""</var>
+  </global-vars>
+  <shared-vars >
+    <var name="s_intDuration" type="i4" >120</var>
+    <var name="s_intSleepTime" type="i4" >10</var>
+    <var name="s_intTimeout" type="i4" >60</var>
+    <var name="s_strConferenceAppURI" type="string" ></var>
+    <var name="s_strConferenceAppIP" type="string" >10.10.104.6:5060</var>
+    <var name="s_strSIPaddress" type="string" ></var>
+    <var name="s_strAccessNumber" type="string" >8888</var>
+    <var name="s_strVia" type="string" ></var>
+    <var name="s_strANI" type="string" >5086160900</var>
+    <var name="s_strContentType" type="string" >application/sdp</var>
+    <var name="s_intPlayDTMFTime" type="i4" >10</var>
+    <var name="s_intConfNumberID" type="i4" >0</var>
+    <var name="s_intMaxConf" type="i4" >1</var>
+    <var name="s_longTotalCalls" type="i8" >0</var>
+    <var name="s_longTotalSuccess" type="i8" >0</var>
+    <var name="s_longTotalFailure" type="i8" >0</var>
+    <var name="s_longLoadTestID" type="i8" >0</var>
+    <var name="s_intPacketizationPeriod" type="i4" >20</var>
+    <var name="s_strMSType" type="string" >CONV</var>
+    <var name="s_intMaxDurationAllowed" type="i4" >168000</var>
+    <var name="s_strDataSource" type="string" >psprd1</var>
+    <var name="s_longTotalCurrentCalls" type="i8" >0</var>
+    <var name="s_lServiceProviderID" type="i8" >1</var>
+    <var name="s_lServiceID" type="i8" >4</var>
+    <var name="s_lOfferingID" type="i8" >4</var>
+    <var name="s_intMaxWaitBeforeStart" type="i4" >15</var>
+    <var name="s_bPlayTone" type="boolean" >1</var>
+    <var name="s_oModArray" type="object" ></var>
+    <var name="s_intSiteId" type="i4" >2</var>
+  </shared-vars>
+  <functions >
+    <function name="OnSessionStart" start="37" event="OnSessionStart" returns="void" >
+      <parameters >
+        <parameter name="strSessionId" type="string"/>
+        <parameter name="nIteration" type="i4"/>
+      </parameters>
+      <local-vars >
+        <var name="f_oDigit" type="object" ></var>
+        <var name="f_strDigits" type="string" ></var>
+        <var name="f_strPassCode" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="37" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=19 y=86 ?>
+          <sleep duration="g_intRandomSleepTime"/>
+          <results >
+            <result name="Default" link="34" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[// var tokenmatch = /(\d+).(\w+)/;
+// var id = Session._sessionId;
+// var second = id.match(tokenmatch);
+// Session.g_intRandomSleepTime = second[1];
+// Server.logInfo("SESSION NUMBER IS: " + second[1]);
+// Server.logInfo("SLEEP TIME IS: " + Session.g_intRandomSleepTime);
+Server.lockSharedVariables();
+	Session.s_longTotalCalls++;
+Server.unlockSharedVariables();
+Session.g_intRandomSleepTime = (Math.random() * Session.s_intMaxWaitBeforeStart);
+Session.g_intPromptNumber = Session.nIteration;
+
+Session.g_strRemoteUri = Session.s_strConferenceAppURI ;
+
+Session.g_strContact = "sip:" + Server.sipAddress;
+if( Server.sipPort != 5060 )
+{
+ Session.g_strContact += ":" + Server.sipPort;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Pactolus.MGCPCreate.1" ><?xtml-editor x=516 y=106 ?>
+          <crcx callid="g_strMSCallId" remote-sdp="" mode="inactive" capability="2" returns="g_intReturnCode" endpoint="g_strMSEndPoint" connection-id="g_strMSConnectionId" local-sdp="g_strMSSDP" packetization-period="s_intPacketizationPeriod" codec="0" timeout="s_intTimeout" local-connection-options="" second-endpoint-id="" telephone-events="0" ms-type="" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </crcx>
+          <results >
+            <result name="Default" link="36" stubbed="1"/>
+            <result name="Success" link="4" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO CRCX MS CONNECTION, EXIT ON: " + Result.name);
+	Server.logError("ERROR: callToConference.OnSessionStart.1: FAILED TO CREATE MS CONNECTION.");
+	Server.lockSharedVariables();
+		Session.s_longTotalFailure++;
+	Server.unlockSharedVariables();	
+	
+	
+} else {
+
+Server.logInfo("INFO: callToConference.OnSessionStart.3: SUCCESSFUL CREATE MS CONNECTION.");
+Server.logInfo("INFO: callToConference.OnSessionStart.3: MS CALL ID: " + Session.g_strMSCallId);
+Server.logInfo("INFO: callToConference.OnSessionStart.3: MS CONNECTION ID: " + Session.g_strMSConnectionId);
+Server.logInfo("INFO: callToConference.OnSessionStart.3: MS ENDPOINT: " + Session.g_strMSEndPoint);
+Session.g_boolConnectedToMS = true;
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.SipInvite.1" ><?xtml-editor x=35 y=206 ?>
+          <!--CALL to conference app-->
+          <sip-invite add-record-route="0" add-via="1" handle-responses="0" follow-redirection="0" final-response-status="" response-content="" response-content-type="" final-request-uri="" timeout-for-final-response="" timeout-for-provisional-response="" record-route="" contact="" response-to="" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_strCallIdA</call-id>
+            <contact >g_strContact</contact>
+            <content >g_strMSSDP</content>
+            <content-type >s_strContentType</content-type>
+            <cseq >g_strCSeqA</cseq>
+            <from >g_strFrom</from>
+            <request-uri >g_strRemoteUri</request-uri>
+            <to >g_strTo</to>
+          </sip-invite>
+          <results >
+            <result name="Default" link="36" stubbed="1"/>
+            <result name="Success" link="8" stubbed="0"/>
+            <result name="Redirect (3xx)"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Provisional Timeout"/>
+            <result name="Final Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.enableEvents(false);
+Session.g_strTo = "sip:" + Session.s_strAccessNumber + "@" + Session.s_strConferenceAppIP;
+Session.g_strFrom = "<sip:" + Session.s_strANI + "@" + Session.s_strSIPaddress + ">;tag=" + Server.getUTCTime();
+Session.g_strCallIdA = Server.getUTCTime() + "_" + Session._sessionId;
+var cseq = new SipCSeq();
+cseq.value = 1000;
+cseq.method = "INVITE";
+Session.g_strCSeqA = cseq.encode();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND INVITE TO CONFERENCE, EXIT ON: " + Result.name);
+	Server.logError("ERROR: TO : " + Session.g_strTo);
+	Server.logError("ERROR: FROM : " + Session.g_strFrom);
+	Server.logError("ERROR: URI : " + Session.s_strConferenceAppURI);
+	Server.logError("ERROR: CALL ID : " + Session.g_strCallIdA);
+	Server.logError("ERROR: CSEQ : " + Session.g_strCSeqA);
+	Server.logError("ERROR: callToConference.OnSessionStart.4: FAILED TO SEND INVITE TO CONFERENCE.");
+	Server.lockSharedVariables();
+		Session.s_longTotalFailure++;
+	Server.unlockSharedVariables();	
+} else {
+
+	Server.logInfo("INFO: callToConference.OnSessionStart.7: SUCCESSFUL SEND INVITE TO CONFERENCE");
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=226 y=299 ?>
+          <!--wait for response-->
+          <function name="&quot;WaitForResponse&quot;" return="g_intReturnCode" external-function="0" library="" >
+            <parameter >s_intTimeout</parameter>
+            <parameter >g_strCallIdA</parameter>
+            <parameter >g_strCSeqA</parameter>
+          </function>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+          </results>
+        </action>
+        <action id="9" plug-in="Pactolus.Branch.1" ><?xtml-editor x=445 y=262 ?>
+          <!--what is the response?-->
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+            <result name="&gt; 200" link="11" stubbed="0" >g_intReturnCode &gt; 200</result>
+            <result name="200" link="12" stubbed="0" >g_intReturnCode == 200</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.enableEvents(true);]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Pactolus.SipCancel.1" ><?xtml-editor x=755 y=113 ?>
+          <!--stop retransmission of INVITE-->
+          <sip-bye add-record-route="0" add-via="0" handle-responses="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_strCallIdA</call-id>
+            <contact >g_strFrom</contact>
+            <cseq >g_strCSeqA</cseq>
+            <from >g_strFrom</from>
+            <request-uri >s_strConferenceAppURI</request-uri>
+            <to >g_strTo</to>
+            <via >s_strVia</via>
+          </sip-bye>
+          <results >
+            <result name="Default" link="36" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strTo += ";tag=callToConference";
+Server.lockSharedVariables();
+	Session.s_longTotalFailure++;
+Server.unlockSharedVariables();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND CANCEL, EXIT ON: " + Result.name);
+	Server.logError("ERROR: TO : " + Session.g_strTo);
+	Server.logError("ERROR: FROM : " + Session.g_strFrom);
+	Server.logError("ERROR: URI : " + Session.s_strConferenceAppURI);
+	Server.logError("ERROR: CALL ID : " + Session.g_strCallIdA);
+	Server.logError("ERROR: CSEQ : " + Session.g_strCSeqA);
+	Server.logError("ERROR: callToConference.OnSessionStart.10: FAILED TO SEND CANCEL");
+} else {
+	Server.logError("ERROR: callToConference.OnSessionStart.10: NO RESPONSE FOR INVITE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Pactolus.SipAck.1" ><?xtml-editor x=749 y=324 ?>
+          <!--ACK TO FINAL RESPONSE-->
+          <sip-ack add-record-route="0" add-via="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_strCallIdA</call-id>
+            <contact >g_strFrom</contact>
+            <cseq >g_strCSeqA</cseq>
+            <from >g_strFrom</from>
+            <request-uri >g_strRemoteUri</request-uri>
+            <to >g_strToFromResponse</to>
+          </sip-ack>
+          <results >
+            <result name="Default" link="36" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.lockSharedVariables();
+	Session.s_longTotalFailure++;
+Server.unlockSharedVariables();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND ACK, EXIT ON: " + Result.name);
+	Server.logError("ERROR: TO : " + Session.g_strToFromResponse);
+	Server.logError("ERROR: FROM : " + Session.g_strFrom);
+	Server.logError("ERROR: URI : " + Session.s_strConferenceAppURI);
+	Server.logError("ERROR: CALL ID : " + Session.g_strCallIdA);
+	Server.logError("ERROR: CSEQ : " + Session.g_strCSeqA);
+	Server.logError("ERROR: callToConference.OnSessionStart.11: FAILED TO SEND ACK");	
+} else {
+	Server.logError("ERROR: callToConference.OnSessionStart.11: NON 200 OK RESPONSE FOR INVITE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Pactolus.SipAck.1" ><?xtml-editor x=629 y=450 ?>
+          <!--ACK TO 200 OK-->
+          <sip-ack add-record-route="0" add-via="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_strCallIdA</call-id>
+            <contact >g_strFrom</contact>
+            <cseq >g_strCSeqA</cseq>
+            <from >g_strFrom</from>
+            <request-uri >g_strRemoteUri</request-uri>
+            <to >g_strToFromResponse</to>
+          </sip-ack>
+          <results >
+            <result name="Default" link="21" stubbed="0"/>
+            <result name="Success" link="17" stubbed="0"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND BYE, EXIT ON: " + Result.name);
+	Server.logError("ERROR: TO : " + Session.g_strToFromResponse);
+	Server.logError("ERROR: FROM : " + Session.g_strFrom);
+	Server.logError("ERROR: URI : " + Session.s_strConferenceAppURI);
+	Server.logError("ERROR: CALL ID : " + Session.g_strCallIdA);
+	Server.logError("ERROR: CSEQ : " + Session.g_strCSeqA);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="17" plug-in="Pactolus.MGCPModify.1" ><?xtml-editor x=40 y=621 ?>
+          <!--JS First: increase seq for next use-->
+          <mdcx connection-id="g_strMSConnectionId" endpoint="g_strMSEndPoint" callid="g_strMSCallId" returns="g_intReturnCode" remote-sdp="g_strConferenceSDP" mode="send/receive" packetization-period="s_intPacketizationPeriod" codec="0" timeout="s_intTimeout" local-connection-options="" second-endpoint-id="" ms-type="" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </mdcx>
+          <results >
+            <result name="Default" link="24" stubbed="0"/>
+            <result name="Success" link="18" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var cseq = new SipCSeq(Session.g_strCSeqA);
+cseq.increment();
+Session.g_strCSeqA = cseq.encode();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO MDCX MS CONNECTION, EXIT ON: " + Result.name);
+	Server.logError("ERROR: MS CALL ID : " + Session.g_strMSCallId);
+	Server.logError("ERROR: MS CONNECTION ID : " + Session.g_strMSConnectionId);
+	Server.logError("ERROR: MS END POINT : " + Session.g_strMSEndPoint);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="18" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=275 y=727 ?>
+          <!--6 sec-->
+          <sleep duration="6"/>
+          <results >
+            <result name="Default" link="43" stubbed="0"/>
+          </results>
+        </action>
+        <action id="21" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=870 y=476 ?>
+          <!--HangUp-->
+          <function name="&quot;HangUp&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="36" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: callToConference.OnSessionStart.21: FAILED TO SEND ACK");
+Server.lockSharedVariables();
+	Session.s_longTotalFailure++;
+Server.unlockSharedVariables();]]></script>
+          </scripts>
+        </action>
+        <action id="24" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=278 y=630 ?>
+          <!--HangUp-->
+          <function name="&quot;HangUp&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="36" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: callToConference.OnSessionStart.24: FAILED MODIFY MS CONNECTION");
+Server.lockSharedVariables();
+	Session.s_longTotalFailure++;
+Server.unlockSharedVariables();]]></script>
+          </scripts>
+        </action>
+        <action id="30" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1251 y=667 ?>
+          <return value=""/>
+        </action>
+        <action id="34" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=274 y=110 ?>
+          <!--get a passcode-->
+          <function name="&quot;psAPIgetConfPassCode&quot;" return="g_intReturnCode" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="36" stubbed="1"/>
+            <result name="g_intReturnCode == 0" link="1" stubbed="0" >g_intReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if(Result.id == 1) {
+	Server.logError("ERROR: callToConference.OnSessionStart.34: FAILED TO GET A PASSCODE.");
+	Server.lockSharedVariables();
+		Session.s_longTotalFailure++;
+	Server.unlockSharedVariables();
+}]]></script>
+          </scripts>
+        </action>
+        <action id="36" plug-in="Standard.EndSession.1" ><?xtml-editor x=44 y=855 ?></action>
+        <action id="43" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=521 y=674 ?>
+          <!--JS First: parse passcode, play passcode-->
+          <play connection-id="g_strMSConnectionId" endpoint="g_strMSEndPoint" callid="g_strMSCallId" repeat="1" timeout="s_intTimeout" ms-type="s_strMSType" returns="g_intReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >f_oDigit[0]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[1]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[2]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[3]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[4]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[5]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[6]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[7]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[8]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[9]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[10]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[11]</audio>
+          </play>
+          <results >
+            <result name="Default" link="36" stubbed="1"/>
+            <result name="Success" link="45" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="mod passcode?" link="45" stubbed="1" >f_strPassCode match g_strModPassCode</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.lockSharedVariables();
+	Session.s_longTotalCurrentCalls++;
+	if(Session.g_bUseModPassCode) {
+		Session.f_strPassCode = Session.g_strACDPassCode;
+		Server.logInfo("HAU: Use ACD pascode: " + Session.f_strPassCode + " endpoint: " + Session.g_strMSEndPoint );
+	} else {
+		Session.f_strPassCode = Session.g_strACDPassCode;
+		Server.logInfo("HAU: Use ACD pascode: " + Session.f_strPassCode + " endpoint: " + Session.g_strMSEndPoint );
+	}
+Server.unlockSharedVariables();
+
+
+
+for (var i = 0; i < 12; i++)
+{
+	Session.f_oDigit[i] = 99;
+}
+for (var i = 0; i < Session.f_strPassCode.length; i++)
+{
+	switch (Session.f_strPassCode.charAt(i))
+	{
+		case "0":
+			Session.f_oDigit[i] = 200;
+			break;
+		case "1":
+			Session.f_oDigit[i] = 201;
+			break;
+		case "2":
+			Session.f_oDigit[i] = 202;
+			break;
+		case "3":
+			Session.f_oDigit[i] = 203;
+			break;
+		case "4":
+			Session.f_oDigit[i] = 204;
+			break;
+		case "5":
+			Session.f_oDigit[i] = 205;
+			break;
+		case "6":
+			Session.f_oDigit[i] = 206;
+			break;
+		case "7":
+			Session.f_oDigit[i] = 207;
+			break;
+		case "8":
+			Session.f_oDigit[i] = 208;
+			break;
+		case "9":
+			Session.f_oDigit[i] = 209;
+			break;
+		default:
+			Session.f_oDigit[i] = 99;
+			break;
+	}
+}
+//terminate with pound key
+Session.f_oDigit[Session.f_strPassCode.length] = 211 ;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2 && Result.id != 5)
+{
+	Server.logError("ERROR: FAIL TO PLAY PASSCODE, EXIT ON: " + Result.name);
+	Server.logError("ERROR: MS CALL ID : " + Session.g_strMSCallId);
+	Server.logError("ERROR: MS CONNECTION ID : " + Session.g_strMSConnectionId);
+	Server.logError("ERROR: MS END POINT : " + Session.g_strMSEndPoint);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="44" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=997 y=668 ?>
+          <!--play # for ID-->
+          <play connection-id="g_strMSConnectionId" endpoint="g_strMSEndPoint" callid="g_strMSCallId" repeat="1" timeout="s_intTimeout" ms-type="s_strMSType" returns="g_intReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >211</audio>
+          </play>
+          <results >
+            <result name="Default" link="30" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="45" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=760 y=669 ?>
+          <!--3 secs-->
+          <sleep duration="3"/>
+          <results >
+            <result name="Default" link="44" stubbed="0"/>
+          </results>
+        </action>
+        <action id="46" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=522 y=844 ?>
+          <!--JS First: parse passcode, play passcode-->
+          <play connection-id="g_strMSConnectionId" endpoint="g_strMSEndPoint" callid="g_strMSCallId" repeat="1" timeout="s_intTimeout" ms-type="s_strMSType" returns="g_intReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >f_oDigit[0]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[1]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[2]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[3]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[4]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[5]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[6]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[7]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[8]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[9]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[10]</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >f_oDigit[11]</audio>
+          </play>
+          <results >
+            <result name="Default" link="36" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="mod passcode?" >f_strPassCode match g_strModPassCode</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.lockSharedVariables();
+	Session.s_longTotalCurrentCalls++;
+	if(Session.s_longTotalCurrentCalls == 1) {
+		Session.f_strPassCode = Session.g_strModPassCode;
+		Server.logInfo("Use moderator pascode: " + Session.f_strPassCode + " endpoint: " + Session.g_strMSEndPoint );
+	} else {
+		Session.f_strPassCode = Session.g_strPassCode;
+		Server.logInfo("Use participant pascode: " + Session.f_strPassCode + " endpoint: " + Session.g_strMSEndPoint );
+	} 		
+
+	if(0 == Session.g_intCurrentModCount) {
+		Session.f_strPassCode = Session.g_strModPassCode;
+		Server.logInfo("Use moderator pascode: " + Session.f_strPassCode + " endpoint: " + Session.g_strMSEndPoint );
+	} else {
+		Session.f_strPassCode = Session.g_strPassCode;
+		Server.logInfo("Use participant pascode: " + Session.f_strPassCode + " endpoint: " + Session.g_strMSEndPoint );
+	} 
+		
+Server.unlockSharedVariables();
+
+
+
+for (var i = 0; i < 11; i++)
+{
+	Session.f_oDigit[i] = 99;
+}
+for (var i = 0; i < Session.f_strPassCode.length; i++)
+{
+	switch (Session.f_strPassCode.charAt(i))
+	{
+		case "0":
+			Session.f_oDigit[i] = 200;
+			break;
+		case "1":
+			Session.f_oDigit[i] = 201;
+			break;
+		case "2":
+			Session.f_oDigit[i] = 202;
+			break;
+		case "3":
+			Session.f_oDigit[i] = 203;
+			break;
+		case "4":
+			Session.f_oDigit[i] = 204;
+			break;
+		case "5":
+			Session.f_oDigit[i] = 205;
+			break;
+		case "6":
+			Session.f_oDigit[i] = 206;
+			break;
+		case "7":
+			Session.f_oDigit[i] = 207;
+			break;
+		case "8":
+			Session.f_oDigit[i] = 208;
+			break;
+		case "9":
+			Session.f_oDigit[i] = 209;
+			break;
+		default:
+			Session.f_oDigit[i] = 99;
+			break;
+	}
+}
+//terminate with pound key
+Session.f_oDigit[Session.f_strPassCode.length] = 211 ;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2 && Result.id != 5)
+{
+	Server.logError("ERROR: FAIL TO PLAY PASSCODE, EXIT ON: " + Result.name);
+	Server.logError("ERROR: MS CALL ID : " + Session.g_strMSCallId);
+	Server.logError("ERROR: MS CONNECTION ID : " + Session.g_strMSConnectionId);
+	Server.logError("ERROR: MS END POINT : " + Session.g_strMSEndPoint);
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="55" y-coord="24" width="336" height="62" text="Send invite to conference app and enter conference passcode.
+Will receive invite with conference SDP if passcode valid." font-name="Times New Roman" size="14" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="10" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="OnServiceLoad" start="3" event="OnServiceLoad" returns="void" >
+      <parameters >
+        <parameter name="strAppName" type="string"/>
+        <parameter name="nSessionCount" type="i2"/>
+        <parameter name="nMaxIterations" type="i2"/>
+        <parameter name="nServerId" type="i2"/>
+      </parameters>
+      <local-vars >
+        <var name="intReturnCode" type="i4" >-50</var>
+      </local-vars>
+      <actions >
+        <action id="3" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=47 y=107 ?>
+          <!--set ip and port, create conference-->
+          <java class="&quot;com.pactolus.psAPILoadTest&quot;" method="&quot;createEventConferences&quot;" timeout="3600" return="" method-return-var="intReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="i4" >s_intMaxConf</parameter>
+            <parameter type="in" var-type="i8" >s_lServiceProviderID</parameter>
+            <parameter type="in" var-type="i8" >s_lServiceID</parameter>
+            <parameter type="in" var-type="i8" >s_lOfferingID</parameter>
+            <parameter type="in" var-type="string" >s_strAccessNumber</parameter>
+            <parameter type="in" var-type="i4" >s_intSiteId</parameter>
+          </java>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="Success" link="2" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.s_strSIPaddress = Server.ipAddress;
+if (Server.sipPort != 5060)
+{
+	Session.s_strSIPaddress += ":" + Server.sipPort;
+}
+Session.s_strVia = "SIP/2.0/UDP " + Session.s_strSIPaddress;
+Session.s_strConferenceAppURI = "sip:" + Session.s_strAccessNumber + "@" + Session.s_strConferenceAppIP + " SIP/2.0";
+Session.s_intPlayDTMFTime = Session.s_intPlayDTMFTime + Clib.floor((40 / 32000)*Clib.rand());
+
+
+Server.logInfo("INFO: callToConference.OnServiceLoad.3: CREATE CONFERENCE.");
+Server.logInfo("Number of conferences to create: " + Session.s_intMaxConf);
+Server.logInfo("HAU: Initialize moderator array");
+for (var i = 0; i < Session.s_intMaxConf; i++)
+{
+	Session.s_oModArray[i] = 0;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("INFO: callToConference.OnServiceLoad.3: CREATE CONFERENCE.");
+Server.logInfo("*********JAVA RETURN*********");
+Server.logInfo("psAPILoadTest.createConferences returned " + Session.intReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO CALL JAVA CREATE CONFERENCE, EXIT ON: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=346 y=282 ?>
+          <return value=""/>
+        </action>
+        <action id="5" plug-in="Standard.EndSession.1" ><?xtml-editor x=325 y=79 ?></action>
+      </actions>
+    </function>
+    <function name="WaitForResponse" start="1" event="WaitForResponse" returns="i4" >
+      <parameters >
+        <parameter name="intTimeout" type="i4"/>
+        <parameter name="strCallId" type="string"/>
+        <parameter name="strCSeq" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="intStatus" type="i4" >0</var>
+        <var name="longCurrentTime" type="i8" >0</var>
+        <var name="intSecondRemaining" type="i4" >0</var>
+        <var name="strContact" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=53 y=162 ?>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.intSecondRemaining = Session.intTimeout;
+Session.longCurrentTime = Server.getUTCTime();]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.WaitEvent.1" ><?xtml-editor x=304 y=157 ?>
+          <!--wait for response-->
+          <wait timeout="intSecondRemaining" recv-name="g_strEvtReceive" >
+            <msg name="Pactolus.EveSipResponse.1" >
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter >g_strCallId</parameter>
+              <parameter ></parameter>
+              <parameter >strContact</parameter>
+              <parameter >g_strConferenceSDP</parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter >g_strCSeq</parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter >g_strStatus</parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter >g_strToFromResponse</parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+            </msg>
+          </wait>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success" link="8" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strStatus = "";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO WAIT FOR RESPONSE, EXIT ON: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=538 y=157 ?>
+          <!---1-->
+          <return value="-1"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: callToConference.WaitForResponse.3: TIMEOUT OR ERROR");]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.Branch.1" ><?xtml-editor x=788 y=395 ?>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="1XX" link="2" stubbed="0" >intStatus &lt; 200</result>
+            <result name="NON 200" link="6" stubbed="0" >intStatus &gt; 200</result>
+            <result name="200" link="7" stubbed="0" >intStatus == 200</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var status = new SipStatus(Session.g_strStatus);
+Session.intStatus = status.code;
+Session.intSecondRemaining -= (Server.getUTCTime() - Session.longCurrentTime);
+Session.longCurrentTime = Server.getUTCTime();]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1028 y=389 ?>
+          <!--UNKNOWN RESPONSE-->
+          <return value="intStatus"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: callToConference.WaitForResponse.5: UNKNOWN STATUS");
+Server.logError("ERROR: CALL ID: " + Session.g_strCallId);
+Server.logError("ERROR: CSEQ: " + Session.g_strCSeq);
+Server.logError("ERROR: STATUS: " + Session.g_strStatus);
+Server.logError("ERROR: EVENT RECEIVED: " + Session.g_strEvtReceive);]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1028 y=463 ?>
+          <!--NON 200 OK RESPONSE-->
+          <return value="intStatus"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: callToConference.WaitForResponse.6: NON 200 OK STATUS");
+Server.logError("ERROR: CALL ID: " + Session.g_strCallId);
+Server.logError("ERROR: CSEQ: " + Session.g_strCSeq);
+Server.logError("ERROR: STATUS: " + Session.g_strStatus);
+Server.logError("ERROR: EVENT RECEIVED: " + Session.g_strEvtReceive);
+
+Session.g_strRemoteUri = Session.strContact ;]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1034 y=547 ?>
+          <!--200 OK RESPONSE-->
+          <return value="intStatus"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("INFO: callToConference.WaitForResponse.7: 200 OK STATUS");
+Server.logInfo("INFO: CALL ID: " + Session.g_strCallId);
+Server.logInfo("INFO: CSEQ: " + Session.g_strCSeq);
+Server.logInfo("INFO: STATUS: " + Session.g_strStatus);
+Server.logInfo("INFO: EVENT RECEIVED: " + Session.g_strEvtReceive);
+
+Session.g_strRemoteUri = Session.strContact ;]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Pactolus.Branch.1" ><?xtml-editor x=544 y=235 ?>
+          <!--same call id and cseq?-->
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="same" link="4" stubbed="0" >strCallId match g_strCallId
+AND strCSeq match g_strCSeq</result>
+          </results>
+        </action>
+        <action id="9" plug-in="Pactolus.Branch.1" ><?xtml-editor x=770 y=158 ?>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: callToConference.WaitForResponse.9: Callid or CSeq mismatch" );
+Server.logError("ERROR: callToConference.WaitForResponse.9: expected callid: " + Session.strCallId);
+Server.logError("ERROR: callToConference.WaitForResponse.9: expected CSeq: " + Session.strCSeq);
+Server.logError("ERROR: callToConference.WaitForResponse.9: got callid: " + Session.g_strCallId);
+Server.logError("ERROR: callToConference.WaitForResponse.9: got CSeq: " + Session.g_strCSeq);]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="HangUp" start="1" event="HangUp" returns="void" >
+      <actions >
+        <action id="1" plug-in="Pactolus.SipBye.1" ><?xtml-editor x=150 y=42 ?>
+          <sip-bye add-record-route="0" add-via="1" timeout="s_intTimeout" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_strCallIdA</call-id>
+            <contact >g_strFrom</contact>
+            <cseq >g_strCSeqA</cseq>
+            <from >g_strFrom</from>
+            <request-uri >g_strRemoteUri</request-uri>
+            <to >g_strTo</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND BYE, EXIT ON: " + Result.name);
+	Server.logError("ERROR: TO : " + Session.g_strTo);
+	Server.logError("ERROR: FROM : " + Session.g_strFrom);
+	Server.logError("ERROR: URI : " + Session.s_strConferenceAppURI);
+	Server.logError("ERROR: CALL ID : " + Session.g_strCallIdA);
+	Server.logError("ERROR: CSEQ : " + Session.g_strCSeqA);
+	Server.logError("ERROR: callToConference.HangUp.1: FAILED TO SEND BYE.");	
+} else {
+	Server.logInfo("INFO: callToConference.HangUp.2: SUCCESS SEND BYE.");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=321 y=181 ?>
+          <return value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="OnBye" start="1" event="OnBye" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string"/>
+        <parameter name="strAcceptEncoding" type="string"/>
+        <parameter name="strAcceptLanguage" type="string"/>
+        <parameter name="strAllow" type="string" pass="byref"/>
+        <parameter name="strAllowEvents" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string"/>
+        <parameter name="strCallId" type="string"/>
+        <parameter name="strCSeq" type="string"/>
+        <parameter name="strDate" type="string"/>
+        <parameter name="strEncryption" type="string"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string"/>
+        <parameter name="strMaxForwards" type="string"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string"/>
+        <parameter name="strProxyRequire" type="string"/>
+        <parameter name="strRecordRoute" type="string"/>
+        <parameter name="strReferredBy" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string"/>
+        <parameter name="strRequire" type="string"/>
+        <parameter name="strResponseKey" type="string"/>
+        <parameter name="strRoute" type="string"/>
+        <parameter name="strSupported" type="string"/>
+        <parameter name="strTimestamp" type="string"/>
+        <parameter name="strTo" type="string"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=79 y=140 ?>
+          <!--200 OK-->
+          <sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 200 OK"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: GOT A BYE FROM CONFERENCE APP");
+Server.logError("ERROR: EITHER THE PASSCODE DOES NOT GET THERE CORRECTLY");
+Server.logError("ERROR: OR INVALID PASSCODE: " + Session.g_strPassCode);
+Server.logError("ERROR: OR CAN'T ADD TO CONFERENCE FOR SOME OTHER REASON");
+Server.lockSharedVariables();
+	Session.s_longTotalFailure++;
+Server.unlockSharedVariables();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO RESPONSE 200 OK, EXIT ON: " + Result.name);
+	Server.logError("ERROR: TO : " + Session.strTo);
+	Server.logError("ERROR: FROM : " + Session.strFrom);
+	Server.logError("ERROR: CALL ID : " + Session.strCallId);
+	Server.logError("ERROR: CSEQ : " + Session.strCSeq);
+	Server.logError("ERROR: callToConference.OnBye.2: FAILED TO RESPONSE 200 OK");	
+}]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.EndSession.1" ><?xtml-editor x=343 y=172 ?></action>
+      </actions>
+    </function>
+    <function name="OnSessionEnd" start="6" event="OnSessionEnd" returns="void" >
+      <parameters >
+        <parameter name="nSessionEndReason" type="i2"/>
+      </parameters>
+      <actions >
+        <action id="6" plug-in="Pactolus.Branch.1" ><?xtml-editor x=26 y=40 ?>
+          <!--connected to MS?-->
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="ConnectedToMS" link="1" stubbed="0" >g_boolConnectedToMS == true</result>
+          </results>
+        </action>
+        <action id="1" plug-in="Pactolus.MGCPDelete.1" ><?xtml-editor x=190 y=224 ?>
+          <dlcx connection-id="g_strMSConnectionId" endpoint="g_strMSEndPoint" callid="g_strMSCallId" timeout="s_intTimeout" returns="g_intReturnCode" ms-type="" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </dlcx>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO DELETE MS CONNECTION, EXIT ON: " + Result.name);
+	Server.logError("ERROR: MS CALL ID : " + Session.g_strMSCallId);
+	Server.logError("ERROR: MS CONNECTION ID : " + Session.g_strMSConnectionId);
+	Server.logError("ERROR: MS END POINT : " + Session.g_strMSEndPoint);
+	Server.logError("ERROR: callToConference.OnSessionEnd.1: FAILED TO DELETE MS CONNECTION");	
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=669 y=126 ?>
+          <return value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if (0 == Session.s_longTotalCalls % 20)
+{
+	Server.logError("CURRENT TOTAL CALLS: " + Session.s_longTotalCalls);
+	Server.logError("CURRENT SUCCESS CALLS: " + Session.s_longTotalSuccess);
+	Server.logError("CURRENT FAILURE CALLS: " + Session.s_longTotalFailure);
+}
+
+if (Session.g_bIamMod)
+{
+	Server.lockSharedVariables();
+	Session.s_oModArray;
+	Session.s_oModArray[Session.g_intCurrentlyInArray] = 0;
+	Server.unlockSharedVariables();
+	Server.logInfo("HAU: Reset mod flag");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=418 y=125 ?>
+          <!--stop timers-->
+          <function name="&quot;StopTimers&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="OnTimer" start="1" event="OnTimer" returns="void" >
+      <parameters >
+        <parameter name="nTimerId" type="i4"/>
+      </parameters>
+      <local-vars >
+        <var name="f_intRandNumber" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=6 y=251 ?>
+          <!--which timer-->
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+            <result name="play DTMF" link="11" stubbed="0" >nTimerId == g_longPlayDTMFTimerID</result>
+            <result name="call Duration" link="15" stubbed="0" >nTimerId == g_longDurationTimerID</result>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.EndSession.1" ><?xtml-editor x=737 y=542 ?></action>
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=491 y=543 ?>
+          <!--HangUp-->
+          <function name="&quot;HangUp&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.lockSharedVariables();
+	Session.s_longTotalSuccess++;
+Server.unlockSharedVariables();]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=479 y=150 ?>
+          <!--play DTMF-->
+          <play connection-id="g_strMSConnectionId" endpoint="g_strMSEndPoint" callid="g_strMSCallId" repeat="1" timeout="s_intTimeout" ms-type="s_strMSType" returns="g_intReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="number" >g_intPromptNumber</audio>
+            <audio type="index" >225</audio>
+            <audio type="index" >226</audio>
+            <audio type="silence" >0.5</audio>
+            <audio type="index" >227</audio>
+            <audio type="index" >228</audio>
+            <audio type="silence" >0.5</audio>
+            <audio type="index" >229</audio>
+            <audio type="index" >230</audio>
+          </play>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY PROMPT, EXIT ON : " + Result.name);
+	Server.logError("ERROR: MS CALL ID: " + Session.g_strMSCallId);
+	Server.logError("ERROR: MS CONNECTION ID: " + Session.g_strMSConnectionId);
+	Server.logError("ERROR: MS END POINT: " + Session.g_strMSEndPoint);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.Timer.1" ><?xtml-editor x=769 y=170 ?>
+          <!--play DTMF-->
+          <timer start="1" id="g_longPlayDTMFTimerID" duration="f_intRandNumber"/>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_intRandNumber = 10 + Clib.floor((30 / 32000)*Clib.rand());]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.g_boolPlayDTMFTimerStarted = true;]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=34 y=637 ?>
+          <return value=""/>
+        </action>
+        <action id="10" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=467 y=21 ?>
+          <!--play DTMF-->
+          <play connection-id="g_strMSConnectionId" endpoint="g_strMSEndPoint" callid="g_strMSCallId" repeat="1" timeout="s_intTimeout" ms-type="s_strMSType" returns="g_intReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >0.5</audio>
+            <audio type="index" >231</audio>
+            <audio type="index" >232</audio>
+            <audio type="silence" >0.5</audio>
+            <audio type="index" >233</audio>
+            <audio type="index" >234</audio>
+          </play>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY PROMPT, EXIT ON : " + Result.name);
+	Server.logError("ERROR: MS CALL ID: " + Session.g_strMSCallId);
+	Server.logError("ERROR: MS CONNECTION ID: " + Session.g_strMSConnectionId);
+	Server.logError("ERROR: MS END POINT: " + Session.g_strMSEndPoint);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Pactolus.Branch.1" ><?xtml-editor x=262 y=171 ?>
+          <!--CONV-->
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="CONV" link="14" stubbed="0" >s_strMSType match "CONV"</result>
+          </results>
+        </action>
+        <action id="14" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=471 y=305 ?>
+          <!--play DTMF-->
+          <play connection-id="g_strMSConnectionId" endpoint="g_strMSEndPoint" callid="g_strMSCallId" repeat="1" timeout="s_intTimeout" ms-type="s_strMSType" returns="g_intReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="number" >g_intPromptNumber</audio>
+            <audio type="index" >225</audio>
+            <audio type="index" >226</audio>
+            <audio type="index" >99</audio>
+            <audio type="index" >227</audio>
+            <audio type="index" >228</audio>
+            <audio type="index" >99</audio>
+            <audio type="index" >229</audio>
+            <audio type="index" >230</audio>
+          </play>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY PROMPT, EXIT ON : " + Result.name);
+	Server.logError("ERROR: MS CALL ID: " + Session.g_strMSCallId);
+	Server.logError("ERROR: MS CONNECTION ID: " + Session.g_strMSConnectionId);
+	Server.logError("ERROR: MS END POINT: " + Session.g_strMSEndPoint);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=279 y=547 ?>
+          <sleep duration="g_intRandomSleepTime"/>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_intRandomSleepTime = (Math.random() * Session.s_intMaxWaitBeforeStart);]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="StopTimers" start="1" event="StopTimers" returns="void" >
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=15 y=37 ?>
+          <!--playDTMF?-->
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="playDTMFTimerStarted?" link="2" stubbed="0" >g_boolPlayDTMFTimerStarted == true</result>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.Timer.1" ><?xtml-editor x=189 y=159 ?>
+          <!--stop play DTMF-->
+          <timer start="0" id="g_longPlayDTMFTimerID" duration=""/>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+          </results>
+        </action>
+        <action id="3" plug-in="Pactolus.Branch.1" ><?xtml-editor x=368 y=46 ?>
+          <!--callDuration?-->
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="callDurationTimerStarted?" link="4" stubbed="0" >g_boolDurationTimerStarted == true</result>
+          </results>
+        </action>
+        <action id="4" plug-in="Standard.Timer.1" ><?xtml-editor x=529 y=200 ?>
+          <!--stop call duration timer-->
+          <timer start="0" id="g_longDurationTimerID" duration=""/>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+          </results>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=758 y=123 ?>
+          <return value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="OnInvite" start="11" event="OnInvite" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string"/>
+        <parameter name="strAcceptEncoding" type="string"/>
+        <parameter name="strAcceptLanguage" type="string"/>
+        <parameter name="strAlertInfo" type="string" pass="byref"/>
+        <parameter name="strAllow" type="string" pass="byref"/>
+        <parameter name="strAllowEvents" type="string" pass="byref"/>
+        <parameter name="strAnonymity" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string"/>
+        <parameter name="strCallId" type="string"/>
+        <parameter name="strCallInfo" type="string" pass="byref"/>
+        <parameter name="strContact" type="string"/>
+        <parameter name="strContent" type="string"/>
+        <parameter name="strContentDisposition" type="string"/>
+        <parameter name="strContentEncoding" type="string" pass="byref"/>
+        <parameter name="strContentLanguage" type="string" pass="byref"/>
+        <parameter name="strContentType" type="string"/>
+        <parameter name="strCSeq" type="string"/>
+        <parameter name="strDate" type="string"/>
+        <parameter name="strEncryption" type="string"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strExpires" type="string"/>
+        <parameter name="strFrom" type="string"/>
+        <parameter name="strInReplyTo" type="string" pass="byref"/>
+        <parameter name="strMaxForwards" type="string"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strMinSE" type="string" pass="byref"/>
+        <parameter name="strOrganization" type="string" pass="byref"/>
+        <parameter name="strPriority" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string"/>
+        <parameter name="strProxyRequire" type="string"/>
+        <parameter name="strRecordRoute" type="string"/>
+        <parameter name="strReferredBy" type="string" pass="byref"/>
+        <parameter name="strRemotePartyID" type="string" pass="byref"/>
+        <parameter name="strReplaces" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string"/>
+        <parameter name="strRequire" type="string"/>
+        <parameter name="strResponseKey" type="string"/>
+        <parameter name="strRoute" type="string"/>
+        <parameter name="strSessionExpires" type="string"/>
+        <parameter name="strSubject" type="string"/>
+        <parameter name="strSupported" type="string"/>
+        <parameter name="strTimestamp" type="string"/>
+        <parameter name="strTo" type="string"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="bool_HOLD" type="boolean" >0</var>
+        <var name="strHOLDSDP" type="string" ></var>
+        <var name="f_intReturnCode" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="11" plug-in="Pactolus.Branch.1" ><?xtml-editor x=34 y=226 ?>
+          <!--HOLD?-->
+          <results >
+            <result name="Default" link="16" stubbed="0"/>
+            <result name="HOLD" link="12" stubbed="0" >strHOLDSDP match "0.0.0.0"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var content = new Sdp(Session.strContent.toString());
+Session.strHOLDSDP = content.connection.address;]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Pactolus.MGCPModify.1" ><?xtml-editor x=564 y=150 ?>
+          <mdcx connection-id="g_strMSConnectionId" endpoint="g_strMSEndPoint" callid="g_strMSCallId" returns="g_intReturnCode" remote-sdp="strContent" mode="send/receive" packetization-period="s_intPacketizationPeriod" codec="0" timeout="s_intTimeout" local-connection-options="" second-endpoint-id="" ms-type="" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </mdcx>
+          <results >
+            <result name="Default" link="19" stubbed="0"/>
+            <result name="Success" link="6" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO MDCX, EXIT ON: " + Result.name);
+	Server.logError("ERROR: MS CALL ID : " + Session.g_strMSCallId);
+	Server.logError("ERROR: MS CONNECTION ID : " + Session.g_strMSConnectionId);
+	Server.logError("ERROR: MS END POINT : " + Session.g_strMSEndPoint);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=48 y=1103 ?>
+          <return value=""/>
+        </action>
+        <action id="6" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=820 y=325 ?>
+          <!--200 OK-->
+          <sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <contact >g_strFrom</contact>
+            <content >g_strMSSDP</content>
+            <content-type >s_strContentType</content-type>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 200 OK"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="10" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: callToConference.OnInivite.6: FAILED TO RESPONSE 200 OK");
+	Server.logError("ERROR: FAIL TO RESPONSE 200 OK, EXIT ON: " + Result.name);
+	Server.logError("ERROR: TO : " + Session.strTo);
+	Server.logError("ERROR: FROM : " + Session.strFrom);
+	Server.logError("ERROR: CALL ID : " + Session.strCallId);
+	Server.logError("ERROR: CSEQ : " + Session.strCSeq);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.Timer.1" ><?xtml-editor x=282 y=529 ?>
+          <!--Duration of call-->
+          <timer start="1" id="g_longDurationTimerID" duration="g_intCallDuration"/>
+          <results >
+            <result name="Default" link="23" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_bFirstTimeAround = false;
+if (Session.g_bIamMod)
+{
+	Session.g_intCallDuration = (Session.s_intMaxWaitBeforeStart - Session.g_intRandomSleepTime) + Session.s_intDuration + 348;
+}
+else
+{
+	Session.g_intCallDuration = (Session.s_intMaxWaitBeforeStart - Session.g_intRandomSleepTime) + Session.s_intDuration;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.g_boolDurationTimerStarted = true;]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Pactolus.Branch.1" ><?xtml-editor x=37 y=527 ?>
+          <!--HOLD?-->
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="HOLD" link="5" stubbed="1" >strHOLDSDP match "0.0.0.0"</result>
+            <result name="!FirstTime" link="5" stubbed="1" >g_bFirstTimeAround == false</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var content = new Sdp(Session.strContent.toString());
+Session.strHOLDSDP = content.connection.address;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("Result.id from Branch Pac.10,OnInvite: " + Result.id);]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=329 y=332 ?>
+          <!--200 OK-->
+          <sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <contact >g_strFrom</contact>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 200 OK"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="10" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: callToConference.OnInivite.13: FAILED TO RESPONSE 200 OK");
+	Server.logError("ERROR: FAIL TO RESPONSE 200 OK, EXIT ON: " + Result.name);
+	Server.logError("ERROR: TO : " + Session.strTo);
+	Server.logError("ERROR: FROM : " + Session.strFrom);
+	Server.logError("ERROR: CALL ID : " + Session.strCallId);
+	Server.logError("ERROR: CSEQ : " + Session.strCSeq);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=315 y=153 ?>
+          <!--100 TRYING-->
+          <sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 100 Trying"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: callToConference.OnInivite.17: FAILED TO RESPONSE 100 TRYING");
+	Server.logError("ERROR: FAIL TO RESPONSE 100 TRYING, EXIT ON: " + Result.name);
+	Server.logError("ERROR: TO : " + Session.strTo);
+	Server.logError("ERROR: FROM : " + Session.strFrom);
+	Server.logError("ERROR: CALL ID : " + Session.strCallId);
+	Server.logError("ERROR: CSEQ : " + Session.strCSeq);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="19" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=800 y=112 ?>
+          <!--500 Internal Error-->
+          <sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 500 Server Internal Error"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="20" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: callToConference.OnInivite.4: FAILED TO MDCX");
+Server.lockSharedVariables();
+	Session.s_longTotalFailure++;
+Server.unlockSharedVariables();]]></script>
+          </scripts>
+        </action>
+        <action id="20" plug-in="Standard.EndSession.1" ><?xtml-editor x=1044 y=115 ?></action>
+        <action id="21" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=799 y=514 ?>
+          <!--play DTMF tones-->
+          <play connection-id="g_strMSConnectionId" endpoint="g_strMSEndPoint" callid="g_strMSCallId" repeat="1" timeout="s_intTimeout" ms-type="s_strMSType" returns="g_intReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="number" >g_intPromptNumber</audio>
+            <audio type="index" >225</audio>
+            <audio type="index" >226</audio>
+            <audio type="index" >99</audio>
+            <audio type="index" >227</audio>
+            <audio type="index" >228</audio>
+            <audio type="index" >99</audio>
+            <audio type="index" >229</audio>
+            <audio type="index" >230</audio>
+          </play>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="Success" link="22" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY PROMPT, EXIT ON : " + Result.name);
+	Server.logError("ERROR: MS CALL ID: " + Session.g_strMSCallId);
+	Server.logError("ERROR: MS CONNECTION ID: " + Session.g_strMSConnectionId);
+	Server.logError("ERROR: MS END POINT: " + Session.g_strMSEndPoint);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="22" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1061 y=513 ?>
+          <!--play silence-->
+          <play connection-id="g_strMSConnectionId" endpoint="g_strMSEndPoint" callid="g_strMSCallId" repeat="20" timeout="" ms-type="s_strMSType" returns="g_intReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >99</audio>
+            <audio type="index" >99</audio>
+            <audio type="index" >99</audio>
+            <audio type="index" >99</audio>
+            <audio type="index" >99</audio>
+            <audio type="index" >99</audio>
+            <audio type="index" >99</audio>
+            <audio type="index" >99</audio>
+            <audio type="index" >99</audio>
+          </play>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="Success" link="32" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY PROMPT, EXIT ON : " + Result.name);
+	Server.logError("ERROR: MS CALL ID: " + Session.g_strMSCallId);
+	Server.logError("ERROR: MS CONNECTION ID: " + Session.g_strMSConnectionId);
+	Server.logError("ERROR: MS END POINT: " + Session.g_strMSEndPoint);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="23" plug-in="Pactolus.Branch.1" ><?xtml-editor x=526 y=524 ?>
+          <!--play tone?-->
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="s_bPlayTone" link="21" stubbed="0" >s_bPlayTone == true</result>
+          </results>
+        </action>
+        <action id="24" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=35 y=705 ?>
+          <!--s_intSleepTime-->
+          <sleep duration="s_intSleepTime"/>
+          <results >
+            <result name="Default" link="25" stubbed="0"/>
+          </results>
+        </action>
+        <action id="25" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=284 y=705 ?>
+          <!--"MuteAllRequest"-->
+          <function name="&quot;MuteAllRequest&quot;" return="f_intReturnCode" external-function="1" library="lib_confMenu.xml" >
+            <parameter >g_strMSEndPoint</parameter>
+            <parameter >g_strMSConnectionId</parameter>
+            <parameter >g_strMSCallId</parameter>
+            <parameter >s_strMSType</parameter>
+          </function>
+          <results >
+            <result name="Default" link="26" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (-1 == Session.f_intReturnCode)
+	Server.logError("ERROR: FAILURE RETURN CODE FROM FUNCTION");]]></script>
+          </scripts>
+        </action>
+        <action id="26" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=541 y=707 ?>
+          <!--s_intSleepTime-->
+          <sleep duration="s_intSleepTime"/>
+          <results >
+            <result name="Default" link="27" stubbed="0"/>
+          </results>
+        </action>
+        <action id="27" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=792 y=705 ?>
+          <!--"UnmuteAllRequest"-->
+          <function name="&quot;UnmuteAllRequest&quot;" return="f_intReturnCode" external-function="1" library="lib_confMenu.xml" >
+            <parameter >g_strMSEndPoint</parameter>
+            <parameter >g_strMSConnectionId</parameter>
+            <parameter >g_strMSCallId</parameter>
+            <parameter >s_strMSType</parameter>
+          </function>
+          <results >
+            <result name="Default" link="28" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (-1 == Session.f_intReturnCode)
+	Server.logError("ERROR: FAILURE RETURN CODE FROM FUNCTION");]]></script>
+          </scripts>
+        </action>
+        <action id="28" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=36 y=840 ?>
+          <!--s_intSleepTime-->
+          <sleep duration="s_intSleepTime"/>
+          <results >
+            <result name="Default" link="31" stubbed="0"/>
+          </results>
+        </action>
+        <action id="29" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=542 y=842 ?>
+          <!--s_intSleepTime-->
+          <sleep duration="s_intSleepTime"/>
+          <results >
+            <result name="Default" link="30" stubbed="0"/>
+          </results>
+        </action>
+        <action id="30" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=793 y=840 ?>
+          <!--"UnlockConferenceRequest"-->
+          <function name="&quot;UnlockConferenceRequest&quot;" return="f_intReturnCode" external-function="1" library="lib_confMenu.xml" >
+            <parameter >g_strMSEndPoint</parameter>
+            <parameter >g_strMSConnectionId</parameter>
+            <parameter >g_strMSCallId</parameter>
+            <parameter >s_strMSType</parameter>
+          </function>
+          <results >
+            <result name="Default" link="33" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (-1 == Session.f_intReturnCode)
+	Server.logError("ERROR: FAILURE RETURN CODE FROM FUNCTION");]]></script>
+          </scripts>
+        </action>
+        <action id="31" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=285 y=840 ?>
+          <!--"LockConferenceRequest"-->
+          <function name="&quot;LockConferenceRequest&quot;" return="f_intReturnCode" external-function="1" library="lib_confMenu.xml" >
+            <parameter >g_strMSEndPoint</parameter>
+            <parameter >g_strMSConnectionId</parameter>
+            <parameter >g_strMSCallId</parameter>
+            <parameter >s_strMSType</parameter>
+          </function>
+          <results >
+            <result name="Default" link="29" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (-1 == Session.f_intReturnCode)
+	Server.logError("ERROR: FAILURE RETURN CODE FROM FUNCTION");]]></script>
+          </scripts>
+        </action>
+        <action id="32" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1296 y=572 ?>
+          <!--moderator?-->
+          <results >
+            <result name="Default" link="21" stubbed="1"/>
+            <result name="g_bIamMod" link="33" stubbed="0" >g_bIamMod == true</result>
+          </results>
+        </action>
+        <action id="33" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=1007 y=839 ?>
+          <!--3600 secs-->
+          <sleep duration="3600"/>
+          <results >
+            <result name="Default" link="34" stubbed="0"/>
+          </results>
+        </action>
+        <action id="34" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1294 y=830 ?>
+          <!--"IVRAddPartyToConference"-->
+          <function name="&quot;IVRAddPartyToConference&quot;" return="f_intReturnCode" external-function="1" library="lib_confMenu.xml" >
+            <parameter >g_strMSEndPoint</parameter>
+            <parameter >g_strMSConnectionId</parameter>
+            <parameter >g_strMSCallId</parameter>
+            <parameter >s_strMSType</parameter>
+          </function>
+          <results >
+            <result name="Default" link="21" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (-1 == Session.f_intReturnCode)
+	Server.logError("ERROR: FAILURE RETURN CODE FROM FUNCTION");]]></script>
+          </scripts>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="160" y-coord="25" width="308" height="74" text="Should receive 2 invite:
+1.  HOLD after passcode validated.
+2.  Conference SDP.  Once in the conference, set timers" font-name="Times New Roman" size="14" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="10" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="OnAck" start="1" event="OnAck" returns="void" >
+      <parameters >
+        <parameter name="strAllowEvents" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string"/>
+        <parameter name="strCallId" type="string"/>
+        <parameter name="strContact" type="string"/>
+        <parameter name="strContent" type="string"/>
+        <parameter name="strContentDisposition" type="string"/>
+        <parameter name="strContentEncoding" type="string" pass="byref"/>
+        <parameter name="strContentLanguage" type="string" pass="byref"/>
+        <parameter name="strContentType" type="string"/>
+        <parameter name="strCSeq" type="string"/>
+        <parameter name="strDate" type="string"/>
+        <parameter name="strEncryption" type="string"/>
+        <parameter name="strFrom" type="string"/>
+        <parameter name="strMaxForwards" type="string"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string"/>
+        <parameter name="strProxyRequire" type="string"/>
+        <parameter name="strRecordRoute" type="string"/>
+        <parameter name="strRequestURI" type="string"/>
+        <parameter name="strRequire" type="string"/>
+        <parameter name="strResponseKey" type="string"/>
+        <parameter name="strRoute" type="string"/>
+        <parameter name="strTimestamp" type="string"/>
+        <parameter name="strTo" type="string"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=221 y=143 ?>
+          <return value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="OnServiceUnload" start="1" event="OnServiceUnload" returns="void" >
+      <local-vars >
+        <var name="intReturnCode" type="i4" >-50</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=32 y=73 ?>
+          <!--END CONF-->
+          <java class="&quot;com.pactolus.psAPILoadTest&quot;" method="&quot;endConferences&quot;" timeout="s_intTimeout" return="" method-return-var="intReturnCode" method-return-type="0"/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="2" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("INFO: callToConference.OnServiceUnLoad.1: END CONFERENCE.");
+Server.logInfo("*********JAVA START psAPILoadTest.endConferences *********");]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("INFO: callToConference.OnServiceUnLoad.1: END CONFERENCE.");
+Server.logInfo("*********JAVA RETURN*********");
+Server.logInfo("psAPILoadTest.endConferences returned " + Session.intReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO CALL JAVA END CONFERENCE, EXIT ON: " + Result.name);
+	Server.logError("ERROR: callToConference.OnServiceUnLoad.1: FAILED TO END CONFERENCE.");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=567 y=132 ?>
+          <return value=""/>
+        </action>
+        <action id="5" plug-in="Pactolus.DBDynSql.1" ><?xtml-editor x=271 y=208 ?>
+          <!--WRITE RESULT-->
+          <sql-dynamic timeout="s_intTimeout" returns="intReturnCode" dsn="s_strDataSource" db-interface="Oracle" statement="insert into conf_loadtest_result
+values(?,?,?,?)" >
+            <parameter >s_longLoadTestID</parameter>
+            <parameter >s_longTotalCalls</parameter>
+            <parameter >s_longTotalSuccess</parameter>
+            <parameter >s_longTotalFailure</parameter>
+            <result-set result-set-var="" rows-affected=""/>
+          </sql-dynamic>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.s_longLoadTestID = Server.getUTCTime();
+//Session.s_longTotalFailure = Session.s_longTotalCalls - Session.s_longTotalSuccess;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO CALL SQL WRITE TEST RESULT, EXIT ON: " + Result.name);
+	Server.logError("ERROR: callToConference.OnServiceUnLoad.5: FAILED TO WRITE LOADTEST RESULT.");
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="psAPIgetConfPassCode" start="1" event="psAPIgetConfPassCode" returns="i4" >
+      <local-vars >
+        <var name="intReturnCode" type="i4" >-50</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=108 y=138 ?>
+          <!--GET PASSCODE-->
+          <java class="&quot;com.pactolus.psAPILoadTest&quot;" method="&quot;getACDPasscodes&quot;" timeout="s_intTimeout" return="" method-return-var="intReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="i4" >s_intConfNumberID</parameter>
+            <parameter type="inout" var-type="string" >g_strACDPassCode</parameter>
+          </java>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success" link="7" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("INFO: callToConference.psAPIgetConfPassCode.1: GET CONFERENCE PASSCODE.");
+Server.logInfo("*********JAVA START psAPILoadTest.getConfPasscodes *********");
+Server.lockSharedVariables();
+	Session.s_intConfNumberID;
+	if (Session.s_intConfNumberID >= Session.s_intMaxConf)
+	{
+		Session.s_intConfNumberID = 1;
+	}
+	else
+	{
+		Session.s_intConfNumberID++;
+	}
+	if (0 == Session.s_oModArray[Session.s_intConfNumberID - 1])
+	{
+		Session.s_oModArray[Session.s_intConfNumberID - 1] = 1;
+		Session.g_bUseModPassCode = true;
+		Session.g_bIamMod = true;
+		Session.g_intCurrentlyInArray = Session.s_intConfNumberID - 1;
+		Server.logInfo("HAU: first caller for conference, use moderator passcode");
+	}
+Server.unlockSharedVariables();
+Server.logInfo("INFO: conference number ID: " + Session.s_intConfNumberID);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("INFO: callToConference.psAPIgetConfPassCode.1: GET CONFERENCE PASSCODE.");
+Server.logInfo("*********JAVA RETURN*********");
+Server.logInfo("psAPILoadTest.psAPIgetConfPassCode returned " + Session.intReturnCode);
+Server.logInfo("PASSCODE IS: " + Session.g_strACDPassCode);
+Server.logInfo("MODERATOR PASSCODE IS: " + Session.g_strACDPassCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO CALL JAVA GET PASSCODE, EXIT ON: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=634 y=346 ?>
+          <return value="intReturnCode"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("MOD PASSCODE: " + Session.g_strACDPassCode);
+Server.logInfo("CONF PASSCODE: " + Session.g_strACDPassCode);]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=359 y=132 ?>
+          <return value="-1"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: callToConference.psAPIgetConfPassCode.3: FAILED TO GET CONFERENCE PASSCODE.");]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Pactolus.Branch.1" ><?xtml-editor x=378 y=223 ?>
+          <!--success-->
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="success" link="2" stubbed="0" >intReturnCode == 0</result>
+          </results>
+        </action>
+        <action id="8" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=617 y=214 ?>
+          <return value="intReturnCode"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: callToConference.psAPIgetConfPassCode.8: JAVA return NON SUCCESS");]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="playMainMenu" start="2" event="playMainMenu" returns="i4" >
+      <local-vars >
+        <var name="f_bAddParty" type="boolean" >0</var>
+        <var name="f_bDropLastParty" type="boolean" >0</var>
+        <var name="f_bExtendConf" type="boolean" >0</var>
+        <var name="f_bLockConf" type="boolean" >0</var>
+        <var name="f_bMuteAll" type="boolean" >0</var>
+        <var name="f_bPlayCount" type="boolean" >0</var>
+        <var name="f_bAllowContinue" type="boolean" >0</var>
+        <var name="f_bSelfMute" type="boolean" >0</var>
+        <var name="f_bEndConf" type="boolean" >0</var>
+        <var name="f_intOptionDTMF" type="i4" >201</var>
+        <var name="f_bSkipOption" type="boolean" >0</var>
+        <var name="f_intSleepForMainMenu" type="i4" >35</var>
+      </local-vars>
+      <actions >
+        <action id="2" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=15 y=23 ?>
+          <!--play * * to go to main menu-->
+          <play connection-id="g_strMSConnectionId" endpoint="g_strMSEndPoint" callid="g_strMSCallId" repeat="1" timeout="s_intTimeout" ms-type="s_strMSType" returns="g_intReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >210</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >210</audio>
+          </play>
+          <results >
+            <result name="Default" link="9" stubbed="1"/>
+            <result name="Success" link="1" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY * * TO ENTER MAIN MENU, EXIT ON: " + Result.name);
+	Server.logError("ERROR: MS CALL ID : " + Session.g_strMSCallId);
+	Server.logError("ERROR: MS CONNECTION ID : " + Session.g_strMSConnectionId);
+	Server.logError("ERROR: MS END POINT : " + Session.g_strMSEndPoint);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=26 y=218 ?>
+          <!--f_intSleepForMainMenu-->
+          <sleep duration="f_intSleepForMainMenu"/>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("While the main menu plays, sleep for: " + Session.f_intSleepForMainMenu + " seconds.");]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=14 y=358 ?>
+          <!--play option DTMF-->
+          <play connection-id="g_strMSConnectionId" endpoint="g_strMSEndPoint" callid="g_strMSCallId" repeat="1" timeout="s_intTimeout" ms-type="s_strMSType" returns="g_intReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >f_intOptionDTMF</audio>
+          </play>
+          <results >
+            <result name="Default" link="9" stubbed="1"/>
+            <result name="Success" link="5" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[
+//Session.f_intOptionDTMF++;
+Session.f_intOptionDTMF = 204;
+
+
+// Option 9 does not exist, 211 is to terminate conference
+if(Session.f_intOptionDTMF == 209) { 
+	Session.f_intOptionDTMF = 211;
+}
+
+Server.logInfo("Session.f_intOptionDTMF: " + Session.f_intOptionDTMF);
+
+if(Session.f_intOptionDTMF == 201) {
+
+	Server.logInfo("Selecting option 1 (add party)");
+	
+} else if(Session.f_intOptionDTMF == 202) {
+
+	Server.logInfo("Selecting option 2 (drop party)");
+	
+} else if(Session.f_intOptionDTMF == 203) {
+
+	Server.logInfo("Selecting option 3 (extend conference)");
+	
+} else if(Session.f_intOptionDTMF == 204) {
+
+	Server.logInfo("Selecting option 4 (lock conference)");
+	
+} else if(Session.f_intOptionDTMF == 205) {
+
+	Server.logInfo("Selecting option 5 (mute all)");
+	
+} else if(Session.f_intOptionDTMF == 206) {
+
+	Server.logInfo("Selecting option 6 (play count)");
+	
+} else if(Session.f_intOptionDTMF == 207) {
+
+	Server.logInfo("Selecting option 7 (disallow without moderator)");
+	
+} else if(Session.f_intOptionDTMF == 208) {
+
+	Server.logInfo("Selecting option 8 (self mute)");
+	
+} else if(Session.f_intOptionDTMF == 211) {
+
+	Server.logInfo("Selecting option # (end conference)");
+	
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY MAIN MENU OPTION, EXIT ON: " + Result.name);
+	Server.logError("ERROR: MS CALL ID : " + Session.g_strMSCallId);
+	Server.logError("ERROR: MS CONNECTION ID : " + Session.g_strMSConnectionId);
+	Server.logError("ERROR: MS END POINT : " + Session.g_strMSEndPoint);
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.Branch.1" ><?xtml-editor x=256 y=357 ?>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+            <result name="Add Party?" link="12" stubbed="0" >f_intOptionDTMF == 201</result>
+            <result name="Drop Last Party?" >f_intOptionDTMF == 202</result>
+            <result name="Extend Conference?" >f_intOptionDTMF == 203</result>
+            <result name="Lock Conference?" link="7" stubbed="0" >f_intOptionDTMF == 204</result>
+            <result name="Mute All?" link="8" stubbed="0" >f_intOptionDTMF == 205</result>
+            <result name="Count?" >f_intOptionDTMF == 206</result>
+            <result name="Disallow with Mod?" link="8" stubbed="0" >f_intOptionDTMF == 207</result>
+            <result name="Self Mute?" link="8" stubbed="0" >f_intOptionDTMF == 208</result>
+            <result name="End Conference?" link="11" stubbed="1" >f_intOptionDTMF == 211</result>
+          </results>
+        </action>
+        <action id="6" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=786 y=407 ?>
+          <!--reverse option just selected (lock conference, mute all, self mute, disallow)-->
+          <play connection-id="g_strMSConnectionId" endpoint="g_strMSEndPoint" callid="g_strMSCallId" repeat="1" timeout="s_intTimeout" ms-type="s_strMSType" returns="g_intReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >f_intOptionDTMF</audio>
+          </play>
+          <results >
+            <result name="Default" link="9" stubbed="1"/>
+            <result name="Success" link="1" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Reverse option just selected: Session.f_intOptionDTMF: " + Session.f_intOptionDTMF);
+
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY PASSCODE, EXIT ON: " + Result.name);
+	Server.logError("ERROR: MS CALL ID : " + Session.g_strMSCallId);
+	Server.logError("ERROR: MS CONNECTION ID : " + Session.g_strMSConnectionId);
+	Server.logError("ERROR: MS END POINT : " + Session.g_strMSEndPoint);
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1563 y=175 ?>
+          <!--0-->
+          <return value="0"/>
+        </action>
+        <action id="8" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=523 y=471 ?>
+          <!--f_intSleepForMainMenu-->
+          <sleep duration="f_intSleepForMainMenu"/>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("While the main menu plays, sleep for: " + Session.f_intSleepForMainMenu + " seconds.");]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=23 y=546 ?>
+          <!---1-->
+          <return value="-1"/>
+        </action>
+        <action id="11" plug-in="Standard.EndSession.1" ><?xtml-editor x=21 y=632 ?></action>
+        <action id="12" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=433 y=280 ?>
+          <!--8-->
+          <sleep duration="8"/>
+          <results >
+            <result name="Default" link="13" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Sleep for 8 seconds while the instructions to add a party are played.")]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=664 y=260 ?>
+          <!--play movie phone number-->
+          <play connection-id="g_strMSConnectionId" endpoint="g_strMSEndPoint" callid="g_strMSCallId" repeat="1" timeout="s_intTimeout" ms-type="s_strMSType" returns="g_intReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >206</audio>
+            <audio type="silence" >2</audio>
+            <audio type="index" >201</audio>
+            <audio type="silence" >2</audio>
+            <audio type="index" >207</audio>
+            <audio type="silence" >2</audio>
+            <audio type="index" >203</audio>
+            <audio type="silence" >2</audio>
+            <audio type="index" >203</audio>
+            <audio type="silence" >2</audio>
+            <audio type="index" >203</audio>
+            <audio type="silence" >2</audio>
+            <audio type="index" >203</audio>
+            <audio type="silence" >2</audio>
+            <audio type="index" >204</audio>
+            <audio type="silence" >2</audio>
+            <audio type="index" >205</audio>
+            <audio type="silence" >2</audio>
+            <audio type="index" >206</audio>
+          </play>
+          <results >
+            <result name="Default" link="9" stubbed="1"/>
+            <result name="Success" link="14" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Play movie phone number.")]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY MOVIE PHONE NUMBER, EXIT ON: " + Result.name);
+	Server.logError("ERROR: MS CALL ID : " + Session.g_strMSCallId);
+	Server.logError("ERROR: MS CONNECTION ID : " + Session.g_strMSConnectionId);
+	Server.logError("ERROR: MS END POINT : " + Session.g_strMSEndPoint);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=430 y=92 ?>
+          <!--20-->
+          <sleep duration="20"/>
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Sleep for 20 seconds while additional instructions to add a party are played and the party is dialed.")]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=690 y=66 ?>
+          <!--play * 1 to bridge caller into conference-->
+          <play connection-id="g_strMSConnectionId" endpoint="g_strMSEndPoint" callid="g_strMSCallId" repeat="1" timeout="s_intTimeout" ms-type="s_strMSType" returns="g_intReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >210</audio>
+            <audio type="silence" >.2</audio>
+            <audio type="index" >201</audio>
+          </play>
+          <results >
+            <result name="Default" link="9" stubbed="1"/>
+            <result name="Success" link="16" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Play '* 1' to bridge the caller into the conference.")]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY * 1 TO BRIDGE CALLER INTO CONFERENCE: " + Result.name);
+	Server.logError("ERROR: MS CALL ID : " + Session.g_strMSCallId);
+	Server.logError("ERROR: MS CONNECTION ID : " + Session.g_strMSConnectionId);
+	Server.logError("ERROR: MS END POINT : " + Session.g_strMSEndPoint);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=922 y=119 ?>
+          <!--8-->
+          <sleep duration="8"/>
+          <results >
+            <result name="Default" link="17" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Sleep for 8 seconds while instructions to return to the conference are played.")]]></script>
+          </scripts>
+        </action>
+        <action id="17" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1153 y=108 ?>
+          <!--play * to bring moderator back to conference-->
+          <play connection-id="g_strMSConnectionId" endpoint="g_strMSEndPoint" callid="g_strMSCallId" repeat="1" timeout="s_intTimeout" ms-type="s_strMSType" returns="g_intReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >210</audio>
+          </play>
+          <results >
+            <result name="Default" link="9" stubbed="1"/>
+            <result name="Success" link="18" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Play '*' to return moderator to the conference.")]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY * TO RETURN MODERATOR TO CONFERENCE: " + Result.name);
+	Server.logError("ERROR: MS CALL ID : " + Session.g_strMSCallId);
+	Server.logError("ERROR: MS CONNECTION ID : " + Session.g_strMSConnectionId);
+	Server.logError("ERROR: MS END POINT : " + Session.g_strMSEndPoint);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="18" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=1386 y=142 ?>
+          <!--4-->
+          <sleep duration="4"/>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[function formatPhone(inPhone)
+{
+	var number = /\d/;
+	var i = 0;
+	var result;
+	var outPhone="";
+	
+	while(i < inPhone.length)
+	{
+		result = inPhone.charAt(i).match(number);
+		if ( result != null)
+		{
+			outPhone += inPhone.charAt(i);
+		}
+		i++;
+	}
+
+	// Server.logInfo("RETURN VALUE: " + outPhone);
+	return outPhone;
+
+}]]></script>
+  <properties >
+    <property key="default" value="C:/prompts/pactolus/english/vox/pcs_english.vox"/>
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value=""/>
+    <property key="library-modules" value="lib_confMenu.xml"/>
+    <property key="library-path" value="D:/Applications/InternalProduct/SceXMLScripts/Libs"/>
+  </properties>
+</xtml>

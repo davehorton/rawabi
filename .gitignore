@@ -4,3 +4,10 @@
 *.jar
 *.war
 *.ear
+
+# Eclipse personal settings
+.settings
+*.prefs
+
+# maven build directory
+target

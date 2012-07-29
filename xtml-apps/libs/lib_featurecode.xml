@@ -1,0 +1,528 @@
+<?xml version="1.0"?>
+<xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
+  <version sce-version="6021" prev-sce-version="6021" last-mod-time="Tuesday, October 07, 2008 14:27:38"/>
+  <global-handlers/>
+  <functions >
+    <function name="CheckBalance" start="2" event="" returns="i4" >
+      <parameters >
+        <parameter name="p_oCallLegA" type="object" pass="byref"/>
+        <parameter name="p_oMS" type="object" pass="byref"/>
+        <parameter name="p_oAPI" type="object" pass="byref"/>
+        <parameter name="p_oSUB" type="object" pass="byref"/>
+        <parameter name="p_oSTB" type="object" pass="byref"/>
+        <parameter name="s_nTIMEOUT" type="i4" pass="byref"/>
+        <parameter name="g_nChimeOrSilence" type="i4" pass="byref"/>
+        <parameter name="s_strLocalHost" type="string" pass="byref"/>
+        <parameter name="s_strCustomerCode" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >0</var>
+        <var name="strDigits" type="string" ></var>
+        <var name="f_nTimeAvailable" type="i4" >0</var>
+        <var name="f_nClosingPrompt1" type="i4" >1782</var>
+        <var name="f_nClosingPrompt2" type="i4" >311</var>
+        <var name="f_nMinutesPrompt" type="i4" >309</var>
+        <var name="p_subTimeAvailable" type="i8" >0</var>
+        <var name="f_nSubMinutesPrompt" type="i4" >0</var>
+        <var name="f_strBillingDate" type="string" ></var>
+        <var name="f_nReplay" type="i4" >0</var>
+        <var name="f_nBucketSizeSeconds" type="i4" >0</var>
+        <var name="p_TotalBucketSizeSeconds" type="i8" >0</var>
+        <var name="p_subBucketSeconds" type="i8" >0</var>
+        <var name="f_nBillingCycleTime" type="i4" >0</var>
+        <var name="f_nSecondsAvailable" type="i4" >0</var>
+        <var name="p_totalSubBucketSize" type="i8" >0</var>
+        <var name="p_totalSubBucketSizeSec" type="i8" >0</var>
+        <var name="p_subSecondsAvailable" type="i8" >0</var>
+        <var name="f_bDoLangMenu" type="boolean" >0</var>
+      </local-vars>
+      <actions >
+        <action id="2" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=20 y=20 ?>
+          <!--DirectCallerToMS-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DirectCallerToMS&quot;" return="f_nReturnCode" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="success" link="6" stubbed="0" >f_nReturnCode == 0</result>
+          </results>
+        </action>
+        <action id="3" plug-in="Standard.EndSession.1" ><?xtml-editor x=763 y=47 ?></action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=890 y=290 ?>
+          <!--HangUpParty-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpParty&quot;" return="" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oCallLegA</parameter>
+            <parameter >s_strLocalHost</parameter>
+          </function>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+          </results>
+        </action>
+        <action id="6" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=124 y=271 ?>
+          <!--Get sub bucket info-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psGetStoredBalance&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oSUB</parameter>
+            <parameter >p_oSTB</parameter>
+            <parameter >p_oAPI</parameter>
+          </function>
+          <results >
+            <result name="Default" link="13" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("------------Java.  StoredBalance-------------");
+
+Server.logInfo("p_secondsBalance00= " + Session.p_oSTB.lSecondsBalance00);
+Server.logInfo("p_secondsUsed01 = " + Session.p_oSTB.lSecondUsed01);
+Server.logInfo("p_description02 = " + Session.p_oSTB.strDescription02);
+Server.logInfo("p_bucketSize03 = " + Session.p_oSTB.lBucketSize03);
+Server.logInfo("p_linkedFlag04 = " + Session.p_oSTB.strLinkedFlag04);
+
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=599 y=122 ?>
+          <!--<= bucket size min used-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="p_oMS.strType" returns="f_nReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="p_oAPI.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >376</audio>
+            <audio type="number" >f_nTimeAvailable</audio>
+            <audio type="index" >f_nMinutesPrompt</audio>
+            <audio type="index" >1333</audio>
+          </play>
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+            <result name="Success" link="15" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Playing prompt for primary bucket minutes available");
+Session.strDigits = "";]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( "1" == Session.strDigits ) {
+	Session.f_nReplay++;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 2 == Session.f_nReplay ) {
+	Session.f_nClosingPrompt1 = 322;
+	Session.f_nClosingPrompt2 = 98;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=640 y=309 ?>
+          <!--> bucket size min used-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="p_oMS.strType" returns="f_nReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="&quot;[x]&quot;" language="p_oAPI.strLanguage" digits="strDigits" retry-count="0" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >376</audio>
+            <audio type="number" >f_nTimeAvailable</audio>
+            <audio type="index" >f_nMinutesPrompt</audio>
+            <audio type="index" >1333</audio>
+          </play>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="dtmf 1" link="8" stubbed="1" >strDigits match "1"
+AND f_nReplay &lt;= 2</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Playing prompt for > 250 minutes available");
+Session.strDigits = "";
+
+
+Server.logInfo("Billing cycle start date: " + Session.p_oSUB.nBillingCycleDay);]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( "1" == Session.strDigits ) {
+	Session.f_nReplay++;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 2 == Session.f_nReplay ) {
+	Session.f_nClosingPrompt1 = 322;
+	Session.f_nClosingPrompt2 = 98;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=644 y=459 ?>
+          <!--SubBucket has Usage < than subbucket Size-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="p_oMS.strType" returns="f_nReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="&quot;[x]&quot;" language="p_oAPI.strLanguage" digits="strDigits" retry-count="0" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >376</audio>
+            <audio type="number" >f_nTimeAvailable</audio>
+            <audio type="index" >f_nMinutesPrompt</audio>
+            <audio type="index" >1333</audio>
+            <audio type="index" >52</audio>
+            <audio type="number" >p_subTimeAvailable</audio>
+            <audio type="index" >1332</audio>
+            <audio type="index" >f_nSubMinutesPrompt</audio>
+            <audio type="index" >1333</audio>
+            <audio type="silence" >.5</audio>
+            <audio type="index" >f_nClosingPrompt1</audio>
+            <audio type="index" >f_nClosingPrompt2</audio>
+          </play>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="dtmf 1" link="9" stubbed="1" >strDigits match "1"
+AND f_nReplay &lt;= 2</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Playing prompt for SubBucket usage < subBucket minutes available");
+
+Session.strDigits = "";]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( "1" == Session.strDigits ) {
+	Session.f_nReplay++;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 2 == Session.f_nReplay ) {
+	Session.f_nClosingPrompt1 = 322;
+	Session.f_nClosingPrompt2 = 98;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=516 y=603 ?>
+          <!--SubBucket has Usage >  subbucket Size
+OR
+Primary has usage > BucketSize-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="p_oMS.strType" returns="f_nReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="&quot;[x]&quot;" language="p_oAPI.strLanguage" digits="strDigits" retry-count="0" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >376</audio>
+            <audio type="number" >f_nTimeAvailable</audio>
+            <audio type="index" >1333</audio>
+            <audio type="index" >f_nMinutesPrompt</audio>
+            <audio type="index" >52</audio>
+            <audio type="number" >p_subTimeAvailable</audio>
+            <audio type="index" >1332</audio>
+            <audio type="index" >f_nSubMinutesPrompt</audio>
+            <audio type="index" >1333</audio>
+            <audio type="silence" >.5</audio>
+            <audio type="index" >f_nClosingPrompt1</audio>
+            <audio type="index" >f_nClosingPrompt2</audio>
+          </play>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="dtmf 1" link="10" stubbed="1" >strDigits match "1"
+AND f_nReplay &lt;= 2</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Playing prompt for SubBucket usage > subBucket minutes available");
+
+Session.strDigits = "";]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( "1" == Session.strDigits ) {
+	Session.f_nReplay++;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 2 == Session.f_nReplay ) {
+	Session.f_nClosingPrompt1 = 322;
+	Session.f_nClosingPrompt2 = 98;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=444 y=839 ?>
+          <!--subUsage >= subBucket In billing Cycle-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="40" ms-type="p_oMS.strType" returns="f_nReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="&quot;[x]&quot;" language="p_oAPI.strLanguage" digits="strDigits" retry-count="0" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >376</audio>
+            <audio type="number" >f_nTimeAvailable</audio>
+            <audio type="index" >1333</audio>
+            <audio type="index" >f_nMinutesPrompt</audio>
+            <audio type="index" >614</audio>
+            <audio type="index" >1318</audio>
+            <audio type="index" >f_nSubMinutesPrompt</audio>
+            <audio type="index" >1308</audio>
+            <audio type="index" >615</audio>
+            <audio type="index" >1318</audio>
+            <audio type="index" >1321</audio>
+            <audio type="date" >f_strBillingDate</audio>
+            <audio type="silence" >.5</audio>
+            <audio type="index" >f_nClosingPrompt1</audio>
+            <audio type="index" >f_nClosingPrompt2</audio>
+          </play>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="dtmf 1" link="11" stubbed="1" >strDigits match "1"
+AND f_nReplay &lt;= 2</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Playing prompt for Sub >= subBucket in Billing cycle Primary has available seconds");
+Session.strDigits = "";
+
+
+Server.logInfo("Billing cycle start date: " + Session.p_oSUB.nBillingCycleDay);]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( "1" == Session.strDigits ) {
+	Session.f_nReplay++;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 2 == Session.f_nReplay ) {
+	Session.f_nClosingPrompt1 = 322;
+	Session.f_nClosingPrompt2 = 98;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=283 y=971 ?>
+          <!--MAX allotment has been reached-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="p_oMS.strType" returns="f_nReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="p_oAPI.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >376</audio>
+            <audio type="number" >f_nTimeAvailable</audio>
+            <audio type="index" >f_nMinutesPrompt</audio>
+            <audio type="index" >1333</audio>
+          </play>
+          <results >
+            <result name="Default" link="16" stubbed="0"/>
+            <result name="Success" link="16" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Playing prompt for Max ALLOTMENT has been reached");
+Session.strDigits = "";
+
+
+Server.logInfo("Billing cycle start date: " + Session.p_oSUB.nBillingCycleDay);]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( "1" == Session.strDigits ) {
+	Session.f_nReplay++;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 2 == Session.f_nReplay ) {
+	Session.f_nClosingPrompt1 = 322;
+	Session.f_nClosingPrompt2 = 98;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Pactolus.Branch.1" ><?xtml-editor x=399 y=158 ?>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="Min Used &lt;= bucket size" link="7" stubbed="0" >(g_oSUB.nSecondsUsed &lt;= f_nBucketSizeSeconds
+AND g_oSTB.lSecondsUsed01 == 0)
+OR (g_oSUB.nSecondsUsed &lt;= f_nBucketSizeSeconds
+AND g_oSTB.lSecondsUsed01 == -1)</result>
+            <result name="Min Used &gt; bucket size" link="8" stubbed="0" >g_oSUB.nSecondsBalance == p_TotalBucketSizeSeconds
+AND g_oSUB.nSecondsUsed &lt; p_TotalBucketSizeSeconds
+AND (g_oSTB.lSecondsUsed01 == p_subBucketSeconds
+OR g_oSTB.lSecondsUsed01 == -1)</result>
+            <result name="SBusage and &lt; bucket size" link="9" stubbed="0" >(g_oSTB.lSecondsUsed01 &gt; 0)
+AND (g_oSTB.lSecondsUsed01 &lt;= p_subBucketSeconds)
+AND (g_oSUB.nSecondsUsed  &lt; f_nBucketSizeSeconds)</result>
+            <result name="SBusage and &gt; buckets  size" link="10" stubbed="0" >g_oSTB.lSecondsUsed01 &gt; p_subBucketSeconds
+AND g_oSTB.lSecondsBalance00 == p_totalSubBucketSizeSec
+AND g_oSUB.nSecondsUsed &lt; p_TotalBucketSizeSeconds
+AND g_oSUB.nSecondsBalance == p_TotalBucketSizeSeconds
+AND g_oSTB.lSecondsUsed01 &lt; p_totalSubBucketSizeSec</result>
+            <result name="SubBuck &gt; total and prim &lt; less" link="11" stubbed="1" >g_oSTB.lSecondsUsed01 &gt;= p_totalSubBucketSizeSec
+AND g_oSUB.nSecondsUsed &lt; p_TotalBucketSizeSeconds</result>
+            <result name="used &gt; greater than total" link="12" stubbed="0" >g_oSUB.nSecondsUsed &gt;= p_TotalBucketSizeSeconds</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[
+// eventually need to loop through and play all subBuckets and there description.
+
+//Total subBucket size based on Primary bucket number of refills allowed
+var refills = Session.p_oSUB.nTotalBucketSize / Session.p_oSUB.nBucketSize;
+Server.logInfo("This is Refills = " + refills);
+
+Server.logInfo("This is the SubBucket Balance First SubBucket = " + Session.p_oSTB.lSecondsBalance00);
+Server.logInfo("This is the SubBucket Usage of the FirstSubBucket = " + Session.p_oSTB.lSecondsUsed01);
+Server.logInfo("This Is the Name to Announce for the first SubBucket = " + Session.p_oSTB.strDescription02);
+Server.logInfo("This Is the SubBucket Size for first SubBucket = " + Session.p_oSTB.lBucketSize03);
+
+Session.p_TotalBucketSizeSeconds = Session.p_oSUB.nTotalBucketSize * 60; //Primary total in Seconds
+
+   //Total subBucket size based on Primary bucket number of refills allowed
+  Session.p_subBucketSeconds = Session.p_oSTB.lBucketSize03 * 60; 
+  Session.p_totalSubBucketSize = Session.p_oSTB.lBucketSize03	* refills;
+  Session.p_totalSubBucketSizeSec = Session.p_totalSubBucketSize * 60;
+Server.logInfo("This Is the TotalSubBucket Size for first SubBucket = " + Session.p_totalSubBucketSize);
+Server.logInfo("Total Bucket size Primary =" + Session.p_oSUB.nTotalBucketSize );
+
+
+Session.f_nSecondsAvailable = (Session.p_oSUB.nSecondsBalance - Session.p_oSUB.nSecondsUsed) ;
+Session.f_nBucketSizeSeconds = Session.p_oSUB.nBucketSize*60;
+	//SubBucket seconds available
+Session.p_subSecondsAvailable = (Session.p_oSTB.lSecondsBalance00 - Session.p_oSTB.lSecondsUsed01);
+
+Server.logInfo("Session.f_nSecondsAvailable: " + Session.f_nSecondsAvailable);
+Server.logInfo("Session.p_oSUB.nSecondsBalance: "+Session.p_oSUB.nSecondsBalance);
+Server.logInfo("Session.p_oSUB.nSecondsUsed: "+Session.p_oSUB.nSecondsUsed);
+Server.logInfo("Session.f_nBucketSizeSeconds: "+Session.f_nBucketSizeSeconds);
+
+if ( 0 < Session.f_nSecondsAvailable && 60 > Session.f_nSecondsAvailable ) {
+	Session.f_nTimeAvailable = 1;
+}
+else {
+	Session.f_nTimeAvailable = Math.round(Session.f_nSecondsAvailable/60);
+}
+Server.logInfo("Session.f_nTimeAvailable=" +Session.f_nTimeAvailable);
+if ( Session.f_nTimeAvailable < 0){
+   Session.f_nTimeAvailable = 0;
+}
+
+ // SubBucket TimeAvailable
+if ( 0 < Session.p_subSecondsAvailable && 60 > Session.p_subSecondsAvailable ) {
+	Session.p_subTimeAvailable = 1;
+} 
+else {
+	Session.p_subTimeAvailable = Math.round(Session.p_subSecondsAvailable/60);
+} 
+// Check if linked Bucket and if so set SubBucket avail to lesser of primary and Subbucket value
+    if ( Session.p_oSTB.strLinkedFlag04 == "T" && Session.p_subTimeAvailable > Session.f_nTimeAvailable ){
+	   Session.p_subTimeAvailable = Session.f_nTimeAvailable;
+	 } 
+if ( 1 == Session.p_subTimeAvailable ){
+	Session.f_nSubMinutesPrompt = 308;
+}	 		
+	 		
+
+Server.logInfo("Minutes available Primary: " + Session.f_nTimeAvailable);
+Server.logInfo("Minutes available SubBucket: " + Session.p_subTimeAvailable);
+if ( 1 == Session.f_nTimeAvailable ) {
+	Session.f_nMinutesPrompt = 308;
+}
+
+
+
+
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[//format for date prompt: YYYYMMDD
+var today = new Date();
+	var month = 0;
+	Server.logInfo("Billing cycle date: " + Session.p_oSUB.nBillingCycleDay);
+	Server.logInfo("Today's date: " + today.toString());
+	Session.f_strBillingDate = today.getFullYear();
+	//billing cycle dates cannot be greater than 28
+	if ( Session.p_oSUB.nBillingCycleDay > today.getDate() ) {
+		//next billing date is in the current month
+		 month = today.getMonth() + 1 ;
+		 if ( 10 > month ) {
+		 	Session.f_strBillingDate += "0";
+		 }
+		 Session.f_strBillingDate += month.toString();
+	}
+	else {
+		//next billing date is next month
+		month = today.getMonth() + 2;
+		 if ( 10 > month ) {
+		 	Session.f_strBillingDate += "0";
+		 	Session.f_strBillingDate += month.toString();
+	     } else {
+	     Session.f_strBillingDate += month.toString();
+	       }
+		 if ( 12 < month ){// Set year to next year and month to Jan
+       		 Session.f_strBillingDate = today.getFullYear() + 1;
+       		 Session.f_strBillingDate += "01";
+		 }
+	}
+	if ( 10 > Session.p_oSUB.nBillingCycleDay ){
+		Session.f_strBillingDate += "0";
+	}//first else
+	Session.f_strBillingDate += Session.p_oSUB.nBillingCycleDay.toString();
+	Server.logInfo("Next billing date: " + Session.f_strBillingDate);
+]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=866 y=104 ?>
+          <!--Replay balance in Spanish-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="p_oMS.strType" returns="f_nReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="&quot;[x]&quot;" language="p_oAPI.strLanguage" digits="strDigits" retry-count="0" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >376</audio>
+            <audio type="number" >f_nTimeAvailable</audio>
+            <audio type="index" >f_nMinutesPrompt</audio>
+            <audio type="index" >1333</audio>
+          </play>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Playing prompt for primary bucket minutes available");
+Session.strDigits = "";
+Session.p_oAPI.strLanguage = "spa";]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( "1" == Session.strDigits ) {
+	Session.f_nReplay++;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 2 == Session.f_nReplay ) {
+	Session.f_nClosingPrompt1 = 322;
+	Session.f_nClosingPrompt2 = 98;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=568 y=1064 ?>
+          <!--Replay in Spanish-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="p_oMS.strType" returns="f_nReturnCode" start-play="1" interrupt="0" return-immediate="0" digit-map="&quot;[x]&quot;" language="p_oAPI.strLanguage" digits="strDigits" retry-count="0" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >376</audio>
+            <audio type="number" >f_nTimeAvailable</audio>
+            <audio type="index" >f_nMinutesPrompt</audio>
+            <audio type="index" >1333</audio>
+          </play>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Playing prompt for Max ALLOTMENT has been reached");
+Session.strDigits = "";
+Session.p_oAPI.strLanguage = "spa";
+
+Server.logInfo("Billing cycle start date: " + Session.p_oSUB.nBillingCycleDay);]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( "1" == Session.strDigits ) {
+	Session.f_nReplay++;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 2 == Session.f_nReplay ) {
+	Session.f_nClosingPrompt1 = 322;
+	Session.f_nClosingPrompt2 = 98;
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="CheckBalanceByCustomer" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="p_oCallLegA" type="object" pass="byref"/>
+        <parameter name="p_oMS" type="object" pass="byref"/>
+        <parameter name="p_oAPI" type="object" pass="byref"/>
+        <parameter name="p_oSUB" type="object" pass="byref"/>
+        <parameter name="p_oSTB" type="object" pass="byref"/>
+        <parameter name="s_nTIMEOUT" type="i4" pass="byref"/>
+        <parameter name="g_nChimeOrSilence" type="i4" pass="byref"/>
+        <parameter name="s_strLocalHost" type="string" pass="byref"/>
+        <parameter name="s_strCustomerCode" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nReturnCode" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=61 y=135 ?>
+          <!--Direct to Custom Check balance-->
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="TNZI" link="2" stubbed="0" >s_strCustomerCode match "tnzi"</result>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=384 y=76 ?>
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;CheckBalance&quot;" return="" external-function="0" library="" >
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oMS</parameter>
+            <parameter >p_oAPI</parameter>
+            <parameter >p_oSUB</parameter>
+            <parameter >p_oSTB</parameter>
+            <parameter >s_nTIMEOUT</parameter>
+            <parameter >g_nChimeOrSilence</parameter>
+            <parameter >s_strLocalHost</parameter>
+            <parameter >s_strCustomerCode</parameter>
+          </function>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+          </results>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=592 y=242 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value="C:/builds/HEAD/Applications/InternalProduct/SceXMLScripts/Libs"/>
+    <property key="library-modules" value="lib_mediaserver.xml;lib_callcontrol.xml;lib_APISce.xml"/>
+    <property key="library-path" value="C:/builds/HEAD/Applications/InternalProduct/SceXMLScripts/Libs"/>
+  </properties>
+</xtml>

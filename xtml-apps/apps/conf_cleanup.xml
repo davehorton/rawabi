@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<xtml version="1.0"><events><event name="Pactolus.ProxyOutage.1" display="ProxyOutage"><parameter name="strHostName" type="string"/><parameter name="intHostPort" type="i4"/></event><event name="Pactolus.ProxyReconnect.1" display="ProxyReconnect"><parameter name="strHostName" type="string"/><parameter name="intHostPort" type="i4"/><parameter name="intTotalOutageTime" type="i4"/></event></events><global-handlers><handler event="Standard.OnSessionStart.1" function="OnSessionStart" public="0" always-on="0"/><handler event="Standard.OnTimer.1" function="OnTimer" public="0" always-on="0"/><handler event="Pactolus.ProxyOutage.1" function="OnProxyOutage" public="1" always-on="1"/><handler event="Pactolus.ProxyReconnect.1" function="OnProxyReconnect" public="1" always-on="1"/></global-handlers><global-vars><var name="g_oAppServer" type="object"></var><var name="g_intNbrAppServers" type="i4">0</var><var name="g_lTimerId" type="i8">0</var><var name="g_intCheckOutageTimer" type="i4">60</var><var name="g_intMaxOutageTime" type="i4">300</var></global-vars><shared-vars><var name="s_intTIMEOUT" type="i4">0</var></shared-vars><functions><function name="OnProxyOutage" start="5" returns="void"><parameters><parameter name="strHostName" type="string" pass="byref"/><parameter name="intHostPort" type="i4" pass="byref"/></parameters><local-vars><var name="f_intReturnCode" type="i4">-50</var><var name="f_lCurrentTime" type="i8">0</var></local-vars><actions><action id="5" plug-in="Pactolus.Branch.1"><?xtml-editor x=182 y=301 ?><results><result name="Default" link="4" stubbed="0"/></results><scripts><script language="javascript" timing="first"><![CDATA[var i = 0;
+var found = false;
+
+Server.logError("RECEIVE PROXY OUTAGE");
+for (i = 0; i < Session.g_oAppServer.length; i++)
+{
+	if ( 0 == Clib.strcmp(Session.g_oAppServer[i].name, Session.strHostName) )
+	{
+		found = true;
+		Session.g_oAppServer[i].disconnected = true;
+		Session.g_oAppServer[i].disTime = Server.getUTCTime();	
+	}
+}
+if (false == found)
+{
+	Session.g_oAppServer[Session.g_intNbrAppServers].name = Session.strHostName;
+	Session.g_oAppServer[Session.g_intNbrAppServers].disconnected = true;
+	Session.g_oAppServer[Session.g_intNbrAppServers].disTime = Server.getUTCTime();
+	Server.logInfo("INFO: PROXYOUTAGE, NUMBER OF APPSERVER OUTAGE IS: " + Session.g_intNbrAppServers);
+	Server.logInfo("INFO: PROXYOUTAGE, APPSERVER NAME  IS: " + Session.g_oAppServer[Session.g_intNbrAppServers].name);
+	Server.logInfo("INFO: PROXYOUTAGE, APPSERVER DISCONNECT IS: " + Session.g_oAppServer[Session.g_intNbrAppServers].disconnected);
+	Server.logInfo("INFO: PROXYOUTAGE, APPSERVER TIME  IS: " + Session.g_oAppServer[Session.g_intNbrAppServers].disTime);	
+	Session.g_intNbrAppServers++;
+}]]></script></scripts></action><action id="1" plug-in="Pactolus.JavaStaticMethod.1"><?xtml-editor x=420 y=486 ?><!--confCleanUp--><java class="&quot;com.pactolus.conferencing.psAPISceConfCleanup&quot;" method="&quot;cleanup&quot;" timeout="s_intTIMEOUT" return="" method-return-var="f_intReturnCode" method-return-type="0"><parameter type="in" var-type="unknown">f_lCurrentTime</parameter><parameter type="in" var-type="unknown">strHostName</parameter></java><results><result name="Default" link="2" stubbed="0"/><result name="Success"/><result name="Error"/><result name="Timeout"/></results><scripts><script language="javascript" timing="first"><![CDATA[//Server.logInfo("INFO: ********JAVA CALLING psAPISceConfCleanup *********");
+Session.f_lCurrentTime = Server.getUTCTime();]]></script><script language="javascript" timing="last"><![CDATA[//Server.logInfo("INFO: ********** iJavaReturnCode " + Session.f_intReturnCode);]]></script></scripts></action><action id="2" plug-in="Standard.FunctionReturn.1"><?xtml-editor x=654 y=485 ?><return value=""/><scripts><script language="javascript" timing="first"><![CDATA[if (Session.f_intReturnCode < 0)
+{
+	Server.logError("ERROR: FAIL TO CALL psAPISceConfCleanup");
+}]]></script></scripts></action><action id="4" plug-in="Standard.FunctionReturn.1"><?xtml-editor x=421 y=302 ?><return value=""/></action><action id="6" plug-in="Standard.Timer.1"><?xtml-editor x=201 y=492 ?><timer start="1" id="g_lTimerId" duration="g_intCheckOutageTimer"/><results><result name="Default" link="1" stubbed="0"/></results></action></actions></function><function name="OnProxyReconnect" start="2" returns="void"><parameters><parameter name="strHostName" type="string" pass="byref"/><parameter name="intHostPort" type="i4" pass="byref"/><parameter name="intTotalOutageTime" type="i4" pass="byref"/></parameters><actions><action id="2" plug-in="Standard.FunctionReturn.1"><?xtml-editor x=243 y=284 ?><return value=""/><scripts><script language="javascript" timing="first"><![CDATA[var i = 0;
+var found = false;
+Server.logError("RECEIVE PROXY RECONNECT");
+for (i = 0; i < Session.g_oAppServer.length; i++)
+{
+	if ( 0 == Clib.strcmp(Session.g_oAppServer[i].name, Session.strHostName) )
+	{
+		found = true;
+		Session.g_oAppServer[i].disconnected = false;
+		Server.logInfo("INFO: PROXYRECONNECT, APPSERVER NAME  IS: " + Session.g_oAppServer[i].name);
+		Server.logInfo("INFO: PROXYRECONNECT, APPSERVER DISCONNECT IS: " + Session.g_oAppServer[i].disconnected);
+	}
+}
+if (false == found)
+{
+	Server.logError("ERROR: get reconnect for unkown disconnect app.");
+	Server.logError("ERROR: appserver name: " + Session.strHostName);
+	Server.logError("ERROR: appserver port: " + Session.intHostPort);
+}]]></script></scripts></action></actions></function><function name="OnTimer" start="1" returns="void"><parameters><parameter name="nTimerId" type="i4" pass="byref"/></parameters><local-vars><var name="f_bSendCleanUp" type="boolean">0</var><var name="f_oCleanUpAS" type="object"></var><var name="f_intCleanUpCounter" type="i4">0</var><var name="f_lCurrentTime" type="i8">0</var><var name="f_intReturnCode" type="i4">-1</var><var name="f_strDisconnectHostName" type="string"></var><var name="f_intCleanUpIndex" type="i4">0</var></local-vars><actions><action id="1" plug-in="Pactolus.Branch.1"><?xtml-editor x=118 y=229 ?><results><result name="Default" link="5" stubbed="0"/><result name="send cleanup == true" link="2" stubbed="0">f_bSendCleanUp == true</result></results><scripts><script language="javascript" timing="first"><![CDATA[var i = 0;
+var currentTime = Server.getUTCTime();
+
+Server.logInfo("INFO: CLEANUP, APPSERVER LENGTH  IS: " + Session.g_oAppServer.length);
+
+for (i = 0; i < Session.g_oAppServer.length; i++)
+{
+	if (true == Session.g_oAppServer[i].disconnected && (currentTime - Session.g_oAppServer[i].disTime) >= Session.g_intMaxOutageTime)
+	{
+		Server.logInfo("INFO: CLEANUP, APPSERVER NAME IS: " + Session.g_oAppServer[i].name);	
+		Server.logInfo("INFO: CLEANUP, APPSERVER DISCONNECT  IS: " + Session.g_oAppServer[i].disconnected);
+		Session.g_oAppServer[i].disconnected = false;
+		Session.f_bSendCleanUp = true;
+		Session.f_oCleanUpAS[Session.f_intCleanUpIndex] = Session.g_oAppServer[i].name;
+		Server.logInfo("INFO: CLEANUP, APPSERVER TO SEND DISCONNECT IS: " + Session.f_oCleanUpAS[Session.f_intCleanUpIndex]);	
+		Session.f_intCleanUpIndex++;
+	}
+}]]></script></scripts></action><action id="2" plug-in="Pactolus.JavaStaticMethod.1"><?xtml-editor x=431 y=481 ?><!--confCleanUp--><java class="&quot;com.pactolus.conferencing.psAPISceConfCleanup&quot;" method="&quot;cleanup&quot;" timeout="s_intTIMEOUT" return="" method-return-var="f_intReturnCode" method-return-type="0"><parameter type="in" var-type="unknown">f_lCurrentTime</parameter><parameter type="in" var-type="unknown">f_strDisconnectHostName</parameter></java><results><result name="Default" link="4" stubbed="0"/><result name="Success"/><result name="Error"/><result name="Timeout"/></results><scripts><script language="javascript" timing="first"><![CDATA[//Server.logInfo("INFO: ********JAVA CALLING psAPISceConfCleanup *********");
+Session.f_lCurrentTime = Server.getUTCTime();
+Session.f_strDisconnectHostName = Session.f_oCleanUpAS[Session.f_intCleanUpCounter];
+Server.logError("ERROR: CLEANUP, ABOUT TO SEND DISCONNECT HOST NAME: " + Session.f_strDisconnectHostName);]]></script><script language="javascript" timing="last"><![CDATA[//Server.logInfo("INFO: ********** iJavaReturnCode " + Session.f_intReturnCode);
+if (Result.id != 2 || Session.f_intReturnCode != 0)
+{
+	Server.logError("ERROR: fails to call java conf clean up");
+}]]></script></scripts></action><action id="3" plug-in="Standard.FunctionReturn.1"><?xtml-editor x=698 y=206 ?><return value=""/></action><action id="4" plug-in="Pactolus.Branch.1"><?xtml-editor x=671 y=485 ?><!--more to cleanup?--><results><result name="Default" link="2" stubbed="0"/><result name="counter &gt; array length" link="5" stubbed="1">f_intCleanUpCounter &gt;= f_oCleanUpAS.length</result></results><scripts><script language="javascript" timing="first"><![CDATA[Session.f_intCleanUpCounter++;]]></script></scripts></action><action id="5" plug-in="Standard.Timer.1"><?xtml-editor x=455 y=210 ?><timer start="1" id="g_lTimerId" duration="g_intCheckOutageTimer"/><results><result name="Default" link="3" stubbed="0"/></results></action></actions></function><function name="OnSessionStart" start="1" returns="void"><parameters><parameter name="strSessionId" type="string" pass="byref"/><parameter name="nIteration" type="i4" pass="byref"/></parameters><actions><action id="1" plug-in="Standard.Timer.1"><?xtml-editor x=148 y=221 ?><timer start="1" id="g_lTimerId" duration="g_intCheckOutageTimer"/><results><result name="Default" link="2" stubbed="0"/></results></action><action id="2" plug-in="Standard.FunctionReturn.1"><?xtml-editor x=404 y=219 ?><return value=""/></action></actions></function></functions><properties><property key="disable-logging" value=""/><property key="js-include-path" value=""/><property key="library-modules" value=""/><property key="library-path" value=""/></properties><application-version>
+		<revision>$Id: conf_cleanup.xml,v 1.5 2004/03/25 00:21:05 hlam Exp $</revision>
+		<label>$Name: PCS-A-4-1-1-1-4-c6 $</label>
+	</application-version>
+</xtml>

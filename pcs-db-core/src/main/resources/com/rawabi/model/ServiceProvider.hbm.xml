@@ -1,0 +1,243 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Jul 24, 2012 12:30:10 PM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.rawabi.model.ServiceProvider" table="SERVICE_PROVIDER" schema="PCSPROD">
+        <id name="serviceProviderId" type="big_decimal">
+            <column name="SERVICE_PROVIDER_ID" precision="22" scale="0" />
+            <generator class="assigned" />
+        </id>
+        <property name="logonKey" type="string">
+            <column name="LOGON_KEY" length="20" not-null="true" unique="true">
+                <comment>logon_key is a unique value assigned to each service provider to allow service provider identification when logging into the Administrative application.
+                It can be up to 8 characters and is assigned by the platform owner when creating a service provider.</comment>
+            </column>
+        </property>
+        <property name="deletedFlag" type="char">
+            <column name="DELETED_FLAG" length="1" not-null="true" />
+        </property>
+        <property name="disabledFlag" type="char">
+            <column name="DISABLED_FLAG" length="1" not-null="true">
+                <comment>Flag to determine whether this service provider is disabled.</comment>
+            </column>
+        </property>
+        <property name="enableMaxSessions" type="char">
+            <column name="ENABLE_MAX_SESSIONS" length="1" not-null="true">
+                <comment>Turns Max Session feature on/off for calling card application.</comment>
+            </column>
+        </property>
+        <property name="enableMaxCalls" type="char">
+            <column name="ENABLE_MAX_CALLS" length="1" not-null="true">
+                <comment>Turns Max Calls feature on/off for broadband application.</comment>
+            </column>
+        </property>
+        <property name="pinGenLimitFlag" type="char">
+            <column name="PIN_GEN_LIMIT_FLAG" length="1" not-null="true">
+                <comment>Flag to determine if the feature to limit the number of pins a service provider can generate is on.</comment>
+            </column>
+        </property>
+        <property name="voicemailFlag" type="java.lang.Character">
+            <column name="VOICEMAIL_FLAG" length="1" />
+        </property>
+        <property name="pstnEgressFlag" type="java.lang.Character">
+            <column name="PSTN_EGRESS_FLAG" length="1" />
+        </property>
+        <property name="enableMaxSessForParent" type="java.lang.Character">
+            <column name="ENABLE_MAX_SESS_FOR_PARENT" length="1">
+                <comment>Indicates if the parent service provider at the highest level has turned the max session feature on for calling card.</comment>
+            </column>
+        </property>
+        <property name="enableMaxCallsForParent" type="java.lang.Character">
+            <column name="ENABLE_MAX_CALLS_FOR_PARENT" length="1">
+                <comment>Indicates if the parent service provider at the highest level has turned the max call feature on for broadband.</comment>
+            </column>
+        </property>
+        <property name="allowPhoneNumberMaintenance" type="java.lang.Character">
+            <column name="ALLOW_PHONE_NUMBER_MAINTENANCE" length="1">
+                <comment>Indicates that the service provider has permissions to add, delete and upload broadband phone numbers.</comment>
+            </column>
+        </property>
+        <property name="creditLimitFlag" type="java.lang.Character">
+            <column name="CREDIT_LIMIT_FLAG" length="1">
+                <comment>Indicates whether credit limits should be applied to this service provider.</comment>
+            </column>
+        </property>
+        <property name="creditWarningMethod" type="java.lang.Character">
+            <column name="CREDIT_WARNING_METHOD" length="1">
+                <comment>Indicates the method of determining whether the credit is close to being used up. 0 - use a percentage threshold, 1 - use a fixed amount.</comment>
+            </column>
+        </property>
+        <property name="maxSimultaneousCalls" type="big_decimal">
+            <column name="MAX_SIMULTANEOUS_CALLS" precision="22" scale="0">
+                <comment>Maximum simultaneous broadband calls a Service Provider has to give to child service providers.</comment>
+            </column>
+        </property>
+        <property name="maxCurrentCalls" type="big_decimal">
+            <column name="MAX_CURRENT_CALLS" precision="22" scale="0" />
+        </property>
+        <property name="maxSimultaneousSessions" type="big_decimal">
+            <column name="MAX_SIMULTANEOUS_SESSIONS" precision="22" scale="0">
+                <comment>Maximum simultaneous calling card sessions a Service Provider can have.</comment>
+            </column>
+        </property>
+        <property name="availableSessions" type="big_decimal">
+            <column name="AVAILABLE_SESSIONS" precision="22" scale="0">
+                <comment>Available Calling Card Sessions a Service Provider has to give to Child service providers.</comment>
+            </column>
+        </property>
+        <property name="availableCalls" type="big_decimal">
+            <column name="AVAILABLE_CALLS" precision="22" scale="0">
+                <comment>Available Broadband Sessions a Service Provider has to give to Child service providers.</comment>
+            </column>
+        </property>
+        <property name="creditLimit" type="big_decimal">
+            <column name="CREDIT_LIMIT" precision="22" scale="0">
+                <comment>Max currency amount the service provider is allowed to use.</comment>
+            </column>
+        </property>
+        <property name="creditUsed" type="big_decimal">
+            <column name="CREDIT_USED" precision="22" scale="0">
+                <comment>The amount of credit the service provider has used.</comment>
+            </column>
+        </property>
+        <property name="creditWarningThresholdPct" type="big_decimal">
+            <column name="CREDIT_WARNING_THRESHOLD_PCT" precision="22" scale="0">
+                <comment>The percent of the credit used before warning the service provider.</comment>
+            </column>
+        </property>
+        <property name="creditWarningThresholdAmt" type="big_decimal">
+            <column name="CREDIT_WARNING_THRESHOLD_AMT" precision="22" scale="0">
+                <comment>The fixed amount of the credit used before warning the service provider.</comment>
+            </column>
+        </property>
+        <property name="pinGenLimit" type="big_decimal">
+            <column name="PIN_GEN_LIMIT" precision="22" scale="0">
+                <comment>Number of pins this service provider is allowed to generate.</comment>
+            </column>
+        </property>
+        <property name="pinGenAvailable" type="big_decimal">
+            <column name="PIN_GEN_AVAILABLE" precision="22" scale="0">
+                <comment>Remaining number of pins this service provider is allowed to generate.</comment>
+            </column>
+        </property>
+        <property name="pinGenSelfNotification" type="big_decimal">
+            <column name="PIN_GEN_SELF_NOTIFICATION" precision="22" scale="0">
+                <comment>A threshold when reached triggers an email notification. Percentage of pin_generation_limit.</comment>
+            </column>
+        </property>
+        <property name="pinGenParentNotification" type="big_decimal">
+            <column name="PIN_GEN_PARENT_NOTIFICATION" precision="22" scale="0">
+                <comment>A threshold when reached triggers an email notification to the parent service provider. Percentage of the pin_generation_limit.</comment>
+            </column>
+        </property>
+        <property name="serviceProviderCode" type="string">
+            <column name="SERVICE_PROVIDER_CODE" length="4" unique="true">
+                <comment>unique code that identifies a service provider, used for callback features.</comment>
+            </column>
+        </property>
+        <property name="ecrcNumber" type="string">
+            <column name="ECRC_NUMBER" length="40">
+                <comment>PSTN phone number to forward the call to if routing to PSAPs are unsuccessful.</comment>
+            </column>
+        </property>
+        <property name="forwardingNbr1" type="string">
+            <column name="FORWARDING_NBR_1" length="40">
+                <comment>First number to try to forward the call to.</comment>
+            </column>
+        </property>
+        <property name="forwardingNbr2" type="string">
+            <column name="FORWARDING_NBR_2" length="40">
+                <comment>Second number to try to forward the call to if the first is unsuccessful.</comment>
+            </column>
+        </property>
+        <property name="forwardingNbr3" type="string">
+            <column name="FORWARDING_NBR_3" length="40">
+                <comment>Third number to try to forward the call to if the first and second are unsuccessful.</comment>
+            </column>
+        </property>
+        <property name="name" type="string">
+            <column name="NAME" length="80" />
+        </property>
+        <property name="psap1" type="string">
+            <column name="PSAP_1" length="80">
+                <comment>IP address to redirect the call to.</comment>
+            </column>
+        </property>
+        <property name="psap2" type="string">
+            <column name="PSAP_2" length="80">
+                <comment>Backup IP address to redirect the call to.</comment>
+            </column>
+        </property>
+        <property name="reportingPassword" type="string">
+            <column name="REPORTING_PASSWORD" length="100" />
+        </property>
+        <property name="sipRealm" type="string">
+            <column name="SIP_REALM" length="100" />
+        </property>
+        <property name="description" type="string">
+            <column name="DESCRIPTION" length="120" />
+        </property>
+        <property name="primarySoftswitchIp" type="string">
+            <column name="PRIMARY_SOFTSWITCH_IP" length="120">
+                <comment>ip of primary softswitch used for all outgoing calls.</comment>
+            </column>
+        </property>
+        <property name="backupSoftswitchIp" type="string">
+            <column name="BACKUP_SOFTSWITCH_IP" length="120">
+                <comment>ip of primary softswitch used for all outgoing calls.</comment>
+            </column>
+        </property>
+        <property name="proxyServer" type="string">
+            <column name="PROXY_SERVER" length="256">
+                <comment>The proxy server that subscribers connect their ATA device to for broadband.</comment>
+            </column>
+        </property>
+        <set name="subAuthAnis" table="SUB_AUTH_ANI" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="SERVICE_PROVIDER_ID" precision="22" scale="0" not-null="true" />
+            </key>
+            <one-to-many class="com.rawabi.model.SubAuthAni" />
+        </set>
+        <set name="preActivatedSubscriberses" table="PRE_ACTIVATED_SUBSCRIBERS" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="SERVICE_PROVIDER_ID" precision="22" scale="0" not-null="true" />
+            </key>
+            <one-to-many class="com.rawabi.model.PreActivatedSubscribers" />
+        </set>
+        <set name="productOfferings" table="PRODUCT_OFFERING" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="SERVICE_PROVIDER_ID" precision="22" scale="0" not-null="true">
+                    <comment>Object ID for Service Provider</comment>
+                </column>
+            </key>
+            <one-to-many class="com.rawabi.model.ProductOffering" />
+        </set>
+        <set name="serviceProviderSettingses" table="SERVICE_PROVIDER_SETTINGS" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="SERVICE_PROVIDER_ID" precision="22" scale="0" not-null="true" />
+            </key>
+            <one-to-many class="com.rawabi.model.ServiceProviderSettings" />
+        </set>
+        <set name="accountActivities" table="ACCOUNT_ACTIVITY" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="SERVICE_PROVIDER_ID" precision="22" scale="0" not-null="true" />
+            </key>
+            <one-to-many class="com.rawabi.model.AccountActivity" />
+        </set>
+        <set name="accessNumbers" table="ACCESS_NUMBER" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="SERVICE_PROVIDER_ID" precision="22" scale="0">
+                    <comment>Service Provider OID</comment>
+                </column>
+            </key>
+            <one-to-many class="com.rawabi.model.AccessNumber" />
+        </set>
+        <set name="subscribers" table="SUBSCRIBER" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="SERVICE_PROVIDER_ID" precision="22" scale="0" not-null="true" />
+            </key>
+            <one-to-many class="com.rawabi.model.Subscriber" />
+        </set>
+    </class>
+</hibernate-mapping>

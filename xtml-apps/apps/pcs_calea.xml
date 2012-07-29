@@ -1,0 +1,1332 @@
+<?xml version="1.0"?>
+<xtml version="1.0" >
+  <version sce-version="422a4" prev-sce-version="422a4" last-mod-time="Monday, September 27, 2004 17:52:09"/>
+  <global-handlers >
+    <handler event="Pactolus.EveSipInvite.1" function="OnInvite" public="1" always-on="0"/>
+    <handler event="Pactolus.EveSipBye.1" function="OnBye" public="0" always-on="0"/>
+    <handler event="Standard.OnServiceLoad.1" function="OnServiceLoad" public="0" always-on="0"/>
+    <handler event="Standard.OnSessionEnd.1" function="OnSessionEnd" public="0" always-on="0"/>
+    <handler event="Standard.OnTimer.1" function="OnTimer" public="0" always-on="0"/>
+  </global-handlers>
+  <global-vars >
+    <var name="g_bNewSession" type="boolean" >1</var>
+    <var name="g_oCallLegA" type="object" ></var>
+    <var name="g_strTempString" type="string" ></var>
+    <var name="g_bTempBoolean" type="boolean" >0</var>
+    <var name="g_intTempInt" type="i4" >0</var>
+    <var name="g_strAppServerContact" type="string" ></var>
+    <var name="g_bHasEndPoint" type="boolean" >0</var>
+    <var name="g_oCallLegB" type="object" ></var>
+    <var name="g_lOutdialTimeStart" type="i8" >0</var>
+    <var name="g_lOutdialTimeAnswered" type="i8" >0</var>
+    <var name="g_strOutdialSIPStatus" type="string" ></var>
+    <var name="g_bCreatedConference" type="boolean" >0</var>
+    <var name="g_strConferenceId" type="string" ></var>
+    <var name="g_oMSCallLegA" type="object" ></var>
+    <var name="g_oMSCallLegB" type="object" ></var>
+    <var name="g_oTimerA" type="object" ></var>
+    <var name="g_oTimerB" type="object" ></var>
+    <var name="g_bWaitingForRemoteSdp" type="boolean" >0</var>
+    <var name="g_bPlaySummaryMsg" type="boolean" >0</var>
+    <var name="g_oCallInfo" type="object" ></var>
+  </global-vars>
+  <shared-vars >
+    <var name="s_strMSType" type="string" ></var>
+    <var name="s_strLocalHost" type="string" ></var>
+    <var name="s_intTIMEOUT" type="i4" >30</var>
+    <var name="s_intPacketizationPeriod" type="i4" >0</var>
+    <var name="s_strCodec" type="string" ></var>
+    <var name="s_strSIPVERSION" type="string" >SIP/2.0</var>
+    <var name="s_strContentType" type="string" >application/sdp</var>
+    <var name="s_intSUCCESS" type="i4" >0</var>
+    <var name="s_intFAILURE" type="i4" >-1</var>
+    <var name="s_strPrimaryPSX" type="string" ></var>
+    <var name="s_strBackupPSX" type="string" ></var>
+    <var name="s_intRING_NO_ANSWER_TIME" type="i4" >30</var>
+    <var name="s_strDigitPrependToOutDial" type="string" ></var>
+    <var name="s_bTestBoolean" type="boolean" >0</var>
+    <var name="s_intCALLERHUNGUP" type="i4" >-2</var>
+    <var name="s_strTestString" type="string" ></var>
+    <var name="s_strCarrierName" type="string" ></var>
+    <var name="s_bPlayCaleaSummary" type="boolean" >0</var>
+    <var name="s_nReinviteTimer" type="i4" >1800</var>
+  </shared-vars>
+  <functions >
+    <function name="OnInvite" start="1" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string" pass="byref"/>
+        <parameter name="strAcceptEncoding" type="string" pass="byref"/>
+        <parameter name="strAcceptLanguage" type="string" pass="byref"/>
+        <parameter name="strAlertInfo" type="string" pass="byref"/>
+        <parameter name="strAllow" type="string" pass="byref"/>
+        <parameter name="strAllowEvents" type="string" pass="byref"/>
+        <parameter name="strAnonymity" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strCallInfo" type="string" pass="byref"/>
+        <parameter name="strContact" type="string" pass="byref"/>
+        <parameter name="strContent" type="string" pass="byref"/>
+        <parameter name="strContentDisposition" type="string" pass="byref"/>
+        <parameter name="strContentEncoding" type="string" pass="byref"/>
+        <parameter name="strContentLanguage" type="string" pass="byref"/>
+        <parameter name="strContentType" type="string" pass="byref"/>
+        <parameter name="strCSeq" type="string" pass="byref"/>
+        <parameter name="strDate" type="string" pass="byref"/>
+        <parameter name="strEncryption" type="string" pass="byref"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strExpires" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strInReplyTo" type="string" pass="byref"/>
+        <parameter name="strMaxForwards" type="string" pass="byref"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strMinSE" type="string" pass="byref"/>
+        <parameter name="strOrganization" type="string" pass="byref"/>
+        <parameter name="strPriority" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string" pass="byref"/>
+        <parameter name="strProxyRequire" type="string" pass="byref"/>
+        <parameter name="strRecordRoute" type="string" pass="byref"/>
+        <parameter name="strReferredBy" type="string" pass="byref"/>
+        <parameter name="strRemotePartyID" type="string" pass="byref"/>
+        <parameter name="strReplaces" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string" pass="byref"/>
+        <parameter name="strRequire" type="string" pass="byref"/>
+        <parameter name="strResponseKey" type="string" pass="byref"/>
+        <parameter name="strRoute" type="string" pass="byref"/>
+        <parameter name="strSessionExpires" type="string" pass="byref"/>
+        <parameter name="strSubject" type="string" pass="byref"/>
+        <parameter name="strSupported" type="string" pass="byref"/>
+        <parameter name="strTimestamp" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_intReturnCode" type="i4" >-1</var>
+        <var name="bInvalidEndpoint" type="boolean" >0</var>
+        <var name="f_iTimeout" type="i4" >30</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=79 y=549 ?>
+          <results >
+            <result name="Default" link="20" stubbed="0"/>
+            <result name="g_bNewSession" link="2" stubbed="0" >g_bNewSession == true</result>
+          </results>
+        </action>
+        <action id="2" plug-in="Pactolus.Branch.1" ><?xtml-editor x=299 y=800 ?>
+          <!--use object save incoming call info-->
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+            <result name="g_bHasEndPoint" link="39" stubbed="0" >g_bHasEndPoint == true</result>
+            <result name="Invalid endpoint" link="13" stubbed="1" >bInvalidEndpoint == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_bNewSession = false;
+
+//initialize call leg
+js_initCallLeg(Session.g_oCallLegA);
+Session.g_oCallLegA.bConnecting = Session.g_oCallLegA.bConnected = false ;
+Session.g_oCallLegB.bConnecting = Session.g_oCallLegB.bConnected = false ;
+Session.g_oCallLegA.bReverseFromTo = true;
+Session.g_oCallLegA.strFrom = Session.strFrom;
+Session.g_oCallLegA.strTo = Session.strTo;
+Session.g_oCallLegA.strCallId = Session.strCallId;
+Session.g_oCallLegA.strContact = Session.strContact;
+Session.g_oCallLegA.strContent = Session.strContent;
+Session.g_oCallLegA.strOriginalContent = Session.strContent;
+Session.g_oCallLegA.strContentType = Session.strContentType;
+Session.g_oCallLegA.strCSeq = Session.strCSeq;
+Session.g_oCallLegA.strRecordRoute = Session.strRecordRoute;
+Session.g_oCallLegA.strRoute = Session.strRoute;
+Session.g_oCallLegA.strVia = Session.strVia;
+Session.g_oCallLegA.intSetUpTime = 0;
+Session.g_oCallLegA.intTearDownTime = 0;
+
+/* we receive reINVITEs on the A leg, so sleep till the end of the Session-expires interval */
+Session.g_oCallLegA.intSessionTimer = Number(Session.strSessionExpires);
+js_initTimer(Session.g_oTimerA);
+Session.g_oTimerA.lSleepTime = Number(Session.strSessionExpires);
+Session.g_bPlaySummaryMsg = Session.s_bPlayCaleaSummary ;
+
+
+var from_uri = new SipFrom( Session.strFrom.toString() ) ;
+Session.g_oCallLegA.strOrigTrunkGroup = from_uri.url.otg;
+if (from_uri.url.user != undefined)
+{
+	Session.g_oCallLegA.strCallingNumber = from_uri.url.user;
+}
+
+js_calculate_uri_and_route(true, Session.s_strSIPVERSION, Session.g_oCallLegA.strFrom, 
+	Session.g_oCallLegA.strContact, Session.g_oCallLegA.strRecordRoute, 
+	Session.g_oCallLegA.strRemoteUri, Session.g_oCallLegA.strRoute);
+
+// has an endpoint?
+Session.g_bHasEndPoint = false ;
+if( js_parse_value( Session.strSubject, "endpoint", Session.g_strConferenceId ) ) {
+	Server.logInfo("Conference endpoint in subject header is: " + Session.g_strConferenceId ) ;
+	if( 0 == Session.g_strConferenceId.length ) {
+		Session.bInvalidEndpoint = true ;
+	}
+	else {
+		Session.g_bHasEndPoint = true ;
+	}
+}
+else {
+	/* this is the INVITE to the first leg.  It should have summary info in Subject header*/
+	Session.g_oCallInfo.lStartTime = Server.getUTCTime() ;
+	Session.g_oCallInfo.dtStart = new Date ;
+	js_parse_value( Session.strSubject, "sn", Session.g_oCallInfo.strSurveiledNumber);
+	js_parse_value( Session.strSubject, "on", Session.g_oCallInfo.strOriginationNumber);
+	js_parse_value( Session.strSubject, "tn", Session.g_oCallInfo.strTerminationNumber);
+	Session.g_oCallInfo.nFinalStatus = 0 ;
+	
+	/* get date and time in format for playing */
+	
+	/* date: yyyymmdd */
+	var dtNow = new Date ;
+	var s = dtNow.getUTCFullYear().toString() ;
+	if( dtNow.getUTCMonth() < 9 ) {
+		s += "0" ;
+	}
+	s += (dtNow.getUTCMonth() + 1) ;
+	if( dtNow.getUTCDate() < 10 ) {
+		s += "0" ;
+	}
+	s += dtNow.getUTCDate() ;
+	Session.g_oCallInfo.strDate = s ;
+	
+	/* time: HHMM*/
+	s = "" ;
+	if( dtNow.getUTCHours() < 9 ) {
+		s += "0" ;
+	}
+	s += (dtNow.getUTCHours() + 1 ) ;
+	if( dtNow.getUTCMinutes() < 9 ) {
+		s += "0" ;
+	}
+	s += (dtNow.getUTCMinutes() + 1 ) ;
+	Session.g_oCallInfo.strTime = s ;
+	
+}
+
+// set server contact
+Session.g_strAppServerContact = "sip:" + Server.sipAddress
+if( Server.sipPort != 5060 )
+{
+ Session.g_strAppServerContact += ":" + Server.sipPort;
+}
+
+// Mediaserver object
+js_initMS(Session.g_oMSCallLegA, Session.s_strMSType);
+js_initMS(Session.g_oMSCallLegB, Session.s_strMSType);
+]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=649 y=325 ?>
+          <!--200 OK SDP of MSCallLegA-->
+          <sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <contact >g_strAppServerContact</contact>
+            <content >g_oMSCallLegA.strContent</content>
+            <content-type >s_strContentType</content-type>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 200 OK"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="26" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="6" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=590 y=143 ?>
+          <!--481 Transaction Does Not Exists-->
+          <sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <contact >g_strAppServerContact</contact>
+            <content >strContent</content>
+            <content-type >strContentType</content-type>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 481 Call Leg/Transaction Does Not Exist"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="7" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=837 y=143 ?>
+          <return value=""/>
+        </action>
+        <action id="11" plug-in="Pactolus.CNFCreateConf.1" ><?xtml-editor x=553 y=756 ?>
+          <create-conference ci="g_strConferenceId" persist="0" ms-type="s_strMSType" timeout="s_intTIMEOUT" returns="f_intReturnCode" mp="3" mt="3" hysteresis="" time-constant="" active-speakers="3" reporting-interval="2" active-speaker-threshold="" >
+            <attributes mp="3" mt="3" ig="0" og="0" iat="-10" ias="-40" oat="-10" oas="-40" atn="3" att="2" ia="1" oa="1" te="1" le="1" tp="0" dc="1" tc="1" ate="0" se="0"/>
+          </create-conference>
+          <results >
+            <result name="Default" link="13" stubbed="1"/>
+            <result name="Success" link="40" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="13" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=803 y=971 ?>
+          <!--503 service unavailable-->
+          <sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oCallLegA.strCallId</call-id>
+            <contact >g_strAppServerContact</contact>
+            <cseq >g_oCallLegA.strCSeq</cseq>
+            <from >g_oCallLegA.strFrom</from>
+            <status >"SIP/2.0 503 Service Unavailable"</status>
+            <to >g_oCallLegA.strTo</to>
+            <via >g_oCallLegA.strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="14" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: APP RESPONSES 503 SERVICE UNAVAILABLE");
+var myTo = new SipTo(Session.g_oCallLegA.strTo.toString());
+if (undefined == myTo.tag)
+{
+	Session.g_oCallLegA.strTo = Session.g_oCallLegA.strTo + ";tag=" + Server.getUTCTime();
+}]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Standard.EndSession.1" ><?xtml-editor x=1815 y=827 ?></action>
+        <action id="20" plug-in="Pactolus.Branch.1" ><?xtml-editor x=332 y=277 ?>
+          <!--caller id?-->
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="caller A" link="4" stubbed="0" >strCallId match g_oCallLegA.strCallId</result>
+            <result name="caller B" link="23" stubbed="0" >strCallId match g_oCallLegB.strCallId</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if (0 == Clib.strcmpi(Session.strCallId, Session.g_oCallLegA.strCallId.toString()))
+{
+	var newCSeq = new SipCSeq(Session.strCSeq);
+	var oldCSeq = new SipCSeq(Session.g_oCallLegA.strCSeq);
+
+	if(newCSeq.value >= oldCSeq.value) 
+	{
+		newCSeq.increment() ;
+		Session.g_oCallLegA.strCSeq = newCSeq.encode() ;
+	}
+	if (Clib.strcmpi(Session.strContent, Session.g_oCallLegA.strContent) != 0)
+	{
+		Session.g_oCallLegA.strContent = Session.strContent;
+		Session.g_oCallLegA.strOriginalContent = Session.strContent;
+	}
+}
+else if (0 == Clib.strcmpi(Session.strCallId, Session.g_oCallLegB.strCallId.toString()))
+{
+	var newCSeq = new SipCSeq(Session.strCSeq);
+	var oldCSeq = new SipCSeq(Session.g_oCallLegB.strCSeq);
+
+	if(newCSeq.value >= oldCSeq.value) 
+	{
+		newCSeq.increment() ;
+		Session.g_oCallLegB.strCSeq = newCSeq.encode() ;
+	}
+	if (Clib.strcmpi(Session.strContent, Session.g_oCallLegB.strContent) != 0)
+	{
+		Session.g_oCallLegB.strContent = Session.strContent;
+		Session.g_oCallLegB.strOriginalContent = Session.strContent;
+	}
+}]]></script>
+          </scripts>
+        </action>
+        <action id="23" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=624 y=558 ?>
+          <!--200 OK SDP of MSCallLegB-->
+          <sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <contact >g_strAppServerContact</contact>
+            <content >g_oMSCallLegB.strContent</content>
+            <content-type >s_strContentType</content-type>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 200 OK"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="28" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="26" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=925 y=336 ?>
+          <!--"StopOneTimerA"-->
+          <function name="&quot;StopOneTimer&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >g_oTimerA</parameter>
+          </function>
+          <results >
+            <result name="Default" link="27" stubbed="0"/>
+          </results>
+        </action>
+        <action id="27" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1192 y=359 ?>
+          <!--"StartTimerA"-->
+          <function name="&quot;StartTimer&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >g_oTimerA</parameter>
+          </function>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Start new session timer for A: " + Session.g_oTimerA.lSleepTime + " seconds") ;]]></script>
+          </scripts>
+        </action>
+        <action id="28" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=891 y=599 ?>
+          <!--"StopOneTimerB"-->
+          <function name="&quot;StopOneTimer&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >g_oTimerB</parameter>
+          </function>
+          <results >
+            <result name="Default" link="29" stubbed="0"/>
+          </results>
+        </action>
+        <action id="29" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1138 y=599 ?>
+          <!--"StartTimerB"-->
+          <function name="&quot;StartTimer&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >g_oTimerB</parameter>
+          </function>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+          </results>
+        </action>
+        <action id="30" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1751 y=1090 ?>
+          <!--"StartTimerA"-->
+          <function name="&quot;StartTimer&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >g_oTimerA</parameter>
+          </function>
+          <results >
+            <result name="Default" link="34" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("We will wait for REINVITEs from A for " + Session.g_oTimerA.lSleepTime + " seconds") ;
+]]></script>
+          </scripts>
+        </action>
+        <action id="31" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1980 y=1101 ?>
+          <!--"StartTimerB"-->
+          <function name="&quot;StartTimer&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >g_oTimerB</parameter>
+          </function>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("We will send REINVITEs to B every " + Session.g_oTimerB.lSleepTime + " seconds") ;
+]]></script>
+          </scripts>
+        </action>
+        <action id="33" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1564 y=962 ?>
+          <!--Timer A > 0?-->
+          <results >
+            <result name="Default" link="34" stubbed="0"/>
+            <result name="Timer A &gt; 0?" link="30" stubbed="0" >g_oTimerA.lSleepTime &gt; 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oCallLegB.bConnecting = false ;
+Session.g_oCallLegB.bConnected = true ;]]></script>
+          </scripts>
+        </action>
+        <action id="34" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1841 y=968 ?>
+          <!--Timer B > 0?-->
+          <results >
+            <result name="Default" link="48" stubbed="0"/>
+            <result name="TimerB &gt; 0?" link="31" stubbed="0" >g_oTimerB.lSleepTime &gt; 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_initTimer(Session.g_oTimerB);
+
+/* we send reINVITEs on the B leg, so sleep halfway through the Session-expires interval */
+Session.g_oTimerB.lSleepTime = Session.g_oCallLegB.intSessionTimer/2;
+
+var myURI = new SipRequestUri(Session.g_oCallLegB.strRequestURI.toString());
+Session.g_oCallLegB.strDestTrunkGroup = myURI.url.dtg;
+js_calculate_uri_and_route(false, Session.s_strSIPVERSION, Session.g_oCallLegB.strFrom, 
+	Session.g_oCallLegB.strContact, Session.g_oCallLegB.strRecordRoute, 
+	Session.g_oCallLegB.strRequestURI, Session.g_oCallLegB.strRoute);
+	
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="37" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1072 y=1187 ?>
+          <!--"StartTimerA"-->
+          <function name="&quot;StartTimer&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >g_oTimerA</parameter>
+          </function>
+          <results >
+            <result name="Default" link="48" stubbed="1"/>
+          </results>
+        </action>
+        <action id="38" plug-in="Pactolus.Branch.1" ><?xtml-editor x=804 y=1167 ?>
+          <!--Timer A > 0?-->
+          <results >
+            <result name="Default" link="48" stubbed="1"/>
+            <result name="Timer A &gt; 0?" link="37" stubbed="0" >g_oTimerA.lSleepTime &gt; 0</result>
+          </results>
+        </action>
+        <action id="39" plug-in="Pactolus.CNFAddMember.1" ><?xtml-editor x=565 y=1026 ?>
+          <!--Add A to conference-->
+          <add-member endpoint="g_oMSCallLegA.strEndPoint" ms-type="g_oMSCallLegA.strType" ci="g_strConferenceId" inbound="1" returns="f_intReturnCode" timeout="s_intTIMEOUT" connection-id="g_oMSCallLegA.strConnectionId" ms-sdp="g_oMSCallLegA.strContent" mgcp-call-id="g_oMSCallLegA.strCallId" ingress-gateway="" early-media="0" local="0" packetization-period="s_intPacketizationPeriod" codec="-1" telephone-events="0" route="" record-route="" contact="" te="1" dc="1" le="0" ig="" og="" ia="" oa="" iat="" oat="" ias="" oas="" tf="2" lf="1" to="g_oCallLegA.strTo" call-id="g_oCallLegA.strCallId" cseq="g_oCallLegA.strCSeq" caller-sdp="g_oCallLegA.strContent" from="g_oCallLegA.strFrom" via="g_oCallLegA.strVia" >
+            <attributes mp="16" mt="3" ig="0" og="0" iat="-10" ias="-40" oat="-10" oas="-40" atn="3" att="2" ia="1" oa="1" te="1" le="0" tp="0" dc="1" tc="1" ate="0" se="0"/>
+          </add-member>
+          <results >
+            <result name="Default" link="13" stubbed="0"/>
+            <result name="Success" link="38" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="Resource Unavailable"/>
+            <result name="Caller Hung up" link="14" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (2 == Result.id)
+{
+	Session.g_oMSCallLegA.bCurrentlyInConf = true;
+	Server.logInfo("SUCCESS ADD MEMEMBER");
+	Server.logInfo("**** AFTER ADD MEMBER TO CONFERENCE ****");
+	Server.logInfo("g_oCallLegA.strFrom: " + Session.g_oCallLegA.strFrom);
+	Server.logInfo("g_oCallLegA.strTo: " + Session.g_oCallLegA.strTo);
+	Server.logInfo("g_oCallLegA.strContent: " + Session.g_oCallLegA.strContent);
+	Server.logInfo("g_oCallLegA.strCSeq: " + Session.g_oCallLegA.strCSeq);
+	Server.logInfo("g_oCallLegA.strCallId: " + Session.g_oCallLegA.strCallId);
+	Server.logInfo("g_oCallLegA.strRequestURI: " + Session.g_oCallLegA.strRequestURI);
+	Server.logInfo("g_oMSCallLegA.strConferenceId: " + Session.g_oMSCallLegA.strConferenceId);
+	Server.logInfo("g_oMSCallLegA.strEndPoint: " + Session.g_oMSCallLegA.strEndPoint);
+	Server.logInfo("g_oMSCallLegA.strContent: " + Session.g_oMSCallLegA.strContent);
+	Server.logInfo("g_oMSCallLegA.strConnectionId: " + Session.g_oMSCallLegA.strConnectionId);
+	Server.logInfo("g_oMSCallLegA.strCallId: " + Session.g_oMSCallLegA.strCallId);
+	Server.logInfo("g_oMSCallLegA.strType: " + Session.g_oMSCallLegA.strType);
+	Server.logInfo("g_oMSCallLegA.bMuteFlag: " + Session.g_oMSCallLegA.bMuteFlag);
+	Server.logInfo("g_oMSCallLegA.bDeafFlag: " + Session.g_oMSCallLegA.bDeafFlag);
+	Server.logInfo("g_oMSCallLegA.bCurrentlyInConf: " + Session.g_oMSCallLegA.bCurrentlyInConf);
+	Server.logInfo("g_oMSCallLegA.bCurrentlyConnected: " + Session.g_oMSCallLegA.bCurrentlyConnected);
+	Server.logInfo("g_oMSCallLegA.bRetry: " + Session.g_oMSCallLegA.bRetry);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="40" plug-in="Pactolus.CNFAddMember.1" ><?xtml-editor x=821 y=773 ?>
+          <!--Add A to conference-->
+          <add-member endpoint="g_oMSCallLegA.strEndPoint" ms-type="g_oMSCallLegA.strType" ci="g_strConferenceId" inbound="1" returns="f_intReturnCode" timeout="s_intTIMEOUT" connection-id="g_oMSCallLegA.strConnectionId" ms-sdp="g_oMSCallLegA.strContent" mgcp-call-id="g_oMSCallLegA.strCallId" ingress-gateway="" early-media="0" local="0" packetization-period="s_intPacketizationPeriod" codec="-1" telephone-events="0" route="" record-route="" contact="" te="1" dc="1" le="0" ig="" og="" ia="" oa="" iat="" oat="" ias="" oas="" tf="2" lf="1" to="g_oCallLegA.strTo" call-id="g_oCallLegA.strCallId" cseq="g_oCallLegA.strCSeq" caller-sdp="g_oCallLegA.strContent" from="g_oCallLegA.strFrom" via="g_oCallLegA.strVia" >
+            <attributes mp="16" mt="3" ig="0" og="0" iat="-10" ias="-40" oat="-10" oas="-40" atn="3" att="2" ia="1" oa="1" te="1" le="0" tp="0" dc="1" tc="1" ate="0" se="0"/>
+          </add-member>
+          <results >
+            <result name="Default" link="13" stubbed="1"/>
+            <result name="Success" link="42" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="Resource Unavailable"/>
+            <result name="Caller Hung up" link="14" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_bCreatedConference = true;
+Session.g_oCallLegA.bConnecting = true ;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (2 == Result.id)
+{
+	Session.g_oMSCallLegA.bCurrentlyInConf = true;
+	Server.logInfo("SUCCESS ADD MEMEMBER");
+	Server.logInfo("**** AFTER ADD MEMBER TO CONFERENCE ****");
+	Server.logInfo("g_oCallLegA.strFrom: " + Session.g_oCallLegA.strFrom);
+	Server.logInfo("g_oCallLegA.strTo: " + Session.g_oCallLegA.strTo);
+	Server.logInfo("g_oCallLegA.strContent: " + Session.g_oCallLegA.strContent);
+	Server.logInfo("g_oCallLegA.strCSeq: " + Session.g_oCallLegA.strCSeq);
+	Server.logInfo("g_oCallLegA.strCallId: " + Session.g_oCallLegA.strCallId);
+	Server.logInfo("g_oCallLegA.strRequestURI: " + Session.g_oCallLegA.strRequestURI);
+	Server.logInfo("g_oMSCallLegA.strConferenceId: " + Session.g_oMSCallLegA.strConferenceId);
+	Server.logInfo("g_oMSCallLegA.strEndPoint: " + Session.g_oMSCallLegA.strEndPoint);
+	Server.logInfo("g_oMSCallLegA.strContent: " + Session.g_oMSCallLegA.strContent);
+	Server.logInfo("g_oMSCallLegA.strConnectionId: " + Session.g_oMSCallLegA.strConnectionId);
+	Server.logInfo("g_oMSCallLegA.strCallId: " + Session.g_oMSCallLegA.strCallId);
+	Server.logInfo("g_oMSCallLegA.strType: " + Session.g_oMSCallLegA.strType);
+	Server.logInfo("g_oMSCallLegA.bMuteFlag: " + Session.g_oMSCallLegA.bMuteFlag);
+	Server.logInfo("g_oMSCallLegA.bDeafFlag: " + Session.g_oMSCallLegA.bDeafFlag);
+	Server.logInfo("g_oMSCallLegA.bCurrentlyInConf: " + Session.g_oMSCallLegA.bCurrentlyInConf);
+	Server.logInfo("g_oMSCallLegA.bCurrentlyConnected: " + Session.g_oMSCallLegA.bCurrentlyConnected);
+	Server.logInfo("g_oMSCallLegA.bRetry: " + Session.g_oMSCallLegA.bRetry);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="42" plug-in="Pactolus.SipNotify.1" ><?xtml-editor x=1097 y=817 ?>
+          <!--Notify conference id-->
+          <sip-notify add-record-route="0" add-via="1" increment-cseq-first="0" increment-cseq-last="1" >
+            <call-id >g_oCallLegA.strCallId</call-id>
+            <cseq >g_oCallLegA.strCSeq</cseq>
+            <event >g_strConferenceId</event>
+            <from >g_oCallLegA.strTo</from>
+            <request-uri >g_oCallLegA.strRemoteUri</request-uri>
+            <route >g_oCallLegA.strRoute</route>
+            <to >g_oCallLegA.strFrom</to>
+            <subscription-state >"active"</subscription-state>
+          </sip-notify>
+          <results >
+            <result name="Default" link="46" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oCallLegA.bConnecting = false ;
+Session.g_oCallLegA.bConnected = true ;
+
+Server.logInfo("SEND BACK A NOTIFY WITH CONFERENCE ENDPOINT");
+Server.logInfo("g_oCallLegA.strFrom: " + Session.g_oCallLegA.strFrom);
+Server.logInfo("g_oCallLegA.strTo: " + Session.g_oCallLegA.strTo);
+Server.logInfo("g_oCallLegA.strCSeq: " + Session.g_oCallLegA.strCSeq);
+Server.logInfo("g_oCallLegA.strCallId: " + Session.g_oCallLegA.strCallId);
+Server.logInfo("g_oCallLegA.strRequestURI: " + Session.g_oCallLegA.strRequestURI);]]></script>
+          </scripts>
+        </action>
+        <action id="46" plug-in="Pactolus.CNFAddMemberOutdial.1" ><?xtml-editor x=1348 y=790 ?>
+          <add-member-outdial calling-number="g_oCallLegA.strCallingNumber" called-number="g_oCallLegB.strCalledNumber" preferred-carrier="" codec="-1" reliable-provisional-responses="0" timeout="f_iTimeout" returns="" ms-type="g_oMSCallLegB.strType" ci="g_oMSCallLegB.strConferenceId" calling-packetization="s_intPacketizationPeriod" connection-id="g_oMSCallLegB.strConnectionId" callingparty-contact="g_strAppServerContact" mgcp-call-id="g_oMSCallLegB.strCallId" ms-sdp="g_oMSCallLegB.strSdp" endpoint="g_oMSCallLegB.strEndpoint" calling-capability="2" telephone-events="0" rtp-request-a="0" rtp-endpoint-a="" egress-gateway="g_oCallLegB.strRemoteUri" sdp="g_oCallLegB.strContent" call-id="g_oCallLegB.strCallId" cseq="g_oCallLegB.strCSeq" sip-status="g_oCallLegB.strStatus" to="g_oCallLegB.strTo" from="g_oCallLegB.strFrom" session-timer="1" session-timer-value="g_oCallLegB.intSessionTimer" backup-ss="g_oCallLegB.strBackupRemoteUri" route="g_oCallLegB.strRoute" record-route="g_oCallLegB.strRecordRoute" contact="g_oCallLegB.strContact" rtp-request-b="0" rtp-endpoint-b="" play-ringback="0" language="" ringback-prompt="" capability="1" ringback-codec="-1" packetization-period="" te="" dc="" le="" ig="" og="" ia="" oa="" iat="" oat="" ias="" oas=""/>
+          <results >
+            <result name="Default" link="47" stubbed="0"/>
+            <result name="Success" link="33" stubbed="0"/>
+            <result name="Ring no answer"/>
+            <result name="Busy"/>
+            <result name="Caller DTMF interrupt"/>
+            <result name="Called party error"/>
+            <result name="Calling party error"/>
+            <result name="Other error"/>
+            <result name="Resource unavailable"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_initCallLeg(Session.g_oCallLegB);
+var myURI = new SipUrl(Session.strRequestURI);
+Session.g_oCallLegB.strCalledNumber = myURI.phoneNumber;
+
+/* implement dialing plan rules */
+/* perform number translations for dialing */
+Server.logInfo("About to translate dest: " + Session.g_oCallLegB.strCalledNumber ) ;
+Session.g_oCallLegB.strCalledNumber = js_translate_destination_broadband( Session.s_strCarrierName, 
+		Session.g_oCallLegB.strCalledNumber, "1", false, Session.g_oCallLegB.strCallingNumber ) ;
+Server.logInfo("AFTER Session.g_oCallLegB.strCalledNumber prepend : <" + Session.g_oCallLegB.strCalledNumber + " >");
+
+Session.g_oMSCallLegB.strConferenceId = Session.g_strConferenceId;
+
+Session.g_oCallLegB.strRemoteUri = Session.s_strPrimaryPSX ;
+Session.g_oCallLegA.strBackupRemoteUri = Session.s_strBackupPSX ;
+
+Session.g_oCallLegB.strCSeq = Session.g_oCallLegB.strOriginalCSeq = "1200 INVITE" ;
+
+/* calculate the codec to use based on the far end Sdp.  Currently only PCMU and G729 supported */
+if( Session.strContent.length > 0 ) {
+	var remoteSdp = new Sdp( Session.strContent ) ;
+	if( 0 == remoteSdp.media[0].rtpMaps[0].type ) {
+		Session.g_oMSCallLegB.strCodec = "PCMU"; 
+	}
+	else {
+		Session.g_oMSCallLegB.strCodec = "G729" ;
+	}
+}
+else {
+	Session.g_oMSCallLegB.strCodec = "PCMU";
+}
+Session.g_oCallLegB.bConnecting = true ;
+
+Session.g_oCallLegB.intSessionTimer = Session.s_nReinviteTimer ;
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("After add member outdial session timer value: " + Session.g_oCallLegB.intSessionTimer ) ;
+if( 2 != Result.id ) {
+	Server.logError("Error in add member outdial for destination " + 
+		Session.g_oCallLegB.strCalledNumber + ": " + Result.name + " (" + Result.id + ")" ) ;
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="47" plug-in="Pactolus.SipBye.1" ><?xtml-editor x=1596 y=715 ?>
+          <!--Hang up A-->
+          <sip-bye add-record-route="0" add-via="1" handle-responses="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oCallLegA.strCallId</call-id>
+            <cseq >g_oCallLegA.strCSeq</cseq>
+            <from >g_oCallLegA.strTo</from>
+            <request-uri >g_oCallLegA.strRemoteUri</request-uri>
+            <route >g_oCallLegA.strRoute</route>
+            <to >g_oCallLegA.strFrom</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+        </action>
+        <action id="48" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=2090 y=920 ?>
+          <return value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="OnServiceLoad" start="1" returns="void" >
+      <parameters >
+        <parameter name="strAppName" type="string" pass="byref"/>
+        <parameter name="nSessionCount" type="i2" pass="byref"/>
+        <parameter name="nMaxIterations" type="i2" pass="byref"/>
+        <parameter name="nServerId" type="i2" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Pactolus.UserFunction.1" ><?xtml-editor x=228 y=176 ?>
+          <!--GET PSX IP from config-->
+          <user-function process="&quot;PACTOLUS_ps_c_adaptor&quot;" function="&quot;get_property&quot;" timeout="s_intTIMEOUT" return="" async="0" >
+            <parameter >"primary-softswitch"</parameter>
+            <parameter >s_strPrimaryPSX</parameter>
+            <parameter >"backup-softswitch"</parameter>
+            <parameter >s_strBackupPSX</parameter>
+            <parameter >"prepend-to-outdial"</parameter>
+            <parameter >s_strDigitPrependToOutDial</parameter>
+            <parameter >"appserver-logical-ip"</parameter>
+            <parameter >s_strLocalHost</parameter>
+            <parameter >"ring-no-answer-time"</parameter>
+            <parameter >s_intRING_NO_ANSWER_TIME</parameter>
+            <parameter >"packetization-period"</parameter>
+            <parameter >s_intPacketizationPeriod</parameter>
+            <parameter >"media-server-type"</parameter>
+            <parameter >s_strMSType</parameter>
+            <parameter >"codec"</parameter>
+            <parameter >s_strCodec</parameter>
+            <parameter >"carrier-name"</parameter>
+            <parameter >s_strCarrierName</parameter>
+            <parameter >"play-calea-summary"</parameter>
+            <parameter >s_bPlayCaleaSummary</parameter>
+            <parameter >"calea-session-expires"</parameter>
+            <parameter >s_nReinviteTimer</parameter>
+          </user-function>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Session.s_strPrimaryPSX.length <= 0)
+{
+	Server.logError("ERROR:  NO SETTING FOR PRIMARY SOFTSWITCH.");
+}
+if (Session.s_strBackupPSX.length <= 0)
+{
+	Server.logInfo("WARNING:  NO SETTING FOR BACKUP SOFTSWITCH.");
+}
+if (Session.s_strLocalHost.length <= 0)
+{
+	Session.s_strLocalHost = Server.ipAddress;
+	Server.logInfo("WARNING:  NO SETTING FOR LOCAL HOST IP ADDRESS.  USE DEFAULT: " + Session.s_strLocalHost);
+}
+if (Session.s_intRING_NO_ANSWER_TIME <= 0)
+{
+	Session.s_intRING_NO_ANSWER_TIME = 30;
+	Server.logInfo("WARNING: NO SETTING FOR RING NO ANSWER TIME.  USE DEFAULT: " + Session.s_intRING_NO_ANSWER_TIME);
+}
+if (Session.s_intPacketizationPeriod <= 0)
+{
+	Session.s_intPacketizationPeriod = 20;
+	Server.logInfo("WARNING: NO SETTING FOR PACKETIZATION PERIOD.  USE DEFAULT: " + Session.s_intPacketizationPeriod);
+}
+if (Session.s_strMSType.length <= 0)
+{
+	Server.logInfo("WARNING:  NO SETTING FOR MEDIA SERVER TYP, DEAULT WILL BE PCS.");
+	Session.s_strMSType = "CONV";
+}
+//DH: temporarily hardcode to Convedia
+Session.s_strMSType = "CONV";
+
+if (Session.s_strCodec.length <= 0)
+{
+	Session.s_strCodec = "PCMU";
+	Server.logInfo("WARNING: NO SETTING FOR CODEC.  USE DEFAULT: PCMU");
+}
+
+if( Session.s_bPlayCaleaSummary ) {
+	Server.logInfo("A summary of the wiretap data will be played at the end of each call") ;
+}
+else {
+	Server.logInfo("A summary of the wiretap data will not be played at the end of each call") ;
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=467 y=175 ?>
+          <return value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="OnSessionEnd" start="8" returns="void" >
+      <parameters >
+        <parameter name="nSessionEndReason" type="i2" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_intReturnCode" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="8" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=93 y=217 ?>
+          <!--"StopOneTimerA"-->
+          <function name="&quot;StopOneTimer&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >g_oTimerA</parameter>
+          </function>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Entering OnEndSession") ;]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Pactolus.Branch.1" ><?xtml-editor x=508 y=211 ?>
+          <!--created conference?-->
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="g_bCreatedConference" link="7" stubbed="0" >g_bCreatedConference == true</result>
+          </results>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=958 y=209 ?>
+          <return value=""/>
+        </action>
+        <action id="7" plug-in="Pactolus.CNFDeleteConf.1" ><?xtml-editor x=742 y=209 ?>
+          <delete-conference ci="g_strConferenceId" ms-type="s_strMSType" timeout="s_intTIMEOUT" returns="f_intReturnCode"/>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Deleting conference") ;]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=307 y=215 ?>
+          <!--"StopOneTimerB"-->
+          <function name="&quot;StopOneTimer&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >g_oTimerB</parameter>
+          </function>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+          </results>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="136" y-coord="58" width="229" height="48" text="TODO: play postamble" font-name="Times New Roman" size="-20" red="0" green="0" blue="0" weight="400" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="OnTimer" start="1" returns="void" >
+      <parameters >
+        <parameter name="nTimerId" type="i4" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_intReturnCode" type="i4" >-1</var>
+        <var name="strSessionExpires" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=46 y=182 ?>
+          <!--what timer?-->
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Timer Id A" link="15" stubbed="0" >nTimerId == g_oTimerA.lTimerId</result>
+            <result name="Timer Id B" link="17" stubbed="0" >nTimerId == g_oTimerB.lTimerId</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("TIMER ID IS: " + Session.nTimerId);
+Server.logInfo("TIMER ID A IS: " + Session.g_oTimerA.lTimerId);
+Server.logInfo("TIMER ID B IS: " + Session.g_oTimerB.lTimerId);]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=291 y=69 ?>
+          <return value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("TIMER OCCURRED, BUT NEITHER TIMER ID OF A NOR B");]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.EndSession.1" ><?xtml-editor x=766 y=282 ?>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_bPlaySummaryMsg = false ;]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Pactolus.SipBye.1" ><?xtml-editor x=280 y=272 ?>
+          <!--Hang up A-->
+          <sip-bye add-record-route="0" add-via="1" timeout="2" handle-responses="1" increment-cseq-first="1" increment-cseq-last="0" >
+            <call-id >g_oCallLegA.strCallId</call-id>
+            <cseq >g_oCallLegA.strCSeq</cseq>
+            <from >g_oCallLegA.strTo</from>
+            <request-uri >g_oCallLegA.strRemoteUri</request-uri>
+            <route >g_oCallLegA.strRoute</route>
+            <to >g_oCallLegA.strFrom</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="16" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Session.g_oCallLegA.bConnected = Session.g_oCallLegA.bConnecting = false ;]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Pactolus.SipBye.1" ><?xtml-editor x=524 y=287 ?>
+          <!--Hang up B-->
+          <sip-bye add-record-route="0" add-via="1" timeout="2" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oCallLegB.strCallId</call-id>
+            <cseq >g_oCallLegB.strCSeq</cseq>
+            <from >g_oCallLegB.strFrom</from>
+            <request-uri >g_oCallLegB.strRemoteUri</request-uri>
+            <route >g_oCallLegB.strRoute</route>
+            <to >g_oCallLegB.strTo</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Session.g_oCallLegB.bConnected = Session.g_oCallLegB.bConnecting = false ;]]></script>
+          </scripts>
+        </action>
+        <action id="17" plug-in="Pactolus.SipInvite.1" ><?xtml-editor x=301 y=518 ?>
+          <!--Send reINVITE to B-->
+          <sip-invite add-record-route="0" add-via="1" handle-responses="1" follow-redirection="0" final-response-status="" response-content="" response-content-type="" final-request-uri="" timeout-for-final-response="10" timeout-for-provisional-response="4" record-route="" contact="" response-to="" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oCallLegB.strCallId</call-id>
+            <contact >g_strAppServerContact</contact>
+            <content >g_oMSCallLegB.strSdp</content>
+            <content-type >"application/sdp"</content-type>
+            <cseq >g_oCallLegB.strCSeq</cseq>
+            <from >g_oCallLegB.strFrom</from>
+            <request-uri >g_oCallLegB.strRemoteUri</request-uri>
+            <route >g_oCallLegB.strRoute</route>
+            <session-expires >strSessionExpires</session-expires>
+            <to >g_oCallLegB.strTo</to>
+          </sip-invite>
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+            <result name="Success" link="18" stubbed="0"/>
+            <result name="Redirect (3xx)"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Provisional Timeout"/>
+            <result name="Final Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strSessionExpires = String(Session.g_oCallLegB.intSessionTimer) + ";refresher=uac"; ]]></script>
+          </scripts>
+        </action>
+        <action id="18" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=609 y=547 ?>
+          <!--"StartTimerB"-->
+          <function name="&quot;StartTimer&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >g_oTimerB</parameter>
+          </function>
+          <results >
+            <result name="Default" link="19" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oTimerB.lSleepTime = Clib.atoi(Session.strSessionExpires) / 2 ;
+Server.logInfo("Session-expires: " + Session.strSessionExpires + "; sleep interval is " + Session.g_oTimerB.lSleepTime ) ;]]></script>
+          </scripts>
+        </action>
+        <action id="19" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=811 y=529 ?>
+          <return value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="OnBye" start="1" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string" pass="byref"/>
+        <parameter name="strAcceptEncoding" type="string" pass="byref"/>
+        <parameter name="strAcceptLanguage" type="string" pass="byref"/>
+        <parameter name="strAllow" type="string" pass="byref"/>
+        <parameter name="strAllowEvents" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strCSeq" type="string" pass="byref"/>
+        <parameter name="strDate" type="string" pass="byref"/>
+        <parameter name="strEncryption" type="string" pass="byref"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strMaxForwards" type="string" pass="byref"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string" pass="byref"/>
+        <parameter name="strProxyRequire" type="string" pass="byref"/>
+        <parameter name="strRecordRoute" type="string" pass="byref"/>
+        <parameter name="strReferredBy" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string" pass="byref"/>
+        <parameter name="strRequire" type="string" pass="byref"/>
+        <parameter name="strResponseKey" type="string" pass="byref"/>
+        <parameter name="strRoute" type="string" pass="byref"/>
+        <parameter name="strSupported" type="string" pass="byref"/>
+        <parameter name="strTimestamp" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_intReturnCode" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=55 y=189 ?>
+          <!--200 OK-->
+          <sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <contact >g_strAppServerContact</contact>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 200 OK"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_disable_event();]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.Branch.1" ><?xtml-editor x=288 y=187 ?>
+          <!--caller A or B?-->
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="caller A" link="25" stubbed="0" >strCallId match g_oCallLegA.strCallId</result>
+            <result name="caller B" link="24" stubbed="0" >strCallId match g_oCallLegB.strCallId</result>
+          </results>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=564 y=40 ?>
+          <return value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: RECEIVE BYE BUT NOT FROM NEITHER A NOR B");
+Server.logError("ERROR: CALL ID IS: " + Session.strCallId);
+Server.logError("ERROR: CALL ID A IS: " + Session.g_oCallLegA.strCallId);
+Server.logError("ERROR: CALL ID B IS: " + Session.g_oCallLegB.strCallId);
+js_enable_event();]]></script>
+          </scripts>
+        </action>
+        <action id="24" plug-in="Pactolus.Branch.1" ><?xtml-editor x=582 y=106 ?>
+          <results >
+            <result name="Default" link="31" stubbed="0"/>
+            <result name="A connecting" >g_oCallLegA.bConnecting == true</result>
+            <result name="A connected" link="27" stubbed="0" >g_oCallLegA.bConnected == true</result>
+          </results>
+        </action>
+        <action id="25" plug-in="Pactolus.Branch.1" ><?xtml-editor x=583 y=357 ?>
+          <results >
+            <result name="Default" link="31" stubbed="1"/>
+            <result name="B connecting" link="30" stubbed="0" >g_oCallLegB.bConnecting == true</result>
+            <result name="B connected" link="32" stubbed="0" >g_oCallLegB.bConnected == true</result>
+          </results>
+        </action>
+        <action id="27" plug-in="Pactolus.SipBye.1" ><?xtml-editor x=841 y=170 ?>
+          <sip-bye add-record-route="0" add-via="1" timeout="2" handle-responses="1" increment-cseq-first="1" increment-cseq-last="0" >
+            <call-id >g_oCallLegA.strCallId</call-id>
+            <cseq >g_oCallLegA.strCSeq</cseq>
+            <from >g_oCallLegA.strTo</from>
+            <request-uri >g_oCallLegA.strRemoteUri</request-uri>
+            <route >g_oCallLegA.strRoute</route>
+            <to >g_oCallLegA.strFrom</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="31" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Session.g_oCallLegA.bConnected = Session.g_oCallLegA.bConnecting = false ;]]></script>
+          </scripts>
+        </action>
+        <action id="29" plug-in="Pactolus.SipBye.1" ><?xtml-editor x=992 y=539 ?>
+          <sip-bye add-record-route="0" add-via="1" timeout="2" handle-responses="1" increment-cseq-first="1" increment-cseq-last="0" >
+            <call-id >g_oCallLegB.strCallId</call-id>
+            <cseq >g_oCallLegB.strCSeq</cseq>
+            <from >g_oCallLegB.strFrom</from>
+            <request-uri >g_oCallLegB.strRemoteUri</request-uri>
+            <route >g_oCallLegB.strRoute</route>
+            <to >g_oCallLegB.strTo</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="31" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Sending BYE to B because call is over") ;
+Server.logInfo("From: " + Session.g_oCallLegB.strFrom ) ;
+Server.logInfo("To:   " + Session.g_oCallLegB.strTo ) ;
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.g_oCallLegB.bConnected = Session.g_oCallLegB.bConnecting = false ;]]></script>
+          </scripts>
+        </action>
+        <action id="30" plug-in="Pactolus.SipCancel.1" ><?xtml-editor x=965 y=354 ?>
+          <sip-bye add-record-route="0" add-via="1" timeout="4" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oCallLegB.strCallId</call-id>
+            <cseq >g_oCallLegB.strOriginalCSeq</cseq>
+            <from >g_oCallLegB.strFrom</from>
+            <request-uri >g_oCallLegB.strRemoteUri</request-uri>
+            <to >g_oCallLegB.strTo</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="31" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[/* remove tag from To header, if its there */
+var s = new String(Session.g_oCallLegB.strTo) ;
+var i = s.indexOf(";tag=") ;
+if( -1 != i ) {
+	Session.g_oCallLegB.strTo = s.slice(0, i ) ;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.g_oCallLegB.bConnected = Session.g_oCallLegB.bConnecting = false ;]]></script>
+          </scripts>
+        </action>
+        <action id="31" plug-in="Standard.EndSession.1" ><?xtml-editor x=1225 y=232 ?></action>
+        <action id="32" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=736 y=540 ?>
+          <!--PlayCaleaSummary-->
+          <function name="&quot;PlayCaleaSummary&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="29" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[
+var s ;
+if( js_parse_value( Session.strRequestURI, "connect_status", s) ) {
+	Session.g_oCallInfo.nFinalStatus = Clib.atoi(s) ;
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="PlayCaleaSummary" start="2" returns="void" >
+      <local-vars >
+        <var name="nMinutes" type="i4" >0</var>
+        <var name="nSeconds" type="i4" >0</var>
+        <var name="strMinuteIdx" type="string" ></var>
+        <var name="strSecondsIdx" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="2" plug-in="Pactolus.Branch.1" ><?xtml-editor x=45 y=57 ?>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="summary requested?" link="5" stubbed="0" >s_bPlayCaleaSummary == true
+AND g_oCallLegB.bConnected == true</result>
+          </results>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=777 y=30 ?>
+          <return value=""/>
+        </action>
+        <action id="4" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=639 y=589 ?>
+          <!--play minutes and seconds-->
+          <play connection-id="g_oMSCallLegB.strConnectionId" endpoint="g_oMSCallLegB.strEndpoint" callid="g_oMSCallLegB.strCallId" repeat="1" timeout="90" ms-type="s_strMSType" returns="" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="&quot;eng&quot;" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >2150</audio>
+            <audio type="digits" >g_oCallInfo.strSurveiledNumber</audio>
+            <audio type="index" >2153</audio>
+            <audio type="digits" >g_oCallInfo.strOriginationNumber</audio>
+            <audio type="index" >2154</audio>
+            <audio type="digits" >g_oCallInfo.strTerminationNumber</audio>
+          </play>
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if( 1 == Session.nMinutes ) {
+	Session.strMinuteIdx = 308 ;
+}
+else {
+	Session.strMinuteIdx = 309 ;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.Branch.1" ><?xtml-editor x=159 y=245 ?>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="call connected?" link="7" stubbed="0" >g_oCallInfo.nFinalStatus == 200
+</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nSeconds = Server.getUTCTime() - Session.g_oCallInfo.lStartTime ;
+
+Session.nMinutes = Session.nSeconds / 60 ;
+Session.nSeconds = Session.nSeconds % 60 ;
+
+Server.logInfo("Summary information:") ;
+Server.logInfo("Surveiled Number: " + Session.g_oCallInfo.strSurveiledNumber ) ;
+Server.logInfo("Origination Number: " + Session.g_oCallInfo.strOriginationNumber ) ;
+Server.logInfo("Termination Number: " + Session.g_oCallInfo.strTerminationNumber ) ;
+Server.logInfo("Date (GMT): " + Session.g_oCallInfo.strDate ) ;
+Server.logInfo("Time (GMT): " + Session.g_oCallInfo.strTime ) ;
+Server.logInfo("Duration: " + Session.nMinutes + " minutes and " + Session.nSeconds + " seconds" );
+Server.logInfo("Final SIP status: " + Session.g_oCallInfo.nFinalStatus ) ;
+]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=514 y=132 ?>
+          <!--summary for connect failed-->
+          <play connection-id="g_oMSCallLegB.strConnectionId" endpoint="g_oMSCallLegB.strEndpoint" callid="g_oMSCallLegB.strCallId" repeat="1" timeout="90" ms-type="s_strMSType" returns="" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="&quot;eng&quot;" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >2150</audio>
+            <audio type="digits" >g_oCallInfo.strSurveiledNumber</audio>
+            <audio type="index" >2153</audio>
+            <audio type="digits" >g_oCallInfo.strOriginationNumber</audio>
+            <audio type="index" >2154</audio>
+            <audio type="digits" >g_oCallInfo.strTerminationNumber</audio>
+            <audio type="index" >2159</audio>
+            <audio type="index" >2151</audio>
+            <audio type="date" >g_oCallInfo.strDate</audio>
+            <audio type="time" >g_oCallInfo.strTime</audio>
+            <audio type="index" >2157</audio>
+            <audio type="silence" >1</audio>
+            <audio type="index" >322</audio>
+          </play>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="7" plug-in="Pactolus.Branch.1" ><?xtml-editor x=358 y=400 ?>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="&gt; 60 seconds" link="4" stubbed="0" >nMinutes &gt; 0
+</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if( 1 == Session.nSeconds ) {
+	Session.strSecondsIdx = 54 ;
+}
+else {
+	Session.strSecondsIdx = 46 ;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=642 y=407 ?>
+          <!--play seconds only-->
+          <play connection-id="g_oMSCallLegB.strConnectionId" endpoint="g_oMSCallLegB.strEndpoint" callid="g_oMSCallLegB.strCallId" repeat="1" timeout="90" ms-type="s_strMSType" returns="" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="&quot;eng&quot;" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >2150</audio>
+            <audio type="digits" >g_oCallInfo.strSurveiledNumber</audio>
+            <audio type="index" >2153</audio>
+            <audio type="digits" >g_oCallInfo.strOriginationNumber</audio>
+            <audio type="index" >2154</audio>
+            <audio type="digits" >g_oCallInfo.strTerminationNumber</audio>
+          </play>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if( 1 == Session.nMinutes ) {
+	Session.strMinuteIdx = 308 ;
+}
+else {
+	Session.strMinuteIdx = 309 ;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=848 y=402 ?>
+          <!--play seconds only-->
+          <play connection-id="g_oMSCallLegB.strConnectionId" endpoint="g_oMSCallLegB.strEndpoint" callid="g_oMSCallLegB.strCallId" repeat="1" timeout="90" ms-type="s_strMSType" returns="" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="&quot;eng&quot;" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >2152</audio>
+            <audio type="number" >nSeconds</audio>
+            <audio type="index" >strSecondsIdx</audio>
+            <audio type="index" >2151</audio>
+            <audio type="date" >g_oCallInfo.strDate</audio>
+            <audio type="index" >87</audio>
+            <audio type="time" >g_oCallInfo.strTime</audio>
+            <audio type="index" >2157</audio>
+            <audio type="silence" >1</audio>
+            <audio type="index" >322</audio>
+          </play>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if( 1 == Session.nMinutes ) {
+	Session.strMinuteIdx = 308 ;
+}
+else {
+	Session.strMinuteIdx = 309 ;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=842 y=584 ?>
+          <!--play minutes and seconds-->
+          <play connection-id="g_oMSCallLegB.strConnectionId" endpoint="g_oMSCallLegB.strEndpoint" callid="g_oMSCallLegB.strCallId" repeat="1" timeout="90" ms-type="s_strMSType" returns="" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="&quot;eng&quot;" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >2152</audio>
+            <audio type="number" >nMinutes</audio>
+            <audio type="index" >strMinuteIdx</audio>
+            <audio type="index" >52</audio>
+            <audio type="number" >nSeconds</audio>
+            <audio type="index" >strSecondsIdx</audio>
+            <audio type="index" >2151</audio>
+            <audio type="date" >g_oCallInfo.strDate</audio>
+            <audio type="index" >87</audio>
+            <audio type="time" >g_oCallInfo.strTime</audio>
+            <audio type="index" >2157</audio>
+            <audio type="silence" >1</audio>
+            <audio type="index" >322</audio>
+          </play>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if( 1 == Session.nMinutes ) {
+	Session.strMinuteIdx = 308 ;
+}
+else {
+	Session.strMinuteIdx = 309 ;
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>
+#include <dialing_plan_utils.jsh>]]></script>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value="C:/Applications/InternalProduct/SceXMLScripts/Libs"/>
+    <property key="library-modules" value="lib_utils.xml"/>
+    <property key="library-path" value="C:/Applications/InternalProduct/SceXMLScripts/Libs"/>
+  </properties>
+  <application-version >
+    <revision >$Id: pcs_calea.xml,v 1.15.70.1 2010/03/30 20:36:10 jgibson Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

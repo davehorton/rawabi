@@ -1,0 +1,2215 @@
+<?xml version="1.0"?>
+<xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
+  <version sce-version="422a6" prev-sce-version="422a6" last-mod-time="Thursday, September 20, 2007 13:43:08"/>
+  <global-handlers >
+    <handler event="Pactolus.EveSipInvite.1" function="OnInvite" public="1" always-on="0"/>
+    <handler event="Pactolus.EveSipBye.1" function="OnBye" public="0" always-on="0"/>
+    <handler event="Pactolus.EveSipCancel.1" function="OnCancel" public="0" always-on="0"/>
+    <handler event="Standard.OnServiceLoad.1" function="OnServiceLoad" public="0" always-on="0"/>
+    <handler event="Standard.OnSessionEnd.1" function="OnSessionEnd" public="0" always-on="0"/>
+  </global-handlers>
+  <global-vars >
+    <var name="g_nReturnValue" type="i4" >0</var>
+    <var name="g_oCallLeg" type="object" ></var>
+    <var name="g_oAPI" type="object" ></var>
+    <var name="g_oMS" type="object" ></var>
+    <var name="g_strLanguage" type="string" ></var>
+    <var name="g_sSTATE" type="i2" >0</var>
+    <var name="g_strDigitMap_12" type="string" >([1-2])</var>
+    <var name="g_strTermDigit" type="string" ></var>
+    <var name="g_strWakeUpDate" type="string" ></var>
+    <var name="g_strWakeUpTime" type="string" ></var>
+    <var name="g_strTempGMTOffset" type="string" ></var>
+    <var name="g_strWakeUpGMT" type="string" ></var>
+    <var name="g_strMailboxAcct" type="string" ></var>
+    <var name="g_nUrgentCount" type="i4" >0</var>
+    <var name="g_nUnseenCount" type="i4" >0</var>
+    <var name="g_nSavedCount" type="i4" >0</var>
+    <var name="g_oUrgent" type="object" ></var>
+    <var name="g_oUnseen" type="object" ></var>
+    <var name="g_oSaved" type="object" ></var>
+    <var name="g_nMaxMsgLength" type="i4" >0</var>
+    <var name="g_nErrorPrompt" type="i4" >0</var>
+    <var name="g_nPromptOffset" type="i4" >5</var>
+    <var name="g_strEndKey" type="string" ></var>
+    <var name="g_bUpdateRemindMe" type="boolean" >0</var>
+    <var name="g_fTimeZoneOffset" type="float" >0</var>
+  </global-vars>
+  <shared-vars >
+    <var name="s_strMSType" type="string" ></var>
+    <var name="s_nPacketizationPeriod" type="i4" >0</var>
+    <var name="s_strDBName" type="string" ></var>
+    <var name="s_nTimeout" type="i4" >20</var>
+    <var name="s_strLocalUri" type="string" ></var>
+    <var name="s_strLocalHost" type="string" ></var>
+    <var name="s_sSTATE_CONNECTED_MS" type="i2" >1</var>
+    <var name="s_sSTATE_AWAITING_CALL" type="i2" >0</var>
+    <var name="s_sSATE_CONFIRM_TIME" type="i2" >10</var>
+    <var name="s_sSTATE_SET_DATE" type="i2" >11</var>
+    <var name="s_sSTATE_SET_TIME" type="i2" >12</var>
+    <var name="s_sSTATE_RECORD_MSG" type="i2" >20</var>
+    <var name="s_sSTATE_DELETE_SCHED" type="i2" >2</var>
+    <var name="s_strVMEncodingFlag" type="string" >F</var>
+  </shared-vars>
+  <functions >
+    <function name="OnInvite" start="1" event="Invite" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string" pass="byref"/>
+        <parameter name="strAcceptEncoding" type="string" pass="byref"/>
+        <parameter name="strAcceptLanguage" type="string" pass="byref"/>
+        <parameter name="strAlertInfo" type="string" pass="byref"/>
+        <parameter name="strAllow" type="string" pass="byref"/>
+        <parameter name="strAllowEvents" type="string" pass="byref"/>
+        <parameter name="strAnonymity" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strCallInfo" type="string" pass="byref"/>
+        <parameter name="strContact" type="string" pass="byref"/>
+        <parameter name="strContent" type="string" pass="byref"/>
+        <parameter name="strContentDisposition" type="string" pass="byref"/>
+        <parameter name="strContentEncoding" type="string" pass="byref"/>
+        <parameter name="strContentLanguage" type="string" pass="byref"/>
+        <parameter name="strContentType" type="string" pass="byref"/>
+        <parameter name="strCSeq" type="string" pass="byref"/>
+        <parameter name="strDate" type="string" pass="byref"/>
+        <parameter name="strEncryption" type="string" pass="byref"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strExpires" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strInReplyTo" type="string" pass="byref"/>
+        <parameter name="strMaxForwards" type="string" pass="byref"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strMinSE" type="string" pass="byref"/>
+        <parameter name="strOrganization" type="string" pass="byref"/>
+        <parameter name="strPriority" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string" pass="byref"/>
+        <parameter name="strProxyRequire" type="string" pass="byref"/>
+        <parameter name="strRecordRoute" type="string" pass="byref"/>
+        <parameter name="strReferredBy" type="string" pass="byref"/>
+        <parameter name="strRemotePartyID" type="string" pass="byref"/>
+        <parameter name="strReplaces" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string" pass="byref"/>
+        <parameter name="strRequire" type="string" pass="byref"/>
+        <parameter name="strResponseKey" type="string" pass="byref"/>
+        <parameter name="strRoute" type="string" pass="byref"/>
+        <parameter name="strSessionExpires" type="string" pass="byref"/>
+        <parameter name="strSubject" type="string" pass="byref"/>
+        <parameter name="strSupported" type="string" pass="byref"/>
+        <parameter name="strTimestamp" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="strDigits" type="string" ></var>
+        <var name="nAPIReturn" type="i4" >0</var>
+        <var name="strSIPRealm" type="string" ></var>
+        <var name="strExistingCallSched_GMT" type="string" ></var>
+        <var name="strWakeUpDate" type="string" ></var>
+        <var name="strWakeUpTime" type="string" ></var>
+        <var name="strExistingCallSched_local" type="string" ></var>
+        <var name="lVoipSchedCallId" type="i8" >0</var>
+        <var name="nRetryPrompt" type="i4" >99</var>
+        <var name="nRetries" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=45 y=48 ?>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[/* Save Call Leg information */ 
+
+js_initCallLeg(Session.g_oCallLeg[0]) ;
+js_initAPI(Session.g_oAPI);
+
+Session.g_oCallLeg[0].bReverseFromTo = true; 
+
+Session.g_oCallLeg[0].strFrom = Session.strFrom ;
+Session.g_oCallLeg[0].strRequestUri = Session.strRequestURI ;
+Session.g_oCallLeg[0].strCallId = Session.strCallId ;
+Session.g_oCallLeg[0].strCSeq = Session.strCSeq ;
+Session.g_oCallLeg[0].strRemoteCSeq = Session.strCSeq ;
+Session.g_oCallLeg[0].strContent = Session.strContent;
+Session.g_oCallLeg[0].strRemoteSdp = Session.strContent ;
+Session.g_oCallLeg[0].strContentDisposition = Session.strContentDisposition ;
+Session.g_oCallLeg[0].strContentType = Session.strContentType ;
+Session.g_oCallLeg[0].strVia = Session.strVia ;
+Session.g_oCallLeg[0].strRecordRoute = Session.strRecordRoute ;
+Session.g_oCallLeg[0].strRoute = Session.strRoute ;
+Session.g_oCallLeg[0].strSubject = Session.strSubject ;
+Session.g_oCallLeg[0].strContact = Session.s_strLocalUri ;
+Session.g_oCallLeg[0].strDate = Session.strDate ;
+Session.g_oCallLeg[0].strExpires = Session.strExpires ;
+Session.g_oCallLeg[0].strAccept = Session.strAccept ;
+Session.g_oCallLeg[0].strAcceptEncoding = Session.strAcceptEncoding ;
+Session.g_oCallLeg[0].strAcceptLanguage = Session.strAcceptLanguage ;
+Session.g_oCallLeg[0].strAuthorization = Session.strAuthorization ;
+Session.g_oCallLeg[0].strEncryption = Session.strEncryption ;
+Session.g_oCallLeg[0].strProxyAuthorization = Session.strProxyAuthorization ;
+Session.g_oCallLeg[0].strProxyRequire = Session.strProxyRequire ;
+Session.g_oCallLeg[0].strRequire = Session.strRequire ;
+Session.g_oCallLeg[0].strResponseKey = Session.strResponseKey ;
+Session.g_oCallLeg[0].strSessionExpires = Session.strSessionExpires ;
+Session.g_oCallLeg[0].strSupported = Session.strSupported ;
+Session.g_oCallLeg[0].strTimestamp = Session.strTimestamp ;
+Session.g_oCallLeg[0].strMaxForwards = Session.strMaxForwards ;
+Session.g_oCallLeg[0].strTo = Session.g_oCallLeg[0].strOriginalTo = Session.strTo ;
+Session.g_oCallLeg[0].strAnonymity = Session.strAnonymity ;
+Session.g_oCallLeg[0].strMinSE = Session.strMinSE ;
+Session.g_oCallLeg[0].strRemotePartyID = Session.strRemotePartyID ;
+Session.g_oCallLeg[0].strUserAgent = Session.strUserAgent ;
+Session.g_oCallLeg[0].strMaxForwards = Session.strMaxForwards ;
+
+var from = new SipFrom( Session.strFrom.toString() ) ;
+Session.g_oAPI.strAniReceived = from.url.phoneNumber ;
+
+
+js_calculate_uri_and_route( true, "SIP/2.0", 
+	Session.strFrom.toString(), 
+	Session.strContact.toString(), 
+	Session.strRecordRoute.toString(), 
+	Session.g_oCallLeg[0].strRemoteUri, 
+	Session.g_oCallLeg[0].strRoute ) ;
+	
+Session.g_oCallLeg[0].bUac = false ;
+
+if ( 0 < Session.g_oCallLeg[0].strProxyAuthorization.length) {
+	var s = Session.g_oCallLeg[0].strProxyAuthorization ;
+	js_parse_value( s, "username", Session.g_oAPI.strUserName );
+	js_parse_value( s, "realm", Session.g_oAPI.strRealm );
+}
+else {
+	Server.logError("No Proxy Authorization header; unable to parse UserName and Realm");
+}
+
+Session.g_oAPI.strDBName = Session.s_strDBName;
+Session.g_oAPI.strPlatformSessionId = Session._sessionId;
+]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=77 y=173 ?>
+          <!--180 Ringing-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <contact >s_strLocalUri</contact>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 180 Ringing"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="7" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=310 y=209 ?>
+          <!--DirectCallerToMS-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DirectCallerToMS&quot;" return="g_nReturnValue" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >g_oCallLeg[0]</parameter>
+            <parameter >g_oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="Success" link="17" stubbed="0" >g_nReturnValue == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_initMS(Session.g_oMS, Session.s_strMSType);
+Session.g_oMS.intPacketizationPeriod = 20;
+
+var anSdp = new Sdp( Session.strContent );
+
+for(var i = 0; i < anSdp.media.length; i++) 
+{
+    if (anSdp.media[i].type == "audio")
+    {
+       // cycle through all media streams offered
+       for ( var j = 0; j < anSdp.media[i].rtpMaps.length; j++ )
+       {
+           if (("T" == Session.s_strVMEncodingFlag) && ( anSdp.media[i].rtpMaps[j].type == 18 )) 
+           {
+                // Use G729 codec.
+                Session.g_oMS.strCodec = "g729";
+                Server.logInfo("Applying <" + Session.g_oMS.strCodec + "> as the codec for this call.");
+                break;
+           } else if ( anSdp.media[i].rtpMaps[j].type == 0 ) 
+           {
+                // Use PCMU codec.
+                Session.g_oMS.strCodec = "PCMU";
+                Server.logInfo("Applying <" + Session.g_oMS.strCodec + "> as the codec for this call.");
+                break;
+           }
+       }
+    }
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.g_oMS.bCurrentlyConnected = false ;
+Session.g_oCallLeg[0].bConnected = false ;
+
+if (0 == Session.g_nReturnValue) {
+	Session.g_oMS.bCurrentlyConnected = true ;
+	Session.g_oCallLeg[0].bConnected = true ;
+	Session.g_sSTATE = Session.s_sSTATE_CONNECTED_MS ;
+}
+	
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=805 y=416 ?>
+          <!--ScheduleRemindMe-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ScheduleRemindMe&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_sSTATE = Session.s_sSTATE_SET_DATE;]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=565 y=152 ?>
+          <!--503 Service Unavailable-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 503 Service Unavailable"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="10" plug-in="Standard.EndSession.1" ><?xtml-editor x=797 y=171 ?></action>
+        <action id="11" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1066 y=365 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="14" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=820 y=570 ?>
+          <!--Reminder already exists.-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="s_nTimeout" ms-type="s_strMSType" played-length="" digits="strDigits" terminating-char="" rc="" returns="g_nReturnValue" play-offset="g_nPromptOffset" language="g_strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="g_strDigitMap_12" fdt="50" idt="40" ict="16" terminating-digit="" >
+            <audio type="index" >nRetryPrompt</audio>
+            <audio type="index" >2303</audio>
+            <audio type="silence" >.5</audio>
+            <audio type="index" >2301</audio>
+            <audio type="date" >strWakeUpDate</audio>
+            <audio type="index" >87</audio>
+            <audio type="time" >strWakeUpTime</audio>
+            <audio type="index" >2304</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >2320</audio>
+            <audio type="index" >312</audio>
+            <audio type="index" >2305</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="15" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First/Inter Digit Timeout"/>
+            <result name="strDigits == &quot;1&quot;" link="8" stubbed="0" >strDigits match "1"</result>
+            <result name="strDigits == &quot;2&quot;" link="20" stubbed="1" >strDigits match "2"</result>
+            <result name="MaxRetries" link="18" stubbed="1" >nRetries == 3</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_bUpdateRemindMe = false;
+
+var date_array = Session.strExistingCallSched_local.split(',');
+
+var local = new Date(date_array[0],date_array[1],date_array[2],date_array[3],date_array[4]);
+
+//rh: work around for an unidentified Java bug in which java.sql.Timestamp convertGMTTimestampToLocalTimestamp()
+	// is returning the incorrect time zone offset if the offset is not a whole hour. So, 9.5 is returned as 9.0. 
+if (21 == Session.g_oAPI.nTimezoneId ||
+	29 == Session.g_oAPI.nTimezoneId || 
+	32 == Session.g_oAPI.nTimezoneId ||
+	38 == Session.g_oAPI.nTimezoneId ){
+		
+	local.setMinutes(local.getMinutes() + 30);
+}
+
+//MMdd
+var month = (local.getMonth() + 1);
+if ( 10 > month ) {
+	month = 0 + "" + month;
+}
+Session.strWakeUpDate = month ;
+var tmp_date = local.getDate();
+if ( 10 > tmp_date ) {
+	tmp_date = 0 + "" + tmp_date;
+}
+Session.strWakeUpDate += "" + tmp_date ;
+Server.logInfo("Date to annc: " + Session.strWakeUpDate);
+
+//HHmm
+var hours = local.getHours();
+if ( 10 > hours ) {
+	hours = 0 + "" + hours;
+}
+Session.strWakeUpTime = hours;
+var minutes = local.getMinutes();
+if ( 10 > minutes ) {
+	minutes = 0 + "" + minutes;
+}
+Session.strWakeUpTime += "" + minutes ;
+Server.logInfo("Time to annc: " + Session.strWakeUpTime);
+
+]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( 2 != Result.id ) {
+	Session.nRetries++;
+	Session.nRetryPrompt = 337;
+	Session.g_nErrorPrompt = 1012; //max retries
+}
+else {
+	Session.nRetries = 0;
+	Session.nRetryPrompt = 99;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( "1" == Session.strDigits ) {
+	Session.g_oAPI.lVoipSchedCallId = Session.lVoipSchedCallId;
+	Session.g_bUpdateRemindMe = true;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1079 y=525 ?>
+          <!--Goodbye-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTimeout" ms-type="s_strMSType" returns="g_nReturnValue" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >322</audio>
+          </play>
+          <results >
+            <result name="Default" link="16" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="16" plug-in="Standard.EndSession.1" ><?xtml-editor x=1309 y=524 ?></action>
+        <action id="17" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=559 y=368 ?>
+          <!--"authScheduleRemindMe"-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.broadband.psAPISceBroadbandRemindMe&quot;" method="&quot;authScheduleRemindMe&quot;" timeout="s_nTimeout" return="g_nReturnValue" method-return-var="nAPIReturn" method-return-type="0" >
+            <parameter type="in" var-type="string" >s_strDBName</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strRealm</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strUserName</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strAniReceived</parameter>
+            <parameter type="inout" var-type="string" >g_oCallLeg[0].strVMFlag</parameter>
+            <parameter type="inout" var-type="string" >g_strMailboxAcct</parameter>
+            <parameter type="inout" var-type="i4" >g_nMaxMsgLength</parameter>
+            <parameter type="inout" var-type="string" >g_strLanguage</parameter>
+            <parameter type="inout" var-type="i4" >g_oAPI.nTimezoneId</parameter>
+            <parameter type="inout" var-type="string" >strExistingCallSched_local</parameter>
+            <parameter type="inout" var-type="i8" >lVoipSchedCallId</parameter>
+            <parameter type="inout" var-type="i8" >g_oAPI.lAccessLineId</parameter>
+          </java>
+          <results >
+            <result name="Default" link="18" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="Wake Up call exists" link="14" stubbed="0" >nAPIReturn == -4</result>
+            <result name="success" link="8" stubbed="0" >nAPIReturn == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("***CALLING AuthScheduleRemindMe***");
+Server.logInfo("dbName: " + Session.s_strDBName);
+Server.logInfo("platformSessionID: " + Session.g_oAPI.strPlatformSessionId);
+Server.logInfo("sipRealm: " + Session.g_oAPI.strRealm);
+Server.logInfo("userName: " + Session.g_oAPI.strUserName);
+Server.logInfo("origNumber: " + Session.g_oAPI.strAniReceived);
+]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( 2 == Result.id ) {
+	Server.logInfo("****authSchedRemindMe returned: " + Session.nAPIReturn + "***");
+	Server.logInfo("HasVMFlag: " + Session.g_oCallLeg[0].strVMFlag);
+	Server.logInfo("MailboxAcct: " + Session.g_strMailboxAcct);
+	Server.logInfo("MaxMsgLength: " + Session.g_nMaxMsgLength);
+	Server.logInfo("LanguageCode: " + Session.g_strLanguage);
+	Server.logInfo("TimezoneId: " + Session.g_oAPI.nTimezoneId );
+	Server.logInfo("RemindMeSched: " + Session.strExistingCallSched_local);
+	Server.logInfo("AccessLineID: " + Session.g_oAPI.lAccessLineId);
+	
+	
+} 
+else {	
+	Session.g_nErrorPrompt = 1000 ; //JVM Server error
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="18" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=802 y=290 ?>
+          <!--PlayError-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PlayError&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+          </results>
+        </action>
+        <action id="20" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=1085 y=705 ?>
+          <!--deleteRemindMe-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.broadband.psAPISceBroadbandRemindMe&quot;" method="&quot;deleteRemindMe&quot;" timeout="s_nTimeout" return="g_nReturnValue" method-return-var="" method-return-type="0" >
+            <parameter type="in" var-type="string" >s_strDBName</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="i8" >lVoipSchedCallId</parameter>
+          </java>
+          <results >
+            <result name="Default" link="21" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_sSTATE = Session.s_sSTATE_DELETE_SCHED;
+Server.logInfo("DELETING EXISTING WAKE UP SCHED : " + Session.lVoipSchedCallId);]]></script>
+          </scripts>
+        </action>
+        <action id="21" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1315 y=740 ?>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="strDigits == &quot;2&quot;" link="22" stubbed="0" >strDigits match "2"</result>
+          </results>
+        </action>
+        <action id="22" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1559 y=715 ?>
+          <!--Remind Me deleted-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTimeout" ms-type="s_strMSType" returns="g_nReturnValue" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >2321</audio>
+          </play>
+          <results >
+            <result name="Default" link="16" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="OnServiceLoad" start="1" event="ServiceLoad" returns="void" >
+      <parameters >
+        <parameter name="strAppName" type="string" pass="byref"/>
+        <parameter name="nSessionCount" type="i2" pass="byref"/>
+        <parameter name="nMaxIterations" type="i2" pass="byref"/>
+        <parameter name="nServerId" type="i2" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Pactolus.UserFunction.1" ><?xtml-editor x=71 y=96 ?>
+          <user-function xmlns="urn:www.pactolus.com:xtml:application" process="&quot;PACTOLUS_ps_c_adaptor&quot;" function="&quot;get_property&quot;" timeout="s_nTimeout" return="g_nReturnValue" async="0" >
+            <parameter >"media-server-type"</parameter>
+            <parameter >s_strMSType</parameter>
+            <parameter >"packetization-period"</parameter>
+            <parameter >s_nPacketizationPeriod</parameter>
+            <parameter >"db-name"</parameter>
+            <parameter >s_strDBName</parameter>
+            <parameter >"vmail-encoding-flag"</parameter>
+            <parameter >s_strVMEncodingFlag</parameter>
+          </user-function>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Session.s_strLocalUri = "<sip:" + Server.sipAddress ;
+if( 5060 != Server.sipPort ) {
+	Session.s_strLocalUri += ":" ;
+	Session.s_strLocalUri += Server.sipPort ;
+}
+Session.s_strLocalUri += ">";
+
+Session.s_strLocalHost = Server.sipAddress ;
+if( 5060 != Server.sipPort ) {
+	Session.s_strLocalHost += Server.sipPort ;
+}
+
+
+if ( 0 == Session.s_strDBName.length ) {
+	Server.logInfo("Unable to retrieve DB Name from Application Properties. Setting to pactolusdb.") ;
+	Session.s_strDBName = "pactolusdb" ;
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=299 y=133 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="OnSessionEnd" start="2" event="SessionEnd" returns="void" >
+      <parameters >
+        <parameter name="nSessionEndReason" type="i2" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="strPrompt" type="string" ></var>
+        <var name="nAPIReturnCode" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="2" plug-in="Pactolus.Branch.1" ><?xtml-editor x=131 y=151 ?>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="g_oCallLeg[0].bConnected == true" link="3" stubbed="0" >g_oCallLeg[0].bConnected == true</result>
+          </results>
+        </action>
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=716 y=245 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=137 y=303 ?>
+          <!--HangUpParty-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpParty&quot;" return="g_nReturnValue" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >g_oCallLeg[0]</parameter>
+            <parameter >s_strLocalUri</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[//external lib uses .strRequestUri value for BYE
+Session.g_oCallLeg[0].strRequestUri = Session.g_oCallLeg[0].strRemoteUri ;]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=412 y=307 ?>
+          <!--DeleteMSConnection-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteMSConnection&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >g_oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+          </results>
+        </action>
+        <action id="5" plug-in="Pactolus.Branch.1" ><?xtml-editor x=410 y=158 ?>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="Connected to MS" link="4" stubbed="0" >g_oMS.bCurrentlyConnected == true</result>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="OnBye" start="2" event="Bye" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string" pass="byref"/>
+        <parameter name="strAcceptEncoding" type="string" pass="byref"/>
+        <parameter name="strAcceptLanguage" type="string" pass="byref"/>
+        <parameter name="strAllow" type="string" pass="byref"/>
+        <parameter name="strAllowEvents" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strCSeq" type="string" pass="byref"/>
+        <parameter name="strDate" type="string" pass="byref"/>
+        <parameter name="strEncryption" type="string" pass="byref"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strMaxForwards" type="string" pass="byref"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string" pass="byref"/>
+        <parameter name="strProxyRequire" type="string" pass="byref"/>
+        <parameter name="strRecordRoute" type="string" pass="byref"/>
+        <parameter name="strReferredBy" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string" pass="byref"/>
+        <parameter name="strRequire" type="string" pass="byref"/>
+        <parameter name="strResponseKey" type="string" pass="byref"/>
+        <parameter name="strRoute" type="string" pass="byref"/>
+        <parameter name="strSupported" type="string" pass="byref"/>
+        <parameter name="strTimestamp" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="2" plug-in="Pactolus.Branch.1" ><?xtml-editor x=50 y=130 ?>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Call ID == CallLeg[0]" link="1" stubbed="0" >strCallId match g_oCallLeg[0].strCallId</result>
+          </results>
+        </action>
+        <action id="1" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=297 y=225 ?>
+          <!--200 OK-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 200 OK"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oCallLeg[0].bConnected = false ;
+]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=296 y=25 ?>
+          <!--481 Call Leg Transaction Does Not Exist-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 481 Call Leg/Transaction Does Not Exist"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=530 y=82 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="6" plug-in="Standard.EndSession.1" ><?xtml-editor x=517 y=238 ?></action>
+      </actions>
+    </function>
+    <function name="OnCancel" start="1" event="Cancel" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string" pass="byref"/>
+        <parameter name="strAcceptEncoding" type="string" pass="byref"/>
+        <parameter name="strAcceptLanguage" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strContent" type="string" pass="byref"/>
+        <parameter name="strContentDisposition" type="string" pass="byref"/>
+        <parameter name="strContentType" type="string" pass="byref"/>
+        <parameter name="strCSeq" type="string" pass="byref"/>
+        <parameter name="strDate" type="string" pass="byref"/>
+        <parameter name="strEncryption" type="string" pass="byref"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strMaxForwards" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string" pass="byref"/>
+        <parameter name="strProxyRequire" type="string" pass="byref"/>
+        <parameter name="strRecordRoute" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string" pass="byref"/>
+        <parameter name="strRequire" type="string" pass="byref"/>
+        <parameter name="strResponseKey" type="string" pass="byref"/>
+        <parameter name="strRoute" type="string" pass="byref"/>
+        <parameter name="strSupported" type="string" pass="byref"/>
+        <parameter name="strTimestamp" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=80 y=121 ?>
+          <!--200 OK-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <contact >s_strLocalUri</contact>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 200 OK"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="2" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=322 y=121 ?>
+          <!--487 Request Terminated-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oCallLeg[0].strCallId</call-id>
+            <contact >s_strLocalUri</contact>
+            <cseq >g_oCallLeg[0].strCSeq</cseq>
+            <from >g_oCallLeg[0].strFrom</from>
+            <status >"SIP/2.0 487 Request Terminated"</status>
+            <to >g_oCallLeg[0].strTo</to>
+            <via >g_oCallLeg[0].strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var cseq = new SipCSeq(Session.strCSeq.toString());
+cseq.method = "INVITE";
+Session.strCSeq = cseq.encode();
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.EndSession.1" ><?xtml-editor x=810 y=154 ?></action>
+        <action id="4" plug-in="Standard.WaitEvent.1" ><?xtml-editor x=573 y=120 ?>
+          <!--Wait for ACK-->
+          <wait xmlns="urn:www.pactolus.com:xtml:communication" timeout="s_nTimeout" recv-name="" >
+            <msg name="Pactolus.EveSipAck.1" >
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+            </msg>
+          </wait>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="PlayError" start="1" event="" returns="void" >
+      <actions >
+        <action id="1" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=164 y=142 ?>
+          <!--Play Error Prompt-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTimeout" ms-type="s_strMSType" returns="g_nReturnValue" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="0" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >365</audio>
+            <audio type="number" >g_nErrorPrompt</audio>
+            <audio type="index" >322</audio>
+          </play>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if ( 0 == Session.g_nErrorPrompt ) {
+	Session.g_nErrorPrompt = 305 ; //System error
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.EndSession.1" ><?xtml-editor x=413 y=177 ?></action>
+      </actions>
+    </function>
+    <function name="SelectRemindMeMsg" start="1" event="" returns="void" >
+      <local-vars >
+        <var name="strDigits" type="string" ></var>
+        <var name="nPersonalMsgPrompt" type="i4" >0</var>
+        <var name="nPersonalMsgDTMF" type="i4" >0</var>
+        <var name="strRecordURL" type="string" ></var>
+        <var name="nRecordLength" type="i4" >0</var>
+        <var name="strAppName" type="string" ></var>
+        <var name="strPrompt" type="string" ></var>
+        <var name="nAPIReturnCode" type="i4" >0</var>
+        <var name="nRetries" type="i4" >0</var>
+        <var name="nRetryPrompt" type="i4" >99</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=50 y=78 ?>
+          <results >
+            <result name="Default" link="15" stubbed="1"/>
+            <result name="Has VoiceMail" link="14" stubbed="0" >g_oCallLeg[0].strVMFlag == "T"</result>
+          </results>
+        </action>
+        <action id="2" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1022 y=34 ?>
+          <!--Reminders cheduled. Goodbye.-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTimeout" ms-type="s_strMSType" returns="g_nReturnValue" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >.5</audio>
+            <audio type="index" >2309</audio>
+            <audio type="index" >304</audio>
+            <audio type="index" >322</audio>
+          </play>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="3" plug-in="Standard.EndSession.1" ><?xtml-editor x=1245 y=67 ?></action>
+        <action id="4" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=361 y=353 ?>
+          <!--Record your message after the tone-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTimeout" ms-type="s_strMSType" returns="g_nReturnValue" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >.5</audio>
+            <audio type="index" >1753</audio>
+            <audio type="index" >935</audio>
+            <audio type="index" >321</audio>
+          </play>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="5" plug-in="Pactolus.MGCPRecord.1" ><?xtml-editor x=581 y=436 ?>
+          <record xmlns="urn:www.pactolus.com:xtml:media" op-mode="0" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" timeout="s_nTimeout" returns="g_nReturnValue" return-immediate="0" ms-type="s_strMSType" rid="strRecordURL" eik="&quot;#&quot;" rlt="g_nMaxMsgLength" prt="50" pst="50" rl="nRecordLength" dc="" rc="g_nReturnValue" id-cleanup="1" play-beep="1" ef="&quot;PCM8M16&quot;" agc="0" agcta="" ga="" sla="" bpf="1400" bpa="0" bpd="10"/>
+          <results >
+            <result name="Default" link="17" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No Speech Detected" link="6" stubbed="1"/>
+            <result name="nRecordLength == 0" link="6" stubbed="1" >nRecordLength == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strRecordURL = "";
+Session.nRecordLength = 0;]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=868 y=588 ?>
+          <!--Did not hear anything-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTimeout" ms-type="s_strMSType" returns="g_nReturnValue" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >1810</audio>
+          </play>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="7" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=869 y=349 ?>
+          <!--Confirm recorded message.-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="s_nTimeout" ms-type="s_strMSType" played-length="" digits="strDigits" terminating-char="" rc="" returns="g_nReturnValue" play-offset="g_nPromptOffset" language="g_strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="g_strDigitMap_12" fdt="50" idt="40" ict="16" terminating-digit="" >
+            <audio type="index" >nRetryPrompt</audio>
+            <audio type="url" >strRecordURL</audio>
+            <audio type="silence" >.5</audio>
+            <audio type="index" >1790</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >1788</audio>
+            <audio type="index" >312</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First/Inter Digit Timeout"/>
+            <result name="strDigits == &quot;1&quot;" link="10" stubbed="1" >strDigits match "1"</result>
+            <result name="strDigits == &quot;2&quot;" link="4" stubbed="1" >strDigits match "2"</result>
+            <result name="max retries" link="8" stubbed="1" >nRetries == 3</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strDigits = "" ;
+
+]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( 2 == Result.id ) {
+	Session.nRetries = 0 ;
+	Session.nRetryPrompt = 99;
+}
+else {
+	Session.nRetries++;
+	Session.nRetryPrompt = 337;
+	Session.g_nErrorPrompt = 1012; //max retries
+}]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1028 y=195 ?>
+          <!--PlayError-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PlayError&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+          </results>
+        </action>
+        <action id="9" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1272 y=199 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="10" plug-in="Pactolus.MailboxDelete.1" ><?xtml-editor x=1134 y=353 ?>
+          <!--Delete Remind_Me folder-->
+          <delete-mailbox xmlns="urn:www.pactolus.com:xtml:imap" username="g_strMailboxAcct" password="g_strMailboxAcct" mailbox="&quot;Remind_Me&quot;" returns="g_nReturnValue" timeout="s_nTimeout"/>
+          <results >
+            <result name="Default" link="12" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="11" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=766 y=75 ?>
+          <!--setRemindMe-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.broadband.psAPISceBroadbandRemindMe&quot;" method="&quot;setRemindMe&quot;" timeout="s_nTimeout" return="g_nReturnValue" method-return-var="nAPIReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >s_strDBName</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="i8" >g_oAPI.lAccessLineId</parameter>
+            <parameter type="in" var-type="string" >g_strWakeUpGMT</parameter>
+            <parameter type="in" var-type="string" >strPrompt</parameter>
+            <parameter type="in" var-type="i4" >0</parameter>
+          </java>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="nAPIReturnCode == 0" link="2" stubbed="0" >nAPIReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[/* parse wake up Date as MM/dd/yyyy HH:mm:ss */
+
+var wakeup = new Date(Session.g_strWakeUpGMT);
+Session.g_strWakeUpGMT = wakeup.getMonth() + 1;
+Session.g_strWakeUpGMT += "/" + wakeup.getDate();
+Session.g_strWakeUpGMT += "/" + wakeup.getFullYear();
+Session.g_strWakeUpGMT += " " + wakeup.getHours();
+Session.g_strWakeUpGMT += ":" + wakeup.getMinutes();
+Session.g_strWakeUpGMT += ":00";
+
+Session.nAPIReturnCode = -50;
+
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("*****setWakeUpCall Returns: " + Session.nAPIReturnCode + " ********");
+Server.logInfo("AccessLine <" + Session.g_oAPI.lAccessLineId + ">");
+Server.logInfo("Wake Up Sched <" + Session.g_strWakeUpGMT + ">");
+Server.logInfo("Prompt <" + Session.strPrompt + ">");
+
+
+if ( 0 != Session.nAPIReturnCode ) {
+	Session.g_nErrorPrompt = 1000; //JVM Server Error
+}]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Pactolus.MailboxCreate.1" ><?xtml-editor x=1362 y=355 ?>
+          <!--create new-->
+          <create-mailbox xmlns="urn:www.pactolus.com:xtml:imap" username="g_strMailboxAcct" password="g_strMailboxAcct" mailbox="&quot;Remind_Me&quot;" returns="g_nReturnValue" timeout="s_nTimeout"/>
+          <results >
+            <result name="Default" link="15" stubbed="1"/>
+            <result name="Success" link="13" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="13" plug-in="Pactolus.SendMail.1" ><?xtml-editor x=1595 y=356 ?>
+          <!--Send "Remind_Me" prompt-->
+          <smtp-send xmlns="urn:www.pactolus.com:xtml:smtp" to="g_strMailboxAcct" from="strAppName" cc="" bcc="" subject="&quot;Remind_Me&quot;" attachment1="strRecordURL" attachment2="" attachment3="" flagged="0" timeout="s_nPacketizationPeriod" returns="g_nReturnValue" response-code="" response-text="" body=""/>
+          <results >
+            <result name="Default" link="15" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strAppName = Session._appName;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 2 == Result.id ) {
+	Session.strPrompt = "Personal";
+}]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=123 y=325 ?>
+          <!--Select personal message or system default-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="s_nTimeout" ms-type="s_strMSType" played-length="" digits="strDigits" terminating-char="" rc="" returns="g_nReturnValue" play-offset="g_nPromptOffset" language="g_strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="g_strDigitMap_12" fdt="50" idt="40" ict="16" terminating-digit="" >
+            <audio type="index" >nRetryPrompt</audio>
+            <audio type="index" >2308</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >2307</audio>
+            <audio type="index" >312</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First/Inter Digit Timeout"/>
+            <result name="strDigits == &quot;1&quot;" link="4" stubbed="1" >strDigits match "1"</result>
+            <result name="strDigits == &quot;2&quot;" link="15" stubbed="1" >strDigits match "2"</result>
+            <result name="MaxRetries" link="8" stubbed="1" >nRetries == 3</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strDigits = "" ;
+
+Session.strPrompt = "System";]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( 2 == Result.id ) {
+	Session.nRetries = 0;
+	Session.nRetryPrompt = 99;
+}
+else {
+	Session.nRetries++;
+	Session.nRetryPrompt = 337;
+	Session.g_nErrorPrompt = 1012; //max retries
+}]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Pactolus.Branch.1" ><?xtml-editor x=296 y=81 ?>
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+            <result name="g_bUpdateRemindMe == true" link="16" stubbed="0" >g_bUpdateRemindMe == true</result>
+          </results>
+        </action>
+        <action id="16" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=529 y=163 ?>
+          <!--deleteRemindMe-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.broadband.psAPISceBroadbandRemindMe&quot;" method="&quot;deleteRemindMe&quot;" timeout="s_nTimeout" return="g_nReturnValue" method-return-var="" method-return-type="0" >
+            <parameter type="in" var-type="string" >s_strDBName</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="i8" >g_oAPI.lVoipSchedCallId</parameter>
+          </java>
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_sSTATE = Session.s_sSTATE_DELETE_SCHED;
+Server.logInfo("DELETING EXISTING WAKE UP SCHED : " + Session.g_oAPI.lVoipSchedCallId);]]></script>
+          </scripts>
+        </action>
+        <action id="17" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=656 y=325 ?>
+          <sleep xmlns="urn:www.pactolus.com:xtml:application" duration="2"/>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="ScheduleRemindMe" start="24" event="" returns="void" >
+      <local-vars >
+        <var name="strDigits" type="string" ></var>
+        <var name="strDigitMap_Time" type="string" >(xxxx)</var>
+        <var name="bCancelled" type="boolean" >0</var>
+        <var name="nUnformattedTime" type="i4" >0</var>
+        <var name="bFuture" type="boolean" >0</var>
+        <var name="strGMTTomorrow" type="string" ></var>
+        <var name="strUserDate" type="string" ></var>
+        <var name="strUserTime" type="string" ></var>
+        <var name="strUserDateString" type="string" ></var>
+        <var name="nWakeUpDatePrompt" type="i4" >0</var>
+        <var name="nRetryCount" type="i4" >0</var>
+        <var name="nRetryPrompt" type="i4" >99</var>
+        <var name="bInvalidEntry" type="boolean" >0</var>
+        <var name="nAPIReturnCode" type="i4" >0</var>
+        <var name="bisValid" type="boolean" >0</var>
+        <var name="nYear" type="i4" >0</var>
+        <var name="nMonth" type="i4" >0</var>
+        <var name="nDate" type="i4" >0</var>
+        <var name="strCurrentGMTDate" type="string" ></var>
+        <var name="oUserDate" type="object" ></var>
+        <var name="bMilitaryTime" type="boolean" >0</var>
+        <var name="bNearDaylightSavings" type="boolean" >0</var>
+        <var name="nDSTPrompt" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="24" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=26 y=80 ?>
+          <!--psAIPConvertGMTTimestamp-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIConvertGMTTimestamp&quot;" return="g_nReturnValue" external-function="1" library="lib_APISce.xml" >
+            <parameter >g_oAPI</parameter>
+            <parameter >strCurrentGMTDate</parameter>
+            <parameter >g_oAPI.nTimezoneId</parameter>
+            <parameter >strUserDateString</parameter>
+          </function>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var local = new Date();
+var i = local.toGMTString().indexOf("GMT");
+var gmt = new Date(local.toGMTString().substring(0, (i - 1)));
+
+//format month to MMM
+var month;
+switch (gmt.getMonth()){
+	case 0:
+		month = "JAN";
+		break;
+	case 1:
+		month = "FEB";
+		break;
+	case 2:
+		month = "MAR";
+		break;
+	case 3:
+		month = "APR";
+		break;
+	case 4:
+		month = "MAY";
+		break;
+	case 5:
+		month = "JUN";
+		break;
+	case 6:
+		month = "JUL";
+		break;
+	case 7:
+		month = "AUG";
+		break;
+	case 8:
+		month = "SEP";
+		break;
+	case 9:
+		month = "OCT";
+		break;
+	case 10:
+		month = "NOV";
+		break;
+	case 11:
+		month = "DEC"
+		break;
+	}
+	
+
+Session.strCurrentGMTDate = gmt.getDate() + " " + month +  " "  + gmt.getFullYear() ;
+Session.strCurrentGMTDate += " " + gmt.getHours() + ":" + gmt.getMinutes() + " GMT";
+
+Server.logInfo("Current GMT time: " + Session.strCurrentGMTDate);]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=244 y=19 ?>
+          <!--Confirm current time-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="s_nTimeout" ms-type="s_strMSType" played-length="" digits="strDigits" terminating-char="" rc="" returns="g_nReturnValue" play-offset="g_nPromptOffset" language="g_strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="g_strDigitMap_12" fdt="50" idt="40" ict="16" terminating-digit="" >
+            <audio type="index" >nRetryPrompt</audio>
+            <audio type="index" >2310</audio>
+            <audio type="index" >2311</audio>
+            <audio type="time" >strUserTime</audio>
+            <audio type="index" >335</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >2306</audio>
+            <audio type="index" >312</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First/Inter Digit Timeout"/>
+            <result name="strDigits == 1" link="2" stubbed="1" >strDigits match "1"</result>
+            <result name="strDigits == 2" link="3" stubbed="1" >strDigits match "2"</result>
+            <result name="MaxRetries" link="18" stubbed="1" >nRetryCount == 3</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if ( 0 < Session.strUserDateString.length ) {
+	var local = new Date(Session.strUserDateString);
+	
+	//rh: work around for an unidentified Java bug in which java.sql.Timestamp convertGMTTimestampToLocalTimestamp()
+	// is returning the incorrect time zone offset if the offset is not a whole hour. So, 9.5 is returned as 9.0. 
+	if (21 == Session.g_oAPI.nTimezoneId ||
+		29 == Session.g_oAPI.nTimezoneId || 
+		32 == Session.g_oAPI.nTimezoneId ||
+		38 == Session.g_oAPI.nTimezoneId ){
+		
+		local.setMinutes(local.getMinutes() + 30);
+		Session.strUserDateString = local.toString();
+	}
+	Server.logInfo("User's local date <" + Session.strUserDateString + ">");
+
+}
+else {
+	var local = new Date();
+	Server.logError("Local date not returned from convertGMTTimestamp. Using system date.");
+}
+var currentGMT = new Date();
+currentGMT.setSeconds(0);
+Session.strCurrentGMTDate = currentGMT.toGMTString();
+
+
+//HHmm
+var hours = local.getHours();
+if ( 10 > hours ) {
+	hours = 0 + "" + hours;
+}
+Session.strUserTime = hours;
+var minutes = local.getMinutes();
+if ( 10 > minutes ) {
+	minutes = 0 + "" + minutes;
+}
+Session.strUserTime += "" + minutes ;
+
+/* Set strUserDate while we have the current local Date object */
+var month = local.getMonth();
+month = month + 1;
+if ( 10 > month ) {
+	month = 0 + "" + month;
+}
+var local_date = local.getDate();
+if ( 10 > local_date ) {
+	local_date = 0 + "" + local_date;
+}
+Session.strUserDate = month + "" + local_date;
+Server.logInfo("strUserDate <" + Session.strUserDate + ">");
+
+Session.oUserDate[0] = local.getFullYear();
+Session.oUserDate[1] = local.getMonth();
+Session.oUserDate[2] = local.getDate();
+Session.oUserDate[3] = local.getHours();
+Session.oUserDate[4] = local.getMinutes();
+
+Server.logInfo("CONFIRM LOCAL TIME <" + Session.strUserTime + ">  1 = CORRECT, 2 = CHANGE.");
+
+Session.strDigits = "" ;]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[Session.nRetryPrompt = 99;
+Session.bInvalidEntry = false;
+Session.bCancelled = false;
+
+if ( 2 != Result.id ) {
+	Session.nRetryCount++;
+	Session.nRetryPrompt = 337;
+}
+else {
+	Session.nRetryCount = 0;
+	
+	
+	Session.g_fTimeZoneOffset = getTimezoneOffset(Session.oUserDate, Session.strCurrentGMTDate);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=267 y=318 ?>
+          <!--Schedule Date-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="s_nTimeout" ms-type="s_strMSType" played-length="" digits="strDigits" terminating-char="" rc="" returns="g_nReturnValue" play-offset="g_nPromptOffset" language="g_strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="&quot;([1-3])&quot;" fdt="50" idt="40" ict="16" terminating-digit="" >
+            <audio type="index" >nRetryPrompt</audio>
+            <audio type="index" >2316</audio>
+            <audio type="index" >1851</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >2316</audio>
+            <audio type="index" >2302</audio>
+            <audio type="index" >312</audio>
+            <audio type="index" >2316</audio>
+            <audio type="index" >2317</audio>
+            <audio type="index" >313</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First/Inter Digit Timeout"/>
+            <result name="strDigits == &quot;1&quot;" link="8" stubbed="1" >strDigits match "1"</result>
+            <result name="strDigits == &quot;2&quot;" link="8" stubbed="1" >strDigits match "2"</result>
+            <result name="strDigits == &quot;3&quot;" link="6" stubbed="1" >strDigits match "3"</result>
+            <result name="Max retries" link="18" stubbed="1" >nRetryCount == 3</result>
+            <result name="strDigits  == &quot;*&quot;" link="1" stubbed="1" >strDigits match "*"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strDigits = "" ;
+Session.g_strWakeUpGMT = "";
+]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[Session.nRetryCount = 0 ;
+Session.nRetryPrompt = 99;
+
+if ( 5 == Result.id || 6 == Result.id ) {
+	Session.nRetryCount++;
+	Session.nRetryPrompt = 337;
+}
+
+
+Session.nWakeUpDatePrompt = 0;
+var today = new Date(Session.strUserDateString) ;
+
+/* construct g_strWakeUpGMT first in local time. Once sub has confirmed, set to GMT */
+
+if ( "1" == Session.strDigits ) { //today
+	Session.nWakeUpDatePrompt = 1851 ;
+	Session.g_strWakeUpDate = Session.strUserDate  ;
+	var user_month = parseInt(Session.g_strWakeUpDate.substring(0, 2),10) -1;
+	if ( 10 < user_month ) {
+		user_month = 0 + "" + user_month;
+	}
+	Session.g_strWakeUpGMT = today.getFullYear() + "," + user_month + "," + Session.g_strWakeUpDate.substr(2) ;
+	Server.logInfo("Wake up date set to today <" + Session.g_strWakeUpGMT + ">");
+}
+else if ( "2" == Session.strDigits ) { //tomorrow
+	Session.nWakeUpDatePrompt = 2302 ; 
+	today = today.getTime();
+	var tomorrow = today + (3600000 * 24) ;
+	tomorrow = new Date(tomorrow);
+	Server.logInfo("Tomorrow's date string: " + tomorrow);
+	var month = tomorrow.getMonth() + 1;
+	if ( 10 > month ) {
+		month = 0 + "" + month;
+	}
+	var mo_date = tomorrow.getDate();
+	if ( 10 > mo_date ) {
+		mo_date = 0 + "" + mo_date;
+	}
+	Session.g_strWakeUpDate = month + "" + mo_date ;
+	Session.g_strWakeUpGMT = tomorrow.getFullYear() + "," + tomorrow.getMonth() + "," +  mo_date ;
+	Server.logInfo("Wake up date set to tomorrow <" + Session.g_strWakeUpGMT + ">");
+}
+
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 2 == Session.nRetryCount ){
+	Session.g_nErrorPrompt = 1012;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=527 y=52 ?>
+          <!--Collect current time-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="s_nTimeout" ms-type="s_strMSType" played-length="" digits="strUserTime" terminating-char="g_strTermDigit" rc="" returns="g_nReturnValue" play-offset="g_nPromptOffset" language="g_strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="strDigitMap_Time" fdt="50" idt="40" ict="16" terminating-digit="&quot;*&quot;" >
+            <audio type="index" >nRetryPrompt</audio>
+            <audio type="index" >2312</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="4" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First/Inter Digit Timeout"/>
+            <result name="Cancelled" link="1" stubbed="1" >bCancelled == true</result>
+            <result name="Invalid Entry" link="3" stubbed="1" >bInvalidEntry == true</result>
+            <result name="MaxRetries" link="18" stubbed="1" >nRetryCount == 3</result>
+            <result name="bMilitaryTime == true" link="5" stubbed="1" >bMilitaryTime == true
+AND 'Result'  == 'Success'
+AND bInvalidEntry == false</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strTermDigit = "";
+Session.strUserTime = "";]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[Session.bInvalidEntry = false;
+Session.nRetryPrompt = 99;
+Session.bMilitaryTime = false;
+
+Session.bCancelled = false;
+Server.logInfo("Term Digit: " + Session.g_strTermDigit);
+if ( "*" == Session.g_strTermDigit ) {
+	Session.bCancelled = true ;
+	Session.nRetryCount = 0;
+}
+
+if ( 2 == Result.id ) {
+	Session.nRetryCount = 0 ;	
+	var hour = parseInt(Session.strUserTime.substring(0, 2), 10);
+	var minute = parseInt(Session.strUserTime.substr(2), 10);
+	if ( 23 < hour ) {
+		Session.nRetryPrompt = 337;
+		Session.bInvalidEntry = true;
+	}
+	if ( 59 < minute ) {
+		Session.nRetryPrompt = 337;
+		Session.bInvalidEntry = true;
+	}
+	
+	if ( 12 < hour && 25 > hour ) {
+		Session.bMilitaryTime = true;
+	}
+}
+else {
+	Session.nRetryCount++;
+	Session.nRetryPrompt = 337;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 2 == Session.nRetryCount ){
+	Session.g_nErrorPrompt = 1012;
+}
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=786 y=62 ?>
+          <!--AM or PM?-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="s_nTimeout" ms-type="s_strMSType" played-length="" digits="strDigits" terminating-char="g_strTermDigit" rc="" returns="g_nReturnValue" play-offset="g_nPromptOffset" language="g_strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="g_strDigitMap_12" fdt="50" idt="40" ict="16" terminating-digit="g_strEndKey" >
+            <audio type="index" >nRetryPrompt</audio>
+            <audio type="index" >2314</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >2315</audio>
+            <audio type="index" >312</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success" link="5" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First/Inter Digit Timeout"/>
+            <result name="Cancelled == true" link="3" stubbed="1" >bCancelled == true</result>
+            <result name="MaxRetries" link="18" stubbed="1" >nRetryCount == 3</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("1 = AM, 2 = PM");
+Session.g_strTermDigit = "";
+Session.strDigits = "" ;
+]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[Session.nRetryPrompt == 99;
+Session.bInvalidEntry = false;
+Session.bCancelled = false;
+
+
+if ( "*" == Session.g_strTermDigit ) {
+	Session.bCancelled = true;
+	Session.nRetryCount = 0;
+}
+
+if ( 2 != Result.id ) {
+	Session.nRetryCount++ ;
+	Session.nRetryPrompt = 337;
+}
+else {	
+	Session.nRetryCount = 0;
+	if ( "2" == Session.strDigits && 12 > parseInt(Session.strUserTime.substring(0, 2), 10) ) {
+		var hour = 1200 + parseInt(Session.strUserTime, 10)
+		Session.strUserTime = hour.toString();
+	}
+	else if ( "1" == Session.strDigits && "12" == Session.strUserTime.substring(0, 2) ) {
+		Session.strUserTime = "00" + Session.strUserTime.substr(2) ;
+	}
+	else if ( "1" == Session.strDigits && 12 < parseInt(Session.strUserTime.substring(0, 2), 10) ) {
+		Session.nRetryPrompt = 337;
+		Session.bInvalidEntry = true;
+	}
+	
+	
+
+	Server.logInfo("Local user time set to <" + Session.strUserTime + ">");
+}
+
+
+
+
+	]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 2 == Session.nRetryCount ){
+	Session.g_nErrorPrompt = 1012;
+}
+
+Session.bCancelled = false;
+if ( "*" == Session.g_strTermDigit ) {
+	Session.bCancelled = true;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=1022 y=54 ?>
+          <!--Verify User's current time-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="s_nTimeout" ms-type="s_strMSType" played-length="" digits="strDigits" terminating-char="" rc="" returns="g_nReturnValue" play-offset="g_nPromptOffset" language="g_strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="g_strDigitMap_12" fdt="50" idt="40" ict="16" terminating-digit="" >
+            <audio type="index" >nRetryPrompt</audio>
+            <audio type="index" >339</audio>
+            <audio type="time" >strUserTime</audio>
+            <audio type="index" >335</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >336</audio>
+            <audio type="index" >312</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First/Inter Digit Timeout"/>
+            <result name="strDigits == &quot;1&quot;" link="10" stubbed="1" >strDigits match "1"</result>
+            <result name="strDigits == &quot;2&quot;" link="3" stubbed="1" >strDigits match "2"</result>
+            <result name="Max retries" link="18" stubbed="1" >nRetryCount == 3</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("VERIFY TEMP TIME CHANGE: 1 = ACCEPT, 2 = RESET");
+Session.g_strTermDigit = "";
+Session.strDigits = "" ;
+]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( 2 != Result.id ) {
+	Session.nRetryCount++ ;
+	Session.nRetryPrompt = 337;
+}
+else {
+	Session.nRetryCount = 0 ;
+	Session.nRetryPrompt = 99;	
+}
+
+	 
+	
+	]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 2 == Session.nRetryCount ){
+	Session.g_nErrorPrompt = 1012;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=534 y=331 ?>
+          <!--Collect Date of Reminder-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="s_nTimeout" ms-type="s_strMSType" played-length="" digits="g_strWakeUpDate" terminating-char="g_strTermDigit" rc="" returns="g_nReturnValue" play-offset="g_nPromptOffset" language="g_strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="strDigitMap_Time" fdt="50" idt="40" ict="16" terminating-digit="g_strEndKey" >
+            <audio type="index" >nRetryPrompt</audio>
+            <audio type="index" >2313</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+            <result name="Success" link="22" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First/Inter Digit Timeout"/>
+            <result name="bCancelled == true" link="2" stubbed="1" >bCancelled == true</result>
+            <result name="Max retries" link="18" stubbed="1" >nRetryCount == 3</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strTermDigit = "";
+Session.g_strWakeUpDate = "" ;]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[Session.bCancelled = false ;
+Session.bInvalidEntry = false;
+Session.nRetryPrompt = 99;
+
+if ( "*" == Session.g_strTermDigit ) {
+	Session.bCancelled = true ;
+}
+
+if ( 2 != Result.id ) {
+	Session.nRetryCount++ ;
+	Session.nRetryPrompt = 337;
+}
+else { 
+	Session.nRetryCount = 0 ;
+		
+	Session.nMonth = parseInt(Session.g_strWakeUpDate.substring(0, 2), 10);
+	Session.nDate = parseInt(Session.g_strWakeUpDate.substr(2), 10);
+	var local = new Date(Session.strUserDateString);
+	Session.nYear = local.getFullYear();
+
+	//if the month/day entered is in the past, assume next year
+	if ( parseInt(Session.g_strWakeUpDate, 10) < parseInt(Session.strUserDate, 10)) {
+		Session.nYear = local.getFullYear() + 1 ;
+	}
+}
+
+
+
+
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 2 == Session.nRetryCount ){
+	Session.g_nErrorPrompt = 1012;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=1087 y=319 ?>
+          <!--Confirm date of Reminder-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="s_nTimeout" ms-type="s_strMSType" played-length="" digits="strDigits" terminating-char="" rc="" returns="g_nReturnValue" play-offset="g_nPromptOffset" language="g_strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="g_strDigitMap_12" fdt="50" idt="40" ict="16" terminating-digit="" >
+            <audio type="index" >nRetryPrompt</audio>
+            <audio type="index" >339</audio>
+            <audio type="date" >g_strWakeUpDate</audio>
+            <audio type="index" >335</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >2306</audio>
+            <audio type="index" >312</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First/Inter Digit Timeout"/>
+            <result name="strDigits == &quot;1&quot;" link="8" stubbed="1" >strDigits match "1"</result>
+            <result name="strDigits == &quot;2&quot;" link="6" stubbed="1" >strDigits match "2"</result>
+            <result name="Max retries" link="18" stubbed="1" >nRetryCount == 3</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strTermDigit = "";
+
+//begin to build g_strWakeUpGMT to pass into a date object later on. (yy,mm,dd,hh,mm,ss)
+Session.g_strWakeUpGMT = Session.nYear + "," + (parseInt(Session.g_strWakeUpDate.substring(0, 2), 10) - 1) + "," + Session.g_strWakeUpDate.substr(2);
+
+var current = new Date();
+if (Session.nYear != current.getFullYear()) {
+	Session.g_strWakeUpDate = Session.nYear.toString() + "" + Session.g_strWakeUpDate;
+}
+
+
+
+]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( 2 != Result.id ) {
+	Session.nRetryCount++ ;
+	Session.nRetryPrompt = 337;
+}
+else {
+	Session.nRetryCount = 0 ;
+	Session.nRetryPrompt = 99;
+}
+
+	]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 2 == Session.nRetryCount ){
+	Session.g_nErrorPrompt = 1012;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=819 y=562 ?>
+          <!--Collect Time of  Reminder-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="s_nTimeout" ms-type="s_strMSType" played-length="" digits="g_strWakeUpTime" terminating-char="g_strTermDigit" rc="" returns="g_nReturnValue" play-offset="g_nPromptOffset" language="g_strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="strDigitMap_Time" fdt="50" idt="40" ict="16" terminating-digit="g_strEndKey" >
+            <audio type="index" >nRetryPrompt</audio>
+            <audio type="index" >2312</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="Success" link="9" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First/Inter Digit Timeout"/>
+            <result name="bCancelled == true" link="7" stubbed="1" >bCancelled == true</result>
+            <result name="Invalid entry" link="8" stubbed="1" >bInvalidEntry == true</result>
+            <result name="Max retries" link="18" stubbed="1" >nRetryCount == 3</result>
+            <result name="bMilitaryTime == true" link="13" stubbed="1" >bMilitaryTime == true
+AND 'Result'  == 'Success'
+AND bInvalidEntry == false</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strTermDigit = "";
+Session.g_strWakeUpTime = "" ;]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[Session.bCancelled = false ;
+Session.bInvalidEntry = false;
+Session.nRetryPrompt = 99;
+Session.bMilitaryTime = false;
+
+if ( "*" == Session.g_strTermDigit ) {
+	Session.bCancelled = true ;
+}
+else if ( 2 == Result.id ) {
+	Session.nRetryCount = 0 ;	
+	var hour = parseInt(Session.g_strWakeUpTime.substring(0, 2), 10);
+	var minute = parseInt(Session.g_strWakeUpTime.substr(2), 10);
+	//check for valid range
+	if ( 23 < hour ) {
+		Session.nRetryPrompt = 337;
+		Session.bInvalidEntry = true;
+	}
+	if ( 59 < minute ) {
+		Session.nRetryPrompt = 337;
+		Session.bInvalidEntry = true;
+	}
+	//check if in military time
+	if ( 12 < hour && 25 > hour ) {
+		Session.bMilitaryTime = true;
+	}
+}
+else {
+	Session.nRetryCount++;
+	Session.nRetryPrompt = 337;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 2 == Session.nRetryCount ){
+	Session.g_nErrorPrompt = 1012;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=1097 y=586 ?>
+          <!--AM or PM?-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="s_nTimeout" ms-type="s_strMSType" played-length="" digits="strDigits" terminating-char="g_strTermDigit" rc="" returns="g_nReturnValue" play-offset="g_nPromptOffset" language="g_strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="g_strDigitMap_12" fdt="50" idt="40" ict="16" terminating-digit="g_strEndKey" >
+            <audio type="index" >2314</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >2315</audio>
+            <audio type="index" >312</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="Success" link="13" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First/Inter Digit Timeout"/>
+            <result name="Cancelled == true" link="8" stubbed="1" >bCancelled == true</result>
+            <result name="MaxRetries" link="18" stubbed="1" >nRetryCount == 3</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("1 = AM, 2 = PM");
+Session.strDigits = "" ;
+]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[Session.nRetryPrompt = 99;
+Session.bInvalidEntry = false;
+Session.bCancelled = false;
+
+if ( "*" == Session.g_strTermDigit ) {
+	Session.bCancelled = true;
+}
+
+if ( 2 != Result.id ) {
+	Session.nRetryCount++ ;
+}
+else {
+	Session.nRetryCount = 0 ;
+	
+	if ( "2" == Session.strDigits && 12 > parseInt(Session.g_strWakeUpTime.substring(0, 2), 10) ) {
+		var hour = 1200 + parseInt(Session.g_strWakeUpTime, 10);
+		Session.g_strWakeUpTime = hour.toString();
+	}
+	else if ( "1" == Session.strDigits && "12" == Session.g_strWakeUpTime.substring(0, 2) ) {
+		Session.g_strWakeUpTime = "00" + Session.g_strWakeUpTime.substr(2) ;
+	}
+	else if ( "1" == Session.strDigits && 12 < parseInt(Session.g_strWakeUpTime.substring(0, 2), 10) ) {
+		Session.nRetryPrompt = 337;
+		Session.bInvalidEntry = true;
+	}
+	Server.logInfo("Wake Up Call local time set to <" + Session.g_strWakeUpTime + ">");
+
+	
+
+}
+
+
+
+
+
+
+	 
+	
+	]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 2 == Session.nRetryCount ){
+	Session.g_nErrorPrompt = 1012;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=1285 y=55 ?>
+          <!--Verify Current Date-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="s_nTimeout" ms-type="s_strMSType" played-length="" digits="strDigits" terminating-char="" rc="" returns="g_nReturnValue" play-offset="g_nPromptOffset" language="g_strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="g_strDigitMap_12" fdt="50" idt="40" ict="16" terminating-digit="" >
+            <audio type="index" >nRetryPrompt</audio>
+            <audio type="silence" >1</audio>
+            <audio type="date" >strUserDate</audio>
+            <audio type="index" >335</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >2306</audio>
+            <audio type="index" >312</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="10" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First/Inter Digit Timeout"/>
+            <result name="strDigits == &quot;1&quot;" link="2" stubbed="1" >strDigits match "1"</result>
+            <result name="strDigits == &quot;2&quot;" link="11" stubbed="1" >strDigits match "2"</result>
+            <result name="Max retries" link="18" stubbed="1" >nRetryCount == 3</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strTermDigit = "";
+Session.strDigits = "" ;]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( 2 != Result.id ) {
+	Session.nRetryCount++ ;
+	Session.nRetryPrompt = 337;
+}
+else {
+	Session.nRetryCount = 0 ;
+	Session.nRetryPrompt = 99;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 2 == Session.nRetryCount ){
+	Session.g_nErrorPrompt = 1012;
+}
+
+if ( "1" == Session.strDigits ) {
+	
+	//Construct date in format yyyy,mm,dd,hh,mm,ss
+	var gmtDate = new Date();
+	Session.strCurrentGMTDate = gmtDate.toGMTString();
+	var uDate = new Date(Session.strUserDateString);
+	Session.oUserDate[0] = uDate.getFullYear();
+	Session.oUserDate[1] = uDate.getMonth();
+	Session.oUserDate[2] = uDate.getDate();
+	Session.oUserDate[3] = Session.strUserTime.substring(0, 2);
+	Session.oUserDate[4] = Session.strUserTime.substr(2);
+	
+	Session.strUserDateString = new Date(Session.oUserDate[0],Session.oUserDate[1],Session.oUserDate[2],Session.oUserDate[3],Session.oUserDate[4]);
+	Server.logInfo("New UserDateString: " +	Session.strUserDateString);
+	
+	//determine user's temporary timezone offset based on the new date/time
+	Session.g_fTimeZoneOffset = getTimezoneOffset(Session.oUserDate, Session.strCurrentGMTDate);
+	Server.logInfo("User's Timezone Offset: " + Session.g_fTimeZoneOffset);
+	
+}]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=1537 y=66 ?>
+          <!--Collect User's Current Date-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="s_nTimeout" ms-type="s_strMSType" played-length="" digits="strUserDate" terminating-char="g_strTermDigit" rc="" returns="g_nReturnValue" play-offset="g_nPromptOffset" language="g_strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="strDigitMap_Time" fdt="50" idt="40" ict="16" terminating-digit="g_strEndKey" >
+            <audio type="index" >nRetryPrompt</audio>
+            <audio type="index" >2313</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="11" stubbed="1"/>
+            <result name="Success" link="25" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First/Inter Digit Timeout"/>
+            <result name="bCancelled == true" link="10" stubbed="1" >bCancelled == true</result>
+            <result name="MaxRetries" link="18" stubbed="1" >nRetryCount == 3</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strTermDigit = "";
+]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[Session.bCancelled = false ;
+Session.nRetryPrompt = 99;
+
+if ( "*" == Session.g_strTermDigit ) {
+	Session.bCancelled = true ;
+	Session.nRetryCount = 0;
+}
+
+if ( 2 != Result.id ) {
+	Session.nRetryCount++;
+	Session.nRetryPrompt = 337;
+}
+else {	
+	Session.nRetryCount = 0;
+	
+	Session.nMonth = parseInt(Session.strUserDate.substring(0, 2), 10);
+	Session.nDate = parseInt(Session.strUserDate.substr(2), 10);
+	var local = new Date(Session.strUserDateString);
+	Session.nYear = local.getFullYear();
+	
+	//if the month/day entered is more than one day in the past, assume next year
+	var current = new Date();
+	var tmpDate = current.getMonth() + "" + current.getDate();
+	var uMonth = parseInt(Session.nMonth, 10);
+	var uDate = parseInt(Session.nDate, 10);
+	var uTmp = uMonth + "" + uDate;
+	Server.logInfo("Current MMDD is <" + tmpDate + "> User entered <" + uTmp + ">");
+	if ( uTmp < (tmpDate - 1 )) {
+		Session.nYear = local.getFullYear() + 1 ;
+		Server.logInfo("Date is in the past. Setting year to <" + Session.nYear + ">");
+	}
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 2 == Session.nRetryCount ){
+	Session.g_nErrorPrompt = 1012;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=2048 y=51 ?>
+          <!--Verify temporary date change-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="s_nTimeout" ms-type="s_strMSType" played-length="" digits="strDigits" terminating-char="" rc="" returns="g_nReturnValue" play-offset="g_nPromptOffset" language="g_strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="g_strDigitMap_12" fdt="50" idt="40" ict="16" terminating-digit="" >
+            <audio type="index" >nRetryPrompt</audio>
+            <audio type="index" >339</audio>
+            <audio type="date" >strUserDate</audio>
+            <audio type="index" >335</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >2306</audio>
+            <audio type="index" >312</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="12" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First/Inter Digit Timeout"/>
+            <result name="strDigits == &quot;1&quot;" link="2" stubbed="0" >strDigits match "1"</result>
+            <result name="strDigits == &quot;2&quot;" link="11" stubbed="1" >strDigits match "2"</result>
+            <result name="Max retries" link="18" stubbed="1" >nRetryCount == 3</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("VERIFY TEMP DATE CHANGE <" + Session.strUserDate + ">  1 = ACCEPT, 2 = RESET");
+Session.strDigits = "" ;
+
+]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( 2 != Result.id ) {
+	Session.nRetryCount++ ;
+	Session.nRetryPrompt = 337;
+}
+else {
+	Session.nRetryCount = 0 ;
+	Session.nRetryPrompt = 99;
+}
+
+	 
+	
+	]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 2 == Session.nRetryCount ){
+	Session.g_nErrorPrompt = 1012;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1353 y=612 ?>
+          <results >
+            <result name="Default" link="20" stubbed="0"/>
+            <result name="Future Date" link="16" stubbed="0" >bFuture == true
+AND nWakeUpDatePrompt == 0</result>
+            <result name="Today or Tomorrow" link="17" stubbed="1" >bFuture == true
+AND nWakeUpDatePrompt &gt; 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[/* append the wake up call time to g_strWakeUpGMT */
+Session.g_strWakeUpGMT += "," + Session.g_strWakeUpTime.substring(0, 2) + "," + Session.g_strWakeUpTime.substr(2) ;
+
+var current_ms = new Date(Session.strUserDateString);
+
+var date_array = Session.g_strWakeUpGMT.split(',');
+var wakeup_ms = new Date(date_array[0],date_array[1],date_array[2],date_array[3],date_array[4]);
+Session.g_strWakeUpGMT = wakeup_ms;
+
+if ( current_ms.getTime() < wakeup_ms.getTime() ) {
+	Session.bFuture = true ;
+}
+else {
+	Session.bFuture = false ;
+	Server.logError("USER ENTERED WAKE UP TIME THAT HAS ALREADY PASSED.");
+	Server.logError("Current date " + current_ms.toString() + " < Wake up date " + wakeup_ms.toString());
+}
+
+
+//check if the dates are both in the same daylight savings time. If not prompt user to account for the time difference.
+Session.bNearDaylightSavings = false;
+if ( current_ms.getTimezoneOffset() != wakeup_ms.getTimezoneOffset() ) {
+	Session.bNearDaylightSavings = true;
+}
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=2140 y=562 ?>
+          <!--SelectRemindMeMsg-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;SelectRemindMeMsg&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_sSTATE = Session.s_sSTATE_RECORD_MSG ;
+
+var reminder = new Date(Session.g_strWakeUpGMT);
+Server.logInfo("Adjust time for GMT offset: <" + reminder.getHours() + "> - <" + Session.g_fTimeZoneOffset + ">");
+reminder.setHours(reminder.getHours() - Session.g_fTimeZoneOffset);
+Session.g_strWakeUpGMT = reminder.toString();
+Server.logInfo("Final Reminder GMT object: " + Session.g_strWakeUpGMT);]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=2378 y=581 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="16" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=1605 y=468 ?>
+          <!--Confirm date and time of Reminder - Future date-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="30" ms-type="s_strMSType" played-length="" digits="strDigits" terminating-char="" rc="" returns="g_nReturnValue" play-offset="g_nPromptOffset" language="g_strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="g_strDigitMap_12" fdt="50" idt="40" ict="16" terminating-digit="" >
+            <audio type="index" >nRetryPrompt</audio>
+            <audio type="index" >2301</audio>
+            <audio type="date" >g_strWakeUpDate</audio>
+            <audio type="index" >87</audio>
+            <audio type="time" >g_strWakeUpTime</audio>
+            <audio type="index" >335</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >2306</audio>
+            <audio type="index" >312</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="16" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First/Inter Digit Timeout"/>
+            <result name="strDigits == &quot;1&quot;" link="27" stubbed="1" >strDigits match "1"</result>
+            <result name="strDigits == &quot;2&quot;" link="2" stubbed="1" >strDigits match "2"</result>
+            <result name="MaxRetries" link="18" stubbed="1" >nRetryCount == 3</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strDigits = "";
+
+Server.logInfo("CONFIRM WAKE UP SCHED <" + Session.g_strWakeUpGMT + "> 1 ACCEPT, 2 CHANGE");
+]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( 2 != Result.id ) {
+	Session.nRetryPrompt = 337;
+	Session.nRetryCount++;
+}
+else {
+	Session.nRetryPrompt = 99;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="17" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=1612 y=726 ?>
+          <!--Confirm date of Reminder- Today or Tomorrow-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="30" ms-type="s_strMSType" played-length="" digits="strDigits" terminating-char="" rc="" returns="g_nReturnValue" play-offset="g_nPromptOffset" language="g_strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="g_strDigitMap_12" fdt="50" idt="40" ict="16" terminating-digit="" >
+            <audio type="index" >nRetryPrompt</audio>
+            <audio type="index" >2301</audio>
+            <audio type="index" >nWakeUpDatePrompt</audio>
+            <audio type="index" >87</audio>
+            <audio type="time" >g_strWakeUpTime</audio>
+            <audio type="index" >335</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >2306</audio>
+            <audio type="index" >312</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="17" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First/Inter Digit Timeout"/>
+            <result name="strDigits == &quot;1&quot;" link="27" stubbed="1" >strDigits match "1"</result>
+            <result name="strDigits == &quot;2&quot;" link="2" stubbed="1" >strDigits match "2"</result>
+            <result name="MaxRetries" link="18" stubbed="1" >nRetryCount == 3</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strDigits = "";
+
+Server.logInfo("CONFIRM WAKE UP SCHED <" + Session.g_strWakeUpGMT + "> 1 ACCEPT, 2 CHANGE");]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( 2 != Result.id ) {
+	Session.nRetryCount++;
+	Session.nRetryPrompt = 337;
+}
+else {
+	Session.nRetryPrompt = 99;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="18" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=274 y=597 ?>
+          <!--PlayError-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PlayError&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="19" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_nErrorPrompt = 1012; //max retries]]></script>
+          </scripts>
+        </action>
+        <action id="19" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=526 y=607 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="20" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1359 y=787 ?>
+          <!--Date and time already passed-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTimeout" ms-type="s_strMSType" returns="g_nReturnValue" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >.5</audio>
+            <audio type="index" >2318</audio>
+          </play>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="22" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=819 y=375 ?>
+          <!--psAPIIsValidDate-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIIsValidDate&quot;" return="g_nReturnValue" external-function="1" library="lib_APISce.xml" >
+            <parameter >g_oAPI</parameter>
+            <parameter >nYear</parameter>
+            <parameter >nMonth</parameter>
+            <parameter >nDate</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success" link="7" stubbed="0" >g_nReturnValue == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if ( 0 != Session.g_nReturnValue ) {
+	Session.nRetryPrompt = 337; 
+}
+else {
+	Session.nRetryPrompt = 99;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="25" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1786 y=122 ?>
+          <!--psAPIIsValidDate-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIIsValidDate&quot;" return="g_nReturnValue" external-function="1" library="lib_APISce.xml" >
+            <parameter >g_oAPI</parameter>
+            <parameter >nYear</parameter>
+            <parameter >nMonth</parameter>
+            <parameter >nDate</parameter>
+          </function>
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+            <result name="Success" link="12" stubbed="0" >g_nReturnValue == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if ( 0 != Session.g_nReturnValue ) {
+	Session.nRetryPrompt = 337; 
+}
+else {
+	Session.nRetryPrompt = 99;
+	
+	//construct date in format to pass into date object (yy,mm,dd,hh,mm,ss)
+	Session.strUserDateString = "";
+	Session.oUserDate[0] = Session.nYear;
+	Session.oUserDate[1] = Session.nMonth - 1;
+	Session.oUserDate[2] = Session.nDate;
+	Session.oUserDate[3] = Session.strUserTime.substring(0, 2);
+	Session.oUserDate[4] = Session.strUserTime.substr(2);
+
+	Session.strUserDateString = new Date(Session.oUserDate[0],Session.oUserDate[1],Session.oUserDate[2],Session.oUserDate[3],Session.oUserDate[4]);
+	Server.logInfo("New UserDateString: " +	Session.strUserDateString);
+	
+	//if the date is next year, announce year for confirmation that this is what the user meant
+	var current = new Date();
+	if ( Session.nYear > current.getFullYear() ) {
+		Session.strUserDate += "" + Session.nYear ;
+	}
+	
+	//determine user's temporary timezone offset based on the new date/time
+	Session.g_fTimeZoneOffset = getTimezoneOffset(Session.oUserDate, Session.strCurrentGMTDate);
+	Server.logInfo("User's Timezone Offset: " + Session.g_fTimeZoneOffset);
+	
+	}
+
+
+	
+
+	
+]]></script>
+          </scripts>
+        </action>
+        <action id="27" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1902 y=672 ?>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+            <result name="Near Dayllight Savings" link="28" stubbed="0" >bNearDaylightSavings == true</result>
+          </results>
+        </action>
+        <action id="28" plug-in="Pactolus.CollectPlay.1" ><?xtml-editor x=2160 y=767 ?>
+          <!--Confirm user has accounted for Daylight Savings Time-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" timeout="30" ms-type="s_strMSType" played-length="" digits="strDigits" terminating-char="" rc="" returns="g_nReturnValue" play-offset="g_nPromptOffset" language="g_strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="g_strDigitMap_12" fdt="50" idt="40" ict="16" terminating-digit="" >
+            <audio type="index" >nRetryPrompt</audio>
+            <audio type="index" >2014</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="28" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First/Inter Digit Timeout"/>
+            <result name="strDigits == &quot;1&quot;" link="14" stubbed="1" >strDigits match "1"</result>
+            <result name="strDigits == &quot;2&quot;" link="2" stubbed="0" >strDigits match "2"</result>
+            <result name="MaxRetries" link="18" stubbed="1" >nRetryCount == 3</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strDigits = "";
+
+Server.logInfo("Remind Me date may need to account for daylight savings. 1 = Already does. 2 = Modify date");]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( 2 != Result.id ) {
+	Session.nRetryPrompt = 337;
+	Session.nRetryCount++;
+}
+else {
+	Session.nRetryPrompt = 99;
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>
+#include <dialing_plan_utils.jsh>
+
+function getTimezoneOffset(oUserDate, strGMTDate)
+{
+	var tmpDate = new Date(oUserDate[0],oUserDate[1],oUserDate[2],oUserDate[3],oUserDate[4]);
+	Server.logInfo("Temp Date Object: " + tmpDate);
+	
+	var i = strGMTDate.indexOf("GMT");
+	if ( -1 != i ){
+		var gmt = new Date(strGMTDate.substring(0, (i - 1)));
+	}
+	else {
+		var gmt = new Date(strGMTDate);
+	}
+	Server.logInfo("gmt object: " + gmt);
+
+	var ms = tmpDate.getTime() - gmt.getTime();
+	var TimezoneOffset = (ms / 60000) / 60 ;
+	//var TimezoneOffset = parseInt(hour, 10);
+	Server.logInfo("User's time zone offset: " + TimezoneOffset);
+	
+	return TimezoneOffset;
+	
+}
+]]></script>
+  <properties >
+    <property key="default" value="C:/pactolus_app_server/prompts/pcs_english.vox"/>
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value="C:/code/Apps/main/Applications/InternalProduct/SceXMLScripts/Libs"/>
+    <property key="library-modules" value="lib_mediaserver.xml;lib_callcontrol.xml;lib_APISce.xml"/>
+    <property key="library-path" value="C:/code/Apps/main/Applications/InternalProduct/SceXMLScripts/Libs"/>
+  </properties>
+  <application-version >
+    <revision >$Id: pcs_set_reminder.xml,v 1.20 2007/09/20 19:02:23 gthokar Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

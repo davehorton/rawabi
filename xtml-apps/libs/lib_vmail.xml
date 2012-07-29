@@ -1,0 +1,819 @@
+<?xml version="1.0"?>
+<xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
+  <version sce-version="422a4" prev-sce-version="422a4" last-mod-time="Thursday, March 27, 2008 11:33:57"/>
+  <global-handlers/>
+  <functions >
+    <function name="GetMailStatus" start="1" event="GetMailStatus" returns="i4" >
+      <parameters >
+        <parameter name="strAcctName" type="string" pass="byref"/>
+        <parameter name="strAcctPassword" type="string" pass="byref"/>
+        <parameter name="nUrgent" type="i4" pass="byref"/>
+        <parameter name="nUnseen" type="i4" pass="byref"/>
+        <parameter name="nSaved" type="i4" pass="byref"/>
+        <parameter name="strMailbox" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nReturnValue" type="i4" >0</var>
+        <var name="oUrgent" type="object" ></var>
+        <var name="oUnseen" type="object" ></var>
+        <var name="oSaved" type="object" ></var>
+        <var name="nReturnError" type="i4" >0</var>
+        <var name="nTimeout" type="i4" >20</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.MailboxStatus.1" ><?xtml-editor x=106 y=124 ?>
+          <imap-status xmlns="urn:www.pactolus.com:xtml:imap" username="strAcctName" password="strAcctPassword" mailbox="strMailbox" flagged-count="nUrgent" unseen-count="nUnseen" saved-count="nSaved" flagged="oUrgent" unseen="oUnseen" saved="oSaved" returns="nReturnValue" timeout="nTimeout"/>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success" link="2" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("Return Value: " +Session.nReturnValue) ;
+
+Server.logInfo("Result Name: " +Result.name ) ;
+
+
+
+
+
+
+
+//0 = success
+
+//1 = login failed
+
+//2 = mailbox does not exist
+
+//3 = error connecting to the mail Server]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=365 y=217 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nReturnValue"/>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=361 y=106 ?>
+          <!--Error-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nReturnError"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if ( 2 == Session.nReturnValue ) {
+
+	Session.nReturnError = -1 ;
+
+}
+
+else {
+
+	Session.nReturnError = -99 ;
+
+
+
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="SetMWI" start="4" event="SetMWI" returns="i4" >
+      <parameters >
+        <parameter name="bMWIOn" type="boolean" pass="byref"/>
+        <parameter name="oCallLeg" type="object" pass="byref"/>
+        <parameter name="oMessage" type="object" pass="byref"/>
+        <parameter name="strUserName" type="string" pass="byref"/>
+        <parameter name="strDBName" type="string" pass="byref"/>
+        <parameter name="strRealm" type="string" pass="byref"/>
+        <parameter name="lAccessLineId" type="i8" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="strEvent" type="string" >message-summary</var>
+        <var name="strMailDomain" type="string" ></var>
+        <var name="strUserName" type="string" ></var>
+        <var name="nUrgent" type="i4" >0</var>
+        <var name="nUnseen" type="i4" >0</var>
+        <var name="nSaved" type="i4" >0</var>
+        <var name="nReturnValue" type="i4" >0</var>
+        <var name="strSubscriptionState" type="string" ></var>
+        <var name="nTimeout" type="i4" >20</var>
+        <var name="nAPIReturn" type="i4" >0</var>
+        <var name="strPlatformSessionId" type="string" ></var>
+        <var name="strRealm" type="string" ></var>
+        <var name="lCSeqValue" type="i8" >0</var>
+        <var name="strStatus" type="string" ></var>
+        <var name="nStatus" type="i4" >0</var>
+        <var name="strEventRcvd" type="string" ></var>
+        <var name="nExpires" type="i4" >0</var>
+        <var name="strAcctName" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=26 y=249 ?>
+          <!--GetMailStatus-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;GetMailStatus&quot;" return="nReturnValue" external-function="0" library="" >
+            <parameter >oMessage.strAcctName</parameter>
+            <parameter >oMessage.strAcctPassword</parameter>
+            <parameter >nUrgent</parameter>
+            <parameter >nUnseen</parameter>
+            <parameter >nSaved</parameter>
+            <parameter >"InBox"</parameter>
+          </function>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("***FETCHING MAIL STATUS FOR MAILBOX: " + Session.oMessage.strAcctName ) ;
+
+if ( 0 == Session.strDBName.length ) {
+	Session.strDBName = "pactolusdb" ;
+	Server.logError("No DB Name provided. Setting to pactolusdb.") ;
+}
+
+Session.nReturnValue = -50;
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("Urgent Messages: " + Session.nUrgent ) ;
+
+Server.logInfo("Unseen Messages: " + Session.nUnseen ) ;
+
+Server.logInfo("Saved Messages: " + Session.nSaved ) ;
+
+
+
+Server.logInfo("MWIOn = " + Session.bMWIOn ) ;]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Pactolus.SipNotify.1" ><?xtml-editor x=732 y=240 ?>
+          <sip-notify xmlns="urn:www.pactolus.com:xtml:sip" add-record-route="0" add-via="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >oCallLeg.strCallId</call-id>
+            <contact >oCallLeg.strMyContact</contact>
+            <content >oCallLeg.strContent</content>
+            <content-type >oCallLeg.strContentType</content-type>
+            <cseq >oCallLeg.strCSeq</cseq>
+            <event >strEvent</event>
+            <from >oCallLeg.strFrom</from>
+            <request-uri >oCallLeg.strRequestUri</request-uri>
+            <route >oCallLeg.strRoute</route>
+            <to >oCallLeg.strTo</to>
+            <subscription-state >strSubscriptionState</subscription-state>
+          </sip-notify>
+          <results >
+            <result name="Default" link="12" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.oCallLeg.strMyContact = "<sip:" + Server.sipAddress ;
+if( 5060 != Server.sipPort ) {
+	Session.oCallLeg.strMyContact += ":" ;
+	Session.oCallLeg.strMyContact += Server.sipPort ;
+}
+Session.oCallLeg.strMyContact += ">" ;
+
+if ( 0 == Session.oCallLeg.strCallId.length ) {
+	Session.oCallLeg.strCallId = js_CreateUniqueCallId() ;
+}
+
+Session.oCallLeg.strCSeq = Session.lCSeqValue + "NOTIFY" ;
+
+var uri = new SipRequestUri(Session.oCallLeg.strRequestUri.toString());
+var msg_acct = "sip:";
+msg_acct += uri.url.user;
+msg_acct += "@";
+if( Session.strRealm.length > 0 ) {
+	msg_acct += Session.strRealm ;
+}
+else {
+	msg_acct += uri.url.host;
+}
+
+Session.oCallLeg.strContentType = "application/simple-message-summary" ;
+
+var total_msgs = Session.nUrgent + Session.nUnseen + Session.nSaved ;
+if( 0 == Session.nUnseen || !Session.bMWIOn ) {
+	Session.oCallLeg.strContent = "Messages-Waiting: no\r\n" ;
+}
+else {
+	Session.oCallLeg.strContent = "Messages-Waiting: yes\r\n" ;
+	if ( 0 != Session.nUrgent || 0 != Session.nUnseen ) {
+		Session.oCallLeg.strContent += "Message-Account: " + msg_acct + "\r\n" ;
+		Session.oCallLeg.strContent += "Voice-Message: " + (Session.nUrgent + Session.nUnseen) + "/" + Session.nSaved ;
+		Session.oCallLeg.strContent += " (" + Session.nUrgent + "/" + "0)\r\n" ;
+		Session.oCallLeg.strContent += "\r\n" ;
+	}
+}
+
+
+
+
+
+
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1215 y=235 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nReturnValue"/>
+        </action>
+        <action id="7" plug-in="Pactolus.Branch.1" ><?xtml-editor x=247 y=253 ?>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="MWI = false, still unread msgs" link="8" stubbed="0" >bMWIOn == false
+AND (nUrgent != 0
+OR nUnseen != 0)</result>
+          </results>
+        </action>
+        <action id="8" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=272 y=391 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nReturnValue"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nReturnValue = 1 ;
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=488 y=232 ?>
+          <!--getEventSubscriptionInfo-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.broadband.psAPISceSubscribe&quot;" method="&quot;getEventSubscriptionInfo&quot;" timeout="30" return="nReturnValue" method-return-var="nAPIReturn" method-return-type="0" >
+            <parameter type="in" var-type="string" >strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >strDBName</parameter>
+            <parameter type="in" var-type="i8" >lAccessLineId</parameter>
+            <parameter type="in" var-type="string" >strUserName</parameter>
+            <parameter type="in" var-type="string" >strRealm</parameter>
+            <parameter type="in" var-type="string" >strEvent</parameter>
+            <parameter type="inout" var-type="string" >oCallLeg.strRequestUri</parameter>
+            <parameter type="inout" var-type="string" >oCallLeg.strRoute</parameter>
+            <parameter type="inout" var-type="string" >oCallLeg.strCallId</parameter>
+            <parameter type="inout" var-type="i8" >lCSeqValue</parameter>
+            <parameter type="inout" var-type="string" >oCallLeg.strTo</parameter>
+            <parameter type="inout" var-type="string" >oCallLeg.strFrom</parameter>
+            <parameter type="inout" var-type="string" >strSubscriptionState</parameter>
+            <parameter type="inout" var-type="string" >oCallLeg.strAccept</parameter>
+          </java>
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="nAPIReturn == 0" link="1" stubbed="0" >nAPIReturn == 0
+AND 'Result'  == 'Success'</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nAPIReturn = -50;
+
+Session.strEvent = "message-summary" ;
+Session.strPlatformSessionId = Session._sessionId ;]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( -1 != Session.strSubscriptionState.indexOf("terminated")) {
+	Session.bTerminated = true;
+	Session.nAPIReturn = -4;
+	Server.logInfo("SubscriptionState is Terminated. Not sending MWI Notify.");
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( -1 == Session.nAPIReturn ) {
+	Server.logError("SUBSCRIBING DEVICE NOT FOUND") ;
+}
+else if ( -2 == Session.nAPIReturn ) {
+	Server.logError("SUBSCRIPTION NOT FOUND") ;
+}	
+else if ( 0 == Session.nAPIReturn ) {
+	Server.logInfo("RECEIVED SUBSCRIPTION INFO") ;
+	Server.logInfo("Notify Call Id: " + Session.oCallLeg.strCallId) ;
+	Server.logInfo("Notify CSeq Value: " + Session.lCSeqValue) ;
+	Server.logInfo("Notify To: " + Session.oCallLeg.strTo) ;
+	Server.logInfo("Notify From: " + Session.oCallLeg.strFrom) ;
+	Server.logInfo("Subscription State: " + Session.strSubscriptionState) ;
+	Server.logInfo("Notify Content Accept: " + Session.oCallLeg.strAccept) ;
+}
+
+
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=658 y=399 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nAPIReturn"/>
+        </action>
+        <action id="12" plug-in="Standard.WaitEvent.1" ><?xtml-editor x=961 y=235 ?>
+          <wait xmlns="urn:www.pactolus.com:xtml:communication" timeout="nTimeout" recv-name="strEventRcvd" >
+            <msg name="Pactolus.EveSipResponse.1" >
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter >strStatus</parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+            </msg>
+          </wait>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="Non-200 Status" link="13" stubbed="0" >nStatus &lt; 200
+OR nStatus &gt; 299</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="middle" ><![CDATA[if ( 2 == Result.id ) {
+	var status = new SipStatus(Session.strStatus) ;
+	Session.nStatus = status.code ;
+	Server.logInfo("SIP Status Code: " + Session.nStatus) ;
+	Session.nReturnValue = 0 ;
+}
+else if ( 4 == Result.id ) {
+	Session.nReturnValue = -3 ;
+	Server.logError("No Response to NOTIFY") ;
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=1183 y=334 ?>
+          <!--subscribeForEvent - Terminated-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.broadband.psAPISceSubscribe&quot;" method="&quot;subscribeForEvent&quot;" timeout="nTimeout" return="nReturnValue" method-return-var="nAPIReturn" method-return-type="0" >
+            <parameter type="in" var-type="string" >strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >strDBName</parameter>
+            <parameter type="in" var-type="string" >strUserName</parameter>
+            <parameter type="in" var-type="string" >strRealm</parameter>
+            <parameter type="in" var-type="string" >oCallLeg.strRequestUri</parameter>
+            <parameter type="in" var-type="string" >oCallLeg.strRoute</parameter>
+            <parameter type="in" var-type="string" >strEvent</parameter>
+            <parameter type="in" var-type="string" >oCallLeg.strCallId</parameter>
+            <parameter type="in" var-type="i8" >lCSeqValue</parameter>
+            <parameter type="in" var-type="string" >oCallLeg.strFrom</parameter>
+            <parameter type="in" var-type="string" >oCallLeg.strTo</parameter>
+            <parameter type="in" var-type="string" >strSubscriptionState</parameter>
+            <parameter type="in" var-type="string" >oCallLeg.strAccept</parameter>
+            <parameter type="in" var-type="i4" >nExpires</parameter>
+            <parameter type="inout" var-type="string" >strAcctName</parameter>
+          </java>
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nAPIReturn = -50;
+Session.strSubscriptionState = "terminated" ;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("API return code: " + Session.nAPIReturn) ;
+
+//Returns:
+//0 = success
+//-1 = subscribing device not found
+//-2 = existing subscription not found (in the case of a delete)
+//-99 = DB error
+]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1619 y=365 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nReturnValue"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nReturnValue = -3 ;
+Server.logError("No Response to NOTIFY. Subscription terminated.") ;]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Pactolus.SipNotify.1" ><?xtml-editor x=1413 y=347 ?>
+          <sip-notify xmlns="urn:www.pactolus.com:xtml:sip" add-record-route="0" add-via="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >oCallLeg.strCallId</call-id>
+            <contact >oCallLeg.strMyContact</contact>
+            <cseq >oCallLeg.strCSeq</cseq>
+            <event >strEvent</event>
+            <from >oCallLeg.strFrom</from>
+            <request-uri >oCallLeg.strRequestUri</request-uri>
+            <route >oCallLeg.strRoute</route>
+            <to >oCallLeg.strTo</to>
+            <subscription-state >strSubscriptionState</subscription-state>
+          </sip-notify>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strSubscriptionState = "terminated;reason=deactivated" ;]]></script>
+          </scripts>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="215" y-coord="12" width="286" height="145" text="Return Values:
+0 = Success
+1 = No change to MWI
+-1 = Subscribing device not found
+-2 = Subscription not found
+-3 = No Response to NOTIFY
+-99 = System Error" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+        <text-object x-coord="12" y-coord="11" width="190" height="229" text="In:
+oCallLeg.strContact
+oCallLeg.strRecordRoute
+oMessage.strAcctName
+oMessage.strTo
+oMessage.strFrom
+oMessage.strDate
+oMessage.strPriority
+strDBName
+strUserName
+strRealm
+
+" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="DeleteExpiredMsgs" start="1" event="DeleteExpiredMsgs" returns="i4" >
+      <parameters >
+        <parameter name="strSubPhone" type="string" pass="byref"/>
+        <parameter name="nMsgSaveFor" type="i4" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="strQuery" type="string" ></var>
+        <var name="oMessageIds" type="object" ></var>
+        <var name="nTimeout" type="i4" >20</var>
+        <var name="nTotalMessageIds" type="i4" >0</var>
+        <var name="nReturnValue" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.MailboxSearch.1" ><?xtml-editor x=48 y=87 ?>
+          <search-mailbox xmlns="urn:www.pactolus.com:xtml:imap" username="strSubPhone" password="strSubPhone" mailbox="&quot;InBox&quot;" query-string="strQuery" search-result="oMessageIds" timeout="nTimeout" returns="nReturnValue"/>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[/* start with the current GMT time */
+var startDate = new Date() ;
+var current = new Date(startDate.toGMTString()) ;
+var gmtHours = current.getHours() + (current.getTimezoneOffset()/60) ;
+current.setHours(gmtHours) ;
+
+/* translate the exipration time and current date to ms 
+ to determine the target date for expired messages */
+var expires = Session.nMsgSaveFor * 86400000 ; 
+var utc = new Date(current.toUTCString()) ;
+var searchDate = utc - expires ;
+searchDate = new Date(searchDate) ;
+
+/* Put expired Date into the proper format of DD-MMM-YYYY */
+var month = searchDate.getMonth() ;
+	switch (month) {
+			case 0:
+				month = "JAN" ;
+				break ;
+			case 1:
+				month = "FEB" ;
+				break ;
+			case 2:
+				month = "MAR" ;
+				break ;
+			case 3:
+				month = "APR" ;
+				break ;
+			case 4:
+				month = "MAY" ;
+				break ;
+			case 5:
+				month = "JUN" ;
+				break ;
+			case 6:
+				month = "JUL" ;
+				break ;
+			case 7:
+				month = "AUG" ;
+				break ;
+			case 8:
+				month = "SEP" ;
+				break ;
+			case 9:
+				month = "OCT" ;
+				break ;
+			case 10: 
+				month = "NOV" ;
+				break ;
+			case 11:
+				month = "DEC" ;
+				break;
+		}
+searchDate = searchDate.getDate() + "-" + month + "-" + searchDate.getFullYear() ;
+
+Session.strQuery = "SENTBEFORE " + searchDate ; 
+
+Server.logInfo("SEARCHING FOR MESSAGES OLDER THAN " + searchDate) ;
+
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 0 != Session.nReturnValue ) {
+	Server.logError("SEARCH Mailbox returned: " + Session.nReturnValue) ;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=519 y=153 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="4" plug-in="Pactolus.Branch.1" ><?xtml-editor x=272 y=111 ?>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Messages to delete" link="5" stubbed="0" >nTotalMessageIds &gt; 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nTotalMessageIds = Session.oMessageIds.length ;
+if ( 0 == Session.oMessageIds.length ) {
+	Server.logInfo("DELETE_EXPIRED_MSGS: No Messages are older than the expiration date") ;
+}
+else {
+	Server.logInfo("DELETE_EXPIRED_MSGS: There are " + Session.oMessageIds.length + " messages to be deleted.") ;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.UpdateMail.1" ><?xtml-editor x=282 y=262 ?>
+          <imap-update xmlns="urn:www.pactolus.com:xtml:imap" username="strSubPhone" password="strSubPhone" mailbox="&quot;InBox&quot;" msg-uid="oMessageIds" flag="&quot;delete&quot;" timeout="nTimeout" returns="nReturnValue"/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="ReadMessage" start="6" event="" returns="i4" >
+      <parameters >
+        <parameter name="strAccountName" type="string" pass="byref"/>
+        <parameter name="strAccountPswd" type="string" pass="byref"/>
+        <parameter name="strMailbox" type="string" pass="byref"/>
+        <parameter name="strSubject" type="string" pass="byref"/>
+        <parameter name="oMS" type="object" pass="byref"/>
+        <parameter name="strLanguage" type="string" pass="byref"/>
+        <parameter name="nMaxRecordingTime" type="i4" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nUrgent" type="i4" >0</var>
+        <var name="nUnseen" type="i4" >0</var>
+        <var name="nSaved" type="i4" >0</var>
+        <var name="nReturnValue" type="i4" >-50</var>
+        <var name="strQuery" type="string" ></var>
+        <var name="oMessageID" type="object" ></var>
+        <var name="nTimeout" type="i4" >10</var>
+        <var name="strRecording" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="6" plug-in="Pactolus.MailboxSearch.1" ><?xtml-editor x=192 y=131 ?>
+          <search-mailbox xmlns="urn:www.pactolus.com:xtml:imap" username="strAccountName" password="strAccountPswd" mailbox="strMailbox" query-string="strQuery" search-result="oMessageID" timeout="nTimeout" returns="nReturnValue"/>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="nReturnValue == 0" link="5" stubbed="0" >nReturnValue == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nReturnValue = -50;
+
+Session.strQuery = "SUBJECT \"" + Session.strSubject + "\"" ;]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( 0 == Session.oMessageID.length ) {
+	Session.nReturnValue = -1;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=516 y=401 ?>
+          <!--Failure-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nReturnValue"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("Error reading message");]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.ReadMail.1" ><?xtml-editor x=576 y=147 ?>
+          <imap-read xmlns="urn:www.pactolus.com:xtml:imap" username="strAccountName" password="strAccountPswd" mailbox="strMailbox" msg-uid="oMessageID[0]" to="" from="" cc="" subject="" body="" attachment1="strRecording" attachment2="" attachment3="" timeout="nTimeout" returns="nReturnValue" timestamp=""/>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success" link="8" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nReturnValue = -50;]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=946 y=134 ?>
+          <!--Play Message-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="oMS.strConnectionId" endpoint="oMS.strEndPoint" callid="oMS.strCallId" repeat="1" timeout="nMaxRecordingTime" ms-type="oMS.strType" returns="nReturnValue" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >.5</audio>
+            <audio type="url" >strRecording</audio>
+          </play>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success" link="10" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nReturnValue = -50;]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1296 y=135 ?>
+          <!--Success-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="0"/>
+        </action>
+      </actions>
+    </function>
+    <function name="DeleteBySubject" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="strAccountName" type="string" pass="byref"/>
+        <parameter name="strAccountPswd" type="string" pass="byref"/>
+        <parameter name="strMailbox" type="string" pass="byref"/>
+        <parameter name="strSubject" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="strQuery" type="string" ></var>
+        <var name="oMessageId" type="object" ></var>
+        <var name="nReturnValue" type="i4" >-50</var>
+        <var name="nMsgCount" type="i4" >0</var>
+        <var name="nId" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.MailboxSearch.1" ><?xtml-editor x=137 y=137 ?>
+          <search-mailbox xmlns="urn:www.pactolus.com:xtml:imap" username="strAccountName" password="strAccountPswd" mailbox="strMailbox" query-string="strQuery" search-result="oMessageId" timeout="10" returns="nReturnValue"/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("DeleteBySubject: attempting to delete message with subject: " + Session.strSubject);
+
+Session.strQuery = "SUBJECT \"" + Session.strSubject + "\"" ;]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( 0 == Session.oMessageId.length ) {
+	Session.nReturnValue = -1;
+	Server.logError("No matches found for subject: " + Session.strSubject);
+}
+else {
+	Server.logInfo("Found " + Session.oMessageId.length + " matches.");
+	Session.nMsgCount = Session.oMessageId.length;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=350 y=358 ?>
+          <!--error-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nReturnValue"/>
+        </action>
+        <action id="3" plug-in="Pactolus.UpdateMail.1" ><?xtml-editor x=437 y=134 ?>
+          <imap-update xmlns="urn:www.pactolus.com:xtml:imap" username="strAccountName" password="strAccountPswd" mailbox="strMailbox" msg-uid="oMessageId[nId]" flag="&quot;delete&quot;" timeout="10" returns="nReturnValue"/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="4" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Deleting message id: " + Session.oMessageId[Session.nId]);]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.Branch.1" ><?xtml-editor x=703 y=152 ?>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="nId &lt; MsgCount " link="3" stubbed="0" >nId &lt; nMsgCount</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[++Session.nId;
+]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=972 y=163 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="0"/>
+        </action>
+      </actions>
+    </function>
+    <function name="ReadAllBySubject" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="strAccountName" type="string" pass="byref"/>
+        <parameter name="strAccountPswd" type="string" pass="byref"/>
+        <parameter name="strMailbox" type="string" pass="byref"/>
+        <parameter name="strSubject" type="string" pass="byref"/>
+        <parameter name="oMS" type="object" pass="byref"/>
+        <parameter name="strLanguage" type="string" pass="byref"/>
+        <parameter name="nMaxRecordingTime" type="i4" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nIdx" type="i4" >0</var>
+        <var name="nTotalMessages" type="i4" >0</var>
+        <var name="oMessageID" type="object" ></var>
+        <var name="nReturnValue" type="i4" >0</var>
+        <var name="nTimeout" type="i4" >0</var>
+        <var name="strQuery" type="string" ></var>
+        <var name="strRecording" type="string" ></var>
+        <var name="bMoreMessages" type="boolean" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=410 y=364 ?>
+          <!--Failure-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nReturnValue"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("Error reading message");]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=701 y=92 ?>
+          <!--Play Message-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="oMS.strConnectionId" endpoint="oMS.strEndPoint" callid="oMS.strCallId" repeat="1" timeout="nMaxRecordingTime" ms-type="oMS.strType" returns="nReturnValue" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >.5</audio>
+            <audio type="url" >strRecording</audio>
+          </play>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nReturnValue = -50;]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Pactolus.ReadMail.1" ><?xtml-editor x=402 y=109 ?>
+          <imap-read xmlns="urn:www.pactolus.com:xtml:imap" username="strAccountName" password="strAccountPswd" mailbox="strMailbox" msg-uid="oMessageID[nIdx]" to="" from="" cc="" subject="" body="" attachment1="strRecording" attachment2="" attachment3="" timeout="nTimeout" returns="nReturnValue" timestamp=""/>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+            <result name="Success" link="2" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nReturnValue = -50;]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.MailboxSearch.1" ><?xtml-editor x=89 y=91 ?>
+          <search-mailbox xmlns="urn:www.pactolus.com:xtml:imap" username="strAccountName" password="strAccountPswd" mailbox="strMailbox" query-string="strQuery" search-result="oMessageID" timeout="nTimeout" returns="nReturnValue"/>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="nReturnValue == 0" link="3" stubbed="0" >nReturnValue == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nReturnValue = -50;
+
+Session.strQuery = "SUBJECT \"" + Session.strSubject + "\"" ;]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( 0 == Session.oMessageID.length ) {
+	Session.nReturnValue = -1;
+}
+else {
+	Session.nTotalMessages = Session.oMessageID.length;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.Branch.1" ><?xtml-editor x=959 y=109 ?>
+          <!--more messages?-->
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="bMoreMessages" link="3" stubbed="0" >bMoreMessages == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if ( ++Session.nIdx < Session.nTotalMessages ) {
+	Session.bMoreMessages = true;
+}
+else {
+	Session.bMoreMessages = false;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1116 y=280 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="0"/>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>]]></script>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value="C:/pactolus_app_server/apps"/>
+    <property key="library-modules" value=""/>
+    <property key="library-path" value=""/>
+  </properties>
+</xtml>

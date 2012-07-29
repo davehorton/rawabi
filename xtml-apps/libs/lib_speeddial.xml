@@ -1,0 +1,1400 @@
+<?xml version="1.0"?>
+<xtml version="1.0" >
+  <global-handlers/>
+  <functions >
+    <function name="AddSpeedDial" start="20" event="AddSpeedDial" returns="i4" >
+      <parameters >
+        <parameter name="p_oMS" type="object"/>
+        <parameter name="p_nTIMEOUT" type="i4"/>
+        <parameter name="p_sSUCCESS" type="i2"/>
+        <parameter name="p_nAUTHORIZE_DESTINATION" type="i4"/>
+        <parameter name="p_sFAILURE" type="i2"/>
+        <parameter name="p_nSessionTerminationReason" type="i4" pass="byref"/>
+        <parameter name="p_nMaxLoginAttempts" type="i4"/>
+        <parameter name="p_strPlatformSessionId" type="string"/>
+        <parameter name="p_strProcDBName" type="string"/>
+        <parameter name="p_lSubscriberId" type="i8"/>
+        <parameter name="p_lPinId" type="i8"/>
+        <parameter name="p_nServiceElementId" type="i4"/>
+        <parameter name="p_strDestinationNbr" type="string" pass="byref"/>
+        <parameter name="p_strStripLeadingOne" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="f_bUpdateFlag" type="boolean" >0</var>
+        <var name="f_bZero" type="boolean" >0</var>
+        <var name="f_nReturnCode" type="i4" >-50</var>
+        <var name="f_strNewSDDigits" type="string" ></var>
+        <var name="f_bNullFlag" type="boolean" >0</var>
+        <var name="f_strNewSDPhone" type="string" ></var>
+        <var name="f_strDigitCollected" type="string" ></var>
+        <var name="f_bInsufficientDigit" type="boolean" >0</var>
+        <var name="f_strTerminateDigit" type="string" >#</var>
+        <var name="f_nAttempts" type="i4" >0</var>
+        <var name="f_nNumberOfSpeedDial" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="20" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=34 y=112 ?>
+          <!--"getNumSpeedDials"-->
+          <java class="&quot;com.pactolus.psAPISceSpeedDial&quot;" method="&quot;getNumSpeedDials&quot;" timeout="p_nTIMEOUT" return="" method-return-var="f_nReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >p_strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >p_strProcDBName</parameter>
+            <parameter type="in" var-type="i8" >p_lSubscriberId</parameter>
+            <parameter type="in" var-type="i8" >p_lPinId</parameter>
+            <parameter type="inout" var-type="i4" >f_nNumberOfSpeedDial</parameter>
+          </java>
+          <results >
+            <result name="Default" link="16" stubbed="0"/>
+            <result name="Success" link="16" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="# Speed Dials &gt;= 20" link="21" stubbed="0" >f_nNumberOfSpeedDial &gt;= 20
+AND f_nReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("*********JAVA START GetNumSpeedDials *********");]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("*********JAVA RETURN*********");
+
+Server.logInfo("GetNumSpeedDials returned " + Session.f_nReturnCode);
+
+if (Session.f_nReturnCode < 0)
+{
+	Server.logError("ERROR: FAIL TO GET NUMBER OF SPEED DIALS");	
+} else {
+
+    Server.logInfo("Number of speed dials returned = " + Session.f_nNumberOfSpeedDial );
+
+    if ( Session.f_nNumberOfSpeedDial > 20 ) {
+       Server.logInfo("Max number of speed dials exceeded.");
+    }
+}]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=722 y=476 ?>
+          <!--Set bool update flag and Enter phone number-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="35" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(x.T|x.#)&quot;" language="p_oMS.strLanguage" digits="f_strNewSDPhone" retry-count="p_nMaxLoginAttempts" clear-digits="0" terminating-digit="f_strTerminateDigit" quick-collect="0" digit-timer="" >
+            <audio type="index" >1257</audio>
+            <timeout-prompt type="index" >552</timeout-prompt>
+          </play>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+            <result name="Success" ><?xtml-editor visible=no?></result>
+            <result name="Error"/>
+            <result name="Timeout" link="17" stubbed="1"/>
+            <result name="NULL" link="1" stubbed="1" >f_bNullFlag == true
+
+AND 'Result'  == 'Success'</result>
+            <result name="Insufficient Digit" link="18" stubbed="0" >f_bInsufficientDigit == true
+
+AND 'Result'  == 'Success'</result>
+            <result name="Update SD" link="11" stubbed="0" >'Result'  == 'Success'
+
+AND f_bUpdateFlag == true</result>
+            <result name="Add SD" link="9" stubbed="0" >'Result'  == 'Success'
+
+AND f_bUpdateFlag == false</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Session.f_bUpdateFlag: " + Session.f_bUpdateFlag);]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if (Session.f_strNewSDPhone.length <= 0)
+
+{
+
+	Session.f_bNullFlag = true;
+
+}
+
+else
+
+{
+
+	Session.f_bNullFlag = false;
+
+    if (Session.p_strStripLeadingOne == "T") {
+	    Server.logInfo("BEFORE strip leading one off new phone number: <" + Session.f_strNewSDPhone + " >");
+
+	    Session.f_strNewSDPhone = js_strip_one(Session.f_strNewSDPhone);
+    }
+}
+
+if (Session.f_strNewSDPhone.length < 10)
+
+{
+
+	Session.f_bInsufficientDigit = true;
+
+}
+
+else
+
+{
+
+	Session.f_bInsufficientDigit = false;
+
+}
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1538 y=584 ?>
+          <!--Your speed dial has been recorded.-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="p_nTIMEOUT" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(1|*)&quot;" language="p_oMS.strLanguage" digits="f_strDigitCollected" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >1258</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >1269</audio>
+            <audio type="index" >312</audio>
+            <audio type="index" >1254</audio>
+            <audio type="index" >560</audio>
+          </play>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success" link="7" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="3" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=569 y=307 ?>
+          <!--you already have a speed dial-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="p_nTIMEOUT" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(x|x.T|x.#)&quot;" language="p_oMS.strLanguage" digits="f_strDigitCollected" retry-count="p_nMaxLoginAttempts" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >1280</audio>
+            <audio type="index" >1267</audio>
+            <audio type="digits" >f_strNewSDPhone</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >1268</audio>
+            <audio type="index" >312</audio>
+            <audio type="index" >1270</audio>
+            <timeout-prompt type="index" >552</timeout-prompt>
+          </play>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+            <result name="Success" ><?xtml-editor visible=no?></result>
+            <result name="Error"/>
+            <result name="Timeout" link="17" stubbed="1"/>
+            <result name="press 1" link="1" stubbed="0" >f_strDigitCollected match "1"
+
+AND 'Result'  == 'Success'</result>
+            <result name="press 2" link="4" stubbed="1" >f_strDigitCollected match "2"
+
+AND 'Result'  == 'Success'</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if(Result.id == 5) {
+
+	Session.f_bUpdateFlag=true;
+
+}
+
+
+
+
+
+Server.logInfo("Result.id: " + Result.id);
+
+Server.logInfo("f_bUpdateFlag: " + Session.f_bUpdateFlag);]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=25 y=495 ?>
+          <!--return SUCCESS-->
+          <return value="p_sSUCCESS"/>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=25 y=586 ?>
+          <!--p_sFAILURE-->
+          <return value="p_sFAILURE"/>
+        </action>
+        <action id="7" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1769 y=611 ?>
+          <!--1 or *-->
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="press 1" link="8" stubbed="0" >f_strDigitCollected match "1"</result>
+            <result name="press 2" link="20" stubbed="1" >f_strDigitCollected match "2"</result>
+          </results>
+        </action>
+        <action id="8" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=2017 y=644 ?>
+          <!--return authorizeDestination-->
+          <return value="p_nAUTHORIZE_DESTINATION"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_bUpdateFlag=false;
+
+Session.p_strDestinationNbr = Session.f_strNewSDPhone;]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1051 y=697 ?>
+          <!--psAPISceAddSpeedDia-->
+          <function name="&quot;psAPISceAddSpeedDial&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_nTIMEOUT</parameter>
+            <parameter >p_sFAILURE</parameter>
+            <parameter >f_strNewSDPhone</parameter>
+            <parameter >f_strNewSDDigits</parameter>
+            <parameter >p_strPlatformSessionId</parameter>
+            <parameter >p_strProcDBName</parameter>
+            <parameter >p_lSubscriberId</parameter>
+            <parameter >p_lPinId</parameter>
+            <parameter >p_nServiceElementId</parameter>
+          </function>
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+          </results>
+        </action>
+        <action id="10" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1283 y=665 ?>
+          <!--success?-->
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+            <result name="f_nReturnCode==0" link="2" stubbed="0" >f_nReturnCode == 0</result>
+          </results>
+        </action>
+        <action id="11" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1056 y=607 ?>
+          <!--psAPISceUpdateSpeedDial-->
+          <function name="&quot;psAPISceUpdateSpeedDial&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_nTIMEOUT</parameter>
+            <parameter >p_sFAILURE</parameter>
+            <parameter >f_strNewSDPhone</parameter>
+            <parameter >f_strNewSDDigits</parameter>
+            <parameter >p_strPlatformSessionId</parameter>
+            <parameter >p_strProcDBName</parameter>
+            <parameter >p_lSubscriberId</parameter>
+            <parameter >p_lPinId</parameter>
+            <parameter >p_nServiceElementId</parameter>
+          </function>
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+          </results>
+        </action>
+        <action id="12" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=558 y=32 ?>
+          <!--sp must be 10 and 99-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="p_nTIMEOUT" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="p_oMS.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >301</audio>
+            <audio type="index" >1286</audio>
+            <audio type="index" >364</audio>
+            <audio type="number" >10</audio>
+            <audio type="index" >52</audio>
+            <audio type="number" >99</audio>
+          </play>
+          <results >
+            <result name="Default" link="19" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Session.f_nAttempts++;]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=628 y=169 ?>
+          <!--sp must be 2 digits-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="p_nTIMEOUT" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="p_oMS.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >301</audio>
+            <audio type="index" >1286</audio>
+            <audio type="number" >2</audio>
+            <audio type="index" >1287</audio>
+          </play>
+          <results >
+            <result name="Default" link="19" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Session.f_nAttempts++;]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Standard.EndSession.1" ><?xtml-editor x=236 y=717 ?></action>
+        <action id="15" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=416 y=494 ?>
+          <!--call GetSpeedDial to see if already exists-->
+          <function name="&quot;GetSpeedDial&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_nTIMEOUT</parameter>
+            <parameter >p_sFAILURE</parameter>
+            <parameter >p_sSUCCESS</parameter>
+            <parameter >f_strNewSDPhone</parameter>
+            <parameter >f_strNewSDDigits</parameter>
+            <parameter >p_strPlatformSessionId</parameter>
+            <parameter >p_strProcDBName</parameter>
+            <parameter >p_lSubscriberId</parameter>
+            <parameter >p_lPinId</parameter>
+            <parameter >p_nServiceElementId</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+            <result name="already used" link="3" stubbed="0" >f_nReturnCode == 0</result>
+            <result name="not used" link="1" stubbed="0" >f_nReturnCode == 1</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("GetSpeedDial returned " + Session.f_nReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=258 y=73 ?>
+          <!--Enter speed dial digits or press * to return to Main Menu-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="p_nTIMEOUT" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(xx|x.T|x.#|x.*)&quot;" language="p_oMS.strLanguage" digits="f_strNewSDDigits" retry-count="p_nMaxLoginAttempts" clear-digits="1" terminating-digit="f_strTerminateDigit" quick-collect="0" digit-timer="" >
+            <audio type="index" >1255</audio>
+            <audio type="number" >2</audio>
+            <audio type="index" >1287</audio>
+            <audio type="index" >364</audio>
+            <audio type="number" >10</audio>
+            <audio type="index" >52</audio>
+            <audio type="number" >99</audio>
+            <audio type="index" >952</audio>
+            <audio type="index" >362</audio>
+            <audio type="index" >334</audio>
+            <timeout-prompt type="index" >552</timeout-prompt>
+          </play>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout" link="17" stubbed="1"/>
+            <result name="Pressed *" link="4" stubbed="1" >f_strTerminateDigit match "*"
+AND 'Result'  == 'Success'</result>
+            <result name="start with zero" link="12" stubbed="0" >'Result'  == 'Success'
+
+AND f_bZero == true</result>
+            <result name="less than 2 digits" link="13" stubbed="0" >'Result'  == 'Success'
+
+AND f_bNullFlag == true</result>
+            <result name="valid digit" link="15" stubbed="0" >'Result'  == 'Success'
+
+AND (f_bZero == false
+
+OR f_bNullFlag == false)</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_bUpdateFlag=false;
+]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[Session.f_bNullFlag = false;
+
+Session.f_bZero = false;
+
+if (Session.f_strNewSDDigits.length < 2)
+{
+	Session.f_bNullFlag = true;
+}
+else if ( 0 == Clib.strcspn(Session.f_strNewSDDigits, "0") )
+{
+   Session.f_bZero = true;
+}
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="17" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=35 y=716 ?>
+          <!--"PlayPromptAndHangup"-->
+          <function name="&quot;PlayPromptAndHangup&quot;" return="" external-function="1" library=""/>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_nSessionTerminationReason = 6;]]></script>
+          </scripts>
+        </action>
+        <action id="18" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1055 y=429 ?>
+          <!--invalid phone-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="p_nTIMEOUT" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="p_oMS.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >514</audio>
+          </play>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="19" plug-in="Pactolus.Branch.1" ><?xtml-editor x=863 y=101 ?>
+          <!--Allow Retry?-->
+          <results >
+            <result name="Default" link="16" stubbed="1"/>
+            <result name="f_nAttempts &gt;= p_nMaxLoginAttempts" link="4" stubbed="1" >f_nAttempts &gt;= p_nMaxLoginAttempts</result>
+          </results>
+        </action>
+        <action id="21" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=108 y=320 ?>
+          <!--"You cannot add any more speed dials at this time"-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="p_nTIMEOUT" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="p_oMS.strLanguage" digits="" retry-count="p_nMaxLoginAttempts" clear-digits="0" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >1279</audio>
+          </play>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="GetSpeedDial" start="1" event="GetSpeedDial" returns="i4" >
+      <parameters >
+        <parameter name="p_nTIMEOUT" type="i4"/>
+        <parameter name="p_sFAILURE" type="i2"/>
+        <parameter name="p_sSUCCESS" type="i2"/>
+        <parameter name="p_strNewSDPhone" type="string" pass="byref"/>
+        <parameter name="p_strNewSDDigits" type="string"/>
+        <parameter name="p_strPlatformSessionId" type="string"/>
+        <parameter name="p_strProcDBName" type="string"/>
+        <parameter name="p_lSubscriberId" type="i8"/>
+        <parameter name="p_lPinId" type="i8"/>
+        <parameter name="p_nServiceElementId" type="i4"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=20 y=32 ?>
+          <!--GetSpeedDial-->
+          <java class="&quot;com.pactolus.psAPISceSpeedDial&quot;" method="&quot;getSpeedDial&quot;" timeout="p_nTIMEOUT" return="" method-return-var="f_nReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >p_strPlatformSessionId</parameter>
+            <parameter type="in" var-type="unknown" >p_strProcDBName</parameter>
+            <parameter type="in" var-type="unknown" >p_lSubscriberId</parameter>
+            <parameter type="in" var-type="unknown" >p_lPinId</parameter>
+            <parameter type="in" var-type="unknown" >p_strNewSDDigits</parameter>
+            <parameter type="inout" var-type="unknown" >p_strNewSDPhone</parameter>
+            <parameter type="in" var-type="unknown" >p_nServiceElementId</parameter>
+          </java>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success" ><?xtml-editor visible=no?></result>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="speed dial exists" link="2" stubbed="0" >'Result'  == 'Success'
+
+AND f_nReturnCode == p_sSUCCESS</result>
+            <result name="not found" link="3" stubbed="0" >'Result'  == 'Success'
+
+AND f_nReturnCode == 1</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("*********JAVA START get speed dial *********");
+
+Server.logInfo("looking up digits: " + Session.p_strNewSDDigits);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("*********JAVA RETURN*********");
+
+Server.logInfo("GetSpeedDial returned " + Session.f_nReturnCode);
+
+Server.logInfo("phone number =  " + Session.p_strNewSDPhone);
+
+if (Session.f_nReturnCode < 0)
+
+{
+
+	Server.logError("ERROR: FAIL TO GET SPEED DIAL NUMBER");
+
+	Server.logError("GetSpeedDial returned: " + Session.f_nReturnCode);
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=311 y=121 ?>
+          <!--return SUCCESS (0)-->
+          <return value="p_sSUCCESS"/>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=318 y=211 ?>
+          <!--return NOT_FOUND(1)-->
+          <return value="1"/>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=319 y=20 ?>
+          <!--return FAILURE(-1)-->
+          <return value="p_sFAILURE"/>
+        </action>
+      </actions>
+    </function>
+    <function name="LoadSpeedDialList" start="1" event="LoadSpeedDialList" returns="i4" >
+      <parameters >
+        <parameter name="p_oSpeedDial" type="object" pass="byref"/>
+        <parameter name="p_nTIMEOUT" type="i4"/>
+        <parameter name="p_sFAILURE" type="i2"/>
+        <parameter name="p_sSUCCESS" type="i2"/>
+        <parameter name="p_strPlatformSessionId" type="string"/>
+        <parameter name="p_strProcDBName" type="string"/>
+        <parameter name="p_lSubscriberId" type="i8"/>
+        <parameter name="p_lPinId" type="i8"/>
+        <parameter name="p_nNumberOfSpeedDial" type="i4" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=18 y=57 ?>
+          <!--LoadSpeedDialList-->
+          <java class="&quot;com.pactolus.psAPISceSpeedDial&quot;" method="&quot;loadSpeedDials&quot;" timeout="p_nTIMEOUT" return="" method-return-var="f_nReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >p_strPlatformSessionId</parameter>
+            <parameter type="in" var-type="unknown" >p_strProcDBName</parameter>
+            <parameter type="in" var-type="unknown" >p_lSubscriberId</parameter>
+            <parameter type="in" var-type="unknown" >p_lPinId</parameter>
+            <parameter type="inout" var-type="unknown" >p_nNumberOfSpeedDial</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[0].tag</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[0].num</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[1].tag</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[1].num</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[2].tag</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[2].num</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[3].tag</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[3].num</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[4].tag</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[4].num</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[5].tag</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[5].num</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[6].tag</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[6].num</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[7].tag</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[7].num</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[8].tag</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[8].num</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[9].tag</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[9].num</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[10].tag</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[10].num</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[11].tag</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[11].num</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[12].tag</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[12].num</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[13].tag</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[13].num</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[14].tag</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[14].num</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[15].tag</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[15].num</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[16].tag</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[16].num</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[17].tag</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[17].num</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[18].tag</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[18].num</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[19].tag</parameter>
+            <parameter type="inout" var-type="unknown" >p_oSpeedDial[19].num</parameter>
+          </java>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("*********JAVA START LoadSpeedDialList *********");
+
+Session.p_oSpeedDial[0].tag = "";
+
+Session.p_oSpeedDial[0].num = "";
+
+Session.p_oSpeedDial[1].tag = "";
+
+Session.p_oSpeedDial[1].num = "";
+
+Session.p_oSpeedDial[2].tag = "";
+
+Session.p_oSpeedDial[2].num = "";
+
+Session.p_oSpeedDial[3].tag = "";
+
+Session.p_oSpeedDial[3].num = "";
+
+Session.p_oSpeedDial[4].tag = "";
+
+Session.p_oSpeedDial[4].num = "";
+
+Session.p_oSpeedDial[5].tag = "";
+
+Session.p_oSpeedDial[5].num = "";
+
+Session.p_oSpeedDial[6].tag = "";
+
+Session.p_oSpeedDial[6].num = "";
+
+Session.p_oSpeedDial[7].tag = "";
+
+Session.p_oSpeedDial[7].num = "";
+
+Session.p_oSpeedDial[8].tag = "";
+
+Session.p_oSpeedDial[8].num = "";
+
+Session.p_oSpeedDial[9].tag = "";
+
+Session.p_oSpeedDial[9].num = "";
+
+Session.p_oSpeedDial[10].tag = "";
+
+Session.p_oSpeedDial[10].num = "";
+
+Session.p_oSpeedDial[11].tag = "";
+
+Session.p_oSpeedDial[11].num = "";
+
+Session.p_oSpeedDial[12].tag = "";
+
+Session.p_oSpeedDial[12].num = "";
+
+Session.p_oSpeedDial[13].tag = "";
+
+Session.p_oSpeedDial[13].num = "";
+
+Session.p_oSpeedDial[14].tag = "";
+
+Session.p_oSpeedDial[14].num = "";
+
+Session.p_oSpeedDial[15].tag = "";
+
+Session.p_oSpeedDial[15].num = "";
+
+Session.p_oSpeedDial[16].tag = "";
+
+Session.p_oSpeedDial[16].num = "";
+
+Session.p_oSpeedDial[17].tag = "";
+
+Session.p_oSpeedDial[17].num = "";
+
+Session.p_oSpeedDial[18].tag = "";
+
+Session.p_oSpeedDial[18].num = "";
+
+Session.p_oSpeedDial[19].tag = "";
+
+Session.p_oSpeedDial[19].num = "";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("*********JAVA RETURN*********");
+
+Server.logInfo("LoadSpeedDialList returned " + Session.f_nReturnCode);
+
+if (Session.f_nReturnCode < 0)
+
+{
+
+	Server.logError("ERROR: FAIL TO LOAD SPEED DIAL LIST");
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=282 y=20 ?>
+          <!--return FAILURE(-1)-->
+          <return value="p_sFAILURE"/>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=298 y=117 ?>
+          <!--return f_nReturnCode-->
+          <return value="f_nReturnCode"/>
+        </action>
+      </actions>
+    </function>
+    <function name="psAPISceAddSpeedDial" start="3" event="psAPISceAddSpeedDial" returns="i8" >
+      <parameters >
+        <parameter name="p_nTIMEOUT" type="i4"/>
+        <parameter name="p_sFAILURE" type="i2"/>
+        <parameter name="p_strNewSDPhone" type="string"/>
+        <parameter name="p_strNewSDDigits" type="string"/>
+        <parameter name="p_strPlatformSessionId" type="string"/>
+        <parameter name="p_strProcDBName" type="string"/>
+        <parameter name="p_lSubscriberId" type="i8"/>
+        <parameter name="p_lPinId" type="i8"/>
+        <parameter name="p_nServiceElementId" type="i4"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="3" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=51 y=83 ?>
+          <!--AddSpeedDial-->
+          <java class="&quot;com.pactolus.psAPISceSpeedDial&quot;" method="&quot;addSpeedDial&quot;" timeout="p_nTIMEOUT" return="" method-return-var="f_nReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >p_strPlatformSessionId</parameter>
+            <parameter type="in" var-type="unknown" >p_strProcDBName</parameter>
+            <parameter type="in" var-type="unknown" >p_lSubscriberId</parameter>
+            <parameter type="in" var-type="unknown" >p_lPinId</parameter>
+            <parameter type="in" var-type="unknown" >p_strNewSDDigits</parameter>
+            <parameter type="in" var-type="unknown" >p_strNewSDPhone</parameter>
+            <parameter type="in" var-type="unknown" >p_nServiceElementId</parameter>
+          </java>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="Success" link="2" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("*********JAVA START add speed dial *********");
+
+Server.logInfo("adding digits " + Session.p_strNewSDDigits);
+
+Server.logInfo("adding phone " + Session.p_strNewSDPhone);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("*********JAVA RETURN*********");
+
+Server.logInfo("AddSpeedDial returned " + Session.f_nReturnCode);
+
+if (Session.f_nReturnCode != 0)
+
+{
+
+	Server.logError("ERROR: FAIL TO ADD SPEED DIAL");
+
+	Server.logError("ERROR: AddSpeedDial returned: " + Session.f_nReturnCode);
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=305 y=76 ?>
+          <!--p_sFAILURE-->
+          <return value="p_sFAILURE"/>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=306 y=196 ?>
+          <!--f_nReturnCode-->
+          <return value="f_nReturnCode"/>
+        </action>
+      </actions>
+    </function>
+    <function name="psAPISceUpdateSpeedDial" start="3" event="psAPISceUpdateSpeedDial" returns="i4" >
+      <parameters >
+        <parameter name="p_nTIMEOUT" type="i4"/>
+        <parameter name="p_sFAILURE" type="i2"/>
+        <parameter name="p_strNewSDPhone" type="string"/>
+        <parameter name="p_strNewSDDigits" type="string"/>
+        <parameter name="p_strPlatformSessionId" type="string"/>
+        <parameter name="p_strProcDBName" type="string"/>
+        <parameter name="p_lSubscriberId" type="i8"/>
+        <parameter name="p_lPinId" type="i8"/>
+        <parameter name="p_nServiceElementId" type="i4"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="3" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=45 y=138 ?>
+          <!--UpdateSpeedDial-->
+          <java class="&quot;com.pactolus.psAPISceSpeedDial&quot;" method="&quot;updateSpeedDial&quot;" timeout="p_nTIMEOUT" return="" method-return-var="f_nReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >p_strPlatformSessionId</parameter>
+            <parameter type="in" var-type="unknown" >p_strProcDBName</parameter>
+            <parameter type="in" var-type="unknown" >p_lSubscriberId</parameter>
+            <parameter type="in" var-type="unknown" >p_lPinId</parameter>
+            <parameter type="in" var-type="unknown" >p_strNewSDDigits</parameter>
+            <parameter type="in" var-type="unknown" >p_strNewSDPhone</parameter>
+            <parameter type="in" var-type="unknown" >p_nServiceElementId</parameter>
+          </java>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="Success" link="2" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("*********JAVA START update speed dial *********");
+
+Server.logInfo("adding digits " + Session.p_strNewSDDigits);
+
+Server.logInfo("adding phone " + Session.p_strNewSDPhone);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("*********JAVA RETURN*********");
+
+Server.logInfo("UpdateSpeedDial returned " + Session.f_nReturnCode);
+
+if ( Session.f_nReturnCode != 0)
+
+{
+
+	Server.logError("ERROR: FAIL TO UPDATE SPEED DIAL");
+
+	Server.logError("ERROR: UpdateSpeedDial returned: " + Session.f_nReturnCode);
+
+}
+
+
+
+if(Result.id != 2) {
+
+
+
+	Server.logError("ERROR: FAIL TO UPDATE SPEED DIAL");
+
+	Server.logError("ERROR: UpdateSpeedDial returned: " + Session.f_nReturnCode);
+
+
+
+}
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=301 y=137 ?>
+          <!--s_sFAILURE-->
+          <return value="p_sFAILURE"/>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=309 y=229 ?>
+          <!--f_nReturnCode-->
+          <return value="f_nReturnCode"/>
+        </action>
+      </actions>
+    </function>
+    <function name="ReviewSpeedDials" start="39" event="ReviewSpeedDials" returns="i4" >
+      <parameters >
+        <parameter name="p_oMS" type="object"/>
+        <parameter name="p_nTIMEOUT" type="i4"/>
+        <parameter name="p_nAUTHORIZE_DESTINATION" type="i4"/>
+        <parameter name="p_sSUCCESS" type="i2"/>
+        <parameter name="p_sFAILURE" type="i2"/>
+        <parameter name="p_nMaxLoginAttempts" type="i4"/>
+        <parameter name="p_strDestinationNbr" type="string" pass="byref"/>
+        <parameter name="p_nSessionTerminationReason" type="string" pass="byref"/>
+        <parameter name="p_strPlatformSessionId" type="string"/>
+        <parameter name="p_strProcDBName" type="string"/>
+        <parameter name="p_lSubscriberId" type="i8"/>
+        <parameter name="p_lPinId" type="i8"/>
+        <parameter name="p_nServiceElementId" type="i4"/>
+        <parameter name="p_strStripLeadingOne" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >-50</var>
+        <var name="f_strSDPhone" type="string" ></var>
+        <var name="f_strSDDigit" type="string" ></var>
+        <var name="f_strNewSDDigits" type="string" ></var>
+        <var name="f_strNewSDPhone" type="string" ></var>
+        <var name="f_strDigitCollected" type="string" ></var>
+        <var name="f_nNumberOfSpeedDial" type="i4" >0</var>
+        <var name="f_bNullFlag" type="boolean" >0</var>
+        <var name="f_nCounter" type="i4" >0</var>
+        <var name="f_oSpeedDial" type="object" ></var>
+        <var name="f_bZero" type="boolean" >0</var>
+        <var name="f_nUpdatePrompt" type="i4" >0</var>
+        <var name="f_bInsufficientDigit" type="boolean" >0</var>
+      </local-vars>
+      <actions >
+        <action id="39" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=17 y=43 ?>
+          <!--Enter speed dial digits or press # to review the entire list or press * to return to main menu-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="p_nTIMEOUT" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(xx|x.T|*|#)&quot;" language="p_oMS.strLanguage" digits="f_strNewSDDigits" retry-count="p_nMaxLoginAttempts" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >1266</audio>
+            <audio type="index" >1261</audio>
+            <audio type="index" >1270</audio>
+            <timeout-prompt type="index" >552</timeout-prompt>
+          </play>
+          <results >
+            <result name="Default" link="17" stubbed="1"/>
+            <result name="Success" link="36" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout" link="35" stubbed="1"/>
+            <result name="#" link="29" stubbed="1" >f_strNewSDDigits match "#"</result>
+            <result name="*" link="6" stubbed="1" >f_strNewSDDigits match "*"</result>
+          </results>
+        </action>
+        <action id="1" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=748 y=167 ?>
+          <!--no speed dial for that number-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="p_nTIMEOUT" ms-type="p_oMS.strType" returns="f_nReturnCode" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="p_oMS.strLanguage" digits="" retry-count="p_nMaxLoginAttempts" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >1285</audio>
+            <audio type="digits" >f_strNewSDDigits</audio>
+            <timeout-prompt type="index" >552</timeout-prompt>
+          </play>
+          <results >
+            <result name="Default" link="39" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("no speed dial for digits entered");]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1435 y=372 ?>
+          <!--Your speed dial has been recorded.-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="p_nTIMEOUT" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(x)&quot;" language="p_oMS.strLanguage" digits="f_strDigitCollected" retry-count="p_nMaxLoginAttempts" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >1258</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >1269</audio>
+            <audio type="index" >1261</audio>
+            <audio type="index" >1270</audio>
+            <timeout-prompt type="index" >552</timeout-prompt>
+          </play>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="Press 1" link="5" stubbed="0" >f_strDigitCollected match "1"</result>
+          </results>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1204 y=156 ?>
+          <!--return AUTHORIZE_DESTINATION-->
+          <return value="p_nAUTHORIZE_DESTINATION"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_strDestinationNbr = Session.f_strNewSDPhone;]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1715 y=459 ?>
+          <!--return AUTHORIZE_DESTINATION-->
+          <return value="p_nAUTHORIZE_DESTINATION"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_strDestinationNbr = Session.f_strNewSDPhone;]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=25 y=456 ?>
+          <!--p_sSUCCESS-->
+          <return value="p_sSUCCESS"/>
+        </action>
+        <action id="10" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=305 y=571 ?>
+          <!--no speed dial recorded-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="p_nTIMEOUT" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="p_oMS.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >301</audio>
+            <audio type="index" >1289</audio>
+          </play>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("INFO: Do not have any speed dial recorded. ");]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Pactolus.Branch.1" ><?xtml-editor x=427 y=962 ?>
+          <!--all the speedials?-->
+          <results >
+            <result name="Default" link="27" stubbed="0"/>
+            <result name="counter &lt; number of SD" link="37" stubbed="1" >f_nCounter &lt; f_nNumberOfSpeedDial</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_nCounter++;]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=760 y=721 ?>
+          <!--Enter phone number-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="35" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(xxxxxxxxxxxxxx|x.T|x.#)&quot;" language="p_oMS.strLanguage" digits="f_strNewSDPhone" retry-count="p_nMaxLoginAttempts" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >1257</audio>
+            <timeout-prompt type="index" >552</timeout-prompt>
+          </play>
+          <results >
+            <result name="Default" link="26" stubbed="0"/>
+            <result name="Success" link="23" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout" link="35" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("collected phone number " + Session.f_strNewSDPhone);
+
+Session.f_strNewSDDigits = Session.f_strSDDigit;
+
+Server.logInfo("for speed dial number: " + Session.f_strNewSDDigits);
+
+
+
+
+
+if(Result.id == 1 || Result.id == 3) {
+
+	Session.f_nReturnCode = -50;
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=604 y=856 ?>
+          <!--return authorizeDestination-->
+          <return value="p_nAUTHORIZE_DESTINATION"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_strDestinationNbr = Session.f_strSDPhone;]]></script>
+          </scripts>
+        </action>
+        <action id="17" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=22 y=372 ?>
+          <!--s_sFAILURE-->
+          <return value="p_sFAILURE"/>
+        </action>
+        <action id="20" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=1200 y=55 ?>
+          <!--.5 sec-->
+          <sleep duration=".5"/>
+          <results >
+            <result name="Default" link="30" stubbed="0"/>
+          </results>
+        </action>
+        <action id="21" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=1660 y=96 ?>
+          <!--.5 sec-->
+          <sleep duration=".5"/>
+          <results >
+            <result name="Default" link="40" stubbed="0"/>
+            <result name="f_bNullFlag" link="30" stubbed="0" >f_bNullFlag == true</result>
+            <result name="f_bInsufficientDigit" link="43" stubbed="0" >f_bInsufficientDigit == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if (Session.f_strNewSDPhone.length <= 0)
+
+{
+
+	Session.f_bNullFlag = true;
+
+}
+
+else
+
+{
+
+	Session.f_bNullFlag = false;
+
+}
+
+if (Session.f_strNewSDPhone.length < 10)
+
+{
+
+	Session.f_bInsufficientDigit = true;
+
+}
+
+else
+
+{
+
+	Session.f_bInsufficientDigit = false;
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="22" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=522 y=744 ?>
+          <!--.5 sec-->
+          <sleep duration=".5"/>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+          </results>
+        </action>
+        <action id="23" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=991 y=820 ?>
+          <!--.5 sec-->
+          <sleep duration=".5"/>
+          <results >
+            <result name="Default" link="41" stubbed="0"/>
+            <result name="f_bNullFlag" link="14" stubbed="0" >f_bNullFlag == true</result>
+            <result name="f_bInsufficientDigit" link="44" stubbed="0" >f_bInsufficientDigit == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if (Session.f_strNewSDPhone.length <= 0)
+
+{
+
+	Session.f_bNullFlag = true;
+
+}
+
+else
+
+{
+
+	Session.f_bNullFlag = false;
+
+}
+
+if (Session.f_strNewSDPhone.length < 10)
+
+{
+
+	Session.f_bInsufficientDigit = true;
+
+}
+
+else
+
+{
+
+	Session.f_bInsufficientDigit = false;
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="24" plug-in="Standard.EndSession.1" ><?xtml-editor x=233 y=299 ?></action>
+        <action id="26" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1432 y=698 ?>
+          <!--Unable to complete transaction OR Speed dial recorded-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="p_nTIMEOUT" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="p_oMS.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >f_nUpdatePrompt</audio>
+          </play>
+          <results >
+            <result name="Default" link="11" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if(Session.f_nReturnCode == 0) {
+
+	Session.f_nUpdatePrompt = 1258;
+
+} else {
+
+	Session.f_nUpdatePrompt = 363;
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="27" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=665 y=1006 ?>
+          <!--no more speed dial-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="p_nTIMEOUT" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="p_oMS.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >1278</audio>
+          </play>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="29" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=25 y=549 ?>
+          <!--LoadSpeedDialList-->
+          <function name="&quot;LoadSpeedDialList&quot;" return="f_nReturnCode" external-function="0" library="" >
+            <parameter >f_oSpeedDial</parameter>
+            <parameter >p_nTIMEOUT</parameter>
+            <parameter >p_sFAILURE</parameter>
+            <parameter >p_sSUCCESS</parameter>
+            <parameter >p_strPlatformSessionId</parameter>
+            <parameter >p_strProcDBName</parameter>
+            <parameter >p_lSubscriberId</parameter>
+            <parameter >p_lPinId</parameter>
+            <parameter >f_nNumberOfSpeedDial</parameter>
+          </function>
+          <results >
+            <result name="Default" link="17" stubbed="1"/>
+            <result name="success and no speeddial" link="10" stubbed="0" >f_nReturnCode == 1
+
+AND f_nNumberOfSpeedDial == 0</result>
+            <result name="success and has speeddials" link="37" stubbed="0" >f_nReturnCode == p_sSUCCESS
+
+AND f_nNumberOfSpeedDial &gt; 0</result>
+          </results>
+        </action>
+        <action id="30" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1426 y=67 ?>
+          <!--Enter phone number-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="35" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(xxxxxxxxxxxxxx|x.T|x.#)&quot;" language="p_oMS.strLanguage" digits="f_strNewSDPhone" retry-count="p_nMaxLoginAttempts" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >1257</audio>
+            <timeout-prompt type="index" >552</timeout-prompt>
+          </play>
+          <results >
+            <result name="Default" link="17" stubbed="1"/>
+            <result name="Success" link="21" stubbed="0"/>
+            <result name="Error" ><?xtml-editor visible=no?></result>
+            <result name="Timeout" link="35" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("collected phone number " + Session.f_strNewSDPhone);]]></script>
+          </scripts>
+        </action>
+        <action id="32" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=433 y=393 ?>
+          <!--sp must be 2 digits-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="p_nTIMEOUT" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="p_oMS.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >301</audio>
+            <audio type="index" >1286</audio>
+            <audio type="number" >2</audio>
+            <audio type="index" >1287</audio>
+          </play>
+          <results >
+            <result name="Default" link="39" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="33" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=539 y=262 ?>
+          <!--sp must be 10 and 99-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="p_nTIMEOUT" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="p_oMS.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >301</audio>
+            <audio type="index" >1286</audio>
+            <audio type="index" >364</audio>
+            <audio type="number" >10</audio>
+            <audio type="index" >52</audio>
+            <audio type="number" >99</audio>
+          </play>
+          <results >
+            <result name="Default" link="39" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="34" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=910 y=33 ?>
+          <!--The phone number for that speed dial is ...-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="50" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(x|*)&quot;" language="p_oMS.strLanguage" digits="f_strDigitCollected" retry-count="p_nMaxLoginAttempts" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >1267</audio>
+            <audio type="digits" >f_strNewSDPhone</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >1268</audio>
+            <audio type="index" >312</audio>
+            <audio type="index" >1269</audio>
+            <audio type="index" >1261</audio>
+            <audio type="index" >1270</audio>
+            <timeout-prompt type="index" >552</timeout-prompt>
+          </play>
+          <results >
+            <result name="Default" link="17" stubbed="1"/>
+            <result name="Success" ><?xtml-editor visible=no?></result>
+            <result name="Error" ><?xtml-editor visible=no?></result>
+            <result name="Timeout" link="35" stubbed="1"/>
+            <result name="press 1" link="20" stubbed="0" >f_strDigitCollected match "1"</result>
+            <result name="press 2" link="3" stubbed="0" >f_strDigitCollected match "2"</result>
+            <result name="press *" link="6" stubbed="1" >f_strDigitCollected match "*"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("ReviewSpeedDials:12 pressed " + Session.f_strDigitCollected);]]></script>
+          </scripts>
+        </action>
+        <action id="35" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=19 y=265 ?>
+          <!--"PlayPromptAndHangup"-->
+          <function name="&quot;PlayPromptAndHangup&quot;" return="" external-function="1" library=""/>
+          <results >
+            <result name="Default" link="24" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_nSessionTerminationReason = 6;
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="36" plug-in="Pactolus.Branch.1" ><?xtml-editor x=286 y=45 ?>
+          <!--speedial start with 0?-->
+          <results >
+            <result name="Default" link="42" stubbed="0"/>
+            <result name="startZero" link="33" stubbed="0" >f_bZero == true</result>
+            <result name="2 digits?" link="32" stubbed="0" >f_bNullFlag == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_bNullFlag = false;
+
+Session.f_bZero = false;
+
+if (Session.f_strNewSDDigits.length < 2)
+
+{
+
+	Session.f_bNullFlag = true;
+
+}
+
+else if ( 0 == Clib.strcspn(Session.f_strNewSDDigits, "0") )
+
+{
+
+   Session.f_bZero = true;
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="37" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=232 y=737 ?>
+          <!--play speed dial-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="30" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(x|*)&quot;" language="p_oMS.strLanguage" digits="f_strDigitCollected" retry-count="p_nMaxLoginAttempts" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >1275</audio>
+            <audio type="number" >f_strSDDigit</audio>
+            <audio type="index" >1276</audio>
+            <audio type="digits" >f_strSDPhone</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >1268</audio>
+            <audio type="index" >312</audio>
+            <audio type="index" >1269</audio>
+            <audio type="index" >313</audio>
+            <audio type="index" >1272</audio>
+            <audio type="index" >1261</audio>
+            <audio type="index" >1270</audio>
+          </play>
+          <results >
+            <result name="Default" link="17" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout" link="6" stubbed="1"/>
+            <result name="1 Change speed dial" link="22" stubbed="0" >f_strDigitCollected match "1"</result>
+            <result name="2 Call this number" link="16" stubbed="0" >f_strDigitCollected match "2"</result>
+            <result name="3 Hear next speed dial" link="11" stubbed="0" >f_strDigitCollected match "3"</result>
+            <result name="* Return to previous menu" link="6" stubbed="1" >f_strDigitCollected match "\*"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_strSDDigit = Session.f_oSpeedDial[Session.f_nCounter].tag;
+
+Session.f_strSDPhone = Session.f_oSpeedDial[Session.f_nCounter].num;]]></script>
+          </scripts>
+        </action>
+        <action id="40" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1933 y=242 ?>
+          <!--psAPISceUpdateSpeedDial-->
+          <function name="&quot;psAPISceUpdateSpeedDial&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_nTIMEOUT</parameter>
+            <parameter >p_sFAILURE</parameter>
+            <parameter >f_strNewSDPhone</parameter>
+            <parameter >f_strNewSDDigits</parameter>
+            <parameter >p_strPlatformSessionId</parameter>
+            <parameter >p_strProcDBName</parameter>
+            <parameter >p_lSubscriberId</parameter>
+            <parameter >p_lPinId</parameter>
+            <parameter >p_nServiceElementId</parameter>
+          </function>
+          <results >
+            <result name="Default" link="17" stubbed="1"/>
+            <result name="f_nReturnCode == 0" link="2" stubbed="0" >f_nReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("BEFORE: new phone number is: " + Session.f_strNewSDPhone);
+
+if ( Session.p_strStripLeadingOne == "T") {
+     Session.f_strNewSDPhone = js_strip_one(Session.f_strNewSDPhone);
+}
+Server.logInfo("AFTER: new phone number is: " + Session.f_strNewSDPhone);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("Session.f_nReturnCode: " + Session.f_nReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="41" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1223 y=848 ?>
+          <!--psAPISceUpdateSpeedDial-->
+          <function name="&quot;psAPISceUpdateSpeedDial&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_nTIMEOUT</parameter>
+            <parameter >p_sFAILURE</parameter>
+            <parameter >f_strNewSDPhone</parameter>
+            <parameter >f_strNewSDDigits</parameter>
+            <parameter >p_strPlatformSessionId</parameter>
+            <parameter >p_strProcDBName</parameter>
+            <parameter >p_lSubscriberId</parameter>
+            <parameter >p_lPinId</parameter>
+            <parameter >p_nServiceElementId</parameter>
+          </function>
+          <results >
+            <result name="Default" link="26" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("BEFORE: new phone number is: " + Session.f_strNewSDPhone);
+
+Session.f_strNewSDPhone = js_strip_one(Session.f_strNewSDPhone);
+
+Server.logInfo("AFTER: new phone number is: " + Session.f_strNewSDPhone);]]></script>
+          </scripts>
+        </action>
+        <action id="42" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=540 y=37 ?>
+          <!--call GetSpeedDial to see if already exists-->
+          <function name="&quot;GetSpeedDial&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_nTIMEOUT</parameter>
+            <parameter >p_sFAILURE</parameter>
+            <parameter >p_sSUCCESS</parameter>
+            <parameter >f_strNewSDPhone</parameter>
+            <parameter >f_strNewSDDigits</parameter>
+            <parameter >p_strPlatformSessionId</parameter>
+            <parameter >p_strProcDBName</parameter>
+            <parameter >p_lSubscriberId</parameter>
+            <parameter >p_lPinId</parameter>
+            <parameter >p_nServiceElementId</parameter>
+          </function>
+          <results >
+            <result name="Default" link="17" stubbed="1"/>
+            <result name="already used" link="34" stubbed="0" >f_nReturnCode == 0</result>
+            <result name="not used" link="1" stubbed="0" >f_nReturnCode == 1</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("GetSpeedDial returned " + Session.f_nReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="43" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1946 y=80 ?>
+          <!--invalid phone-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="p_nTIMEOUT" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="p_oMS.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >514</audio>
+          </play>
+          <results >
+            <result name="Default" link="30" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="44" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1238 y=986 ?>
+          <!--invalid phone-->
+          <play connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="p_nTIMEOUT" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="p_oMS.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >514</audio>
+          </play>
+          <results >
+            <result name="Default" link="14" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <properties >
+    <property key="default" value="Y:/home/pactolus_app_server/pcs_english.vox"/>
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value=""/>
+    <property key="library-modules" value=""/>
+    <property key="library-path" value=""/>
+  </properties>
+  <application-version >
+    <revision >$Id: lib_speeddial.xml,v 1.18 2006/08/25 14:36:19 klew Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Jul 24, 2012 12:30:10 PM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.rawabi.model.PreActivatedSubscribers" table="PRE_ACTIVATED_SUBSCRIBERS" schema="PCSPROD">
+        <comment>This table holds the subscriber information for the pins generated from the lot by the batch utility</comment>
+        <id name="subscriberId" type="big_decimal">
+            <column name="SUBSCRIBER_ID" precision="22" scale="0" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="serviceProvider" class="com.rawabi.model.ServiceProvider" fetch="select">
+            <column name="SERVICE_PROVIDER_ID" precision="22" scale="0" not-null="true" />
+        </many-to-one>
+        <property name="lotId" type="big_decimal">
+            <column name="LOT_ID" precision="22" scale="0" not-null="true">
+                <comment>The lot_status (1-new, 2-processed, 3-activated, 4-cancelled, 5-error)</comment>
+            </column>
+        </property>
+        <property name="pin" type="string">
+            <column name="PIN" length="20" not-null="true" />
+        </property>
+        <property name="pinPassword" type="string">
+            <column name="PIN_PASSWORD" length="100" not-null="true" />
+        </property>
+        <property name="lotSeqNumber" type="big_decimal">
+            <column name="LOT_SEQ_NUMBER" precision="22" scale="0">
+                <comment>8 digit lot sequence number &#192; pins are number 10000001 to X where X is the total number of pins for the lot</comment>
+            </column>
+        </property>
+        <property name="disabledFlag" type="java.lang.Character">
+            <column name="DISABLED_FLAG" length="1">
+                <comment>Indicates that the pre-activated pin has been cancelled and is no longer valid. Default set to False.</comment>
+            </column>
+        </property>
+        <property name="activationFlag" type="java.lang.Character">
+            <column name="ACTIVATION_FLAG" length="1">
+                <comment>This flag indicates whether the record has been copied into the subscriber table T/F</comment>
+            </column>
+        </property>
+        <property name="allowPinOnlyLoginFlag" type="java.lang.Character">
+            <column name="ALLOW_PIN_ONLY_LOGIN_FLAG" length="1">
+                <comment>Controls whether subscribers can log into the portal with PIN only.</comment>
+            </column>
+        </property>
+        <property name="activationDate" type="date">
+            <column name="ACTIVATION_DATE" length="7" />
+        </property>
+        <property name="activationId" type="string">
+            <column name="ACTIVATION_ID" length="20">
+                <comment>sequence generated unique key</comment>
+            </column>
+        </property>
+        <property name="confReslessModPasscode" type="string">
+            <column name="CONF_RESLESS_MOD_PASSCODE" length="20">
+                <comment>moderator passcode for reservationless prepaid conferencing</comment>
+            </column>
+        </property>
+        <property name="confReslessPasscode" type="string">
+            <column name="CONF_RESLESS_PASSCODE" length="20">
+                <comment>conf passcode for reservationless prepaid conferencing</comment>
+            </column>
+        </property>
+        <property name="lotControlNumber" type="string">
+            <column name="LOT_CONTROL_NUMBER" length="40">
+                <comment>lot control tracking number, this is used as the prefix for pin serial numbers</comment>
+            </column>
+        </property>
+        <property name="posEventId" type="string">
+            <column name="POS_EVENT_ID" length="20">
+                <comment>Point of sale event id.</comment>
+            </column>
+        </property>
+    </class>
+</hibernate-mapping>

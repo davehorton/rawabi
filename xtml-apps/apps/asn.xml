@@ -1,0 +1,571 @@
+<?xml version="1.0"?>
+<xtml version="1.0" >
+  <version sce-version="500a8" prev-sce-version="500a8" last-mod-time="Friday, February 16, 2007 17:33:18"/>
+  <events >
+    <event name="EnableActiveSpeaker" display="EnableActiveSpeaker" >
+      <parameter name="p_strRequestSessionId" type="string"/>
+      <parameter name="p_strConferenceId" type="string"/>
+      <parameter name="p_strMSType" type="string"/>
+    </event>
+    <event name="Pactolus.ActiveSpeakerNotification.1" display="ActiveSpeakerNotification" >
+      <parameter name="p_strConferenceId" type="string"/>
+      <parameter name="p_strConnectionId1" type="string"/>
+      <parameter name="p_strConnectionId2" type="string"/>
+      <parameter name="p_strConnectionId3" type="string"/>
+      <parameter name="p_strConnectionId4" type="string"/>
+      <parameter name="p_strConnectionId5" type="string"/>
+      <parameter name="p_strConnectionId6" type="string"/>
+      <parameter name="p_strConnectionId7" type="string"/>
+      <parameter name="p_strConnectionId8" type="string"/>
+      <parameter name="p_strConnectionId9" type="string"/>
+      <parameter name="p_strConnectionId10" type="string"/>
+      <parameter name="p_strConnectionId11" type="string"/>
+      <parameter name="p_strConnectionId12" type="string"/>
+      <parameter name="p_strConnectionId13" type="string"/>
+      <parameter name="p_strConnectionId14" type="string"/>
+      <parameter name="p_strConnectionId15" type="string"/>
+      <parameter name="p_strConnectionId16" type="string"/>
+    </event>
+    <event name="DisableActiveSpeaker" display="DisableActiveSpeaker" >
+      <parameter name="p_strRequestSessionId" type="string"/>
+      <parameter name="p_strConferenceId" type="string"/>
+      <parameter name="p_strMSType" type="string"/>
+    </event>
+    <event name="ConfActiveSpeakerRequest" display="ConfActiveSpeakerRequest" >
+      <parameter name="strConfControllerIP" type="string"/>
+      <parameter name="intConfControllerPort" type="i4"/>
+      <parameter name="strTransactionID" type="string"/>
+      <parameter name="conferenceID" type="string"/>
+      <parameter name="mediaServerEndpoint" type="string"/>
+    </event>
+    <event name="ConfCancelActiveSpeakerRequest" display="ConfCancelActiveSpeakerRequest" >
+      <parameter name="strConfControllerIP" type="string"/>
+      <parameter name="intConfControllerPort" type="i4"/>
+      <parameter name="strTransactionID" type="string"/>
+      <parameter name="strConferenceID" type="string"/>
+    </event>
+  </events>
+  <global-handlers >
+    <handler event="Standard.OnSessionStart.1" function="OnSessionStart" public="0" always-on="0"/>
+    <handler event="Pactolus.ActiveSpeakerNotification.1" function="OnActiveSpeakerNotification" public="0" always-on="0"/>
+    <handler event="ConfActiveSpeakerRequest" function="OnConfActiveSpeakerRequest" public="1" always-on="1"/>
+    <handler event="ConfCancelActiveSpeakerRequest" function="OnConfCancelActiveSpeakerRequest" public="1" always-on="1"/>
+  </global-handlers>
+  <global-vars >
+    <var name="g_strSessionID" type="string" >""</var>
+    <var name="g_strMSEndpoint" type="string" >""</var>
+    <var name="g_strMSType" type="string" >CONV</var>
+    <var name="g_asn" type="object" ></var>
+  </global-vars>
+  <shared-vars >
+    <var name="s_intSUCCESS" type="i4" >0</var>
+    <var name="s_intFAILURE" type="i4" >-1</var>
+  </shared-vars>
+  <functions >
+    <function name="OnDisableActiveSpeaker" start="3" event="OnDisableActiveSpeaker" returns="i4" >
+      <parameters >
+        <parameter name="p_strRequestSessionId" type="string" pass="byref"/>
+        <parameter name="p_strConferenceId" type="string" pass="byref"/>
+        <parameter name="p_strMSType" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_intReturnCode" type="i4" >-1</var>
+        <var name="f_intTIMEOUT" type="i4" >20</var>
+        <var name="f_strEvent" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="3" plug-in="Pactolus.CNFModifyConf.1" ><?xtml-editor x=84 y=271 ?>
+          <modify-conference ci="p_strConferenceId" endpoint="" asn="0" mute="0" ms-type="p_strMSType" timeout="f_intTIMEOUT" returns="f_intReturnCode" mt="3" hysteresis="" time-constant="" active-speakers="3" reporting-interval="2" active-speaker-threshold="" action="1" >
+            <attributes mp="16" mt="3" ig="0" og="0" iat="-10" ias="-40" oat="-10" oas="-40" atn="3" att="2" ia="1" oa="1" te="1" le="1" tp="0" dc="1" tc="1" ate="0" se="0"/>
+          </modify-conference>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("RECEIVE DISABLE ACTIVE SPEAKER EVENT FROM SESSION: " + Session.p_strRequestSessionId);
+Session.f_strEvent = "";
+Server.logInfo("SEND REQUEST DISABLE ACTIVE SPEAKER TO CONFERENCE ID: " + Session.p_strConferenceId);
+Server.logInfo("SEND REQUEST DISABLE ACTIVE SPEAKER TO MS TYPE: " + Session.p_strMSType);
+Server.logInfo("SEND REQUEST DISABLE ACTIVE SPEAKER WITH EVENT: " + Session.f_strEvent);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("SEND REQUEST INACTIVE SPEAKER");
+Server.logInfo("WITH RETURN CODE: " + Session.f_intReturnCode);
+Server.logInfo("WITH RESULT ID: " + Result.id);]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Pactolus.MGCPNotifyRequest.1" ><?xtml-editor x=90 y=71 ?>
+          <!--Request InActive Speaker Event-->
+          <rqnt connection-id="" endpoint="p_strConferenceId" callid="p_strConferenceId" timeout="f_intTIMEOUT" returns="f_intReturnCode" ms-type="p_strMSType" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[f_strEvent]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </rqnt>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("RECEIVE DISABLE ACTIVE SPEAKER EVENT FROM SESSION: " + Session.p_strRequestSessionId);
+Session.f_strEvent = "";
+Server.logInfo("SEND REQUEST DISABLE ACTIVE SPEAKER TO CONFERENCE ID: " + Session.p_strConferenceId);
+Server.logInfo("SEND REQUEST DISABLE ACTIVE SPEAKER TO MS TYPE: " + Session.p_strMSType);
+Server.logInfo("SEND REQUEST DISABLE ACTIVE SPEAKER WITH EVENT: " + Session.f_strEvent);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("SEND REQUEST INACTIVE SPEAKER");
+Server.logInfo("WITH RETURN CODE: " + Session.f_intReturnCode);
+Server.logInfo("WITH RESULT ID: " + Result.id);]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=520 y=216 ?>
+          <return value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="OnActiveSpeakerNotification" start="3" event="OnActiveSpeakerNotification" returns="void" >
+      <parameters >
+        <parameter name="p_strConferenceId" type="string" pass="byref"/>
+        <parameter name="p_strConnectionId1" type="string" pass="byref"/>
+        <parameter name="p_strConnectionId2" type="string" pass="byref"/>
+        <parameter name="p_strConnectionId3" type="string" pass="byref"/>
+        <parameter name="p_strConnectionId4" type="string" pass="byref"/>
+        <parameter name="p_strConnectionId5" type="string" pass="byref"/>
+        <parameter name="p_strConnectionId6" type="string" pass="byref"/>
+        <parameter name="p_strConnectionId7" type="string" pass="byref"/>
+        <parameter name="p_strConnectionId8" type="string" pass="byref"/>
+        <parameter name="p_strConnectionId9" type="string" pass="byref"/>
+        <parameter name="p_strConnectionId10" type="string" pass="byref"/>
+        <parameter name="p_strConnectionId11" type="string" pass="byref"/>
+        <parameter name="p_strConnectionId12" type="string" pass="byref"/>
+        <parameter name="p_strConnectionId13" type="string" pass="byref"/>
+        <parameter name="p_strConnectionId14" type="string" pass="byref"/>
+        <parameter name="p_strConnectionId15" type="string" pass="byref"/>
+        <parameter name="p_strConnectionId16" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_confID" type="string" ></var>
+        <var name="f_ccIP" type="string" ></var>
+        <var name="f_ccPort" type="i4" >0</var>
+        <var name="f_bNotFound" type="boolean" >0</var>
+      </local-vars>
+      <actions >
+        <action id="3" plug-in="Pactolus.Branch.1" ><?xtml-editor x=54 y=96 ?>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="ConferenceID Not Found" link="1" stubbed="0" >f_bNotFound == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.enableEvents(false);
+
+//Server.logInfo("--Received Active speaker notification  for conference: " + Session.p_strConferenceId);
+//if(Session.p_strConnectionId1 != "")
+//	Server.logInfo("Connection " +Session.p_strConnectionId1 +" is active");
+//if(Session.p_strConnectionId2 != "")
+//	Server.logInfo("Connection " +Session.p_strConnectionId2 +" is active");
+//if(Session.p_strConnectionId3 != "")
+//	Server.logInfo("Connection " +Session.p_strConnectionId3 +" is active");
+//if(Session.p_strConnectionId4 != "")
+//	Server.logInfo("Connection " +Session.p_strConnectionId4 +" is active");
+//if(Session.p_strConnectionId5 != "")
+//	Server.logInfo("Connection " +Session.p_strConnectionId5 +" is active");
+//if(Session.p_strConnectionId6 != "")
+//	Server.logInfo("Connection " +Session.p_strConnectionId6 +" is active");
+//if(Session.p_strConnectionId7 != "")
+//	Server.logInfo("Connection " +Session.p_strConnectionId7 +" is active");
+//if(Session.p_strConnectionId8 != "")
+//	Server.logInfo("Connection " +Session.p_strConnectionId8 +" is active");
+//if(Session.p_strConnectionId9 != "")
+//	Server.logInfo("Connection " +Session.p_strConnectionId9 +" is active");
+//if(Session.p_strConnectionId10 != "")
+//	Server.logInfo("Connection " +Session.p_strConnectionId10 +" is active");
+//if(Session.p_strConnectionId11 != "")
+//	Server.logInfo("Connection " +Session.p_strConnectionId11 +" is active");
+//if(Session.p_strConnectionId12 != "")
+//	Server.logInfo("Connection " +Session.p_strConnectionId12 +" is active");
+//if(Session.p_strConnectionId13 != "")
+//	Server.logInfo("Connection " +Session.p_strConnectionId13 +" is active");
+//if(Session.p_strConnectionId14 != "")
+//	Server.logInfo("Connection " +Session.p_strConnectionId14 +" is active");
+//if(Session.p_strConnectionId15 != "")
+//	Server.logInfo("Connection " +Session.p_strConnectionId15 +" is active");
+//if(Session.p_strConnectionId16 != "")
+//	Server.logInfo("Connection " +Session.p_strConnectionId16 +" is active");
+	
+
+//get the endpoint number out of the endpoint
+var e = js_parse_ep(Session.p_strConferenceId);
+//get the blade name out of the endpoint
+var e_name = js_parse_ep_name(Session.p_strConferenceId);
+
+Session.f_bNotFound = true;
+// search for endpoint 
+for( var i = 0; i < Session.g_asn.length; i++ ) {
+	if( Session.g_asn[i].name == e_name ) {
+		Session.f_confID = Session.g_asn[i].endpoint_info[e].confID;
+		Session.f_ccIP   = Session.g_asn[i].endpoint_info[e].ccIP;
+		Session.f_ccPort = Session.g_asn[i].endpoint_info[e].ccPort;
+		Session.f_bNotFound = false;
+		Server.logInfo("Conference ID Found for Session " + Session.p_strConferenceId);
+
+		break;
+	}
+	else {
+		Session.f_bNotFound = true;
+	}
+}
+
+if (Session.f_bNotFound == true) {
+	Server.logInfo("Conference ID Not Found for Session " + Session.p_strConferenceId);
+}
+
+/*
+if (Session.p_strConnectionId1 == "none") {
+	Session.p_strConnectionId1 = "";
+}
+if (Session.p_strConnectionId2 == "none") {
+	Session.p_strConnectionId2 = "";
+}
+if (Session.p_strConnectionId3 == "none") {
+	Session.p_strConnectionId3 = "";
+}
+*/
+
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=290 y=234 ?>
+          <return value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.enableEvents(true);]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=275 y=50 ?>
+          <!--ConfActiveSpeakerNotify-->
+          <SOAP destination-ip="f_ccIP" transaction="&quot;0&quot;" message-name="&quot;ConfActiveSpeakerNotify&quot;" destination-port="f_ccPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;conferenceID&quot;" value="f_confID"/>
+            <parameter tag="&quot;activeSpeaker1&quot;" value="p_strConnectionId1"/>
+            <parameter tag="&quot;activeSpeaker2&quot;" value="p_strConnectionId2"/>
+            <parameter tag="&quot;activeSpeaker3&quot;" value="p_strConnectionId3"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="OnEnableActiveSpeaker" start="3" event="OnEnableActiveSpeaker" returns="void" >
+      <parameters >
+        <parameter name="p_strRequestSessionId" type="string" pass="byref"/>
+        <parameter name="p_strConferenceId" type="string" pass="byref"/>
+        <parameter name="p_strMSType" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_intReturnCode" type="i4" >-1</var>
+        <var name="f_intTIMEOUT" type="i4" >20</var>
+        <var name="f_strEvent" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="3" plug-in="Pactolus.Branch.1" ><?xtml-editor x=4 y=46 ?>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+          </results>
+        </action>
+        <action id="1" plug-in="Pactolus.MGCPNotifyRequest.1" ><?xtml-editor x=207 y=45 ?>
+          <!--Request Active Speaker Event-->
+          <rqnt connection-id="" endpoint="p_strConferenceId" callid="p_strConferenceId" timeout="f_intTIMEOUT" returns="f_intReturnCode" ms-type="p_strMSType" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[f_strEvent]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </rqnt>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("RECEIVE ENABLE ACTIVE SPEAKER EVENT FROM SESSION: " + Session.p_strRequestSessionId);
+Session.f_strEvent = "AC/asn";
+Server.logInfo("SEND REQUEST ACTIVE SPEAKER TO CONFERENCE ID: " + Session.p_strConferenceId);
+Server.logInfo("SEND REQUEST ACTIVE SPEAKER TO MS TYPE: " + Session.p_strMSType);
+Server.logInfo("SEND REQUEST ACTIVE SPEAKER WITH EVENT: " + Session.f_strEvent);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("SEND REQUEST ACTIVE SPEAKER");
+Server.logInfo("WITH RETURN CODE: " + Session.f_intReturnCode);
+Server.logInfo("WITH RESULT ID: " + Result.id);]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=413 y=110 ?>
+          <return value=""/>
+        </action>
+        <action id="4" plug-in="Pactolus.CNFModifyConf.1" ><?xtml-editor x=163 y=288 ?>
+          <modify-conference ci="p_strConferenceId" endpoint="" asn="1" mute="0" ms-type="p_strMSType" timeout="f_intTIMEOUT" returns="f_intReturnCode" mt="3" hysteresis="" time-constant="" active-speakers="3" reporting-interval="2" active-speaker-threshold="" action="1" >
+            <attributes mp="16" mt="3" ig="0" og="0" iat="-10" ias="-40" oat="-10" oas="-40" atn="3" att="2" ia="1" oa="1" te="1" le="1" tp="0" dc="1" tc="1" ate="0" se="0"/>
+          </modify-conference>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("RECEIVE ENABLE ACTIVE SPEAKER EVENT FROM SESSION: " + Session.p_strRequestSessionId);
+Session.f_strEvent = "AC/asn";
+Server.logInfo("SEND REQUEST ACTIVE SPEAKER TO CONFERENCE ID: " + Session.p_strConferenceId);
+Server.logInfo("SEND REQUEST ACTIVE SPEAKER TO MS TYPE: " + Session.p_strMSType);
+Server.logInfo("SEND REQUEST ACTIVE SPEAKER WITH EVENT: " + Session.f_strEvent);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("SEND REQUEST ACTIVE SPEAKER");
+Server.logInfo("WITH RETURN CODE: " + Session.f_intReturnCode);
+Server.logInfo("WITH RESULT ID: " + Result.id);]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnSessionStart" start="5" event="OnSessionStart" returns="void" >
+      <parameters >
+        <parameter name="strSessionId" type="string" pass="byref"/>
+        <parameter name="nIteration" type="i4" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=136 y=102 ?>
+          <return value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="OnConfActiveSpeakerRequest" start="1" event="OnConfActiveSpeakerRequest" returns="void" >
+      <parameters >
+        <parameter name="strConfControllerIP" type="string" pass="byref"/>
+        <parameter name="intConfControllerPort" type="i4" pass="byref"/>
+        <parameter name="strTransactionID" type="string" pass="byref"/>
+        <parameter name="conferenceID" type="string" pass="byref"/>
+        <parameter name="mediaServerEndpoint" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_strReturnMessage" type="string" >ASN Successfully Enabled</var>
+        <var name="f_bNotFound" type="boolean" >1</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=32 y=36 ?>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.enableEvents(false);
+
+Server.logInfo("---Received ConfActiveSpeakerRequest Message from Conference Controller");
+Server.logInfo("   	conferenceID <" + Session.conferenceID + ">");
+Server.logInfo("	mediaServerEndpoint <" + Session.mediaServerEndpoint + ">");
+
+//get the endpoint number out of the endpoint
+var e = js_parse_ep(Session.mediaServerEndpoint);
+Server.logInfo("endpoint VALUE, INDEX IS: " + e);
+//get the blade name out of the endpoint
+var e_name = js_parse_ep_name(Session.mediaServerEndpoint);
+Server.logInfo("endpoint blade NAME IS: " + e_name);
+
+//stick this in an object array at the endpoint number
+Session.f_bNotFound = true;
+// search for endpoint
+for( var i = 0; i < Session.g_asn.length; i++ ) {
+	if( Session.g_asn[i].name == e_name ) {
+		Session.g_asn[i].endpoint_info[e].confID = Session.conferenceID;
+		Session.g_asn[i].endpoint_info[e].msEndpoint = Session.mediaServerEndpoint
+		Session.g_asn[i].endpoint_info[e].ccIP = Session.strConfControllerIP;
+		Session.g_asn[i].endpoint_info[e].ccPort = Session.intConfControllerPort;
+		if ( e > Session.g_asn[i].highest_endpoint ) {
+			Session.g_asn[i].highest_endpoint=e;
+		}
+		Session.f_bNotFound = false;
+		Server.logInfo("Found endpoint entry for: " + Session.mediaServerEndpoint);
+		break;
+	}
+	else {
+		Session.f_bNotFound = true;
+	}
+}
+
+if ( Session.f_bNotFound == true ) {
+	Server.logInfo("Endpoint blade name: " + e_name + " being added for conf Id: " + Session.conferenceID);
+	var i = Session.g_asn.length;
+	Session.g_asn[i].name = e_name;
+	Session.g_asn[i].endpoint_info[e].confID = Session.conferenceID;
+	Session.g_asn[i].endpoint_info[e].msEndpoint = Session.mediaServerEndpoint
+	Session.g_asn[i].endpoint_info[e].ccIP = Session.strConfControllerIP;
+	Session.g_asn[i].endpoint_info[e].ccPort = Session.intConfControllerPort;
+	Session.g_asn[i].highest_endpoint=e;
+}
+
+
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=199 y=135 ?>
+          <function name="&quot;OnEnableActiveSpeaker&quot;" return="" external-function="0" library="" >
+            <parameter >g_strSessionID</parameter>
+            <parameter >mediaServerEndpoint</parameter>
+            <parameter >g_strMSType</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+          </results>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=557 y=384 ?>
+          <return value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.enableEvents(true);]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=382 y=228 ?>
+          <!--response SUCCESS-->
+          <SOAP destination-ip="strConfControllerIP" transaction="strTransactionID" message-name="&quot;ConfActiveSpeakerResponse&quot;" destination-port="intConfControllerPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;resultCode&quot;" value="s_intSUCCESS"/>
+            <parameter tag="&quot;resultMessage&quot;" value="f_strReturnMessage"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="OnConfCancelActiveSpeakerRequest" start="2" event="OnConfCancelActiveSpeakerRequest" returns="void" >
+      <parameters >
+        <parameter name="strConfControllerIP" type="string" pass="byref"/>
+        <parameter name="intConfControllerPort" type="i4" pass="byref"/>
+        <parameter name="strTransactionID" type="string" pass="byref"/>
+        <parameter name="strConferenceID" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_strReturnMessage" type="string" >ASN Successfully Cancelled</var>
+        <var name="f_strMSEndpoint" type="string" ></var>
+        <var name="f_bMSFound" type="boolean" >0</var>
+        <var name="f_intReturnCode" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="2" plug-in="Pactolus.Branch.1" ><?xtml-editor x=10 y=52 ?>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="endpointFound=true?" link="1" stubbed="0" >f_bMSFound == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.enableEvents(false);
+
+// search for endpoint
+Session.f_bMSFound = false;
+for( var i = 0; i < Session.g_asn.length; i++ ) {
+	for ( var j = 0; j <= Session.g_asn[i].highest_endpoint; j++) {
+		if (Session.g_asn[i].endpoint_info[j].confID == Session.strConferenceID) {
+			Session.f_strMSEndpoint = Session.g_asn[i].endpoint_info[j].msEndpoint;
+			Session.f_bMSFound = true;
+			Server.logInfo("MS Endpont found for ConferenceID: " + Session.strConferenceID);
+			break;
+		}
+	}
+}
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Session.f_bMSFound != true)
+{
+	Server.logInfo("MS Endpont not found for ConferenceID: " + Session.strConferenceID);
+	Session.f_strReturnMessage = "MS Endpoint not found for Conference";
+	Session.f_intReturnCode = Session.s_intFAILURE;
+}
+Server.logInfo("Return Code: " + Session.f_intReturnCode);
+]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=181 y=172 ?>
+          <function name="&quot;OnDisableActiveSpeaker&quot;" return="f_intReturnCode" external-function="0" library="" >
+            <parameter >g_strSessionID</parameter>
+            <parameter >f_strMSEndpoint</parameter>
+            <parameter >g_strMSType</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="f_intReturnCode == s_intSUCCESS" link="4" stubbed="0" >f_intReturnCode == s_intSUCCESS</result>
+          </results>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=572 y=413 ?>
+          <return value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.enableEvents(true);]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=389 y=265 ?>
+          <!--response SUCCESS-->
+          <SOAP destination-ip="strConfControllerIP" transaction="strTransactionID" message-name="&quot;ConfCancelActiveSpeakerResponse&quot;" destination-port="intConfControllerPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;resultCode&quot;" value="s_intSUCCESS"/>
+            <parameter tag="&quot;resultMessage&quot;" value="f_strReturnMessage"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+        </action>
+        <action id="5" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=427 y=39 ?>
+          <!--response FAIL-->
+          <SOAP destination-ip="strConfControllerIP" transaction="strTransactionID" message-name="&quot;ConfCancelActiveSpeakerResponse&quot;" destination-port="intConfControllerPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;resultCode&quot;" value="s_intFAILURE"/>
+            <parameter tag="&quot;resultMessage&quot;" value="f_strReturnMessage"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Return Code: " + Session.f_intReturnCode);
+Server.logInfo("Endpoint Found: " + Session.f_bMSFound);
+
+if (Session.f_intReturnCode != 0 && Session.f_bMSFound == true)
+{
+	Session.f_strReturnMessage = "Failure return code: " + Session.f_intReturnCode;
+	Server.logInfo("Returning Error Code: " + Session.f_intReturnCode);
+}
+else
+{
+	Session.f_strReturnMessage = "MS Endpoint not found for Conference";
+}
+]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>
+
+// get the blade name out of the end point
+function js_parse_ep_name ( endpoint ) 
+{
+	var endpoint_name = "";
+	var myString = new String(endpoint);
+
+	var myArray = myString.split("@");
+	endpoint_name = myArray[1];
+	
+	return endpoint_name;
+}
+]]></script>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value=""/>
+    <property key="library-modules" value=""/>
+    <property key="library-path" value=""/>
+  </properties>
+  <application-version >
+    <revision >$Id: asn.xml,v 1.12 2007/02/16 22:50:30 jgibson Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

@@ -1,0 +1,2344 @@
+<?xml version="1.0"?>
+<xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
+  <global-handlers/>
+  <functions >
+    <function name="3WayCalling" start="2" event="3WayCalling" returns="i4" >
+      <parameters >
+        <parameter name="oCallLegA" type="object" pass="byref"/>
+        <parameter name="oArrayCallLeg" type="object" pass="byref"/>
+        <parameter name="oConferenceMS" type="object" pass="byref"/>
+        <parameter name="p_strContact" type="string"/>
+        <parameter name="p_strDefaultANI" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >-50</var>
+        <var name="f_nTIMEOUT" type="i4" >30</var>
+        <var name="f_nSUCCESS" type="i4" >0</var>
+        <var name="f_nFAILURE" type="i4" >-1</var>
+        <var name="f_nCALLERHUNGUP" type="i4" >-2</var>
+        <var name="f_lOutdialStartTime" type="i8" >0</var>
+        <var name="f_lOutdialConnectTime" type="i8" >0</var>
+        <var name="f_strSIPStatus" type="string" ></var>
+        <var name="f_strSIPVERSION" type="string" >SIP/2.0</var>
+        <var name="f_nIndexB" type="i4" >0</var>
+        <var name="f_nIndexC" type="i4" >1</var>
+      </local-vars>
+      <actions >
+        <action id="2" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=106 y=415 ?>
+          <!--CreateAConference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;CreateConference&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >oConferenceMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="SUCCESS" link="4" stubbed="0" >f_nReturnCode == f_nSUCCESS</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("**** START 3 WAY CALLING ****");
+Server.logInfo("3 WAY CALLING RECEIVES: ");
+Server.logInfo("ARRAY LENGTH IS: " + Session.oArrayCallLeg.length);
+
+Server.logInfo("oCallLegA.strFrom: " + Session.oCallLegA.strFrom);
+Server.logInfo("oCallLegA.strTo: " + Session.oCallLegA.strTo);
+Server.logInfo("oCallLegA.strContent: " + Session.oCallLegA.strContent);
+Server.logInfo("oCallLegA.strCSeq: " + Session.oCallLegA.strCSeq);
+Server.logInfo("oCallLegA.strCallId: " + Session.oCallLegA.strCallId);
+
+Server.logInfo("oCallLegB.strFrom: " + Session.oArrayCallLeg[Session.f_nIndexB].strFrom);
+Server.logInfo("oCallLegB.strTo: " + Session.oArrayCallLeg[Session.f_nIndexB].strTo);
+Server.logInfo("oCallLegB.strContent: " + Session.oArrayCallLeg[Session.f_nIndexB].strContent);
+Server.logInfo("oCallLegB.strCSeq: " + Session.oArrayCallLeg[Session.f_nIndexB].strCSeq);
+Server.logInfo("oCallLegB.strCallId: " + Session.oArrayCallLeg[Session.f_nIndexB].strCallId);
+
+Server.logInfo("oCallLegC.strFrom: " + Session.oArrayCallLeg[Session.f_nIndexC].strFrom);
+Server.logInfo("oCallLegC.strTo: " + Session.oArrayCallLeg[Session.f_nIndexC].strTo);
+Server.logInfo("oCallLegC.strContent: " + Session.oArrayCallLeg[Session.f_nIndexC].strContent);
+Server.logInfo("oCallLegC.strCSeq: " + Session.oArrayCallLeg[Session.f_nIndexC].strCSeq);
+Server.logInfo("oCallLegC.strCallId: " + Session.oArrayCallLeg[Session.f_nIndexC].strCallId);]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=350 y=355 ?>
+          <!--f_nFAILURE-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nFAILURE"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("AFTER 3 WAY CALLING RECEIVES: ");
+Server.logInfo("ARRAY LENGTH IS: " + Session.oArrayCallLeg.length);
+
+Server.logInfo("oCallLegA.strFrom: " + Session.oCallLegA.strFrom);
+Server.logInfo("oCallLegA.strTo: " + Session.oCallLegA.strTo);
+Server.logInfo("oCallLegA.strContent: " + Session.oCallLegA.strContent);
+Server.logInfo("oCallLegA.strCSeq: " + Session.oCallLegA.strCSeq);
+Server.logInfo("oCallLegA.strCallId: " + Session.oCallLegA.strCallId);
+
+Server.logInfo("oCallLegB.strFrom: " + Session.oArrayCallLeg[Session.f_nIndexB].strFrom);
+Server.logInfo("oCallLegB.strTo: " + Session.oArrayCallLeg[Session.f_nIndexB].strTo);
+Server.logInfo("oCallLegB.strContent: " + Session.oArrayCallLeg[Session.f_nIndexB].strContent);
+Server.logInfo("oCallLegB.strCSeq: " + Session.oArrayCallLeg[Session.f_nIndexB].strCSeq);
+Server.logInfo("oCallLegB.strCallId: " + Session.oArrayCallLeg[Session.f_nIndexB].strCallId);
+
+Server.logInfo("oCallLegC.strFrom: " + Session.oArrayCallLeg[Session.f_nIndexC].strFrom);
+Server.logInfo("oCallLegC.strTo: " + Session.oArrayCallLeg[Session.f_nIndexC].strTo);
+Server.logInfo("oCallLegC.strContent: " + Session.oArrayCallLeg[Session.f_nIndexC].strContent);
+Server.logInfo("oCallLegC.strCSeq: " + Session.oArrayCallLeg[Session.f_nIndexC].strCSeq);
+Server.logInfo("oCallLegC.strCallId: " + Session.oArrayCallLeg[Session.f_nIndexC].strCallId);]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=362 y=518 ?>
+          <!--AddMemberToConference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;AddMemberToConference&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >oConferenceMS</parameter>
+            <parameter >oCallLegA</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="FAILURE" link="3" stubbed="1" >f_nReturnCode == f_nFAILURE</result>
+            <result name="CALLER HUNG UP" link="5" stubbed="0" >f_nReturnCode == f_nCALLERHUNGUP</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.oArrayCallLeg[Session.f_nIndexB].oMS.strConferenceId = Session.oConferenceMS.strConferenceId;
+Session.oArrayCallLeg[Session.f_nIndexC].oMS.strConferenceId = Session.oConferenceMS.strConferenceId;]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=634 y=592 ?>
+          <!--f_nCALLERHUNGUP-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nCALLERHUNGUP"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("AFTER 3 WAY CALLING RECEIVES: ");
+Server.logInfo("ARRAY LENGTH IS: " + Session.oArrayCallLeg.length);
+
+Server.logInfo("oCallLegA.strFrom: " + Session.oCallLegA.strFrom);
+Server.logInfo("oCallLegA.strTo: " + Session.oCallLegA.strTo);
+Server.logInfo("oCallLegA.strContent: " + Session.oCallLegA.strContent);
+Server.logInfo("oCallLegA.strCSeq: " + Session.oCallLegA.strCSeq);
+Server.logInfo("oCallLegA.strCallId: " + Session.oCallLegA.strCallId);
+
+Server.logInfo("oCallLegB.strFrom: " + Session.oArrayCallLeg[Session.f_nIndexB].strFrom);
+Server.logInfo("oCallLegB.strTo: " + Session.oArrayCallLeg[Session.f_nIndexB].strTo);
+Server.logInfo("oCallLegB.strContent: " + Session.oArrayCallLeg[Session.f_nIndexB].strContent);
+Server.logInfo("oCallLegB.strCSeq: " + Session.oArrayCallLeg[Session.f_nIndexB].strCSeq);
+Server.logInfo("oCallLegB.strCallId: " + Session.oArrayCallLeg[Session.f_nIndexB].strCallId);
+
+Server.logInfo("oCallLegC.strFrom: " + Session.oArrayCallLeg[Session.f_nIndexC].strFrom);
+Server.logInfo("oCallLegC.strTo: " + Session.oArrayCallLeg[Session.f_nIndexC].strTo);
+Server.logInfo("oCallLegC.strContent: " + Session.oArrayCallLeg[Session.f_nIndexC].strContent);
+Server.logInfo("oCallLegC.strCSeq: " + Session.oArrayCallLeg[Session.f_nIndexC].strCSeq);
+Server.logInfo("oCallLegC.strCallId: " + Session.oArrayCallLeg[Session.f_nIndexC].strCallId);]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=640 y=450 ?>
+          <!--OutdialParty C ToConference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;OutdialPartyToConference&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >oArrayCallLeg[f_nIndexC]</parameter>
+            <parameter >oArrayCallLeg[f_nIndexC].oMS</parameter>
+            <parameter >f_lOutdialStartTime</parameter>
+            <parameter >f_lOutdialConnectTime</parameter>
+            <parameter >f_strSIPStatus</parameter>
+            <parameter >p_strDefaultANI</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="SUCCESS" link="7" stubbed="0" >f_nReturnCode == f_nSUCCESS</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[var myUri = new SipRequestUri(Session.oArrayCallLeg[Session.f_nIndexC].strRequestUri);
+if (myUri.url.dtg == undefined)
+{
+	Session.oArrayCallLeg[Session.f_nIndexC].strDestTrunkGroup = "";
+}
+else
+{
+	Session.oArrayCallLeg[Session.f_nIndexC].strDestTrunkGroup = myUri.url.dtg;
+}
+Server.logInfo("BEFORE call leg C contact: " + Session.oArrayCallLeg[Session.f_nIndexC].strContact);
+Server.logInfo("BEFORE call leg C record route: " + Session.oArrayCallLeg[Session.f_nIndexC].strRecordRoute);
+Server.logInfo("BEFORE call leg C request Uri: " + Session.oArrayCallLeg[Session.f_nIndexC].strRequestUri);
+Server.logInfo("BEFORE call leg C route: " + Session.oArrayCallLeg[Session.f_nIndexC].strRoute);
+var bDialIn = false;
+js_calculate_uri_and_route(bDialIn, Session.f_strSIPVERSION, Session.oArrayCallLeg[Session.f_nIndexC].strFrom, Session.oArrayCallLeg[Session.f_nIndexC].strContact, Session.oArrayCallLeg[Session.f_nIndexC].strRecordRoute, Session.oArrayCallLeg[Session.f_nIndexC].strRequestUri, Session.oCallLegC.strRoute);
+Server.logInfo("AFTER call leg C contact: " + Session.oArrayCallLeg[Session.f_nIndexC].strContact);
+Server.logInfo("AFTER call leg C record route: " + Session.oArrayCallLeg[Session.f_nIndexC].strRecordRoute);
+Server.logInfo("AFTER call leg C request Uri: " + Session.oArrayCallLeg[Session.f_nIndexC].strRequestUri);
+Server.logInfo("AFTER call leg C route: " + Session.oArrayCallLeg[Session.f_nIndexC].strRoute);
+Server.logInfo("Call leg C request Uri is: " + Session.oArrayCallLeg[Session.f_nIndexC].strRequestUri);]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=896 y=570 ?>
+          <!--AddMember B to Conference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;AddMemberToConference&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >oArrayCallLeg[f_nIndexB].oMS</parameter>
+            <parameter >oArrayCallLeg[f_nIndexB]</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="SUCCESS" link="8" stubbed="0" >f_nReturnCode == f_nSUCCESS</result>
+          </results>
+        </action>
+        <action id="8" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1151 y=568 ?>
+          <!--f_nSUCCESS-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nSUCCESS"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("AFTER 3 WAY CALLING RECEIVES: ");
+Server.logInfo("ARRAY LENGTH IS: " + Session.oArrayCallLeg.length);
+
+Server.logInfo("oCallLegA.strFrom: " + Session.oCallLegA.strFrom);
+Server.logInfo("oCallLegA.strTo: " + Session.oCallLegA.strTo);
+Server.logInfo("oCallLegA.strContent: " + Session.oCallLegA.strContent);
+Server.logInfo("oCallLegA.strCSeq: " + Session.oCallLegA.strCSeq);
+Server.logInfo("oCallLegA.strCallId: " + Session.oCallLegA.strCallId);
+
+Server.logInfo("oCallLegB.strFrom: " + Session.oArrayCallLeg[Session.f_nIndexB].strFrom);
+Server.logInfo("oCallLegB.strTo: " + Session.oArrayCallLeg[Session.f_nIndexB].strTo);
+Server.logInfo("oCallLegB.strContent: " + Session.oArrayCallLeg[Session.f_nIndexB].strContent);
+Server.logInfo("oCallLegB.strCSeq: " + Session.oArrayCallLeg[Session.f_nIndexB].strCSeq);
+Server.logInfo("oCallLegB.strCallId: " + Session.oArrayCallLeg[Session.f_nIndexB].strCallId);
+
+Server.logInfo("oCallLegC.strFrom: " + Session.oArrayCallLeg[Session.f_nIndexC].strFrom);
+Server.logInfo("oCallLegC.strTo: " + Session.oArrayCallLeg[Session.f_nIndexC].strTo);
+Server.logInfo("oCallLegC.strContent: " + Session.oArrayCallLeg[Session.f_nIndexC].strContent);
+Server.logInfo("oCallLegC.strCSeq: " + Session.oArrayCallLeg[Session.f_nIndexC].strCSeq);
+Server.logInfo("oCallLegC.strCallId: " + Session.oArrayCallLeg[Session.f_nIndexC].strCallId);]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=881 y=452 ?>
+          <!--f_nReturnCode-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nReturnCode"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("AFTER 3 WAY CALLING RECEIVES: ");
+Server.logInfo("ARRAY LENGTH IS: " + Session.oArrayCallLeg.length);
+
+Server.logInfo("oCallLegA.strFrom: " + Session.oCallLegA.strFrom);
+Server.logInfo("oCallLegA.strTo: " + Session.oCallLegA.strTo);
+Server.logInfo("oCallLegA.strContent: " + Session.oCallLegA.strContent);
+Server.logInfo("oCallLegA.strCSeq: " + Session.oCallLegA.strCSeq);
+Server.logInfo("oCallLegA.strCallId: " + Session.oCallLegA.strCallId);
+
+Server.logInfo("oCallLegB.strFrom: " + Session.oArrayCallLeg[Session.f_nIndexB].strFrom);
+Server.logInfo("oCallLegB.strTo: " + Session.oArrayCallLeg[Session.f_nIndexB].strTo);
+Server.logInfo("oCallLegB.strContent: " + Session.oArrayCallLeg[Session.f_nIndexB].strContent);
+Server.logInfo("oCallLegB.strCSeq: " + Session.oArrayCallLeg[Session.f_nIndexB].strCSeq);
+Server.logInfo("oCallLegB.strCallId: " + Session.oArrayCallLeg[Session.f_nIndexB].strCallId);
+
+Server.logInfo("oCallLegC.strFrom: " + Session.oArrayCallLeg[Session.f_nIndexC].strFrom);
+Server.logInfo("oCallLegC.strTo: " + Session.oArrayCallLeg[Session.f_nIndexC].strTo);
+Server.logInfo("oCallLegC.strContent: " + Session.oArrayCallLeg[Session.f_nIndexC].strContent);
+Server.logInfo("oCallLegC.strCSeq: " + Session.oArrayCallLeg[Session.f_nIndexC].strCSeq);
+Server.logInfo("oCallLegC.strCallId: " + Session.oArrayCallLeg[Session.f_nIndexC].strCallId);]]></script>
+          </scripts>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="140" y-coord="51" width="162" height="58" text="Assume B is on index 0
+C is on index 1" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="InitCallLeg" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="p_oArrayCallLegs" type="object" pass="byref"/>
+        <parameter name="p_nCurrentArrayIndex" type="i4" pass="byref"/>
+        <parameter name="p_oCallLegB" type="object" pass="byref"/>
+        <parameter name="p_strMSType" type="string"/>
+        <parameter name="p_oTimerGSXB" type="object" pass="byref"/>
+        <parameter name="p_oRATE" type="object"/>
+        <parameter name="p_oAPI" type="object" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=50 y=144 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[// Phone outdial call leg object
+Server.logInfo("ARRAY CALL LEGS array.length: " + Session.p_oArrayCallLegs.length);
+Session.p_nCurrentArrayIndex = Session.p_oArrayCallLegs.length;
+Server.logInfo("CURRENT ARRAY INDEX: " + Session.p_nCurrentArrayIndex);
+if (Session.p_nCurrentArrayIndex > 0) {
+	Server.logInfo("CALL LEG CALL Id LENGTH: " + Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex - 1].strCallId.length);
+} else {
+	Server.logInfo("CALL LEG CALL Id LENGTH no callx legs");
+}
+if (0 == Session.p_oArrayCallLegs.length  || Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex - 1].strCallId.length != 0)
+{
+	//initialize calll leg
+	Server.logInfo("INITIALIZE NEW CALL LEG IN THE ARRAY");
+	js_initCallLeg(Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex]);
+	js_initMS(Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].oMS, Session.p_strMSType);
+	js_initTimer(Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].oTimer);
+	js_initTimer(Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].oTimerGSX);	
+	js_initRATE(Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].oRATE);
+
+	
+	
+	
+	Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].oRATE = Session.p_oRATE;
+	
+	Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].oTimerGSX.lSleepTime =	Session.p_oTimerGSXB.lSleepTime;
+	Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].strConfCallFlag = Session.p_oCallLegB.strConfCallFlag;
+
+	Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].strStrippedDest = Session.p_oCallLegB.strStrippedDest;	
+	Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].strConfCallFlag = Session.p_oCallLegB.strConfCallFlag;
+	Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].strOutdialDestNbr = Session.p_oCallLegB.strOutdialDestNbr;
+	Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].strDestDomIntlFlag = Session.p_oCallLegB.strDestDomIntlFlag;
+	Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].nDestCountryId = Session.p_oCallLegB.nDestCountryId;
+	Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].strDestCallingCode = Session.p_oCallLegB.strDestCallingCode;
+	Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].strDestAreaCode = Session.p_oCallLegB.strDestAreaCode;
+	Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].strEventId = Session.p_oCallLegB.strEventId;
+	Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].strStrippedDest = Session.p_oCallLegB.strStrippedDest;
+	Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].nGracePeriod = Session.p_oCallLegB.nGracePeriod;
+	Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].nDestRegionId = Session.p_oCallLegB.nDestRegionId;	
+	
+	if(Session.p_oAPI.strPrimarySoftswitchIP.length > 0) {
+		Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].strRequestUri = Session.p_oAPI.strPrimarySoftswitchIP;
+	}
+	
+	if(Session.p_oAPI.strBackupSoftswitchIP.length > 0) {
+		Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].strBackupRequestUri = Session.p_oAPI.strBackupSoftswitchIP;
+	}	
+	
+	
+	Server.logInfo("p_oArrayCallLegs[p_nCurrentArrayIndex].strOutdialDestNbr: " + Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].strOutdialDestNbr);	
+	
+	Server.logInfo("p_oArrayCallLegs[p_nCurrentArrayIndex].strConfCallFlag: " + Session.p_oArrayCallLegs[Session.p_nCurrentArrayIndex].strConfCallFlag);
+	Server.logInfo("after init array.length:" + Session.p_oArrayCallLegs.length);
+	
+}
+else
+{
+	Session.p_nCurrentArrayIndex--;
+}
+
+
+
+]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="ProcNLeg" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="p_oCallLegA" type="object" pass="byref"/>
+        <parameter name="p_oArrayCallLegs" type="object" pass="byref"/>
+        <parameter name="p_strContact" type="string"/>
+        <parameter name="p_oMS" type="object" pass="byref"/>
+        <parameter name="p_oSUB" type="object" pass="byref"/>
+        <parameter name="p_oAPI" type="object" pass="byref"/>
+        <parameter name="p_oACD" type="object" pass="byref"/>
+        <parameter name="p_oRATE" type="object" pass="byref"/>
+        <parameter name="p_oConfMS" type="object" pass="byref"/>
+        <parameter name="p_oTimerGSXA" type="object" pass="byref"/>
+        <parameter name="p_oTimerMaxTime" type="object" pass="byref"/>
+        <parameter name="p_oTimerPhoneA" type="object" pass="byref"/>
+        <parameter name="p_oTimerThreshold1" type="object" pass="byref"/>
+        <parameter name="p_oTimerThreshold2" type="object" pass="byref"/>
+        <parameter name="p_oTimerThreshold3" type="object" pass="byref"/>
+        <parameter name="p_oTimerLongCallInterval" type="object" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >-1</var>
+        <var name="f_strInputDigit" type="string" ></var>
+        <var name="i" type="i4" >-1</var>
+        <var name="f_nEND_SESSION" type="i4" >-99</var>
+        <var name="f_nGET_DEST" type="i4" >3</var>
+        <var name="f_nPrompt" type="i4" >99</var>
+        <var name="f_nTries" type="i4" >0</var>
+        <var name="f_oPrompts" type="object" ></var>
+        <var name="f_nGET_NON_CONF_DEST" type="i4" >4</var>
+        <var name="f_bPutCallersOnHold" type="boolean" >1</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=14 y=47 ?>
+          <results >
+            <result name="Default" link="26" stubbed="0"/>
+            <result name="MS.CurrentlyConnected" link="6" stubbed="1" >p_oMS.bCurrentlyConnected == true</result>
+            <result name="oArrayCallLegs = 1" link="32" stubbed="0" >p_oArrayCallLegs.length == 1</result>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=247 y=157 ?>
+          <!--put B on hold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PutPartyOnHold&quot;" return="f_nReturnCode" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oArrayCallLegs[0]</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="SUCCESS" link="3" stubbed="0" >f_nReturnCode == s_sSUCCESS</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if(0 != Session.f_nReturnCode) {
+	Session.p_oAPI.nCallTerminationReason = 6;
+	Session.p_oAPI.nSessionTerminationReason = 5;
+}	]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=503 y=167 ?>
+          <!--put A on hold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PutPartyOnHold&quot;" return="f_nReturnCode" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="Success, array.length = 1" link="4" stubbed="0" >f_nReturnCode == s_sSUCCESS
+AND p_oArrayCallLegs.length == 1</result>
+            <result name="Success" link="22" stubbed="0" >f_nReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if(0 != Session.f_nReturnCode) {
+	Session.p_oAPI.nCallTerminationReason = 6;
+	Session.p_oAPI.nSessionTerminationReason = 5;
+}	]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=774 y=177 ?>
+          <!--outdial from MS-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;MSOutdialParty&quot;" return="f_nReturnCode" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oMS</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="Caller Hungup" link="5" stubbed="1" >f_nReturnCode == s_sCALLERHUNGUP</result>
+            <result name="SUCCESS" link="6" stubbed="1" >f_nReturnCode == s_sSUCCESS</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if(2 == Result.id) {
+	Session.g_oAPI.nCallTerminationReason = 2;
+}else if (3 == Result.id){
+	Session.p_oAPI.bBeginAConference = true;
+} else {
+	Session.g_oAPI.nCallTerminationReason = 6;
+	Session.g_oAPI.nSessionTerminationReason = 5;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=80 y=837 ?>
+          <!--HangUpAllWriteCDR-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpAllWriteCDR&quot;" return="" external-function="0" library="" >
+            <parameter >p_oArrayCallLegs</parameter>
+            <parameter >p_oSUB</parameter>
+            <parameter >p_oAPI</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_strContact</parameter>
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oTimerGSXA</parameter>
+            <parameter >p_oTimerMaxTime</parameter>
+            <parameter >p_oTimerPhoneA</parameter>
+            <parameter >p_oTimerThreshold1</parameter>
+            <parameter >p_oTimerThreshold2</parameter>
+            <parameter >p_oTimerThreshold3</parameter>
+            <parameter >p_oConfMS</parameter>
+            <parameter >p_oTimerLongCallInterval</parameter>
+          </function>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+          </results>
+        </action>
+        <action id="6" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=59 y=382 ?>
+          <!--Add New, Remove Last party or Return-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="30" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(1|3|9|*)&quot;" language="p_oAPI.strLanguage" digits="f_strInputDigit" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >f_oPrompts.nADD_PARTY</audio>
+            <audio type="index" >f_oPrompts.nPRESS_1</audio>
+            <audio type="index" >f_oPrompts.nEND_CONF</audio>
+            <audio type="index" >f_oPrompts.nPRESS_3</audio>
+            <audio type="index" >856</audio>
+            <audio type="index" >319</audio>
+            <audio type="index" >379</audio>
+            <audio type="index" >320</audio>
+          </play>
+          <results >
+            <result name="Default" link="21" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error" link="5" stubbed="1"/>
+            <result name="Timeout"/>
+            <result name="1 - add new" link="14" stubbed="0" >f_strInputDigit match "1"
+AND p_oArrayCallLegs.length &lt; p_oAPI.nMaxPartiesAllowed</result>
+            <result name="9 - remove last" link="11" stubbed="0" >f_strInputDigit match "9"</result>
+            <result name="* - return to caller(s)" link="19" stubbed="0" >f_strInputDigit match "*"</result>
+            <result name="3 - End Conf" link="24" stubbed="1" >p_oArrayCallLegs.length &gt;= 2
+AND f_strInputDigit match "3"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_nTries++;
+
+if(Session.p_oArrayCallLegs.length >= 2) {
+
+	Session.f_oPrompts.nPRESS_3 = 313;
+	Session.f_oPrompts.nEND_CONF = 889;
+	
+} else {
+
+	Session.f_oPrompts.nPRESS_3 = 99;
+	Session.f_oPrompts.nEND_CONF = 99;
+
+
+}	
+
+
+if(Session.p_oArrayCallLegs.length >= Session.p_oAPI.nMaxPartiesAllowed) {
+	Session.f_oPrompts.nADD_PARTY = 924; // You cannot add any more participants to this conference. 
+	Session.f_oPrompts.nPRESS_1 = 99;
+} else {
+	Session.f_oPrompts.nADD_PARTY = 960; 
+	Session.f_oPrompts.nPRESS_1 = 311;
+}
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if(4 == Result.id) {
+	Session.f_nPrompt = 552;
+} else if(2 == Result.id) {
+	Session.f_nPrompt = 337;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=845 y=548 ?>
+          <!--HangUpParty-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpParty&quot;" return="" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oArrayCallLegs[i]</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oAPI.nCallTerminationReason = 5;]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1255 y=541 ?>
+          <!--psAPIProcCallCompletion-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIProcCallCompletion&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oAPI</parameter>
+            <parameter >p_oSUB</parameter>
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oArrayCallLegs[i]</parameter>
+            <parameter >p_oArrayCallLegs[i].oRATE</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_oArrayCallLegs</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="Success" link="23" stubbed="0" >f_nReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oAPI.nCallTerminationReason = 5; // reorgination]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=353 y=853 ?>
+          <!--HangUpParty-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpParty&quot;" return="" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="10" stubbed="1"/>
+          </results>
+        </action>
+        <action id="10" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=337 y=704 ?>
+          <!--f_nEND_SESSION-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nEND_SESSION"/>
+        </action>
+        <action id="11" plug-in="Pactolus.Branch.1" ><?xtml-editor x=403 y=615 ?>
+          <results >
+            <result name="Default" link="33" stubbed="0"/>
+            <result name="oArrayCallLegs = 1" link="24" stubbed="1" >p_oArrayCallLegs.length == 1</result>
+          </results>
+        </action>
+        <action id="14" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=424 y=547 ?>
+          <!--f_nGET_DEST-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nGET_DEST"/>
+        </action>
+        <action id="15" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1051 y=549 ?>
+          <!--StopBLegTimers-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StopBLegTimers&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >p_oArrayCallLegs[i].oTimer</parameter>
+            <parameter >p_oArrayCallLegs[i].oTimerGSX</parameter>
+          </function>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+          </results>
+        </action>
+        <action id="19" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=77 y=689 ?>
+          <!--ReturnToConf-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ReturnToConf&quot;" return="f_nReturnCode" external-function="0" library="" >
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oMS</parameter>
+            <parameter >p_strContact</parameter>
+            <parameter >p_oArrayCallLegs</parameter>
+            <parameter >p_oSUB</parameter>
+            <parameter >p_oRATE</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_oAPI</parameter>
+            <parameter >p_oConfMS</parameter>
+            <parameter >p_oTimerGSXA</parameter>
+            <parameter >p_oTimerMaxTime</parameter>
+            <parameter >p_oTimerPhoneA</parameter>
+            <parameter >p_oTimerThreshold1</parameter>
+            <parameter >p_oTimerThreshold2</parameter>
+            <parameter >p_oTimerThreshold3</parameter>
+            <parameter >p_oTimerLongCallInterval</parameter>
+          </function>
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+            <result name="Success" link="20" stubbed="0" >f_nReturnCode == 0</result>
+          </results>
+        </action>
+        <action id="20" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=337 y=773 ?>
+          <!--0 - Do nothing-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="0"/>
+        </action>
+        <action id="21" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=353 y=388 ?>
+          <!--f_nPrompt: Invalid.. or Did not hear...-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="30" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="p_oAPI.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >f_nPrompt</audio>
+          </play>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="Success" link="19" stubbed="1"/>
+            <result name="Error" ><?xtml-editor visible=no?></result>
+            <result name="Timeout" ><?xtml-editor visible=no?></result>
+            <result name="tries &lt; 2" link="6" stubbed="1" >f_nTries &lt; 2</result>
+          </results>
+        </action>
+        <action id="22" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=785 y=335 ?>
+          <!--RemoveMemberFromConference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="f_nReturnCode" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oConfMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+          </results>
+        </action>
+        <action id="23" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=658 y=693 ?>
+          <!--ResetTimers-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ResetTimers&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >p_oTimerThreshold1</parameter>
+            <parameter >p_oTimerThreshold2</parameter>
+            <parameter >p_oTimerThreshold3</parameter>
+            <parameter >p_oTimerMaxTime</parameter>
+          </function>
+          <results >
+            <result name="Default" link="29" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[timeRemaining(Session.p_oSUB.fPrepaidBalance, Session.p_oArrayCallLegs, Session.p_oAPI.nRoundingSeconds, Session.p_oSUB.nSecondsAvailable);
+Session.p_oTimerMaxTime.lSleepTime =  Session.p_oSUB.nSecondsAvailable;]]></script>
+          </scripts>
+        </action>
+        <action id="24" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=92 y=958 ?>
+          <!--ProcTerminateConf-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ProcTerminateConf&quot;" return="f_nReturnCode" external-function="0" library="" >
+            <parameter >p_oArrayCallLegs</parameter>
+            <parameter >p_strContact</parameter>
+            <parameter >p_oAPI</parameter>
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oSUB</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_oTimerGSXA</parameter>
+            <parameter >p_oTimerMaxTime</parameter>
+            <parameter >p_oTimerPhoneA</parameter>
+            <parameter >p_oTimerThreshold1</parameter>
+            <parameter >p_oTimerThreshold2</parameter>
+            <parameter >p_oTimerThreshold3</parameter>
+            <parameter >p_oConfMS</parameter>
+            <parameter >p_oTimerLongCallInterval</parameter>
+          </function>
+          <results >
+            <result name="Default" link="10" stubbed="1"/>
+            <result name="Success,SuppressOnHold" link="31" stubbed="0" >f_nReturnCode == 0
+AND p_oAPI.bSuppressOnHold == true</result>
+            <result name="Success,!SuppressOnHold" link="30" stubbed="0" >f_nReturnCode == 0
+AND p_oAPI.bSuppressOnHold == false</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oAPI.nCallTerminationReason = 5;]]></script>
+          </scripts>
+        </action>
+        <action id="25" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=888 y=957 ?>
+          <!--f_nGET_NON_CONF_DEST-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nGET_NON_CONF_DEST"/>
+        </action>
+        <action id="26" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=318 y=33 ?>
+          <!--"ModifyConferenceMember"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ModifyConferenceMember&quot;" return="f_nReturnCode" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oConfMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="SUCCESS" link="6" stubbed="1" >f_nReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("MODIFY CALLER A TO MUTE AND DEAF FROM CONF, TO ADD OR REMOVE CALL LEG");
+Session.p_oConfMS.bDeafFlag = true;
+Session.p_oConfMS.bMuteFlag = true;
+Session.p_oMS.strEndPoint = Session.p_oConfMS.strEndPoint;
+Session.p_oMS.strConnectionId = Session.p_oConfMS.strConnectionId;
+Session.p_oMS.strCallId = Session.p_oConfMS.strCallId;
+Session.p_oMS.strType = Session.p_oConfMS.strType;]]></script>
+          </scripts>
+        </action>
+        <action id="27" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1199 y=680 ?>
+          <!--"ModifyConferenceMember"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ModifyConferenceMember&quot;" return="f_nReturnCode" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oConfMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="SUCCESS" link="20" stubbed="1" >f_nReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("MODIFY CALLER A TO CONF, RETURN CALLER TO CONFERENCE");
+Session.p_oConfMS.bDeafFlag = false;
+Session.p_oConfMS.bMuteFlag = false;
+
+Session.p_oMS.strEndPoint = "";
+Session.p_oMS.strConnectionId = "";
+Session.p_oMS.strCallId = "";]]></script>
+          </scripts>
+        </action>
+        <action id="28" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1154 y=807 ?>
+          <!--ProcOnly1BLegLeft-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ProcOnly1BLegLeft&quot;" return="f_nReturnCode" external-function="0" library="" >
+            <parameter >p_oArrayCallLegs</parameter>
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oConfMS</parameter>
+            <parameter >p_strContact</parameter>
+            <parameter >p_oAPI</parameter>
+            <parameter >f_bPutCallersOnHold</parameter>
+          </function>
+          <results >
+            <result name="Default" link="20" stubbed="1"/>
+            <result name="-99: End Session" link="10" stubbed="1" >f_nReturnCode == -99</result>
+          </results>
+        </action>
+        <action id="29" plug-in="Pactolus.Branch.1" ><?xtml-editor x=903 y=691 ?>
+          <results >
+            <result name="Default" link="27" stubbed="0"/>
+            <result name="oArrayCallLegs = 1" link="28" stubbed="0" >p_oArrayCallLegs.length == 1</result>
+          </results>
+        </action>
+        <action id="30" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=317 y=1074 ?>
+          <!--put A on hold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PutPartyOnHold&quot;" return="f_nReturnCode" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="9" stubbed="1"/>
+            <result name="Success" link="31" stubbed="0" >f_nReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if(0 != Session.f_nReturnCode) {
+	Session.p_oAPI.nCallTerminationReason = 6;
+	Session.p_oAPI.nSessionTerminationReason = 5;
+}	]]></script>
+          </scripts>
+        </action>
+        <action id="31" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=582 y=956 ?>
+          <!--outdial from MS-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;MSOutdialParty&quot;" return="f_nReturnCode" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oMS</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="9" stubbed="1"/>
+            <result name="Caller Hungup" link="9" stubbed="1" >f_nReturnCode == s_sCALLERHUNGUP</result>
+            <result name="SUCCESS" link="25" stubbed="0" >f_nReturnCode == s_sSUCCESS</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oMS.strEndPoint = "";
+Session.p_oMS.strConnectionId = "";
+Session.p_oMS.strCallId = "";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if(2 == Result.id) {
+	Session.g_oAPI.nCallTerminationReason = 2;
+}else if (3 == Result.id){
+	Session.p_oAPI.bBeginAConference = true;
+} else {
+	Session.g_oAPI.nCallTerminationReason = 6;
+	Session.g_oAPI.nSessionTerminationReason = 5;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="32" plug-in="Pactolus.Branch.1" ><?xtml-editor x=47 y=226 ?>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="oAPI.bSuppressOnHold" link="4" stubbed="1" >p_oAPI.bSuppressOnHold == true</result>
+          </results>
+        </action>
+        <action id="33" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=636 y=536 ?>
+          <!--Remove member from conference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="f_nReturnCode" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oArrayCallLegs[i].oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.i = Session.p_oArrayCallLegs.length - 1;
+Session.f_nReturnCode = -50;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if(Session.f_nReturnCode != 0) {
+	Server.logError("There was an error removing the member from the conference. f_nReturnCode: " + Session.f_nReturnCode);
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="HangUpAllWriteCDR" start="5" event="" returns="i4" >
+      <parameters >
+        <parameter name="p_oArrayCallLegs" type="object" pass="byref"/>
+        <parameter name="p_oSUB" type="object" pass="byref"/>
+        <parameter name="p_oAPI" type="object" pass="byref"/>
+        <parameter name="p_oACD" type="object" pass="byref"/>
+        <parameter name="p_strContact" type="string" pass="byref"/>
+        <parameter name="p_oCallLegA" type="object" pass="byref"/>
+        <parameter name="p_oTimerGSXA" type="object" pass="byref"/>
+        <parameter name="p_oTimerMaxTime" type="object" pass="byref"/>
+        <parameter name="p_oTimerPhoneA" type="object" pass="byref"/>
+        <parameter name="p_oTimerThreshold1" type="object" pass="byref"/>
+        <parameter name="p_oTimerThreshold2" type="object" pass="byref"/>
+        <parameter name="p_oTimerThreshold3" type="object" pass="byref"/>
+        <parameter name="p_oConfMS" type="object" pass="byref"/>
+        <parameter name="p_oTimerLongCallInterval" type="object" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="i" type="i4" >0</var>
+        <var name="f_oTimerMaxTimeALeg" type="object" ></var>
+        <var name="f_bContinue" type="boolean" >0</var>
+        <var name="f_bErrorInArray" type="boolean" >0</var>
+        <var name="f_nCallCompAttempts" type="i4" >0</var>
+        <var name="f_nSizeAfterCallComp" type="i4" >0</var>
+        <var name="f_nSizeAtStart" type="i4" >0</var>
+        <var name="f_nSizeBeforeCallComp" type="i4" >0</var>
+        <var name="f_bSendEmail" type="boolean" >0</var>
+        <var name="f_nReturnCode" type="i4" >-50</var>
+      </local-vars>
+      <actions >
+        <action id="5" plug-in="Pactolus.Branch.1" ><?xtml-editor x=71 y=77 ?>
+          <!--any call leg?-->
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="oArrayCallLeg.length &gt; 1" link="11" stubbed="0" >p_oArrayCallLegs.length &gt; 1</result>
+            <result name="oArrayCallLeg.length = 1" link="12" stubbed="0" >p_oArrayCallLegs.length == 1</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("p_oArrayCallLegs array.length:" + Session.p_oArrayCallLegs.length);
+Session.i = 0;
+
+Session.f_nSizeAtStart = Session.p_oArrayCallLegs.length;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if(1 == Result.id) {
+	Server.logInfo("WARNING: Called function HangUpAllWriteCDR but array does not cotain any call legs.");
+}
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=655 y=308 ?>
+          <!--Hang Up Party-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpParty&quot;" return="" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oArrayCallLegs[0]</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=217 y=421 ?>
+          <!--"psAPIProcCallCompletion"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIProcCallCompletion&quot;" return="" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oAPI</parameter>
+            <parameter >p_oSUB</parameter>
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oArrayCallLegs[0]</parameter>
+            <parameter >p_oArrayCallLegs[0].oRATE</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_oArrayCallLegs</parameter>
+          </function>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+            <result name="f_bSendEmail" link="16" stubbed="0" >f_bSendEmail == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_nCallCompAttempts++;
+Server.logInfo("f_nCallCompAttempts: " + Session.f_nCallCompAttempts);
+Session.f_nSizeBeforeCallComp = Session.p_oArrayCallLegs.length;
+Server.logInfo("f_nSizeBeforeCallComp: " + Session.f_nSizeBeforeCallComp);]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[Session.f_bSendEmail = false;
+
+if(Session.p_oAPI.strEmailEvents.length > 0) {
+	Session.f_bSendEmail = true;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.f_nSizeAfterCallComp = Session.p_oArrayCallLegs.length;
+Server.logInfo("f_nSizeAfterCallComp: " + Session.f_nSizeAfterCallComp);
+
+
+if(Session.f_nSizeBeforeCallComp == Session.f_nSizeAfterCallComp) {
+	Session.f_bErrorInArray = true;
+	Server.logError("There was an error finding the call leg in the array.");
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Pactolus.Branch.1" ><?xtml-editor x=457 y=422 ?>
+          <!--more to hangup?-->
+          <results >
+            <result name="Default" link="13" stubbed="0"/>
+            <result name="ArrayCallLegs.length &gt;= 1" link="4" stubbed="1" >p_oArrayCallLegs.length &gt;= 1</result>
+          </results>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=436 y=302 ?>
+          <!--Remove member from conference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oArrayCallLegs[0].oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+          </results>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=273 y=71 ?>
+          <!--0-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="0"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oArrayCallLegs.length = 0;]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=895 y=420 ?>
+          <!--DeleteConference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteConference&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oConfMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.i = Session.i - 1;
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=737 y=171 ?>
+          <!--psAPIProcCallCompletion-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIProcCallCompletion&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oAPI</parameter>
+            <parameter >p_oSUB</parameter>
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oArrayCallLegs[i]</parameter>
+            <parameter >p_oArrayCallLegs[i].oRATE</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_oArrayCallLegs</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+            <result name="f_bSendEmail" link="17" stubbed="0" >f_bSendEmail == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="middle" ><![CDATA[if(Session.p_oAPI.strEmailEvents.length > 0) {
+	Session.f_bSendEmail = true;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if(Session.f_nReturnCode != 0) {
+	Server.logError("Error calling psAPIProcCallCompletion.");
+} 
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=496 y=172 ?>
+          <!--Hang Up Party-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpParty&quot;" return="" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oArrayCallLegs[i]</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+          </results>
+        </action>
+        <action id="11" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=222 y=312 ?>
+          <!--StopTimers-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StopTimers&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >p_oTimerGSXA</parameter>
+            <parameter >p_oTimerMaxTime</parameter>
+            <parameter >p_oTimerPhoneA</parameter>
+            <parameter >p_oTimerThreshold1</parameter>
+            <parameter >p_oTimerThreshold2</parameter>
+            <parameter >p_oTimerThreshold3</parameter>
+            <parameter >p_oArrayCallLegs</parameter>
+            <parameter >f_oTimerMaxTimeALeg</parameter>
+            <parameter >p_oTimerLongCallInterval</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+          </results>
+        </action>
+        <action id="12" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=277 y=168 ?>
+          <!--StopTimers-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StopTimers&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >p_oTimerGSXA</parameter>
+            <parameter >p_oTimerMaxTime</parameter>
+            <parameter >p_oTimerPhoneA</parameter>
+            <parameter >p_oTimerThreshold1</parameter>
+            <parameter >p_oTimerThreshold2</parameter>
+            <parameter >p_oTimerThreshold3</parameter>
+            <parameter >p_oArrayCallLegs</parameter>
+            <parameter >f_oTimerMaxTimeALeg</parameter>
+            <parameter >p_oTimerLongCallInterval</parameter>
+          </function>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+          </results>
+        </action>
+        <action id="13" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=679 y=421 ?>
+          <!--Remove A from conference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oConfMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+          </results>
+        </action>
+        <action id="14" plug-in="Pactolus.Branch.1" ><?xtml-editor x=409 y=649 ?>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="f_bErrorInArray" link="15" stubbed="0" >f_bErrorInArray == true</result>
+          </results>
+        </action>
+        <action id="15" plug-in="Pactolus.Branch.1" ><?xtml-editor x=631 y=663 ?>
+          <results >
+            <result name="Default" link="13" stubbed="0"/>
+            <result name="f_bContinue" link="4" stubbed="1" >f_bContinue == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if(Session.f_nCallCompAttempts >= Session.f_nSizeAtStart) {
+	Session.f_bContinue = false
+} else {
+	Session.f_bContinue = true;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=142 y=623 ?>
+          <!--psAPIPrepareAndSendEmails-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIPrepareAndSendEmails&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oSUB</parameter>
+            <parameter >p_oAPI</parameter>
+          </function>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_nReturnCode = -50;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if(Session.f_nReturnCode != 0) {
+	Server.logError("Error calling psAPIPrepareAndSendEmails.");
+} 
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="17" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=995 y=175 ?>
+          <!--psAPIPrepareAndSendEmails-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIPrepareAndSendEmails&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oSUB</parameter>
+            <parameter >p_oAPI</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_nReturnCode = -50;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if(Session.f_nReturnCode != 0) {
+	Server.logError("Error calling psAPIPrepareAndSendEmails.");
+} 
+
+]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="PutAllLegsOnHold" start="3" event="" returns="i4" >
+      <parameters >
+        <parameter name="p_oArrayCallLegs" type="object" pass="byref"/>
+        <parameter name="p_strContact" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="i" type="i4" >-1</var>
+        <var name="f_nRC" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="3" plug-in="Pactolus.Branch.1" ><?xtml-editor x=91 y=150 ?>
+          <!--any call leg?-->
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="oArrayCallLeg.length &lt;= 0" link="5" stubbed="0" >p_oArrayCallLegs.length &lt;= 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("p_oArrayCallLegs array.length: " + Session.p_oArrayCallLegs.length);
+Session.i = 0;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if(2 == Result.id) {
+	Server.logInfo("WARNING: Called function PutAllLegsOnHold but array does not cotain any call legs.");
+}
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.Branch.1" ><?xtml-editor x=554 y=209 ?>
+          <!--more to hangup?-->
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="i &lt; oArrayCallLegs.length" link="4" stubbed="1" >i &lt; p_oArrayCallLegs.length</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.i++;]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=310 y=104 ?>
+          <!--PutPartyOnHold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PutPartyOnHold&quot;" return="f_nRC" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oArrayCallLegs[i]</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success" link="2" stubbed="0" >f_nRC == 0</result>
+          </results>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=325 y=309 ?>
+          <!--0-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="0"/>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=536 y=64 ?>
+          <!---1-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="-1"/>
+        </action>
+      </actions>
+    </function>
+    <function name="ProcTerminateConf" start="2" event="" returns="i4" >
+      <parameters >
+        <parameter name="p_oArrayCallLegs" type="object" pass="byref"/>
+        <parameter name="p_strContact" type="string"/>
+        <parameter name="p_oAPI" type="object" pass="byref"/>
+        <parameter name="p_oCallLegA" type="object" pass="byref"/>
+        <parameter name="p_oSUB" type="object" pass="byref"/>
+        <parameter name="p_oACD" type="object" pass="byref"/>
+        <parameter name="p_oTimerGSXA" type="object" pass="byref"/>
+        <parameter name="p_oTimerMaxTime" type="object" pass="byref"/>
+        <parameter name="p_oTimerPhoneA" type="object" pass="byref"/>
+        <parameter name="p_oTimerThreshold1" type="object" pass="byref"/>
+        <parameter name="p_oTimerThreshold2" type="object" pass="byref"/>
+        <parameter name="p_oTimerThreshold3" type="object" pass="byref"/>
+        <parameter name="p_oConfMS" type="object" pass="byref"/>
+        <parameter name="p_oTimerLongCallInterval" type="object" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nRC" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="2" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=123 y=110 ?>
+          <!--HangUpAllWriteCDR-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpAllWriteCDR&quot;" return="f_nRC" external-function="0" library="" >
+            <parameter >p_oArrayCallLegs</parameter>
+            <parameter >p_oSUB</parameter>
+            <parameter >p_oAPI</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_strContact</parameter>
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oTimerGSXA</parameter>
+            <parameter >p_oTimerMaxTime</parameter>
+            <parameter >p_oTimerPhoneA</parameter>
+            <parameter >p_oTimerThreshold1</parameter>
+            <parameter >p_oTimerThreshold2</parameter>
+            <parameter >p_oTimerThreshold3</parameter>
+            <parameter >p_oConfMS</parameter>
+            <parameter >p_oTimerLongCallInterval</parameter>
+          </function>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success" link="4" stubbed="0" >f_nRC == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if(Session.f_nRC != 0) {
+	Server.logError("There was an error hanging up all B legs and writing CDRs.");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=339 y=79 ?>
+          <!--HangUpParty A-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpParty&quot;" return="" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+          </results>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=354 y=204 ?>
+          <!--0-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="0"/>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=559 y=78 ?>
+          <!---1: End Session-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="-1"/>
+        </action>
+      </actions>
+    </function>
+    <function name="ReturnToConf" start="12" event="" returns="i4" >
+      <parameters >
+        <parameter name="p_oCallLegA" type="object" pass="byref"/>
+        <parameter name="p_oMS" type="object" pass="byref"/>
+        <parameter name="p_strContact" type="string"/>
+        <parameter name="p_oArrayCallLegs" type="object" pass="byref"/>
+        <parameter name="p_oSUB" type="object" pass="byref"/>
+        <parameter name="p_oRATE" type="object" pass="byref"/>
+        <parameter name="p_oACD" type="object" pass="byref"/>
+        <parameter name="p_oAPI" type="object" pass="byref"/>
+        <parameter name="p_oConfMS" type="object" pass="byref"/>
+        <parameter name="p_oTimerGSXA" type="object" pass="byref"/>
+        <parameter name="p_oTimerMaxTime" type="object" pass="byref"/>
+        <parameter name="p_oTimerPhoneA" type="object" pass="byref"/>
+        <parameter name="p_oTimerThreshold1" type="object" pass="byref"/>
+        <parameter name="p_oTimerThreshold2" type="object" pass="byref"/>
+        <parameter name="p_oTimerThreshold3" type="object" pass="byref"/>
+        <parameter name="p_oTimerLongCallInterval" type="object" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nRC" type="i4" >-1</var>
+        <var name="f_nEND_SESSION" type="i4" >-99</var>
+        <var name="f_lFILLER" type="i8" >0</var>
+        <var name="bPlayRingBack" type="boolean" >0</var>
+      </local-vars>
+      <actions >
+        <action id="12" plug-in="Pactolus.Branch.1" ><?xtml-editor x=20 y=48 ?>
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+            <result name="p_oArrayCallLegs.length==1" link="7" stubbed="0" >p_oArrayCallLegs.length == 1</result>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=574 y=165 ?>
+          <!--HangUpAllWriteCDR-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpAllWriteCDR&quot;" return="" external-function="0" library="" >
+            <parameter >p_oArrayCallLegs</parameter>
+            <parameter >p_oSUB</parameter>
+            <parameter >p_oAPI</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_strContact</parameter>
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oTimerGSXA</parameter>
+            <parameter >p_oTimerMaxTime</parameter>
+            <parameter >p_oTimerPhoneA</parameter>
+            <parameter >p_oTimerThreshold1</parameter>
+            <parameter >p_oTimerThreshold2</parameter>
+            <parameter >p_oTimerThreshold3</parameter>
+            <parameter >p_oConfMS</parameter>
+            <parameter >p_oTimerLongCallInterval</parameter>
+          </function>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+          </results>
+        </action>
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=819 y=155 ?>
+          <!--HangUpParty-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpParty&quot;" return="" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+          </results>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1059 y=160 ?>
+          <!--f_nEND_SESSION-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nEND_SESSION"/>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=27 y=373 ?>
+          <!--0-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="0"/>
+        </action>
+        <action id="7" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=254 y=186 ?>
+          <!--DeleteMSConnection-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteMSConnection&quot;" return="f_nRC" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success,!bSuppressOnHold" link="10" stubbed="0" >f_nRC == 0
+AND p_oAPI.bSuppressOnHold == false</result>
+            <result name="Success,bSuppressOnHold" link="8" stubbed="0" >f_nRC == 0
+AND p_oAPI.bSuppressOnHold == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Session.array.length:" + Session.p_oArrayCallLegs.length);]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=724 y=348 ?>
+          <!--outdial-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;OutdialParty&quot;" return="" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oArrayCallLegs[0]</parameter>
+            <parameter >f_lFILLER</parameter>
+            <parameter >f_lFILLER</parameter>
+            <parameter >p_oArrayCallLegs[0].strSIPStatus</parameter>
+            <parameter >p_strContact</parameter>
+            <parameter >p_oAPI</parameter>
+            <parameter >bPlayRingBack</parameter>
+            <parameter >p_oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Only 1 B leg in the arrray.  Must dial out A to B: assuming both legs are already on hold.");]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=959 y=350 ?>
+          <!--1-->
+          <sleep xmlns="urn:www.pactolus.com:xtml:application" duration="1"/>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+          </results>
+        </action>
+        <action id="10" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=434 y=326 ?>
+          <!--put A on hold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PutPartyOnHold&quot;" return="f_nRC" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="8" stubbed="0" >f_nRC == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if(0 != Session.f_nRC) {
+	Session.p_oAPI.nCallTerminationReason = 6;
+	Session.p_oAPI.nSessionTerminationReason = 5;
+}	]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=317 y=34 ?>
+          <!--"ModifyConferenceMember"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ModifyConferenceMember&quot;" return="f_nRC" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oConfMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="SUCCESS" link="5" stubbed="1" >f_nRC == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("MODIFY CALLER A TO CONF, RETURN CALLER TO CONFERENCE");
+Session.p_oConfMS.bDeafFlag = false;
+Session.p_oConfMS.bMuteFlag = false;
+Session.p_oMS.strEndPoint = "";
+Session.p_oMS.strConnectionId = "";
+Session.p_oMS.strCallId = "";]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="ProcOnly1BLegLeft" start="17" event="" returns="i4" >
+      <parameters >
+        <parameter name="p_oArrayCallLegs" type="object" pass="byref"/>
+        <parameter name="p_oCallLegA" type="object" pass="byref"/>
+        <parameter name="p_oConfMS" type="object" pass="byref"/>
+        <parameter name="p_strContact" type="string" pass="byref"/>
+        <parameter name="p_oAPI" type="object" pass="byref"/>
+        <parameter name="p_bPutCallersOnHold" type="boolean"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >-1</var>
+        <var name="f_nEND_SESSION" type="i4" >-99</var>
+        <var name="f_lFILLER" type="i8" >0</var>
+        <var name="f_strFILLER" type="string" ></var>
+        <var name="bPlayRingBack" type="boolean" >0</var>
+      </local-vars>
+      <actions >
+        <action id="17" plug-in="Pactolus.Branch.1" ><?xtml-editor x=22 y=30 ?>
+          <results >
+            <result name="Default" link="18" stubbed="1"/>
+            <result name="bPutCallersOnHold,!bSuppressOnHold" link="11" stubbed="0" >p_bPutCallersOnHold == true
+AND p_oAPI.bSuppressOnHold == false</result>
+          </results>
+        </action>
+        <action id="8" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=255 y=305 ?>
+          <!--Remove A from conference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oConfMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+          </results>
+        </action>
+        <action id="9" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=495 y=302 ?>
+          <!--Remove B from conference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oArrayCallLegs[0].oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+          </results>
+        </action>
+        <action id="10" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=721 y=297 ?>
+          <!--"DeleteConference"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteConference&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oConfMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="15" stubbed="1"/>
+            <result name="0 - Succes from outdial" link="16" stubbed="1" >f_nReturnCode == 0</result>
+          </results>
+        </action>
+        <action id="11" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=278 y=31 ?>
+          <!--put A on hold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PutPartyOnHold&quot;" return="f_nReturnCode" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+            <result name="SUCCESS" link="12" stubbed="0" >f_nReturnCode == s_sSUCCESS</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_nReturnCode = -50;]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=531 y=119 ?>
+          <!--put B on hold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PutPartyOnHold&quot;" return="f_nReturnCode" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oArrayCallLegs[0]</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="15" stubbed="1"/>
+            <result name="SUCCESS" link="18" stubbed="0" >f_nReturnCode == s_sSUCCESS</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_nReturnCode = -50;]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=515 y=30 ?>
+          <!--f_nEND_SESSION-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nEND_SESSION"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR executing ProcOnly1BLegLeft.");]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=22 y=472 ?>
+          <!--0-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="0"/>
+        </action>
+        <action id="18" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=27 y=308 ?>
+          <!--OutdialParty-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;OutdialParty&quot;" return="f_nReturnCode" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oArrayCallLegs[0]</parameter>
+            <parameter >f_lFILLER</parameter>
+            <parameter >f_lFILLER</parameter>
+            <parameter >f_strFILLER</parameter>
+            <parameter >p_strContact</parameter>
+            <parameter >p_oAPI</parameter>
+            <parameter >bPlayRingBack</parameter>
+            <parameter >p_oConfMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="ProcOnByes" start="2" event="" returns="i4" >
+      <parameters >
+        <parameter name="p_oOnByeCallIds" type="object" pass="byref"/>
+        <parameter name="p_oAPI" type="object" pass="byref"/>
+        <parameter name="p_oCallLegA" type="object" pass="byref"/>
+        <parameter name="p_oRATE" type="object" pass="byref"/>
+        <parameter name="p_oACD" type="object" pass="byref"/>
+        <parameter name="p_oArrayCallLegs" type="object" pass="byref"/>
+        <parameter name="p_oSUB" type="object" pass="byref"/>
+        <parameter name="p_oConfMS" type="object" pass="byref"/>
+        <parameter name="p_strContact" type="string"/>
+        <parameter name="p_oTimerThreshold1" type="object" pass="byref"/>
+        <parameter name="p_oTimerThreshold2" type="object" pass="byref"/>
+        <parameter name="p_oTimerThreshold3" type="object" pass="byref"/>
+        <parameter name="p_oTimerMaxTime" type="object" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="i" type="i4" >0</var>
+        <var name="f_nIndex" type="i4" >0</var>
+        <var name="f_bPutCallersOnHold" type="boolean" >1</var>
+        <var name="f_nEND_SESSION" type="i4" >-99</var>
+        <var name="f_nRC" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="2" plug-in="Pactolus.Branch.1" ><?xtml-editor x=14 y=41 ?>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="oOnByeCallIds.length &gt;= 1" link="10" stubbed="0" >p_oOnByeCallIds.length &gt;= 1</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("oOnByeLegs.length: " + Session.p_oOnByeCallIds.length);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("ArrayCallLegs.length: " + Session.p_oArrayCallLegs.length);
+Server.logInfo("oOnByeLegs.length: " + Session.p_oOnByeCallIds.length);
+
+if(1 == Result.id) {
+	Server.logInfo("Did not recieve any Byes while moderator was adding a party.");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=481 y=90 ?>
+          <!--psAPIProcCallCompletion-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIProcCallCompletion&quot;" return="" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oAPI</parameter>
+            <parameter >p_oSUB</parameter>
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oArrayCallLegs[f_nIndex]</parameter>
+            <parameter >p_oArrayCallLegs[f_nIndex].oRATE</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_oArrayCallLegs</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[
+
+Session.f_nIndex = js_search_callid(Session.p_oArrayCallLegs,  Session.p_oOnByeCallIds[Session.i].strCallId);
+
+
+
+
+
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=35 y=685 ?>
+          <!--0-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="0"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oOnByeCallIds.length = 0;]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.Branch.1" ><?xtml-editor x=737 y=120 ?>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="i &lt; oOnByeCallIds.length" link="10" stubbed="0" >i &lt; p_oOnByeCallIds.length</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.i++;]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.Branch.1" ><?xtml-editor x=32 y=316 ?>
+          <results >
+            <result name="Default" link="9" stubbed="1"/>
+            <result name="oArrayCallLegs = 0" link="8" stubbed="0" >p_oArrayCallLegs.length == 0</result>
+            <result name="oArrayCallLegs = 1" link="6" stubbed="0" >p_oArrayCallLegs.length == 1</result>
+          </results>
+        </action>
+        <action id="6" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=339 y=479 ?>
+          <!--ProcOnly1BLegLeft-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ProcOnly1BLegLeft&quot;" return="f_nRC" external-function="0" library="" >
+            <parameter >p_oArrayCallLegs</parameter>
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oConfMS</parameter>
+            <parameter >p_strContact</parameter>
+            <parameter >p_oAPI</parameter>
+            <parameter >f_bPutCallersOnHold</parameter>
+          </function>
+          <results >
+            <result name="Default" link="9" stubbed="1"/>
+            <result name="-99: End Session" link="7" stubbed="0" >f_nRC == -99</result>
+          </results>
+        </action>
+        <action id="7" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=626 y=496 ?>
+          <!--f_nEND_SESSION-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nEND_SESSION"/>
+        </action>
+        <action id="8" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=481 y=333 ?>
+          <!--0-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="0"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("Got OnBye while mod was adding party. removed b legs, now none remain. Should not be here!");
+Session.p_oOnByeCallIds.length = 0;]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=28 y=582 ?>
+          <!--ResetTimers-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ResetTimers&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >p_oTimerThreshold1</parameter>
+            <parameter >p_oTimerThreshold2</parameter>
+            <parameter >p_oTimerThreshold3</parameter>
+            <parameter >p_oTimerMaxTime</parameter>
+          </function>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[timeRemaining(Session.p_oSUB.fPrepaidBalance, Session.p_oArrayCallLegs, Session.p_oAPI.nRoundingSeconds, Session.p_oSUB.nSecondsAvailable);
+Session.p_oTimerMaxTime.lSleepTime =  Session.p_oSUB.nSecondsAvailable;]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=254 y=83 ?>
+          <!--StopBLegTimers-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StopBLegTimers&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >p_oArrayCallLegs[f_nIndex].oTimer</parameter>
+            <parameter >p_oArrayCallLegs[f_nIndex].oTimerGSX</parameter>
+          </function>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="ModifyConfMemebers" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="p_oArrayCallLegs" type="object" pass="byref"/>
+        <parameter name="p_bDeaf" type="boolean"/>
+        <parameter name="p_bMute" type="boolean"/>
+        <parameter name="p_bDtmfClamp" type="boolean"/>
+        <parameter name="p_bModifyLastLeg" type="boolean"/>
+      </parameters>
+      <local-vars >
+        <var name="i" type="i4" >0</var>
+        <var name="f_nRC" type="i4" >0</var>
+        <var name="nArrayLength" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=91 y=150 ?>
+          <!--any call leg?-->
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="oArrayCallLeg.length &lt;= 0" link="4" stubbed="0" >p_oArrayCallLegs.length &lt;= 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("p_oArrayCallLegs array.length: " + Session.p_oArrayCallLegs.length);
+Session.i = 0;
+
+
+// We need p_bModifyLastLeg because a call leg exists in the array that does not have a MS. It has yet to be outdialed.
+if(Session.p_bModifyLastLeg) {
+	Session.nArrayLength = Session.p_oArrayCallLegs.length;
+} else {
+	Session.nArrayLength = Session.p_oArrayCallLegs.length - 1;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if(2 == Result.id) {
+	Server.logInfo("WARNING: Called function ModifyConfMembers but array does not cotain any call legs.");
+}
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.Branch.1" ><?xtml-editor x=554 y=209 ?>
+          <!--more to hangup?-->
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="i &lt; nArrayLength" link="6" stubbed="1" >i &lt; nArrayLength</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.i++;]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=325 y=309 ?>
+          <!--0-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="0"/>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=585 y=43 ?>
+          <!---1-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="-1"/>
+        </action>
+        <action id="6" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=304 y=119 ?>
+          <!--"ModifyConferenceMember"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ModifyConferenceMember&quot;" return="f_nRC" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oArrayCallLegs[i].oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="SUCCESS" link="2" stubbed="0" >f_nRC == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("i: " + Session.i);
+
+Session.p_oArrayCallLegs[Session.i].oMS.bDeafFlag = Session.p_bDeaf;
+Session.p_oArrayCallLegs[Session.i].oMS.bMuteFlag = Session.p_bMute
+Session.p_oArrayCallLegs[Session.i].oMS.bDTMFClampFlag = Session.p_bDtmfClamp;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if(Session.f_nRC != 0) {
+	Server.logError("Error modifying one of the conference members.");
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="AddLegToConf" start="5" event="" returns="void" >
+      <parameters >
+        <parameter name="p_oConfMS" type="object" pass="byref"/>
+        <parameter name="p_oCallLegB" type="object" pass="byref"/>
+        <parameter name="p_strContact" type="string"/>
+        <parameter name="p_oAPI" type="object" pass="byref"/>
+        <parameter name="p_oSUB" type="object" pass="byref"/>
+        <parameter name="p_oCallLegA" type="object" pass="byref"/>
+        <parameter name="p_oRATE" type="object" pass="byref"/>
+        <parameter name="p_oACD" type="object" pass="byref"/>
+        <parameter name="p_oArrayCallLegs" type="object" pass="byref"/>
+        <parameter name="p_oMS" type="object" pass="byref"/>
+        <parameter name="p_strSIPVERSION" type="string"/>
+        <parameter name="p_oOnByeBLegs" type="object" pass="byref"/>
+        <parameter name="p_oTimerThreshold1" type="object" pass="byref"/>
+        <parameter name="p_oTimerThreshold2" type="object" pass="byref"/>
+        <parameter name="p_oTimerThreshold3" type="object" pass="byref"/>
+        <parameter name="p_oTimerMaxTime" type="object" pass="byref"/>
+        <parameter name="p_strSessionTimerFlag" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nRC" type="i4" >0</var>
+        <var name="f_nCALLERHUNGUP" type="i4" >0</var>
+        <var name="f_nEND_SESSION" type="i4" >0</var>
+        <var name="f_nFAILED_TO_ADD" type="i4" >0</var>
+        <var name="f_lFILLER" type="i8" >0</var>
+        <var name="f_bPutCallersOnHold" type="boolean" >0</var>
+        <var name="f_nLAST_LEG_CONNECTED" type="i4" >0</var>
+        <var name="i" type="i4" >0</var>
+        <var name="f_bLegHangUp" type="boolean" >0</var>
+        <var name="f_nPromptToPlay" type="i4" >0</var>
+        <var name="f_oOnByeCallIds" type="object" ></var>
+        <var name="f_bDeaf" type="boolean" >0</var>
+        <var name="f_bMute" type="boolean" >0</var>
+        <var name="f_bDtmfClamp" type="boolean" >0</var>
+        <var name="f_bModifyLastLeg" type="boolean" >0</var>
+        <var name="f_oConfToDoDialOut" type="object" ></var>
+        <var name="f_oBLegForOutdial" type="object" ></var>
+      </local-vars>
+      <actions >
+        <action id="5" plug-in="Pactolus.Branch.1" ><?xtml-editor x=23 y=55 ?>
+          <!--If this is the 2nd B leg, need to set up conference.-->
+          <results >
+            <result name="Default" link="33" stubbed="0"/>
+            <result name="oArray.length=2,SupressOnHold" link="7" stubbed="0" >p_oArrayCallLegs.length == 2
+AND p_oAPI.bSuppressOnHold == true</result>
+            <result name="oArray.length=2,!SupressOnHold" link="13" stubbed="0" >p_oArrayCallLegs.length == 2
+AND p_oAPI.bSuppressOnHold == false</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("array.length: " + Session.p_oArrayCallLegs.length);
+Server.logInfo("this: p_oOnByeBLegs.length: " + Session.p_oOnByeBLegs.length);]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=33 y=468 ?>
+          <!--OutdialPartyToConference - Conf For Outdial-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;OutdialPartyToConference&quot;" return="f_nRC" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oCallLegB</parameter>
+            <parameter >p_oArrayCallLegs[i].oMS</parameter>
+            <parameter >p_oCallLegB.lTimeStart</parameter>
+            <parameter >p_oCallLegB.lTimeAnswered</parameter>
+            <parameter >p_oAPI.strSIPStatus</parameter>
+            <parameter >p_oCallLegA.strCallingNumber</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="19" stubbed="0"/>
+            <result name="Success" link="36" stubbed="0" >f_nRC == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.i = Session.p_oArrayCallLegs.length - 1;
+
+
+//Session.p_oArrayCallLegs[Session.i].oMS.strConferenceId = Session.p_oConfMS.strConferenceId;
+
+Session.p_oArrayCallLegs[Session.i].oMS.strConferenceId = Session.f_oConfToDoDialOut.strConferenceId;
+
+if(Session.p_oConfMS.strType == "PCS") {
+	Session.p_oArrayCallLegs[Session.i].oMS.strCodec = "PCMU";
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=619 y=811 ?>
+          <!--0-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="0"/>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1189 y=552 ?>
+          <!--f_nFAILED_TO_ADD-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nFAILED_TO_ADD"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("Failed to add party to conference.");]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=65 y=806 ?>
+          <!--StartBLegTimers-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StartBLegTimers&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >p_oCallLegB</parameter>
+            <parameter >p_strSessionTimerFlag</parameter>
+          </function>
+          <results >
+            <result name="Default" link="16" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oAPI.nMaxTalkers++;]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=21 y=935 ?>
+          <!--f_nEND_SESSION-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nEND_SESSION"/>
+        </action>
+        <action id="7" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=43 y=298 ?>
+          <!--DeleteMSConnection-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteMSConnection&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="34" stubbed="0"/>
+          </results>
+        </action>
+        <action id="8" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1742 y=656 ?>
+          <!--ProcOnly1BLegLeft-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ProcOnly1BLegLeft&quot;" return="f_nRC" external-function="0" library="" >
+            <parameter >p_oArrayCallLegs</parameter>
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oConfMS</parameter>
+            <parameter >p_strContact</parameter>
+            <parameter >p_oAPI</parameter>
+            <parameter >f_bPutCallersOnHold</parameter>
+          </function>
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+            <result name="-99: End Session" link="6" stubbed="1" >f_nRC == -99</result>
+          </results>
+        </action>
+        <action id="9" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1247 y=210 ?>
+          <!--psAPIProcCallCompletion-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIProcCallCompletion&quot;" return="" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oAPI</parameter>
+            <parameter >p_oSUB</parameter>
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oArrayCallLegs[1]</parameter>
+            <parameter >p_oArrayCallLegs[1].oRATE</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_oArrayCallLegs</parameter>
+          </function>
+          <results >
+            <result name="Default" link="20" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("Could not outdial the 2 B leg to the conference.  Returning A leg back to 1st B Leg.");
+]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1993 y=668 ?>
+          <!--f_nLAST_LEG_CONNECTED-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nLAST_LEG_CONNECTED"/>
+        </action>
+        <action id="11" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1020 y=402 ?>
+          <!--StartBLegTimers-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StartBLegTimers&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >p_oArrayCallLegs[1]</parameter>
+            <parameter >p_strSessionTimerFlag</parameter>
+          </function>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oAPI.nMaxTalkers++;]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1503 y=529 ?>
+          <!--StopBLegTimers-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StopBLegTimers&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >p_oArrayCallLegs[0].oTimer</parameter>
+            <parameter >p_oArrayCallLegs[0].oTimerGSX</parameter>
+          </function>
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+          </results>
+        </action>
+        <action id="13" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=261 y=143 ?>
+          <!--A on hold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PutPartyOnHold&quot;" return="f_nRC" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+            <result name="Success" link="7" stubbed="1" >f_nRC == 0</result>
+          </results>
+        </action>
+        <action id="14" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1242 y=400 ?>
+          <!--Check if 1st B leg hung up-->
+          <results >
+            <result name="Default" link="32" stubbed="0"/>
+            <result name="f_bHangUpBLeg" link="12" stubbed="0" >f_bLegHangUp == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[
+Server.logInfo("p_oOnByeBLegs.length: " + Session.p_oOnByeBLegs.length);
+Session.p_oAPI.nCallTerminationReason = 1;
+
+Session.f_bLegHangUp = false;
+var i = 0;
+
+//var aTemp = new Array();
+
+
+for(i = 0; i < Session.p_oOnByeBLegs.length; i++) {
+
+ 	if(Session.p_oArrayCallLegs[0].strCallId ==	Session.p_oOnByeBLegs[i].strCallId) {
+	 	// Call Id matches, will be proccessed in this function and removed.
+	 	Session.f_bLegHangUp = true;
+ 	} else {
+ 		// Call Id does not match, store this object for future processing.
+ 		//aTemp[i] = Session.p_oOnByeBLegs[i];
+ 		Session.f_oOnByeCallIds[i] = Session.p_oOnByeBLegs[i];
+ 		
+ 	}
+}
+
+
+Session.p_oOnByeBLegs = Session.f_oOnByeCallIds;
+
+Server.logInfo("p_oOnByeBLegs.length: " + Session.p_oOnByeBLegs.length);]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1739 y=524 ?>
+          <!--psAPIProcCallCompletion-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIProcCallCompletion&quot;" return="" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oAPI</parameter>
+            <parameter >p_oSUB</parameter>
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oArrayCallLegs[0]</parameter>
+            <parameter >p_oArrayCallLegs[0].oRATE</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_oArrayCallLegs</parameter>
+          </function>
+          <results >
+            <result name="Default" link="17" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("1st B leg hung up or could not be added to conference, directly outdial A leg to 2nd B leg.");]]></script>
+            <script language="javascript" timing="last" ><![CDATA[timeRemaining(Session.p_oSUB.fPrepaidBalance, Session.p_oArrayCallLegs, Session.p_oAPI.nRoundingSeconds, Session.p_oSUB.nSecondsAvailable)
+]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=306 y=814 ?>
+          <!--ResetTimers-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ResetTimers&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >p_oTimerThreshold1</parameter>
+            <parameter >p_oTimerThreshold2</parameter>
+            <parameter >p_oTimerThreshold3</parameter>
+            <parameter >p_oTimerMaxTime</parameter>
+          </function>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_oArrayCallLegs = Session.p_oArrayCallLegs;
+timeRemaining(Session.p_oSUB.fPrepaidBalance, Session.p_oArrayCallLegs, Session.p_oAPI.nRoundingSeconds, Session.p_oSUB.nSecondsAvailable);
+Session.p_oTimerMaxTime.lSleepTime =  Session.p_oSUB.nSecondsAvailable;
+Session.p_oArrayCallLegs = Session.f_oArrayCallLegs;
+
+
+if(Session.p_oTimerMaxTime.lSleepTime <= 0) {
+	Server.logError("Seconds Available is now less than or equal to zero. Application should not have attempted to add another leg or there is invalid data for rating.");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="17" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1499 y=666 ?>
+          <!--ResetTimers-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ResetTimers&quot;" return="" external-function="1" library="lib_utils.xml" >
+            <parameter >p_oTimerThreshold1</parameter>
+            <parameter >p_oTimerThreshold2</parameter>
+            <parameter >p_oTimerThreshold3</parameter>
+            <parameter >p_oTimerMaxTime</parameter>
+          </function>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_oArrayCallLegs = Session.p_oArrayCallLegs;
+timeRemaining(Session.p_oSUB.fPrepaidBalance, Session.p_oArrayCallLegs, Session.p_oAPI.nRoundingSeconds, Session.p_oSUB.nSecondsAvailable);
+Session.p_oArrayCallLegs = Session.f_oArrayCallLegs;
+Session.p_oTimerMaxTime.lSleepTime =  Session.p_oSUB.nSecondsAvailable;
+
+
+if(Session.p_oTimerMaxTime.lSleepTime <= 0) {
+	Server.logError("Seconds Available is now less than or equal to zero. Application should not have attempted to add another leg or there is invalid data for rating.");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="18" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1027 y=215 ?>
+          <!--f_nPromptToPlay-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="p_oConfMS.strConnectionId" endpoint="p_oConfMS.strEndPoint" callid="p_oConfMS.strCallId" repeat="1" timeout="10" ms-type="p_oConfMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="p_oAPI.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >f_nPromptToPlay</audio>
+          </play>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[switch (Session.f_nRC)
+{
+	case 1:  //ring no answer
+		Session.f_nPromptToPlay = 551;
+		break;
+	case 2:  //busy
+		Session.f_nPromptToPlay = 550;
+		break;
+	case 3:  //DTMF interrupted
+		Session.f_nPromptToPlay = 99;
+		break;
+	default:
+		Session.f_nPromptToPlay = 549;
+		break;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="19" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=308 y=457 ?>
+          <!--f_nPromptToPlay-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="f_oConfToDoDialOut.strConnectionId" endpoint="f_oConfToDoDialOut.strEndPoint" callid="f_oConfToDoDialOut.strCallId" repeat="1" timeout="10" ms-type="f_oConfToDoDialOut.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="p_oAPI.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >f_nPromptToPlay</audio>
+          </play>
+          <results >
+            <result name="Default" link="30" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[switch (Session.f_nRC)
+{
+	case 1:  //ring no answer
+		Session.f_nPromptToPlay = 551;
+		break;
+	case 2:  //busy
+		Session.f_nPromptToPlay = 550;
+		break;
+	case 3:  //DTMF interrupted
+		Session.f_nPromptToPlay = 99;
+		break;
+	default:
+		Session.f_nPromptToPlay = 549;
+		break;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="20" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1403 y=101 ?>
+          <!--Remove A from conference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oConfMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="21" stubbed="0"/>
+          </results>
+        </action>
+        <action id="21" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1549 y=196 ?>
+          <!--"DeleteConference"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteConference&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oConfMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+          </results>
+        </action>
+        <action id="22" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=475 y=22 ?>
+          <!--Create Conf For outdial only-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;CreateConference&quot;" return="f_nRC" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >f_oConfToDoDialOut</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+            <result name="Success" link="23" stubbed="0" >f_nRC == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_initMS(Session.f_oConfToDoDialOut, Session.p_oConfMS.strType);
+if(Session.f_oConfToDoDialOut.strType == "PCS") {
+	Session.f_oConfToDoDialOut.strCodec = "PCMU";
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if(Session.f_nRC != 0) {
+	Server.logError("Error Creating Conference for Outdial.");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="23" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=724 y=23 ?>
+          <!--Add A Leg to Conf for Outdial-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;AddMemberToConference&quot;" return="f_nRC" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >f_oConfToDoDialOut</parameter>
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+            <result name="Success" link="1" stubbed="1" >f_nRC == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if(Session.f_nRC != 0) {
+	Server.logError("Error adding A Leg to Conference for outdial.");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="24" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=374 y=621 ?>
+          <!--Remove Bn From Conf for outdial-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="f_nRC" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oArrayCallLegs[i].oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="25" stubbed="0"/>
+            <result name="Success" >f_nRC == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if(Session.f_nRC != 0) {
+	Server.logError("Error removing A Leg from Regular Conference.");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="25" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=614 y=628 ?>
+          <!--Add A to Regular Conf-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;AddMemberToConference&quot;" return="f_nRC" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oConfMS</parameter>
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="26" stubbed="0"/>
+            <result name="FAILURE" link="6" stubbed="1" >f_nRC == -1</result>
+            <result name="CALLER HUNG UP" link="6" stubbed="1" >f_nRC == f_nCALLERHUNGUP</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oConfMS.bDTMFClampFlag = false;
+Session.p_oConfMS.bDeafFlag = false;
+Session.p_oConfMS.bMuteFlag = false;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if(2 == Result.id) {
+	Server.logError("There was an error adding the A leg back to the Regular Conference.");
+} else if(3 == Result.id) {
+	Server.logInfo("The A leg has hung up while being added back to the regular conference. Session will end.");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="26" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=851 y=635 ?>
+          <!--Add  Bn to Regular Conf-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;AddMemberToConference&quot;" return="f_nRC" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oArrayCallLegs[i].oMS</parameter>
+            <parameter >p_oArrayCallLegs[i]</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="27" stubbed="0"/>
+            <result name="FAILURE" >f_nRC == -1</result>
+            <result name="CALLER HUNG UP" >f_nRC == f_nCALLERHUNGUP</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oArrayCallLegs[Session.i].oMS.strConferenceId = Session.p_oConfMS.strConferenceId;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if(2 == Result.id) {
+	Server.logError("There was an error adding the latest B leg to the Regular Conference.");
+} else if(3 == Result.id) {
+	Server.logInfo("The latest B leg has hung. will be processed after we leave function AddLegToConf.");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="27" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1087 y=663 ?>
+          <!--Delete Conf For Outdial-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteConference&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >f_oConfToDoDialOut</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+          </results>
+        </action>
+        <action id="28" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=746 y=465 ?>
+          <!--Delete Conf For Outdial-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteConference&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >f_oConfToDoDialOut</parameter>
+          </function>
+          <results >
+            <result name="Default" link="29" stubbed="0"/>
+          </results>
+        </action>
+        <action id="29" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=943 y=538 ?>
+          <!--psAPIProcCallCompletion-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIProcCallCompletion&quot;" return="" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oAPI</parameter>
+            <parameter >p_oSUB</parameter>
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oCallLegB</parameter>
+            <parameter >p_oArrayCallLegs[i].oRATE</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_oArrayCallLegs</parameter>
+          </function>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+          </results>
+        </action>
+        <action id="30" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=541 y=475 ?>
+          <!--Remove A From Conf for outdial-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="f_nRC" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >f_oConfToDoDialOut</parameter>
+          </function>
+          <results >
+            <result name="Default" link="28" stubbed="0"/>
+            <result name="Success" >f_nRC == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if(Session.f_nRC != 0) {
+	Server.logError("Error removing A Leg from Regular Conference.");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="31" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=788 y=280 ?>
+          <!--OutdialParty 2 B leg ToConference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;OutdialPartyToConference&quot;" return="f_nRC" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oArrayCallLegs[1]</parameter>
+            <parameter >p_oArrayCallLegs[1].oMS</parameter>
+            <parameter >p_oArrayCallLegs[1].lTimeStart</parameter>
+            <parameter >p_oArrayCallLegs[1].lTimeAnswered</parameter>
+            <parameter >p_oArrayCallLegs[1].strSIPStatus</parameter>
+            <parameter >p_oCallLegA.strCallingNumber</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="18" stubbed="0"/>
+            <result name="SUCCESS" link="11" stubbed="0" >f_nRC == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[var myUri = new SipRequestUri(Session.p_oArrayCallLegs[1].strRequestUri);
+if (myUri.url.dtg == undefined)
+{
+	Session.p_oArrayCallLegs[1].strDestTrunkGroup = "";
+}
+else
+{
+	Session.p_oArrayCallLegs[1].strDestTrunkGroup = myUri.url.dtg;
+}
+Server.logInfo("p_oArrayCallLegs[1].strContact: " + Session.p_oArrayCallLegs[1].strContact);
+Server.logInfo("p_oArrayCallLegs[1].strRecordRoute: " + Session.p_oArrayCallLegs[1].strRecordRoute);
+Server.logInfo("p_oArrayCallLegs[1].strRequestUri: " + Session.p_oArrayCallLegs[1].strRequestUri);
+Server.logInfo("p_oArrayCallLegs[1].strRoute: " + Session.p_oArrayCallLegs[1].strRoute);
+var bDialIn = false;
+js_calculate_uri_and_route(bDialIn, Session.p_strSIPVERSION, Session.p_oArrayCallLegs[1].strFrom, Session.p_oArrayCallLegs[1].strContact, Session.p_oArrayCallLegs[1].strRecordRoute, Session.p_oArrayCallLegs[1].strRequestUri, Session.p_oArrayCallLegs[1].strRoute);
+Server.logInfo("p_oArrayCallLegs[1].strContact:" + Session.p_oArrayCallLegs[1].strContact);
+Server.logInfo("p_oArrayCallLegs[1].strRecordRoute" + Session.p_oArrayCallLegs[1].strRecordRoute);
+Server.logInfo("p_oArrayCallLegs[1].strRequestUri: " + Session.p_oArrayCallLegs[1].strRequestUri);
+Server.logInfo("p_oArrayCallLegs[1].strRoute: " + Session.p_oArrayCallLegs[1].strRoute);
+]]></script>
+          </scripts>
+        </action>
+        <action id="32" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1489 y=388 ?>
+          <!--Add  1st B leg to conf-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;AddMemberToConference&quot;" return="f_nRC" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oArrayCallLegs[0].oMS</parameter>
+            <parameter >p_oArrayCallLegs[0]</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="16" stubbed="1"/>
+            <result name="FAILURE" link="12" stubbed="1" >f_nRC == -1</result>
+            <result name="CALLER HUNG UP" link="12" stubbed="1" >f_nRC == f_nCALLERHUNGUP</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if(1 == Result.id) {
+	Session.p_oAPI.nMaxTalkers++;
+}	]]></script>
+          </scripts>
+        </action>
+        <action id="33" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=265 y=22 ?>
+          <!--Remove A From Reg. Conf-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="f_nRC" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oConfMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="22" stubbed="0"/>
+            <result name="Success" link="22" stubbed="0" >f_nRC == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if(Session.f_nRC != 0) {
+	Server.logError("Error removing A Leg from Regular Conference.");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="34" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=296 y=296 ?>
+          <!--CreateAConference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;CreateConference&quot;" return="f_nRC" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oConfMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+            <result name="SUCCESS" link="35" stubbed="0" >f_nRC == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("**** START N WAY CALLING ****");
+
+if(Session.p_oConfMS.strType == "PCS") {
+	Session.p_oArrayCallLegs[0].oMS.strCodec = "PCMU";
+	Session.p_oArrayCallLegs[1].oMS.strCodec = "PCMU";
+	Session.p_oConfMS.strCodec = "PCMU";
+	Session.p_oAPI.nRTPEncoding = 0;
+
+}
+
+
+Server.logInfo("oCallLegA.strFrom: " + Session.p_oCallLegA.strFrom);
+Server.logInfo("oCallLegA.strTo: " + Session.p_oCallLegA.strTo);
+Server.logInfo("oCallLegA.strContent: " + Session.p_oCallLegA.strContent);
+Server.logInfo("oCallLegA.strCSeq: " + Session.p_oCallLegA.strCSeq);
+Server.logInfo("oCallLegA.strCallId: " + Session.p_oCallLegA.strCallId);
+
+
+
+Server.logInfo("p_oArrayCallLegs[0].strFrom: " + Session.p_oArrayCallLegs[0].strFrom);
+Server.logInfo("p_oArrayCallLegs[0].strTo: " + Session.p_oArrayCallLegs[0].strTo);
+Server.logInfo("p_oArrayCallLegs[0].strContent: " + Session.p_oArrayCallLegs[0].strContent);
+Server.logInfo("p_oArrayCallLegs[0].strCSeq: " + Session.p_oArrayCallLegs[0].strCSeq);
+Server.logInfo("p_oArrayCallLegs[0].strCallId: " + Session.p_oArrayCallLegs[0].strCallId);
+
+Server.logInfo("p_oArrayCallLegs[1].strFrom: " + Session.p_oArrayCallLegs[1].strFrom);
+Server.logInfo("p_oArrayCallLegs[1].strTo: " + Session.p_oArrayCallLegs[1].strTo);
+Server.logInfo("p_oArrayCallLegs[1].strContent: " + Session.p_oArrayCallLegs[1].strContent);
+Server.logInfo("p_oArrayCallLegs[1].strCSeq: " + Session.p_oArrayCallLegs[1].strCSeq);
+Server.logInfo("p_oArrayCallLegs[1].strCallId: " + Session.p_oArrayCallLegs[1].strCallId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if(0 != Session.f_nRC) {
+	Server.logError("Error creating conference for A leg and 2 B legs." );
+}]]></script>
+          </scripts>
+        </action>
+        <action id="35" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=539 y=286 ?>
+          <!--Add A leg to conference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;AddMemberToConference&quot;" return="f_nRC" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oConfMS</parameter>
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="31" stubbed="0"/>
+            <result name="FAILURE" link="6" stubbed="1" >f_nRC == -1</result>
+            <result name="CALLER HUNG UP" link="6" stubbed="1" >f_nRC == f_nCALLERHUNGUP</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oArrayCallLegs[0].oMS.strConferenceId = Session.p_oConfMS.strConferenceId;
+Session.p_oArrayCallLegs[1].oMS.strConferenceId = Session.p_oConfMS.strConferenceId;
+
+
+
+Session.p_oConfMS.bDTMFClampFlag = false;
+Session.p_oConfMS.bDeafFlag = false;
+Session.p_oConfMS.bMuteFlag = false;]]></script>
+          </scripts>
+        </action>
+        <action id="36" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=134 y=618 ?>
+          <!--Remove A From Conf for outdial-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="f_nRC" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >f_oConfToDoDialOut</parameter>
+          </function>
+          <results >
+            <result name="Default" link="24" stubbed="0"/>
+            <result name="Success" >f_nRC == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if(Session.f_nRC != 0) {
+	Server.logError("Error removing A Leg from Regular Conference.");
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>]]></script>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value="../Libs"/>
+    <property key="library-modules" value="lib_3WayCalling.xml;lib_acd.xml;lib_APISce.xml;lib_callcontrol.xml;lib_mediaserver.xml;lib_moh.xml;lib_soap.xml;lib_speeddial.xml;lib_utils.xml"/>
+    <property key="library-path" value="../Libs"/>
+  </properties>
+  <application-version >
+    <revision >$Id: lib_3WayCalling.xml,v 1.49 2007/01/15 19:28:26 sbhatt Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

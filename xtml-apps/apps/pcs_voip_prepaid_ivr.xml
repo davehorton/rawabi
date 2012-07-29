@@ -1,0 +1,1111 @@
+<?xml version="1.0"?>
+<xtml version="1.0" >
+  <version sce-version="430a1" prev-sce-version="430a1" last-mod-time="Tuesday, November 28, 2006 14:53:58"/>
+  <global-handlers >
+    <handler event="Pactolus.EveSipInvite.1" function="OnInvite" public="1" always-on="0"/>
+    <handler event="Pactolus.EveSipBye.1" function="OnBye" public="0" always-on="0"/>
+    <handler event="Standard.OnServiceLoad.1" function="OnServiceLoad" public="0" always-on="0"/>
+    <handler event="Standard.OnSessionEnd.1" function="OnSessionEnd" public="0" always-on="0"/>
+  </global-handlers>
+  <global-vars >
+    <var name="g_oMS" type="object" ></var>
+    <var name="g_oCallLeg" type="object" ></var>
+    <var name="g_bNewCall" type="boolean" >1</var>
+    <var name="g_strLanguage" type="string" ></var>
+    <var name="g_strDigit" type="string" ></var>
+    <var name="g_bMSConnected" type="boolean" >0</var>
+    <var name="g_bParamsOK" type="boolean" >0</var>
+    <var name="g_strForcedToIVR" type="string" ></var>
+    <var name="g_bCCRecharge" type="boolean" >0</var>
+    <var name="g_bGetBalance" type="boolean" >0</var>
+    <var name="g_bGetExpirationDate" type="boolean" >0</var>
+    <var name="g_oSUB" type="object" ></var>
+    <var name="g_oAPI" type="object" ></var>
+    <var name="g_oCC" type="object" ></var>
+    <var name="g_oBALXFER" type="object" ></var>
+    <var name="g_nMaxLoginAttempts" type="i4" >0</var>
+    <var name="g_bExitMainMenu" type="boolean" >0</var>
+  </global-vars>
+  <shared-vars >
+    <var name="s_strLocalUri" type="string" ></var>
+    <var name="s_strLocalHost" type="string" ></var>
+    <var name="s_nSUCCESS" type="i2" >0</var>
+    <var name="s_strMSType" type="string" ></var>
+    <var name="s_nPacketizationPeriod" type="i2" >0</var>
+    <var name="s_strCodec" type="string" ></var>
+    <var name="s_nConferenceMaxParties" type="i4" >4</var>
+    <var name="s_nConferenceMaxTalkers" type="i4" >4</var>
+    <var name="s_strAppserverLogicalIP" type="string" ></var>
+  </shared-vars>
+  <functions >
+    <function name="OnInvite" start="2" event="Invite" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string" pass="byref"/>
+        <parameter name="strAcceptEncoding" type="string" pass="byref"/>
+        <parameter name="strAcceptLanguage" type="string" pass="byref"/>
+        <parameter name="strAlertInfo" type="string" pass="byref"/>
+        <parameter name="strAllow" type="string" pass="byref"/>
+        <parameter name="strAllowEvents" type="string" pass="byref"/>
+        <parameter name="strAnonymity" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strCallInfo" type="string" pass="byref"/>
+        <parameter name="strContact" type="string" pass="byref"/>
+        <parameter name="strContent" type="string" pass="byref"/>
+        <parameter name="strContentDisposition" type="string" pass="byref"/>
+        <parameter name="strContentEncoding" type="string" pass="byref"/>
+        <parameter name="strContentLanguage" type="string" pass="byref"/>
+        <parameter name="strContentType" type="string" pass="byref"/>
+        <parameter name="strCSeq" type="string" pass="byref"/>
+        <parameter name="strDate" type="string" pass="byref"/>
+        <parameter name="strEncryption" type="string" pass="byref"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strExpires" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strInReplyTo" type="string" pass="byref"/>
+        <parameter name="strMaxForwards" type="string" pass="byref"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strMinSE" type="string" pass="byref"/>
+        <parameter name="strOrganization" type="string" pass="byref"/>
+        <parameter name="strPriority" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string" pass="byref"/>
+        <parameter name="strProxyRequire" type="string" pass="byref"/>
+        <parameter name="strRecordRoute" type="string" pass="byref"/>
+        <parameter name="strReferredBy" type="string" pass="byref"/>
+        <parameter name="strRemotePartyID" type="string" pass="byref"/>
+        <parameter name="strReplaces" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string" pass="byref"/>
+        <parameter name="strRequire" type="string" pass="byref"/>
+        <parameter name="strResponseKey" type="string" pass="byref"/>
+        <parameter name="strRoute" type="string" pass="byref"/>
+        <parameter name="strSessionExpires" type="string" pass="byref"/>
+        <parameter name="strSubject" type="string" pass="byref"/>
+        <parameter name="strSupported" type="string" pass="byref"/>
+        <parameter name="strTimestamp" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nReturnValue" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="2" plug-in="Pactolus.Branch.1" ><?xtml-editor x=38 y=62 ?>
+          <results >
+            <result name="Default" link="12" stubbed="0"/>
+            <result name="new call " link="11" stubbed="0" >g_bNewCall == true</result>
+          </results>
+        </action>
+        <action id="1" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=43 y=345 ?>
+          <!--"DirectCallerToMS"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DirectCallerToMS&quot;" return="nReturnValue" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >g_oCallLeg</parameter>
+            <parameter >g_oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+            <result name="MS Connection established" link="3" stubbed="0" >nReturnValue == s_nSUCCESS</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_initMS (Session.g_oMS, Session.s_strMSType);
+
+Session.g_bNewCall = false;
+
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=48 y=493 ?>
+          <!--Call Main Menu-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;MainMenu&quot;" return="nReturnValue" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_calculate_uri_and_route( true, "SIP/2.0", 
+	Session.strFrom.toString(), 
+	Session.strContact.toString(), 
+	Session.strRecordRoute.toString(), 
+	Session.g_oCallLeg.strRemoteUri, 
+	Session.g_oCallLeg.strRoute ) ;
+
+Session.g_oCallLeg.strRequestUri = Session.g_oCallLeg.strRemoteUri ;
+Session.g_oCallLeg.strRequestURI = Session.g_oCallLeg.strRemoteUri ;
+
+// set the g_bMSConnected flag to true ...
+Session.g_bMSConnected = true;]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=320 y=361 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="9" plug-in="Standard.EndSession.1" ><?xtml-editor x=525 y=249 ?></action>
+        <action id="10" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=307 y=199 ?>
+          <!--Return 503 Service Unavailable-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oCallLeg.strCallId</call-id>
+            <contact >s_strLocalUri</contact>
+            <cseq >g_oCallLeg.strCSeq</cseq>
+            <from >g_oCallLeg.strFrom</from>
+            <status >"SIP/2.0 503 Service Unavailable"</status>
+            <to >g_oCallLeg.strTo</to>
+            <via >g_oCallLeg.strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="11" plug-in="Pactolus.Branch.1" ><?xtml-editor x=40 y=177 ?>
+          <!--Get Params from Request URI-->
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+            <result name="URI Params OK" link="1" stubbed="0" >g_bParamsOK == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_initAPI(Session.g_oAPI);
+js_initCC(Session.g_oCC);
+js_initSUB(Session.g_oSUB);
+js_initBALXFER(Session.g_oBALXFER);
+
+Session.g_nMaxLoginAttempts = Session.g_oAPI.nMaxLoginAttempts;
+
+// initialize the call leg information
+js_initVoipCallLeg(Session.g_oCallLeg); 
+Session.g_oCallLeg.bReverseFromTo = true; 
+
+Session.g_oCallLeg.strFrom = Session.strFrom ;
+Session.g_oCallLeg.strCallId = Session.strCallId ;
+Session.g_oCallLeg.strRequestUri = Session.strRequestURI;
+Session.g_oCallLeg.strCSeq = Session.strCSeq ;
+Session.g_oCallLeg.strRemoteCSeq = Session.strCSeq ;
+Session.g_oCallLeg.strRemoteSdp = Session.strContent ;
+Session.g_oCallLeg.strContent = Session.strContent ;
+Session.g_oCallLeg.strContentDisposition = Session.strContentDisposition ;
+Session.g_oCallLeg.strContentType = Session.strContentType ;
+Session.g_oCallLeg.strVia = Session.strVia ;
+Session.g_oCallLeg.strRecordRoute = Session.strRecordRoute ;
+Session.g_oCallLeg.strRoute = Session.strRoute ;
+Session.g_oCallLeg.strSubject = Session.strSubject ;
+Session.g_oCallLeg.strContact = Session.s_strLocalUri ;
+Session.g_oCallLeg.strDate = Session.strDate ;
+Session.g_oCallLeg.strExpires = Session.strExpires ;
+Session.g_oCallLeg.strAccept = Session.strAccept ;
+Session.g_oCallLeg.strAcceptEncoding = Session.strAcceptEncoding ;
+Session.g_oCallLeg.strAcceptLanguage = Session.strAcceptLanguage ;
+Session.g_oCallLeg.strAuthorization = Session.strAuthorization ;
+Session.g_oCallLeg.strEncryption = Session.strEncryption ;
+Session.g_oCallLeg.strProxyAuthorization = Session.strProxyAuthorization ;
+Session.g_oCallLeg.strProxyRequire = Session.strProxyRequire ;
+Session.g_oCallLeg.strRequire = Session.strRequire ;
+Session.g_oCallLeg.strResponseKey = Session.strResponseKey ;
+Session.g_oCallLeg.strSessionExpires = Session.strSessionExpires ;
+Session.g_oCallLeg.strSupported = Session.strSupported ;
+Session.g_oCallLeg.strTimestamp = Session.strTimestamp ;
+Session.g_oCallLeg.strMaxForwards = Session.strMaxForwards ;
+Session.g_oCallLeg.strTo = Session.g_oCallLeg.strOriginalTo = Session.strTo ;
+
+/* recently added SIP headers */
+Session.g_oCallLeg.strAnonymity = Session.strAnonymity ;
+Session.g_oCallLeg.strMinSE = Session.strMinSE ;
+Session.g_oCallLeg.strRemotePartyID = Session.strRemotePartyID ;
+Session.g_oCallLeg.strUserAgent = Session.strUserAgent ;
+Session.g_oCallLeg.strMaxForwards = Session.strMaxForwards ;
+
+// get the params from the request URI ...
+js_parse_value (Session.strRequestURI, "lang", Session.g_strLanguage);
+js_parse_value (Session.strRequestURI, "force", Session.g_strForcedToIVR);
+js_parse_value (Session.strRequestURI, "sub_id", Session.g_oSUB.lSubscriberId);
+js_parse_value (Session.strRequestURI, "sp_id", Session.g_oAPI.lServiceProviderId);
+js_parse_value (Session.strRequestURI, "off_id", Session.g_oSUB.nPrimaryOfferingId);
+js_parse_value (Session.strRequestURI, "curr_id", Session.g_oSUB.nCurrencyId);
+js_parse_value (Session.strRequestURI, "exp_type", Session.g_oSUB.nExpirationType);
+js_parse_value (Session.strRequestURI, "bal", Session.g_oSUB.fPrepaidBalance);
+
+Session.g_oAPI.strDBSessionId = Session._sessionId;
+
+Server.logInfo ("********* Request URI parameters:");
+Server.logInfo ("Language        : " + Session.g_strLanguage);
+Server.logInfo ("Forced          : " + Session.g_strForcedToIVR);
+Server.logInfo ("Subscriber Id   : " + Session.g_oSUB.lSubscriberId);
+Server.logInfo ("Svc Provider Id : " + Session.g_oAPI.lServiceProviderId);
+Server.logInfo ("Pri Offering Id : " + Session.g_oSUB.nPrimaryOfferingId);
+Server.logInfo ("Currency Id     : " + Session.g_oSUB.nCurrencyId);
+Server.logInfo ("Expiration Type : " + Session.g_oSUB.nExpirationType);
+Server.logInfo ("Prepaid Balance : " + Session.g_oSUB.fPrepaidBalance);
+Server.logInfo ("Session Id      : " + Session.g_oAPI.strDBSessionId);
+
+Session.g_bParamsOK = true;
+]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=296 y=59 ?>
+          <!--200 OK SDP of MS-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <contact >s_strLocalUri</contact>
+            <content >g_oMS.strContent</content>
+            <content-type >g_oMS.strContentType</content-type>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 200 OK"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="MainMenu" start="9" event="" returns="i4" >
+      <local-vars >
+        <var name="nReturnCode" type="i4" >0</var>
+        <var name="nNumTries" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="9" plug-in="Pactolus.Branch.1" ><?xtml-editor x=62 y=52 ?>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Forced to Prepaid IVR" link="12" stubbed="0" >g_strForcedToIVR match "yes"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nNumTries = 0;]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=65 y=197 ?>
+          <!--Main Menu-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="0" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(x)&quot;" language="g_strLanguage" digits="g_strDigit" retry-count="g_nMaxLoginAttempts" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >518</audio>
+            <audio type="silence" >1</audio>
+            <audio type="index" >519</audio>
+            <audio type="index" >311</audio>
+            <audio type="silence" >1</audio>
+            <audio type="index" >521</audio>
+            <audio type="index" >312</audio>
+            <audio type="silence" >1</audio>
+            <audio type="index" >522</audio>
+            <audio type="index" >313</audio>
+            <audio type="silence" >1</audio>
+            <audio type="index" >349</audio>
+            <timeout-prompt type="index" >552</timeout-prompt>
+          </play>
+          <results >
+            <result name="Default" link="13" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout" link="19" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strDigit = "";
+Session.nNumTries++;]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.EndSession.1" ><?xtml-editor x=485 y=470 ?></action>
+        <action id="8" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=482 y=367 ?>
+          <!--Hangup Party-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpParty&quot;" return="nReturnCode" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >g_oCallLeg</parameter>
+            <parameter >s_strLocalUri</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+          </results>
+        </action>
+        <action id="12" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=268 y=47 ?>
+          <!--Play Forced to IVR-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >507</audio>
+            <audio type="index" >508</audio>
+          </play>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="13" plug-in="Pactolus.Branch.1" ><?xtml-editor x=66 y=365 ?>
+          <results >
+            <result name="Default" link="18" stubbed="0"/>
+            <result name="Do Credit Card Recharge" link="15" stubbed="0" >g_bCCRecharge == true</result>
+            <result name="Get Account Balance" link="16" stubbed="0" >g_bGetBalance == true</result>
+            <result name="Get Expiration Date" link="17" stubbed="0" >g_bGetExpirationDate == true</result>
+            <result name="Exit Main Menu" link="19" stubbed="1" >g_bExitMainMenu == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_bCCRecharge = false;
+Session.g_bGetBalance = false;
+Session.g_bGetExpirationDate = false;
+Session.g_bExitMainMenu = false;
+
+if(Session.g_strDigit == "1") 
+{
+	Session.g_bCCRecharge = true;
+} 
+else if(Session.g_strDigit == "2") 
+{
+	Session.g_bGetBalance = true;
+} 
+else if(Session.g_strDigit == "3") 
+{
+	Session.g_bGetExpirationDate = true;
+} 
+else if(Session.g_strDigit == "*") 
+{
+	Session.g_bExitMainMenu = true;
+} 
+]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=274 y=498 ?>
+          <!--Call DoCCRecharge-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DoCCRecharge&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+          </results>
+        </action>
+        <action id="16" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=275 y=582 ?>
+          <!--Call GetAccountBalance-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;GetAccountBalance&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+          </results>
+        </action>
+        <action id="17" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=277 y=668 ?>
+          <!--Call GetExpirationDate-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;GetExpirationDate&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+          </results>
+        </action>
+        <action id="18" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=273 y=359 ?>
+          <!--Play Invalid Entry-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >337</audio>
+          </play>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="MaxTries Exceeded" link="19" stubbed="0" >nNumTries == g_nMaxLoginAttempts</result>
+          </results>
+        </action>
+        <action id="19" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=478 y=216 ?>
+          <!--Play Goodbye-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >322</audio>
+          </play>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="OnBye" start="2" event="Bye" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string" pass="byref"/>
+        <parameter name="strAcceptEncoding" type="string" pass="byref"/>
+        <parameter name="strAcceptLanguage" type="string" pass="byref"/>
+        <parameter name="strAllow" type="string" pass="byref"/>
+        <parameter name="strAllowEvents" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strCSeq" type="string" pass="byref"/>
+        <parameter name="strDate" type="string" pass="byref"/>
+        <parameter name="strEncryption" type="string" pass="byref"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strMaxForwards" type="string" pass="byref"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string" pass="byref"/>
+        <parameter name="strProxyRequire" type="string" pass="byref"/>
+        <parameter name="strRecordRoute" type="string" pass="byref"/>
+        <parameter name="strReferredBy" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string" pass="byref"/>
+        <parameter name="strRequire" type="string" pass="byref"/>
+        <parameter name="strResponseKey" type="string" pass="byref"/>
+        <parameter name="strRoute" type="string" pass="byref"/>
+        <parameter name="strSupported" type="string" pass="byref"/>
+        <parameter name="strTimestamp" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="2" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=106 y=160 ?>
+          <!--Send 200 OK-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <contact >s_strLocalUri</contact>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 200 OK"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="1" plug-in="Standard.EndSession.1" ><?xtml-editor x=103 y=331 ?>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_bNewCall = true;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnServiceLoad" start="2" event="ServiceLoad" returns="void" >
+      <parameters >
+        <parameter name="strAppName" type="string" pass="byref"/>
+        <parameter name="nSessionCount" type="i2" pass="byref"/>
+        <parameter name="nMaxIterations" type="i2" pass="byref"/>
+        <parameter name="nServerId" type="i2" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="2" plug-in="Pactolus.UserFunction.1" ><?xtml-editor x=78 y=127 ?>
+          <user-function xmlns="urn:www.pactolus.com:xtml:application" process="&quot;PACTOLUS_ps_c_adaptor&quot;" function="&quot;get_property&quot;" timeout="10" return="" async="0" >
+            <parameter >"media-server-type"</parameter>
+            <parameter >s_strMSType</parameter>
+            <parameter >"packetization-period"</parameter>
+            <parameter >s_nPacketizationPeriod</parameter>
+            <parameter >"codec"</parameter>
+            <parameter >s_strCodec</parameter>
+            <parameter >"appserver-logical-ip"</parameter>
+            <parameter >s_strAppserverLogicalIP</parameter>
+          </user-function>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Session.s_strLocalHost = Server.sipAddress ;
+if( 5060 != Server.sipPort ) {
+	Session.s_strLocalUri += ":" ;
+	Session.s_strLocalUri += Server.sipPort ;
+}
+Server.logInfo("local host: " + Session.s_strLocalHost ) ;
+
+Session.s_strLocalUri = "<sip:" + Session.s_strLocalHost + ">" ;
+Server.logInfo("local uri: " + Session.s_strLocalUri ) ;
+
+if ( 0 == Session.s_strCodec.length ) {
+	Session.s_strCodec = "-1";
+	Server.logInfo("No Codec specified; applying No Preference");
+}
+else {
+	Server.logInfo("Setting Codec to: " + Session.s_strCodec);
+}
+
+if ( 0 == Session.s_nPacketizationPeriod ) {
+	Session.s_nPacketizationPeriod = 20;
+	Server.logInfo("Using default packetization period of 20");
+}
+else {
+	Server.logInfo("Setting packetization period to " + Session.s_nPacketizationPeriod);
+}
+
+Session.s_strApplicationName = Session._appName;
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=293 y=115 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="OnSessionEnd" start="2" event="SessionEnd" returns="void" >
+      <parameters >
+        <parameter name="nSessionEndReason" type="i2" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nReturnCode" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="2" plug-in="Pactolus.Branch.1" ><?xtml-editor x=63 y=156 ?>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="MS Connected" link="1" stubbed="0" >g_bMSConnected == true</result>
+          </results>
+        </action>
+        <action id="1" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=66 y=269 ?>
+          <!--Delete the MS Connection-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteMSConnection&quot;" return="nReturnCode" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >g_oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+          </results>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=384 y=172 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="DoCCRecharge" start="4" event="" returns="void" >
+      <local-vars >
+        <var name="nReturnCode" type="i4" >0</var>
+        <var name="strCCLast4Digits" type="string" ></var>
+        <var name="nNumTries" type="i4" >0</var>
+        <var name="strInputExpDate" type="string" ></var>
+        <var name="bExpDateMatch" type="boolean" >0</var>
+        <var name="strRechargeAmount" type="string" ></var>
+        <var name="bExceedsMaxBalance" type="boolean" >0</var>
+        <var name="bNoAmount" type="boolean" >0</var>
+      </local-vars>
+      <actions >
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=50 y=93 ?>
+          <!--JAVA:
+"PrepaidAPIGetRechargeSettings"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PrepaidAPIGetRechargeSettings&quot;" return="nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >g_oAPI</parameter>
+            <parameter >g_oCC</parameter>
+            <parameter >g_oSUB</parameter>
+            <parameter >g_oBALXFER</parameter>
+          </function>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="Got CC Recharge Settings" link="5" stubbed="0" >nReturnCode == 0</result>
+          </results>
+        </action>
+        <action id="5" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=53 y=247 ?>
+          <!--JAVA:
+"PrepaidAPIGetActiveCC"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PrepaidAPIGetActiveCC&quot;" return="nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >g_oAPI</parameter>
+            <parameter >g_oCC</parameter>
+            <parameter >g_oSUB</parameter>
+          </function>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="Got Active CC" link="11" stubbed="0" >nReturnCode == 0</result>
+            <result name="No Active CC" link="9" stubbed="0" >nReturnCode == -2</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nNumTries = 0;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("*********JAVA RETURN *********");
+Server.logInfo("getActiveCC returned " + Session.nReturnCode);
+Server.logInfo("cc num last 4 digits =  " + Session.g_oCC.strCCNum);
+Server.logInfo("cc exp date = " + Session.g_oCC.strExpDate);
+
+if (Session.nReturnCode != 0)
+{
+	Server.logError("ERROR: FAIL TO CALL JAVA GET ACTIVE CC, EXIT ON: " + Result.name);
+	Server.logInfo("getActiveCC returned " + Session.nReturnCode);
+	switch (Session.nReturnCode)
+	{
+		case -1:
+			Session.g_nErrorMsgNumber = 1001; //db error
+			break;
+		case -2:
+			Session.g_nErrorMsgNumber = 2019; //no active credit card selected
+			break;
+		case -50:
+			Session.g_nErrorMsgNumber = 1000; //jvm server error
+			break;
+		default:
+			Session.g_nErrorMsgNumber = 0;
+			break;
+	}
+} 
+else 
+{
+	// Set max balance
+
+	var temp = Session.g_oCC.fMaxPrepaidBalance - Session.g_oSUB.fPrepaidBalance;
+	Server.logInfo("current prepaid balance = " + Session.g_oSUB.fPrepaidBalance);
+	Server.logInfo("max pp balance = " + Session.g_oCC.fMaxPrepaidBalance);
+	Server.logInfo("max recharge amount = " + Session.g_oCC.fMaxRechargeAmount);
+
+	if (temp > 0 && Session.g_oCC.fMaxRechargeAmount > temp)
+	{
+		Session.g_oCC.fMaxRechargeAmount = temp;
+	}
+
+	Session.g_oCC.fMaxRechargeAmount = Math.floor(Session.g_oCC.fMaxRechargeAmount);
+	Session.g_oCC.fMinRechargeAmount = Math.ceil(Session.g_oCC.fMinRechargeAmount);
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.EndSession.1" ><?xtml-editor x=490 y=264 ?></action>
+        <action id="7" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=488 y=150 ?>
+          <!--Hangup Party-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpParty&quot;" return="nReturnCode" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >g_oCallLeg</parameter>
+            <parameter >s_strLocalUri</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+          </results>
+        </action>
+        <action id="8" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=269 y=92 ?>
+          <!--Play Call Customer Service and goodbye-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="5" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >307</audio>
+            <audio type="index" >322</audio>
+          </play>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="9" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=270 y=249 ?>
+          <!--No active CC with account-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="10" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >301</audio>
+            <audio type="index" >528</audio>
+          </play>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="10" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=490 y=332 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="11" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=51 y=399 ?>
+          <!--Get Last 4 Digits of CC-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="27" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(xxxx|x.T|x.#)&quot;" language="g_strLanguage" digits="strCCLast4Digits" retry-count="g_nMaxLoginAttempts" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >525</audio>
+            <audio type="index" >526</audio>
+            <timeout-prompt type="index" >552</timeout-prompt>
+          </play>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="Success" link="12" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strCCLast4Digits = "";
+Session.nNumTries++;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("user entered cc digits = " + Session.strCCLast4Digits);
+if (4 == Result.id)
+{
+	Session.g_oAPI.nSessionTerminationReason = 6;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=274 y=399 ?>
+          <!--Get CC Exp Date-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="17" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(xxxx|x.T|x.#)&quot;" language="g_strLanguage" digits="strInputExpDate" retry-count="g_nMaxLoginAttempts" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >527</audio>
+            <timeout-prompt type="index" >552</timeout-prompt>
+          </play>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout" link="8" stubbed="1"/>
+            <result name="bExpDateMatch == true" link="14" stubbed="0" >bExpDateMatch == true</result>
+            <result name="bExpDateMatch == false" link="13" stubbed="0" >bExpDateMatch == false</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strInputExpDate = "";]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[//check for match cc and exp date
+if ((Session.g_oCC.strExpDate == Session.strInputExpDate) && (Session.strCCLast4Digits == Session.g_oCC.strCCNum))
+{
+	Session.bExpDateMatch = true;
+	Session.nNumTries = 0;
+} 
+else 
+{
+	Session.bExpDateMatch = false;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("user entered exp date = " + Session.strInputExpDate);
+if (4 == Result.id)
+{
+	Session.g_oAPI.nSessionTerminationReason = 6;
+} ]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=490 y=401 ?>
+          <!--CC and Exp Date do not match-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="21" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >533</audio>
+          </play>
+          <results >
+            <result name="Default" link="11" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="MaxTries exceeded" link="8" stubbed="1" >nNumTries == g_nMaxLoginAttempts</result>
+          </results>
+        </action>
+        <action id="14" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=50 y=608 ?>
+          <!--Get Amount-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="33" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(x.T|x.#)&quot;" language="g_strLanguage" digits="strRechargeAmount" retry-count="g_nMaxLoginAttempts" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >529</audio>
+            <audio type="index" >580</audio>
+            <audio type="index" >530</audio>
+            <audio type="currency" unit="" >g_oCC.fMinRechargeAmount</audio>
+            <audio type="index" >531</audio>
+            <audio type="currency" unit="" >g_oCC.fMaxRechargeAmount</audio>
+            <timeout-prompt type="index" >552</timeout-prompt>
+          </play>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="Success" link="16" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No Amount" link="27" stubbed="0" >bNoAmount == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strRechargeAmount = "";
+Session.bNoAmount = false;
+Session.nNumTries++;]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if (Session.strRechargeAmount == "")
+{
+	Session.strRechargeAmount = "0";
+	Session.bNoAmount = true;
+}
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("user amount = " + Session.strRechargeAmount);
+
+Session.g_oCC.fRechargeAmount = parseFloat(Session.strRechargeAmount);
+if (4 == Result.id)
+{
+	Session.g_oAPI.nSessionTerminationReason = 6;
+} ]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=282 y=609 ?>
+          <!--Get Continue or Try again-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="33" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(x)&quot;" language="g_strLanguage" digits="g_strDigit" retry-count="g_nMaxLoginAttempts" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >339</audio>
+            <audio type="currency" unit="" >g_oCC.fRechargeAmount</audio>
+            <audio type="index" >335</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >336</audio>
+            <audio type="index" >312</audio>
+            <timeout-prompt type="index" >552</timeout-prompt>
+          </play>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="continue" link="17" stubbed="0" >g_strDigit match "1"</result>
+            <result name="try again" link="14" stubbed="0" >g_strDigit match "2"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strDigit = "";]]></script>
+          </scripts>
+        </action>
+        <action id="17" plug-in="Pactolus.Branch.1" ><?xtml-editor x=505 y=610 ?>
+          <!--check max balance-->
+          <results >
+            <result name="Default" link="19" stubbed="0"/>
+            <result name="exceeds max balance" link="18" stubbed="0" >bExceedsMaxBalance == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.bExceedsMaxBalance = false;
+if (Session.g_oCC.fRechargeAmount > Session.g_oCC.fMaxRechargeAmount)
+{
+	Session.bExceedsMaxBalance = true;	
+	Server.logInfo("recharge amount exceeds max, try again");
+}
+else if (Session.g_oCC.fRechargeAmount < Session.g_oCC.fMinRechargeAmount)
+{
+	Session.bExceedsMaxBalance = true;	
+	Server.logInfo("recharge amount below min, try again");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="18" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=711 y=738 ?>
+          <!--Exceeds Max Balance-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="21" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >532</audio>
+          </play>
+          <results >
+            <result name="Default" link="14" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="MaxTries exceeded" link="8" stubbed="1" >nNumTries == g_nMaxLoginAttempts</result>
+          </results>
+        </action>
+        <action id="19" plug-in="Pactolus.Branch.1" ><?xtml-editor x=713 y=551 ?>
+          <!--is there a fee?-->
+          <results >
+            <result name="Default" link="21" stubbed="0"/>
+            <result name="recharge fee &gt; 0" link="20" stubbed="0" >g_oCC.fRechargeFee &gt; 0</result>
+          </results>
+        </action>
+        <action id="20" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=935 y=739 ?>
+          <!--Get Continue or Cancel-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="33" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(x)&quot;" language="g_strLanguage" digits="g_strDigit" retry-count="g_nMaxLoginAttempts" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >534</audio>
+            <audio type="currency" unit="" >g_oCC.fRechargeFee</audio>
+            <audio type="index" >535</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >584</audio>
+            <timeout-prompt type="index" >552</timeout-prompt>
+          </play>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="continue" link="21" stubbed="0" >g_strDigit match "1"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strDigit = "";]]></script>
+          </scripts>
+        </action>
+        <action id="21" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=934 y=524 ?>
+          <!--Please hold-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="10" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >553</audio>
+          </play>
+          <results >
+            <result name="Default" link="22" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="22" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1200 y=523 ?>
+          <!--JAVA:
+"psAPIDoCCRecharge"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIDoCCRecharge&quot;" return="nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >g_oAPI</parameter>
+            <parameter >g_oSUB</parameter>
+            <parameter >g_oCC</parameter>
+          </function>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="0 - Success" link="23" stubbed="0" >nReturnCode == 0</result>
+            <result name="-5 - Max Balance" link="24" stubbed="0" >nReturnCode == -5</result>
+            <result name="Trxn Refused" link="25" stubbed="0" >nReturnCode == -2
+OR nReturnCode == -4
+OR nReturnCode == -7
+OR nReturnCode == -8
+OR nReturnCode == -9
+OR nReturnCode == -10
+OR nReturnCode == -11</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[// 
+// set the service element id so the balance gets updated properly.
+//
+//1 = prepaid, 3 = postpaid
+Session.g_oAPI.nServiceElementId = 1;
+]]></script>
+          </scripts>
+        </action>
+        <action id="23" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1412 y=523 ?>
+          <!--Recharge successful-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="21" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >539</audio>
+            <audio type="index" >546</audio>
+            <audio type="currency" unit="" >g_oSUB.fPrepaidBalance</audio>
+          </play>
+          <results >
+            <result name="Default" link="10" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="24" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1415 y=683 ?>
+          <!--Invalid amount-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="21" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >532</audio>
+          </play>
+          <results >
+            <result name="Default" link="10" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="25" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1417 y=835 ?>
+          <!--Transaction refused-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="21" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >537</audio>
+          </play>
+          <results >
+            <result name="Default" link="10" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="27" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=52 y=821 ?>
+          <!--Entered Zero dollars-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="33" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >339</audio>
+            <audio type="currency" unit="" >g_oCC.fRechargeAmount</audio>
+            <audio type="index" >532</audio>
+          </play>
+          <results >
+            <result name="Default" link="14" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="MaxTries exceeded" link="8" stubbed="1" >nNumTries == g_nMaxLoginAttempts</result>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="GetAccountBalance" start="3" event="" returns="void" >
+      <actions >
+        <action id="3" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=104 y=149 ?>
+          <!--Play Account Balance-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="17" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >503</audio>
+            <audio type="currency" unit="" >g_oSUB.fPrepaidBalance</audio>
+          </play>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=104 y=316 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="GetExpirationDate" start="3" event="" returns="void" >
+      <local-vars >
+        <var name="nReturnCode" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=37 y=117 ?>
+          <!--JAVA:
+"psAPIGetExpDate"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIGetExpDate&quot;" return="nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >g_oAPI</parameter>
+            <parameter >g_oSUB</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="Got Exp Date" link="2" stubbed="0" >nReturnCode == 0</result>
+            <result name="No Exp Date" link="4" stubbed="0" >nReturnCode == 1</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo ("********* psAPIGetExpDate parameters:");
+Server.logInfo ("Platform Session Id : " + Session.g_oAPI.strPlatformSessionId);
+Server.logInfo ("Proc DB Name        : " + Session.g_oAPI.strProcDBName);
+Server.logInfo ("DB Session Id       : " + Session.g_oAPI.strDBSessionId);
+Server.logInfo ("Subscriber Id   : " + Session.g_oSUB.lSubscriberId);
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo ("********* psAPIGetExpDate return parameters:");
+Server.logInfo ("Return Code : " + Session.nReturnCode);
+Server.logInfo ("Expiration Date : " + Session.g_oSUB.strExpDate);
+]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=461 y=380 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="2" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=240 y=257 ?>
+          <!--Play Expiration Date-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="17" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >547</audio>
+            <audio type="date" >g_oSUB.strExpDate</audio>
+          </play>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="4" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=241 y=388 ?>
+          <!--Play No Expiration Date-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="17" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >548</audio>
+          </play>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="5" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=237 y=119 ?>
+          <!--Play Call Customer Service and goodbye-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="17" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >1</audio>
+            <audio type="index" >307</audio>
+            <audio type="index" >322</audio>
+          </play>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="6" plug-in="Standard.EndSession.1" ><?xtml-editor x=458 y=291 ?></action>
+        <action id="7" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=456 y=177 ?>
+          <!--Hangup Party-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpParty&quot;" return="nReturnCode" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >g_oCallLeg</parameter>
+            <parameter >s_strLocalUri</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>]]></script>
+  <properties >
+    <property key="default" value="C:/eclipse/eclipse/workspace/Applications/InternalProduct/pcs_english.vox"/>
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value="C:/eclipse/workspace/Applications/InternalProduct/SceXMLScripts/Libs;C:/Applications/Mainline/InternalProduct/SceXMLScripts/Libs"/>
+    <property key="library-modules" value="lib_mediaserver.xml;lib_APISce.xml;lib_callcontrol.xml"/>
+    <property key="library-path" value="C:/eclipse/workspace/Applications/InternalProduct/SceXMLScripts/Libs;C:/Applications/Mainline/InternalProduct/SceXMLScripts/Libs"/>
+  </properties>
+  <application-version >
+    <revision >$Id: pcs_voip_prepaid_ivr.xml,v 1.11 2006/11/28 19:54:12 rhollis Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

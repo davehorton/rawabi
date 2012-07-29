@@ -1,0 +1,1633 @@
+<?xml version="1.0"?>
+<xtml version="1.0" >
+  <version sce-version="430a1" prev-sce-version="430a1" last-mod-time="Monday, August 08, 2005 10:30:07"/>
+  <global-handlers >
+    <handler event="Pactolus.EveSipRefer.1" function="OnRefer" public="0" always-on="0"/>
+    <handler event="Pactolus.EveSipNotify.1" function="OnNotify" public="0" always-on="0"/>
+    <handler event="Pactolus.EveSipInvite.1" function="OnInvite" public="1" always-on="1"/>
+    <handler event="Pactolus.EveSipBye.1" function="OnBye" public="0" always-on="0"/>
+    <handler event="Pactolus.EveSipCancel.1" function="OnCancel" public="0" always-on="0"/>
+    <handler event="Standard.OnTimer.1" function="OnTimer" public="0" always-on="0"/>
+    <handler event="Pactolus.EveSipAck.1" function="OnAck" public="0" always-on="0"/>
+    <handler event="Pactolus.EveSipResponse.1" function="OnResponse" public="0" always-on="0"/>
+  </global-handlers>
+  <global-vars >
+    <var name="g_oInboundCallLeg" type="object" ></var>
+    <var name="g_oOutboundCallLeg" type="object" ></var>
+    <var name="g_bHandOff" type="boolean" >0</var>
+    <var name="g_strProxyServerContact" type="string" ></var>
+    <var name="g_intStatus" type="i4" >0</var>
+    <var name="g_lWaitForResTimerId" type="i8" >0</var>
+  </global-vars>
+  <shared-vars >
+    <var name="s_strSIPVERSION" type="string" >SIP/2.0</var>
+  </shared-vars>
+  <functions >
+    <function name="OnAck" start="1" event="OnAck" returns="void" >
+      <parameters >
+        <parameter name="strAllowEvents" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strContact" type="string" pass="byref"/>
+        <parameter name="strContent" type="string" pass="byref"/>
+        <parameter name="strContentDisposition" type="string" pass="byref"/>
+        <parameter name="strContentEncoding" type="string" pass="byref"/>
+        <parameter name="strContentLanguage" type="string" pass="byref"/>
+        <parameter name="strContentType" type="string" pass="byref"/>
+        <parameter name="strCSeq" type="string" pass="byref"/>
+        <parameter name="strDate" type="string" pass="byref"/>
+        <parameter name="strEncryption" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strMaxForwards" type="string" pass="byref"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string" pass="byref"/>
+        <parameter name="strProxyRequire" type="string" pass="byref"/>
+        <parameter name="strRecordRoute" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string" pass="byref"/>
+        <parameter name="strRequire" type="string" pass="byref"/>
+        <parameter name="strResponseKey" type="string" pass="byref"/>
+        <parameter name="strRoute" type="string" pass="byref"/>
+        <parameter name="strTimestamp" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=176 y=189 ?>
+          <!--inbound or outbound?-->
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="g_oInboundCallLeg.strCallId" link="4" stubbed="0" >strCallId match g_oInboundCallLeg.strCallId</result>
+          </results>
+        </action>
+        <action id="2" plug-in="Pactolus.SipAck.1" ><?xtml-editor x=439 y=116 ?>
+          <!--Proxy the ACK gateway-->
+          <sip-ack add-record-route="0" add-via="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oInboundCallLeg.strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >g_oInboundCallLeg.strTo</from>
+            <request-uri >g_oInboundCallLeg.strRequestURI</request-uri>
+            <to >g_oInboundCallLeg.strFrom</to>
+            <via >g_oInboundCallLeg.strVia</via>
+          </sip-ack>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="3xx or above final response" link="3" stubbed="0" >g_intStatus &gt;= 300</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2 && Result.id != 4)
+{
+	Server.logError("ERROR: FAIL TO PROXY ACK TO GATEWAY, EXIT ON BRANCH: " + Result.name);
+}
+/*
+else
+{
+	var myCSeq = new SipCSeq(Session.strCSeq);
+	myCSeq.increment();
+	Session.g_oInboundCallLeg.strCSeq = myCSeq.encode();
+}
+*/]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.EndSession.1" ><?xtml-editor x=712 y=205 ?></action>
+        <action id="4" plug-in="Pactolus.SipAck.1" ><?xtml-editor x=453 y=353 ?>
+          <!--Proxy the ACK appserver-->
+          <sip-ack add-record-route="0" add-via="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oOutboundCallLeg.strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >g_oOutboundCallLeg.strFrom</from>
+            <request-uri >g_oOutboundCallLeg.strRequestURI</request-uri>
+            <to >g_oOutboundCallLeg.strTo</to>
+            <via >g_oOutboundCallLeg.strVia</via>
+          </sip-ack>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="3xx or above final response" link="3" stubbed="1" >g_intStatus &gt;= 300</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2 && Result.id != 4)
+{
+	Server.logError("ERROR: FAIL TO PROXY ACK TO APPSERVER, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=714 y=116 ?>
+          <return value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Session.g_oOutboundCallLeg.strRequestURI IS: " + Session.g_oOutboundCallLeg.strRequestURI);]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnBye" start="1" event="OnBye" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string" pass="byref"/>
+        <parameter name="strAcceptEncoding" type="string" pass="byref"/>
+        <parameter name="strAcceptLanguage" type="string" pass="byref"/>
+        <parameter name="strAllow" type="string" pass="byref"/>
+        <parameter name="strAllowEvents" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strCSeq" type="string" pass="byref"/>
+        <parameter name="strDate" type="string" pass="byref"/>
+        <parameter name="strEncryption" type="string" pass="byref"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strMaxForwards" type="string" pass="byref"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string" pass="byref"/>
+        <parameter name="strProxyRequire" type="string" pass="byref"/>
+        <parameter name="strRecordRoute" type="string" pass="byref"/>
+        <parameter name="strReferredBy" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string" pass="byref"/>
+        <parameter name="strRequire" type="string" pass="byref"/>
+        <parameter name="strResponseKey" type="string" pass="byref"/>
+        <parameter name="strRoute" type="string" pass="byref"/>
+        <parameter name="strSupported" type="string" pass="byref"/>
+        <parameter name="strTimestamp" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_strEventReceived" type="string" ></var>
+        <var name="f_strSIPStatus" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=173 y=272 ?>
+          <!--inbound or outbound?-->
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="g_oInboundCallLeg.strCallId" link="2" stubbed="0" >strCallId match g_oInboundCallLeg.strCallId</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_disable_event();]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.SipBye.1" ><?xtml-editor x=456 y=381 ?>
+          <!--Send the BYE to appserver-->
+          <sip-bye add-record-route="0" add-via="1" handle-responses="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oOutboundCallLeg.strCallId</call-id>
+            <cseq >g_oOutboundCallLeg.strCSeq</cseq>
+            <from >g_oOutboundCallLeg.strFrom</from>
+            <record-route >g_oOutboundCallLeg.RecordRoute</record-route>
+            <request-uri >g_oOutboundCallLeg.strRequestURI</request-uri>
+            <route >g_oOutboundCallLeg.strRoute</route>
+            <to >g_oOutboundCallLeg.strTo</to>
+            <via >g_oOutboundCallLeg.strVia</via>
+          </sip-bye>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PROXY BYE TO APPSERVER, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=939 y=373 ?>
+          <!--Send the response-->
+          <sip-response remove-via="1" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >f_strSIPStatus</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND RESPONSE TO BYE, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.WaitEvent.1" ><?xtml-editor x=696 y=378 ?>
+          <!--Wait for response-->
+          <wait timeout="10" recv-name="f_strEventReceived" >
+            <msg name="Pactolus.EveSipResponse.1" >
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter >f_strSIPStatus</parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+            </msg>
+          </wait>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO WAIT FOR RESPONSE FROM BYE, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.EndSession.1" ><?xtml-editor x=1180 y=368 ?></action>
+        <action id="6" plug-in="Pactolus.SipBye.1" ><?xtml-editor x=439 y=137 ?>
+          <!--Send the BYE to gateway-->
+          <sip-bye add-record-route="0" add-via="1" handle-responses="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oInboundCallLeg.strCallId</call-id>
+            <cseq >g_oInboundCallLeg.strCSeq</cseq>
+            <from >g_oInboundCallLeg.strTo</from>
+            <record-route >g_oInboundCallLeg.RecordRoute</record-route>
+            <request-uri >g_oInboundCallLeg.strRequestURI</request-uri>
+            <route >g_oInboundCallLeg.strRoute</route>
+            <to >g_oInboundCallLeg.strFrom</to>
+            <via >g_oInboundCallLeg.strVia</via>
+          </sip-bye>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PROXY BYE TO GATEWAY, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnCancel" start="1" event="OnCancel" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string" pass="byref"/>
+        <parameter name="strAcceptEncoding" type="string" pass="byref"/>
+        <parameter name="strAcceptLanguage" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strContent" type="string" pass="byref"/>
+        <parameter name="strContentDisposition" type="string" pass="byref"/>
+        <parameter name="strContentType" type="string" pass="byref"/>
+        <parameter name="strCSeq" type="string" pass="byref"/>
+        <parameter name="strDate" type="string" pass="byref"/>
+        <parameter name="strEncryption" type="string" pass="byref"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strMaxForwards" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string" pass="byref"/>
+        <parameter name="strProxyRequire" type="string" pass="byref"/>
+        <parameter name="strRecordRoute" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string" pass="byref"/>
+        <parameter name="strRequire" type="string" pass="byref"/>
+        <parameter name="strResponseKey" type="string" pass="byref"/>
+        <parameter name="strRoute" type="string" pass="byref"/>
+        <parameter name="strSupported" type="string" pass="byref"/>
+        <parameter name="strTimestamp" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=213 y=217 ?>
+          <!--inbound or outbound?-->
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="g_oInboundCallLeg.strCallId" link="4" stubbed="0" >strCallId match g_oInboundCallLeg.strCallId</result>
+          </results>
+        </action>
+        <action id="2" plug-in="Pactolus.SipCancel.1" ><?xtml-editor x=481 y=128 ?>
+          <!--Proxy the CANCEL to gateway-->
+          <sip-bye add-record-route="0" add-via="0" timeout="10" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oInboundCallLeg.strCallId</call-id>
+            <cseq >g_oInboundCallLeg.strCSeq</cseq>
+            <from >g_oInboundCallLeg.strFrom</from>
+            <record-route >g_oInboundCallLeg.strRecordRoute</record-route>
+            <request-uri >g_oInboundCallLeg.strRequestURI</request-uri>
+            <route >g_oInboundCallLeg.strRoute</route>
+            <to >g_oInboundCallLeg.strTo</to>
+            <via >g_oInboundCallLeg.strVia</via>
+          </sip-bye>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PROXY CANCEL TO GATEWAY, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.EndSession.1" ><?xtml-editor x=747 y=122 ?></action>
+        <action id="4" plug-in="Pactolus.SipCancel.1" ><?xtml-editor x=498 y=358 ?>
+          <!--Proxy the CANCEL to appserver-->
+          <sip-bye add-record-route="0" add-via="0" timeout="10" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oOutboundCallLeg.strCallId</call-id>
+            <cseq >g_oOutboundCallLeg.strCSeq</cseq>
+            <from >g_oOutboundCallLeg.strFrom</from>
+            <record-route >g_oOutboundCallLeg.strRecordRoute</record-route>
+            <request-uri >g_oOutboundCallLeg.strRequestURI</request-uri>
+            <route >g_oOutboundCallLeg.strRoute</route>
+            <to >g_oOutboundCallLeg.strTo</to>
+            <via >g_oOutboundCallLeg.strVia</via>
+          </sip-bye>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PROXY CANCEL TO GATEWAY, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnInvite" start="1" event="OnInvite" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string" pass="byref"/>
+        <parameter name="strAcceptEncoding" type="string" pass="byref"/>
+        <parameter name="strAcceptLanguage" type="string" pass="byref"/>
+        <parameter name="strAlertInfo" type="string" pass="byref"/>
+        <parameter name="strAllow" type="string" pass="byref"/>
+        <parameter name="strAllowEvents" type="string" pass="byref"/>
+        <parameter name="strAnonymity" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strCallInfo" type="string" pass="byref"/>
+        <parameter name="strContact" type="string" pass="byref"/>
+        <parameter name="strContent" type="string" pass="byref"/>
+        <parameter name="strContentDisposition" type="string" pass="byref"/>
+        <parameter name="strContentEncoding" type="string" pass="byref"/>
+        <parameter name="strContentLanguage" type="string" pass="byref"/>
+        <parameter name="strContentType" type="string" pass="byref"/>
+        <parameter name="strCSeq" type="string" pass="byref"/>
+        <parameter name="strDate" type="string" pass="byref"/>
+        <parameter name="strEncryption" type="string" pass="byref"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strExpires" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strInReplyTo" type="string" pass="byref"/>
+        <parameter name="strMaxForwards" type="string" pass="byref"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strMinSE" type="string" pass="byref"/>
+        <parameter name="strOrganization" type="string" pass="byref"/>
+        <parameter name="strPriority" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string" pass="byref"/>
+        <parameter name="strProxyRequire" type="string" pass="byref"/>
+        <parameter name="strRecordRoute" type="string" pass="byref"/>
+        <parameter name="strReferredBy" type="string" pass="byref"/>
+        <parameter name="strRemotePartyID" type="string" pass="byref"/>
+        <parameter name="strReplaces" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string" pass="byref"/>
+        <parameter name="strRequire" type="string" pass="byref"/>
+        <parameter name="strResponseKey" type="string" pass="byref"/>
+        <parameter name="strRoute" type="string" pass="byref"/>
+        <parameter name="strSessionExpires" type="string" pass="byref"/>
+        <parameter name="strSubject" type="string" pass="byref"/>
+        <parameter name="strSupported" type="string" pass="byref"/>
+        <parameter name="strTimestamp" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_strPassCode" type="string" ></var>
+        <var name="strHandOffToAppServerIP" type="string" ></var>
+        <var name="f_bTrue" type="boolean" >0</var>
+        <var name="f_intReturnCode" type="i4" >-1</var>
+        <var name="f_strAttendeeId" type="string" ></var>
+        <var name="f_intHandOffNumber" type="i4" >0</var>
+        <var name="f_intMaxWaitTime" type="i4" >10</var>
+        <var name="f_strEventReceived" type="string" ></var>
+        <var name="f_bNoSDP" type="boolean" >0</var>
+        <var name="f_strHandoffToApp" type="string" >conference</var>
+        <var name="f_strTargetSession" type="string" ></var>
+        <var name="f_strAccept" type="string" ></var>
+        <var name="f_strAcceptEncoding" type="string" ></var>
+        <var name="f_strAcceptLanguage" type="string" ></var>
+        <var name="f_strCallId" type="string" ></var>
+        <var name="f_strContact" type="string" ></var>
+        <var name="f_strContent" type="string" ></var>
+        <var name="f_strContentDisposition" type="string" ></var>
+        <var name="f_strContentType" type="string" ></var>
+        <var name="f_strCSeq" type="string" ></var>
+        <var name="f_strDate" type="string" ></var>
+        <var name="f_strEncryption" type="string" ></var>
+        <var name="f_strFrom" type="string" ></var>
+        <var name="f_strInReplyTo" type="string" ></var>
+        <var name="f_strProxyAuthenticate" type="string" ></var>
+        <var name="f_strRecordRoute" type="string" ></var>
+        <var name="f_strRequire" type="string" ></var>
+        <var name="f_strRetryAfter" type="string" ></var>
+        <var name="f_strRSeq" type="string" ></var>
+        <var name="f_strSessionExpires" type="string" ></var>
+        <var name="f_strStatus" type="string" ></var>
+        <var name="f_strSupported" type="string" ></var>
+        <var name="f_strTimestamp" type="string" ></var>
+        <var name="f_strTo" type="string" ></var>
+        <var name="f_strUnsuported" type="string" ></var>
+        <var name="f_strVia" type="string" ></var>
+        <var name="f_strWarning" type="string" ></var>
+        <var name="f_strWWWAuthenticate" type="string" ></var>
+        <var name="f_strHandOffNumber" type="string" ></var>
+        <var name="strHandOffToAppServerPort" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=125 y=488 ?>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="g_bHandOff" link="23" stubbed="0" >g_bHandOff == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if ( Clib.strstri(Session.strSubject, "handoff") != null )
+{
+	Session.g_bHandOff = true;
+/*	Server.logInfo("THIS IS A HAND OFF, SUBJECT IS: " + Session.strSubject);
+	var myString = new String(Session.strSubject);
+	var myArray = myString.split(";");
+	Session.f_strPassCode = myArray[1];
+	Server.logInfo("HAND OFF PASSCODE IS: " + Session.f_strPassCode);
+	Session.strHandOffToAppServerIP = myArray[2];
+	Server.logInfo("HAND OFF TO IP ADDRESS IS: " + Session.strHandOffToAppServerIP);
+	Session.f_strAttendeeId = myArray[3];
+	Server.logInfo("HAND OFF ATTENDEE ID IS: " + Session.f_strAttendeeId);
+*/
+
+	Server.logInfo("THIS IS A HAND OFF, SUBJECT IS: " + Session.strSubject);
+	js_parse_value(Session.strSubject, "handoff", Session.f_strHandOffNumber);
+	Server.logInfo("HAND OFF NUMBER IS: " + Session.f_strHandOffNumber);
+	Session.f_intHandOffNumber = Clib.atoi(Session.f_strHandOffNumber);
+	js_parse_value(Session.strSubject, "passcode", Session.f_strPassCode);
+	Server.logInfo("HAND OFF PASSCODE IS: " + Session.f_strPassCode);
+	js_parse_value(Session.strSubject, "attendeeId", Session.f_strAttendeeId);
+	Server.logInfo("HAND OFF ATTENDEE ID IS: " + Session.f_strAttendeeId);
+
+	var strIP_Port = new String();
+	js_parse_value(Session.strSubject, "sendtoIP", strIP_Port);
+	var myArray = strIP_Port.split(":");
+	Session.strHandOffToAppServerIP = myArray[0];
+	if (myArray.length > 1)
+		Session.strHandOffToAppServerPort = myArray[1];
+	else
+		Session.strHandOffToAppServerPort = "5060";
+	
+	Server.logInfo("HAND OFF SEND TO SIP IP ADDRESS IS: " + Session.strHandOffToAppServerIP);
+	Server.logInfo("HAND OFF SEND TO SIP PORT IS: " + Session.strHandOffToAppServerPort);
+}
+else
+{
+	Session.g_bHandOff = false;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.SipInvite.1" ><?xtml-editor x=652 y=704 ?>
+          <!--Proxy the invite to appserver-->
+          <sip-invite add-record-route="1" add-via="1" handle-responses="0" follow-redirection="0" final-response-status="" response-content="" response-content-type="" final-request-uri="" timeout-for-final-response="" timeout-for-provisional-response="" record-route="" contact="" response-to="" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oOutboundCallLeg.strCallId</call-id>
+            <contact >g_strProxyServerContact</contact>
+            <content >g_oInboundCallLeg.strContent</content>
+            <content-type >g_oInboundCallLeg.strContentType</content-type>
+            <cseq >g_oOutboundCallLeg.strCSeq</cseq>
+            <expires >g_oOutboundCallLeg.strExpires</expires>
+            <from >g_oOutboundCallLeg.strFrom</from>
+            <request-uri >g_oOutboundCallLeg.strRequestURI</request-uri>
+            <session-expires >g_oOutboundCallLeg.strSessionExpires</session-expires>
+            <subject >g_oOutboundCallLeg.strSubject</subject>
+            <to >g_oOutboundCallLeg.strTo</to>
+            <via >g_oOutboundCallLeg.strVia</via>
+          </sip-invite>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success" link="17" stubbed="0"/>
+            <result name="Redirect (3xx)"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Provisional Timeout"/>
+            <result name="Final Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_disable_event();
+js_initCallLeg(Session.g_oInboundCallLeg);
+js_initCallLeg(Session.g_oOutboundCallLeg);
+
+if (Server.sipPort != 5060)
+{
+	Session.g_strProxyServerContact = "sip:" + Server.sipAddress + ":" + Server.sipPort;
+}
+else
+{
+	Session.g_strProxyServerContact = "sip:" + Server.sipAddress;
+}
+
+
+
+//Save Inbound call leg info
+Session.g_oInboundCallLeg.bReverseFromTo = true;
+Session.g_oInboundCallLeg.strAccept = Session.strAccept;
+Session.g_oInboundCallLeg.strAcceptEncoding = Session.strAcceptEncoding;
+Session.g_oInboundCallLeg.strAcceptLanguage = Session.strAcceptLanguage;
+Session.g_oInboundCallLeg.strAuthorization = Session.strAuthorization;
+Session.g_oInboundCallLeg.strCallId = Session.strCallId;
+Session.g_oInboundCallLeg.strContact = Session.strContact;
+Session.g_oInboundCallLeg.strContent = Session.strContent;
+Session.g_oInboundCallLeg.strContentDisposition = Session.strContentDisposition;
+Session.g_oInboundCallLeg.strContentType = Session.strContentType;
+Session.g_oInboundCallLeg.strCSeq = Session.strCSeq;
+Session.g_oInboundCallLeg.strDate = Session.strDate;
+Session.g_oInboundCallLeg.strEncryption = Session.strEncryption;
+Session.g_oInboundCallLeg.strExpires = Session.strExpires;
+Session.g_oInboundCallLeg.strFrom = Session.strFrom;
+Session.g_oInboundCallLeg.nMaxForwards = Session.nMaxForwards;
+Session.g_oInboundCallLeg.strProxyAuthorization = Session.strProxyAuthorization;
+Session.g_oInboundCallLeg.strProxyRequire = Session.strProxyRequire;
+Session.g_oInboundCallLeg.strRecordRoute = Session.strRecordRoute;
+Session.g_oInboundCallLeg.strRequestURI = Session.strRequestURI;
+Session.g_oInboundCallLeg.strOrigRequestURI = Session.strRequestURI;
+Session.g_oInboundCallLeg.strRequire = Session.strRequire;
+Session.g_oInboundCallLeg.strResponseKey = Session.strResponseKey;
+Session.g_oInboundCallLeg.strRoute = Session.strRoute;
+Session.g_oInboundCallLeg.strSessionExpires = Session.strSessionExpires;
+Session.g_oInboundCallLeg.strSubject = Session.strSubject;
+Session.g_oInboundCallLeg.strSupported = Session.strSupported;
+Session.g_oInboundCallLeg.strTimestamp = Session.strTimestamp;
+Session.g_oInboundCallLeg.strTo = Session.strTo;
+Session.g_oInboundCallLeg.strVia = Session.strVia;
+Server.logInfo("CALLING js_calculate_uri_and_route");
+Server.logInfo("BEFORE contact: " + Session.g_oInboundCallLeg.strContact);
+Server.logInfo("BEFORE record route: " + Session.g_oInboundCallLeg.strRecordRoute);
+Server.logInfo("BEFORE request URI: " + Session.g_oInboundCallLeg.strRequestURI);
+Server.logInfo("BEFORE route: " + Session.g_oInboundCallLeg.strRoute);
+js_calculate_uri_and_route(Session.f_bTrue, Session.s_strSIPVERSION, Session.g_oInboundCallLeg.strFrom, Session.g_oInboundCallLeg.strContact, Session.g_oInboundCallLeg.strRecordRoute, Session.g_oInboundCallLeg.strRequestURI, Session.g_oInboundCallLeg.strRoute);
+Server.logInfo("AFTER contact: " + Session.g_oInboundCallLeg.strContact);
+Server.logInfo("AFTER record route: " + Session.g_oInboundCallLeg.strRecordRoute);
+Server.logInfo("AFTER request URI: " + Session.g_oInboundCallLeg.strRequestURI);
+Server.logInfo("AFTER route: " + Session.g_oInboundCallLeg.strRoute);
+Server.logInfo("Call leg A request URI is: " + Session.g_oInboundCallLeg.strRequestURI);
+
+
+
+//set up Outbound call leg
+Session.g_oOutboundCallLeg.strCallId = Session._sessionId + Server.getUTCTime();
+Session.g_oOutboundCallLeg.strCSeq = Session.strCSeq;
+Session.g_oOutboundCallLeg.strExpires = Session.strExpires;
+Session.g_oOutboundCallLeg.strFrom = Session.strFrom;
+Session.g_oOutboundCallLeg.strRequestURI = Session.strRequestURI;
+var myRequestURI = new SipRequestUri(Session.g_oOutboundCallLeg.strRequestURI);
+myRequestURI.url.host = Session.strHandOffToAppServerIP;
+myRequestURI.url.port = Session.strHandOffToAppServerPort;
+Session.g_oOutboundCallLeg.strRequestURI = myRequestURI.encode();
+Session.g_oOutboundCallLeg.strRequire = Session.strRequire;
+Session.g_oOutboundCallLeg.strSessionExpires = Session.strSessionExpires;
+Session.g_oOutboundCallLeg.strSubject = "passcode=\"" + Session.f_strPassCode + "\";attendeeId=\"" + Session.f_strAttendeeId + "\"";
+Session.g_oOutboundCallLeg.strSupported = Session.strSupported;
+var myTo = new SipTo(Session.strTo);
+Session.g_oOutboundCallLeg.strTo = myTo.url;
+
+Server.logInfo("HAND OFF Session.g_oOutboundCallLeg.strCallId IS: " + Session.g_oOutboundCallLeg.strCallId);
+Server.logInfo("HAND OFF Session.g_oOutboundCallLeg.strCSeq IS: " + Session.g_oOutboundCallLeg.strCSeq);
+Server.logInfo("HAND OFF Session.g_oOutboundCallLeg.strFrom IS: " + Session.g_oOutboundCallLeg.strFrom);
+Server.logInfo("HAND OFF Session.g_oOutboundCallLeg.strRequestURI IS: " + Session.g_oOutboundCallLeg.strRequestURI);
+Server.logInfo("HAND OFF Session.g_oOutboundCallLeg.strTo IS: " + Session.g_oOutboundCallLeg.strTo);
+Server.logInfo("HAND OFF Session.g_oOutboundCallLeg.strVia IS: " + Session.g_oOutboundCallLeg.strVia);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PROXY INVITE TO APPSERVER, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=913 y=696 ?>
+          <!--HangUp Inbound-->
+          <function name="&quot;HangUpParty&quot;" return="f_intReturnCode" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >g_oInboundCallLeg</parameter>
+            <parameter >g_strProxyServerContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var myCSeq = new SipCSeq(Session.g_oInboundCallLeg.strCSeq.toString());
+myCSeq.increment() ;
+Session.g_oInboundCallLeg.strCSeq = myCSeq.encode() ;
+]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.EndSession.1" ><?xtml-editor x=1154 y=703 ?></action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=911 y=563 ?>
+          <return value=""/>
+        </action>
+        <action id="6" plug-in="Pactolus.Branch.1" ><?xtml-editor x=389 y=255 ?>
+          <!--inbound or outbound?-->
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="g_oInboundCallLeg.strCallId" link="7" stubbed="0" >strCallId match g_oInboundCallLeg.strCallId</result>
+          </results>
+        </action>
+        <action id="7" plug-in="Pactolus.SipInvite.1" ><?xtml-editor x=633 y=407 ?>
+          <!--Proxy the invite to appserver-->
+          <sip-invite add-record-route="0" add-via="1" handle-responses="0" follow-redirection="0" final-response-status="" response-content="" response-content-type="" final-request-uri="" timeout-for-final-response="" timeout-for-provisional-response="" record-route="" contact="" response-to="" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oOutboundCallLeg.strCallId</call-id>
+            <contact >g_strProxyServerContact</contact>
+            <content >strContent</content>
+            <content-type >strContentType</content-type>
+            <cseq >strCSeq</cseq>
+            <expires >strExpires</expires>
+            <from >g_oOutboundCallLeg.strFrom</from>
+            <request-uri >g_oOutboundCallLeg.strRequestURI</request-uri>
+            <session-expires >strSessionExpires</session-expires>
+            <subject >strSubject</subject>
+            <to >g_oOutboundCallLeg.strTo</to>
+            <via >g_oOutboundCallLeg.strVia</via>
+          </sip-invite>
+          <results >
+            <result name="Default" link="12" stubbed="0"/>
+            <result name="Success" link="5" stubbed="0"/>
+            <result name="Redirect (3xx)"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Provisional Timeout"/>
+            <result name="Final Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oInboundCallLeg.strContent = Session.strContent;
+Server.logInfo("SENDING TO APPSERVER WITH INBOUND CONTENT IS: " + Session.g_oInboundCallLeg.strContent);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PROXY INVITE APPSERVER, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Pactolus.SipInvite.1" ><?xtml-editor x=618 y=171 ?>
+          <!--Proxy the invite to gateway-->
+          <sip-invite add-record-route="0" add-via="1" handle-responses="0" follow-redirection="0" final-response-status="" response-content="" response-content-type="" final-request-uri="" timeout-for-final-response="" timeout-for-provisional-response="" record-route="" contact="" response-to="" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oInboundCallLeg.strCallId</call-id>
+            <contact >g_strProxyServerContact</contact>
+            <content >strContent</content>
+            <content-type >strContentType</content-type>
+            <cseq >strCSeq</cseq>
+            <expires >strExpires</expires>
+            <from >g_oInboundCallLeg.strTo</from>
+            <record-route >g_oInboundCallLeg.strRecordRoute</record-route>
+            <request-uri >g_oInboundCallLeg.strRequestURI</request-uri>
+            <route >g_oInboundCallLeg.strRoute</route>
+            <session-expires >strSessionExpires</session-expires>
+            <subject >strSubject</subject>
+            <to >g_oInboundCallLeg.strFrom</to>
+          </sip-invite>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="Success" link="5" stubbed="1"/>
+            <result name="Redirect (3xx)"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Provisional Timeout"/>
+            <result name="Final Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oOutboundCallLeg.strContent = Session.strContent;
+Session.g_oOutboundCallLeg.strVia = Session.strVia;
+Server.logInfo("SENDING TO GATEWAY WITH OUTBOUND CONTENT IS: " + Session.g_oOutboundCallLeg.strContent);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PROXY INVITE TO GATEWAY, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1052 y=162 ?>
+          <!--HangUp Outbound-->
+          <function name="&quot;HangUpParty&quot;" return="f_intReturnCode" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >g_oOutboundCallLeg</parameter>
+            <parameter >g_strProxyServerContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var myCSeq = new SipCSeq(Session.g_oOutboundCallLeg.strCSeq.toString());
+myCSeq.increment() ;
+Session.g_oOutboundCallLeg.strCSeq = myCSeq.encode() ;]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=852 y=343 ?>
+          <!--response 500 to gateway-->
+          <sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <contact >g_strProxyServerContact</contact>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <record-route >strRecordRoute</record-route>
+            <status >"SIP/2.0 500 Server Internal Error"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="12" stubbed="1"/>
+            <result name="Success" ><?xtml-editor visible=no?></result>
+            <result name="Error" ><?xtml-editor visible=no?></result>
+            <result name="Timeout" ><?xtml-editor visible=no?></result>
+          </results>
+        </action>
+        <action id="12" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1102 y=395 ?>
+          <!--HangUp Inbound-->
+          <function name="&quot;HangUpParty&quot;" return="f_intReturnCode" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >g_oInboundCallLeg</parameter>
+            <parameter >g_strProxyServerContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="13" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var myCSeq = new SipCSeq(Session.g_oInboundCallLeg.strCSeq.toString());
+myCSeq.increment() ;
+Session.g_oInboundCallLeg.strCSeq = myCSeq.encode() ;
+]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1339 y=391 ?>
+          <!--HangUp Outbound-->
+          <function name="&quot;HangUpParty&quot;" return="f_intReturnCode" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >g_oOutboundCallLeg</parameter>
+            <parameter >g_strProxyServerContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var myCSeq = new SipCSeq(Session.g_oOutboundCallLeg.strCSeq.toString());
+myCSeq.increment() ;
+Session.g_oOutboundCallLeg.strCSeq = myCSeq.encode() ;]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=824 y=106 ?>
+          <!--response 500 to appserver-->
+          <sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <contact >g_strProxyServerContact</contact>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <record-route >strRecordRoute</record-route>
+            <status >"SIP/2.0 500 Server Internal Error"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="9" stubbed="1"/>
+            <result name="Success" ><?xtml-editor visible=no?></result>
+            <result name="Error" ><?xtml-editor visible=no?></result>
+            <result name="Timeout" ><?xtml-editor visible=no?></result>
+          </results>
+        </action>
+        <action id="15" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1288 y=159 ?>
+          <!--HangUp Inbound-->
+          <function name="&quot;HangUpParty&quot;" return="f_intReturnCode" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >g_oInboundCallLeg</parameter>
+            <parameter >g_strProxyServerContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var myCSeq = new SipCSeq(Session.g_oInboundCallLeg.strCSeq.toString());
+myCSeq.increment() ;
+Session.g_oInboundCallLeg.strCSeq = myCSeq.encode() ;
+]]></script>
+          </scripts>
+        </action>
+        <action id="17" plug-in="Standard.WaitEvent.1" ><?xtml-editor x=930 y=856 ?>
+          <!--wait for response-->
+          <wait timeout="3" recv-name="f_strEventReceived" >
+            <msg name="Pactolus.EveSipResponse.1" >
+              <parameter >f_strAccept</parameter>
+              <parameter >f_strAcceptEncoding</parameter>
+              <parameter >f_strAcceptLanguage</parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter >f_strCallId</parameter>
+              <parameter ></parameter>
+              <parameter >f_strContact</parameter>
+              <parameter >f_strContent</parameter>
+              <parameter >f_strContentDisposition</parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter >f_strContentType</parameter>
+              <parameter >f_strCSeq</parameter>
+              <parameter >f_strDate</parameter>
+              <parameter >f_strEncryption</parameter>
+              <parameter ></parameter>
+              <parameter >f_strFrom</parameter>
+              <parameter >f_strInReplyTo</parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter >f_strProxyAuthenticate</parameter>
+              <parameter >f_strRecordRoute</parameter>
+              <parameter ></parameter>
+              <parameter >f_strRequire</parameter>
+              <parameter >f_strRetryAfter</parameter>
+              <parameter >f_strRSeq</parameter>
+              <parameter ></parameter>
+              <parameter >f_strSessionExpires</parameter>
+              <parameter >f_strStatus</parameter>
+              <parameter ></parameter>
+              <parameter >f_strSupported</parameter>
+              <parameter >f_strTimestamp</parameter>
+              <parameter >f_strTo</parameter>
+              <parameter >f_strUnsuported</parameter>
+              <parameter ></parameter>
+              <parameter >f_strVia</parameter>
+              <parameter >f_strWarning</parameter>
+              <parameter >f_strWWWAuthenticate</parameter>
+            </msg>
+          </wait>
+          <results >
+            <result name="Default" link="22" stubbed="0"/>
+            <result name="Success" link="18" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="18" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1163 y=977 ?>
+          <!--No SDP-->
+          <results >
+            <result name="Default" link="20" stubbed="0"/>
+            <result name="f_bNoSDP" link="19" stubbed="0" >f_bNoSDP == true
+AND f_strStatus match "200"</result>
+            <result name="503 Service Unavailable" link="25" stubbed="0" >f_strStatus match "503"</result>
+            <result name="100 Trying" link="17" stubbed="1" >f_strStatus match "100"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if (Session.f_strContent.length <= 0)
+{
+	Session.f_bNoSDP = true;
+}
+else
+{
+	Session.f_bNoSDP = false;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="19" plug-in="Pactolus.SipAck.1" ><?xtml-editor x=1493 y=1081 ?>
+          <!--Proxy the ACK appserver-->
+          <sip-ack add-record-route="0" add-via="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oOutboundCallLeg.strCallId</call-id>
+            <cseq >g_oOutboundCallLeg.strCSeq</cseq>
+            <from >g_oOutboundCallLeg.strFrom</from>
+            <request-uri >f_strContact</request-uri>
+            <to >g_oOutboundCallLeg.strTo</to>
+            <via >g_oOutboundCallLeg.strVia</via>
+          </sip-ack>
+          <results >
+            <result name="Default" link="21" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oOutboundCallLeg.strFrom = Session.f_strFrom;
+Session.g_oOutboundCallLeg.strRequire = Session.f_strRequire;
+Session.g_oOutboundCallLeg.strSessionExpires = Session.f_strSessionExpires;
+Session.g_oOutboundCallLeg.strSupported = Session.f_strSupported;
+Session.g_oOutboundCallLeg.strTo = Session.f_strTo;
+Session.g_oOutboundCallLeg.strVia = Session.f_strVia;
+Session.g_oOutboundCallLeg.strContent = Session.f_strContent;
+Session.g_oOutboundCallLeg.strContentDisposition = Session.f_strContentDisposition;
+Session.g_oOutboundCallLeg.strContentType = Session.f_strContentType;
+Session.g_oOutboundCallLeg.strContact = Session.f_strContact;
+
+var myRequestURI = new SipRequestUri(Session.g_oOutboundCallLeg.strRequestURI);
+var myContact = new SipUrl(Session.f_strContact);
+if (myContact.port > 0)
+{
+	myRequestURI.url.host = myContact.host + ":" + myContact.port;
+}
+else
+{
+	myRequestURI.url.host = myContact.host;
+}
+Session.g_oOutboundCallLeg.strRequestURI = myRequestURI.encode();
+Server.logInfo("Session.g_oOutboundCallLeg.strRequestURI IS: " + Session.g_oOutboundCallLeg.strRequestURI);
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PROXY ACK TO APPSERVER, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="20" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=1479 y=974 ?>
+          <!--Proxy the response gateway-->
+          <sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oInboundCallLeg.strCallId</call-id>
+            <contact >g_strProxyServerContact</contact>
+            <content >g_oOutboundCallLeg.strContent</content>
+            <content-type >g_oOutboundCallLeg.strContentType</content-type>
+            <cseq >g_oInboundCallLeg.strCSeq</cseq>
+            <expires >g_oOutboundCallLeg.strExpires</expires>
+            <from >g_oInboundCallLeg.strFrom</from>
+            <record-route >g_oInboundCallLeg.strRecordRoute</record-route>
+            <require >g_oOutboundCallLeg.strRequire</require>
+            <session-expires >g_oOutboundCallLeg.strSessionExpires</session-expires>
+            <status >f_strStatus</status>
+            <supported >g_oOutboundCallLeg.strSupported</supported>
+            <to >g_oInboundCallLeg.strTo</to>
+            <via >g_oInboundCallLeg.strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="21" stubbed="0"/>
+            <result name="Success" ><?xtml-editor visible=no?></result>
+            <result name="Error" ><?xtml-editor visible=no?></result>
+            <result name="Timeout" ><?xtml-editor visible=no?></result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[//save updated info from the appserver, these are new values for inbound call leg
+/*
+Session.g_oInboundCallLeg.strExpires = Session.strExpires;
+Session.g_oInboundCallLeg.strFrom = Session.strFrom;
+Session.g_oInboundCallLeg.strRequire = Session.strRequire;
+Session.g_oInboundCallLeg.strSessionExpires = Session.strSessionExpires;
+Session.g_oInboundCallLeg.strSupported = Session.strSupported;
+Session.g_oInboundCallLeg.strTo = Session.strTo;
+Session.g_oInboundCallLeg.strVia = Session.strVia;
+*/
+//save updated value for outbound call leg
+/*
+Session.g_oOutboundCallLeg.strContent = Session.strContent;
+Session.g_oOutboundCallLeg.strContentDisposition = Session.strContentDisposition;
+Session.g_oOutboundCallLeg.strContentType = Session.strContentType;
+Session.g_oOutboundCallLeg.strContact = Session.strContact;
+*/]]></script>
+          </scripts>
+        </action>
+        <action id="21" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1701 y=972 ?>
+          <return value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_enable_event();]]></script>
+          </scripts>
+        </action>
+        <action id="22" plug-in="Pactolus.Handoff.1" ><?xtml-editor x=1145 y=789 ?>
+          <!--hand BACK to other appserver-->
+          <handoff application="f_strHandoffToApp" session="f_strTargetSession"/>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success"/>
+            <result name="No Session"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("HAND BACK TO CONFERENCE ON THIS APPSERVER");
+//Session.strSubject = "handoff=\"3\";passcode=\"" + Session.g_strPassCode + "\";attendeeId=\"" + Session.g_strAttendeeId + "\";sendtoIP=\"" + Session.s_strAppServerIPHandOffTo + "\"";
+var myString = new String(Session.strSubject);
+Server.logInfo("SUBJECT IS: " + myString);
+Session.strSubject = myString.replace(/handoff=\"2\"/, 'handoff=\"3\"');
+Server.logInfo("NEW SUBECT IS: " + Session.strSubject);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO HAND OFF TO " + Session.f_strHandoffToApp + ", exit on : " + Result.name ) ;
+}
+else
+{
+	Server.logInfo("Recipient of handoff was: " + Session.f_strTargetSession ) ;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="23" plug-in="Pactolus.Branch.1" ><?xtml-editor x=407 y=708 ?>
+          <!--HandBack?-->
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="f_intHandOffNumber==3" link="26" stubbed="0" >f_intHandOffNumber == 3</result>
+          </results>
+        </action>
+        <action id="25" plug-in="Pactolus.SipAck.1" ><?xtml-editor x=1474 y=1234 ?>
+          <!--ACK to 503-->
+          <sip-ack add-record-route="0" add-via="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >f_strCallId</call-id>
+            <cseq >f_strCSeq</cseq>
+            <from >f_strFrom</from>
+            <request-uri >g_oOutboundCallLeg.strRequestURI</request-uri>
+            <to >f_strTo</to>
+            <via >f_strVia</via>
+          </sip-ack>
+          <results >
+            <result name="Default" link="22" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PROXY ACK TO APPSERVER, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="26" plug-in="Pactolus.Handoff.1" ><?xtml-editor x=668 y=968 ?>
+          <!--hand BACK to other appserver-->
+          <handoff application="f_strHandoffToApp" session="f_strTargetSession"/>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success"/>
+            <result name="No Session"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("HAND BACK TO CONFERENCE ON THIS APPSERVER");
+//Restore Inbound call leg info
+Session.strAccept = Session.g_oInboundCallLeg.strAccept;
+Session.strAcceptEncoding = Session.g_oInboundCallLeg.strAcceptEncoding;
+Session.strAcceptLanguage = Session.g_oInboundCallLeg.strAcceptLanguage;
+Session.strAuthorization = Session.g_oInboundCallLeg.strAuthorization;
+Session.strCallId = Session.g_oInboundCallLeg.strCallId;
+Session.strContact = Session.g_oInboundCallLeg.strContact;
+Session.strContent = Session.g_oInboundCallLeg.strContent;
+Session.strContentDisposition = Session.g_oInboundCallLeg.strContentDisposition;
+Session.strContentType = Session.g_oInboundCallLeg.strContentType;
+Session.strCSeq = Session.g_oInboundCallLeg.strCSeq;
+Session.strDate = Session.g_oInboundCallLeg.strDate;
+Session.strEncryption = Session.g_oInboundCallLeg.strEncryption;
+Session.strExpires = Session.g_oInboundCallLeg.strExpires;
+Session.strFrom = Session.g_oInboundCallLeg.strFrom;
+Session.nMaxForwards = Session.g_oInboundCallLeg.nMaxForwards;
+Session.strProxyAuthorization = Session.g_oInboundCallLeg.strProxyAuthorization;
+Session.strProxyRequire = Session.g_oInboundCallLeg.strProxyRequire;
+Session.strRecordRoute = Session.g_oInboundCallLeg.strRecordRoute;
+Session.strRequestURI = Session.g_oInboundCallLeg.strOrigRequestURI;
+Session.strRequire = Session.g_oInboundCallLeg.strRequire;
+Session.strResponseKey = Session.g_oInboundCallLeg.strResponseKey;
+Session.strRoute = Session.g_oInboundCallLeg.strRoute;
+Session.strSessionExpires = Session.g_oInboundCallLeg.strSessionExpires;
+// Session.strSubject = Session.g_oInboundCallLeg.strSubject;
+Session.strSupported = Session.g_oInboundCallLeg.strSupported;
+Session.strTimestamp = Session.g_oInboundCallLeg.strTimestamp;
+Session.strTo = Session.g_oInboundCallLeg.strTo;
+Session.strVia = Session.g_oInboundCallLeg.strVia;
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO HAND OFF TO " + Session.f_strHandoffToApp + ", exit on : " + Result.name ) ;
+}
+else
+{
+	Server.logInfo("Recipient of handoff was: " + Session.f_strTargetSession ) ;
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="134" y-coord="28" width="342" height="67" text="Back to back proxy agent
+Inbound is the call from the gateway to this proxy app
+Outbound is the call from this proxy app to appserver" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="OnResponse" start="1" event="OnResponse" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string" pass="byref"/>
+        <parameter name="strAcceptEncoding" type="string" pass="byref"/>
+        <parameter name="strAcceptLanguage" type="string" pass="byref"/>
+        <parameter name="strAlertInfo" type="string" pass="byref"/>
+        <parameter name="strAllow" type="string" pass="byref"/>
+        <parameter name="strAllowEvents" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strCallInfo" type="string" pass="byref"/>
+        <parameter name="strContact" type="string" pass="byref"/>
+        <parameter name="strContent" type="string" pass="byref"/>
+        <parameter name="strContentDisposition" type="string" pass="byref"/>
+        <parameter name="strContentEncoding" type="string" pass="byref"/>
+        <parameter name="strContentLanguage" type="string" pass="byref"/>
+        <parameter name="strContentType" type="string" pass="byref"/>
+        <parameter name="strCSeq" type="string" pass="byref"/>
+        <parameter name="strDate" type="string" pass="byref"/>
+        <parameter name="strEncryption" type="string" pass="byref"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strInReplyTo" type="string" pass="byref"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strMinSE" type="string" pass="byref"/>
+        <parameter name="strOrganization" type="string" pass="byref"/>
+        <parameter name="strPriority" type="string" pass="byref"/>
+        <parameter name="strProxyAuthenticate" type="string" pass="byref"/>
+        <parameter name="strRecordRoute" type="string" pass="byref"/>
+        <parameter name="strRemotePartyID" type="string" pass="byref"/>
+        <parameter name="strRequire" type="string" pass="byref"/>
+        <parameter name="strRetryAfter" type="string" pass="byref"/>
+        <parameter name="strRSeq" type="string" pass="byref"/>
+        <parameter name="strServer" type="string" pass="byref"/>
+        <parameter name="strSessionExpires" type="string" pass="byref"/>
+        <parameter name="strStatus" type="string" pass="byref"/>
+        <parameter name="strSubscriptionState" type="string" pass="byref"/>
+        <parameter name="strSupported" type="string" pass="byref"/>
+        <parameter name="strTimestamp" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strUnsupported" type="string" pass="byref"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string" pass="byref"/>
+        <parameter name="strWarning" type="string" pass="byref"/>
+        <parameter name="strWWWAuthenticate" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_bNoSDP" type="boolean" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=199 y=310 ?>
+          <!--inbound or outbound?-->
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="g_oInboundCallLeg.strCallId" link="4" stubbed="0" >strCallId match g_oInboundCallLeg.strCallId</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_disable_event();
+var status = new SipStatus( Session.strStatus.toString() ) ;
+Session.g_intStatus = status.code ;
+Server.logInfo("RECEIVE RESPONSE");]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=702 y=150 ?>
+          <!--Proxy the response gateway-->
+          <sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oInboundCallLeg.strCallId</call-id>
+            <contact >g_strProxyServerContact</contact>
+            <content >strContent</content>
+            <content-type >strContentType</content-type>
+            <cseq >strCSeq</cseq>
+            <from >g_oInboundCallLeg.strFrom</from>
+            <record-route >g_oInboundCallLeg.strRecordRoute</record-route>
+            <require >strRequire</require>
+            <session-expires >strSessionExpires</session-expires>
+            <status >strStatus</status>
+            <supported >strSupported</supported>
+            <to >g_oInboundCallLeg.strTo</to>
+            <via >g_oInboundCallLeg.strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success" ><?xtml-editor visible=no?></result>
+            <result name="Error" ><?xtml-editor visible=no?></result>
+            <result name="Timeout" ><?xtml-editor visible=no?></result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[//save updated info from the appserver, these are new values for inbound call leg
+/*
+Session.g_oInboundCallLeg.strExpires = Session.strExpires;
+Session.g_oInboundCallLeg.strFrom = Session.strFrom;
+Session.g_oInboundCallLeg.strRequire = Session.strRequire;
+Session.g_oInboundCallLeg.strSessionExpires = Session.strSessionExpires;
+Session.g_oInboundCallLeg.strSupported = Session.strSupported;
+Session.g_oInboundCallLeg.strTo = Session.strTo;
+Session.g_oInboundCallLeg.strVia = Session.strVia;
+*/
+//save updated value for outbound call leg
+/*
+Session.g_oOutboundCallLeg.strContent = Session.strContent;
+Session.g_oOutboundCallLeg.strContentDisposition = Session.strContentDisposition;
+Session.g_oOutboundCallLeg.strContentType = Session.strContentType;
+Session.g_oOutboundCallLeg.strContact = Session.strContact;
+*/]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=971 y=143 ?>
+          <return value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_enable_event();]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=443 y=512 ?>
+          <!--Proxy the response appserver-->
+          <sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oOutboundCallLeg.strCallId</call-id>
+            <contact >g_strProxyServerContact</contact>
+            <content >strContent</content>
+            <content-type >strContentType</content-type>
+            <cseq >strCSeq</cseq>
+            <from >g_oOutboundCallLeg.strTo</from>
+            <record-route >g_oOutboundCallLeg.strRecordRoute</record-route>
+            <require >strRequire</require>
+            <session-expires >strSessionExpires</session-expires>
+            <status >strStatus</status>
+            <supported >strSupported</supported>
+            <to >g_oOutboundCallLeg.strFrom</to>
+            <via >g_oOutboundCallLeg.strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" ><?xtml-editor visible=no?></result>
+            <result name="Error" ><?xtml-editor visible=no?></result>
+            <result name="Timeout" ><?xtml-editor visible=no?></result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[//save updated info from the appserver, these are new values for outbound call leg
+/*
+Session.g_oOutboundCallLeg.strFrom = Session.strFrom;
+Session.g_oOutboundCallLeg.strRequire = Session.strRequire;
+Session.g_oOutboundCallLeg.strSessionExpires = Session.strSessionExpires;
+Session.g_oOutboundCallLeg.strSupported = Session.strSupported;
+Session.g_oOutboundCallLeg.strTo = Session.strTo;
+*/]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.Branch.1" ><?xtml-editor x=425 y=154 ?>
+          <!--No SDP-->
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="f_bNoSDP" link="6" stubbed="0" >f_bNoSDP == true
+AND strStatus match "200"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if (Session.strContent.length <= 0)
+{
+	Session.f_bNoSDP = true;
+}
+else
+{
+	Session.f_bNoSDP = false;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.SipAck.1" ><?xtml-editor x=719 y=262 ?>
+          <!--Proxy the ACK appserver-->
+          <sip-ack add-record-route="0" add-via="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >g_oOutboundCallLeg.strCallId</call-id>
+            <cseq >g_oOutboundCallLeg.strCSeq</cseq>
+            <from >g_oOutboundCallLeg.strFrom</from>
+            <request-uri >strContact</request-uri>
+            <to >g_oOutboundCallLeg.strTo</to>
+            <via >g_oOutboundCallLeg.strVia</via>
+          </sip-ack>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oOutboundCallLeg.strFrom = Session.strFrom;
+Session.g_oOutboundCallLeg.strRequire = Session.strRequire;
+Session.g_oOutboundCallLeg.strSessionExpires = Session.strSessionExpires;
+Session.g_oOutboundCallLeg.strSupported = Session.strSupported;
+Session.g_oOutboundCallLeg.strTo = Session.strTo;
+Session.g_oOutboundCallLeg.strVia = Session.strVia;
+Session.g_oOutboundCallLeg.strContent = Session.strContent;
+Session.g_oOutboundCallLeg.strContentDisposition = Session.strContentDisposition;
+Session.g_oOutboundCallLeg.strContentType = Session.strContentType;
+Session.g_oOutboundCallLeg.strContact = Session.strContact;
+
+var myRequestURI = new SipRequestUri(Session.g_oOutboundCallLeg.strRequestURI);
+myRequestURI.url.host = Session.strContact;
+Session.g_oOutboundCallLeg.strRequestURI = myRequestURI.encode();
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PROXY ACK TO APPSERVER, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="703" y-coord="39" width="221" height="88" text="response to inbound call with content, content type, supported, require, session expires, expires from outbound call" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+        <text-object x-coord="463" y-coord="629" width="225" height="88" text="response to outbound call with content, content type, supported, require, session expires, expires from inbound call" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="OnRefer" start="5" event="OnRefer" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string" pass="byref"/>
+        <parameter name="strAcceptEncoding" type="string" pass="byref"/>
+        <parameter name="strAcceptLanguage" type="string" pass="byref"/>
+        <parameter name="strAllow" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strContact" type="string" pass="byref"/>
+        <parameter name="strContent" type="string" pass="byref"/>
+        <parameter name="strContentDisposition" type="string" pass="byref"/>
+        <parameter name="strContentType" type="string" pass="byref"/>
+        <parameter name="strCSeq" type="string" pass="byref"/>
+        <parameter name="strDate" type="string" pass="byref"/>
+        <parameter name="strEncryption" type="string" pass="byref"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strMaxForwards" type="string" pass="byref"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strOrganization" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string" pass="byref"/>
+        <parameter name="strProxyRequire" type="string" pass="byref"/>
+        <parameter name="strRecordRoute" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string" pass="byref"/>
+        <parameter name="strReferTo" type="string" pass="byref"/>
+        <parameter name="strReferredBy" type="string" pass="byref"/>
+        <parameter name="strRequire" type="string" pass="byref"/>
+        <parameter name="strResponseKey" type="string" pass="byref"/>
+        <parameter name="strRoute" type="string" pass="byref"/>
+        <parameter name="strSupported" type="string" pass="byref"/>
+        <parameter name="strTimestamp" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="5" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=273 y=107 ?>
+          <!--"OnInvite"-->
+          <function name="&quot;OnInvite&quot;" return="" external-function="0" library="" >
+            <parameter >g_oInboundCallLeg.strAccept</parameter>
+            <parameter >g_oInboundCallLeg.strAcceptEncoding</parameter>
+            <parameter >g_oInboundCallLeg.strAcceptLanguage</parameter>
+            <parameter >g_oInboundCallLeg.strAlertInfo</parameter>
+            <parameter >g_oInboundCallLeg.strAllow</parameter>
+            <parameter >g_oInboundCallLeg.strAllowEvents</parameter>
+            <parameter >g_oInboundCallLeg.strAnonymity</parameter>
+            <parameter >g_oInboundCallLeg.strAuthorization</parameter>
+            <parameter >g_oInboundCallLeg.strCallId</parameter>
+            <parameter >g_oInboundCallLeg.strCallInfo</parameter>
+            <parameter >g_oInboundCallLeg.strContact</parameter>
+            <parameter >g_oInboundCallLeg.strContent</parameter>
+            <parameter >g_oInboundCallLeg.strContentDisposition</parameter>
+            <parameter >g_oInboundCallLeg.strContentEncoding</parameter>
+            <parameter >g_oInboundCallLeg.strContentLanguage</parameter>
+            <parameter >g_oInboundCallLeg.strContentType</parameter>
+            <parameter >g_oInboundCallLeg.strCSeq</parameter>
+            <parameter >g_oInboundCallLeg.strDate</parameter>
+            <parameter >g_oInboundCallLeg.strEncryption</parameter>
+            <parameter >g_oInboundCallLeg.strErrorInfo</parameter>
+            <parameter >g_oInboundCallLeg.strExpires</parameter>
+            <parameter >g_oInboundCallLeg.strFrom</parameter>
+            <parameter >g_oInboundCallLeg.strInReplyTo</parameter>
+            <parameter >g_oInboundCallLeg.strMaxForwards</parameter>
+            <parameter >g_oInboundCallLeg.strMIMEVersion</parameter>
+            <parameter >g_oInboundCallLeg.strMinSE</parameter>
+            <parameter >g_oInboundCallLeg.strOrganization</parameter>
+            <parameter >g_oInboundCallLeg.strPriority</parameter>
+            <parameter >g_oInboundCallLeg.strProxyAuthorization</parameter>
+            <parameter >g_oInboundCallLeg.strProxyRequire</parameter>
+            <parameter >g_oInboundCallLeg.strRecordRoute</parameter>
+            <parameter >g_oInboundCallLeg.strReferredBy</parameter>
+            <parameter >g_oInboundCallLeg.strRemotePartyID</parameter>
+            <parameter >g_oInboundCallLeg.strReplaces</parameter>
+            <parameter >g_oInboundCallLeg.strRequestURI</parameter>
+            <parameter >g_oInboundCallLeg.strRequire</parameter>
+            <parameter >g_oInboundCallLeg.strResponseKey</parameter>
+            <parameter >g_oInboundCallLeg.strRoute</parameter>
+            <parameter >g_oInboundCallLeg.strSessionExpires</parameter>
+            <parameter >g_oInboundCallLeg.strSubject</parameter>
+            <parameter >g_oInboundCallLeg.strSupported</parameter>
+            <parameter >g_oInboundCallLeg.strTimestamp</parameter>
+            <parameter >g_oInboundCallLeg.strTo</parameter>
+            <parameter >g_oInboundCallLeg.strUserAgent</parameter>
+            <parameter >g_oInboundCallLeg.strVia</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var myString = new String(Session.g_oInboundCallLeg.strSubject);
+Server.logInfo("SUBJECT IS: " + myString);
+Session.g_oInboundCallLeg.strSubject = myString.replace(/handoff=\"2\"/, 'handoff=\"3\"');
+Server.logInfo("NEW SUBECT IS: " + Session.g_oInboundCallLeg.strSubject);]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.EndSession.1" ><?xtml-editor x=523 y=99 ?></action>
+      </actions>
+    </function>
+    <function name="OnTimer" start="1" event="OnTimer" returns="void" >
+      <parameters >
+        <parameter name="nTimerId" type="i4" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_strHandoffToApp" type="string" >conference</var>
+        <var name="f_strTargetSession" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=140 y=146 ?>
+          <!--what timer?-->
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="no answer from app server" link="3" stubbed="0" >nTimerId == g_lWaitForResTimerId</result>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=384 y=143 ?>
+          <return value=""/>
+        </action>
+        <action id="3" plug-in="Pactolus.Handoff.1" ><?xtml-editor x=400 y=261 ?>
+          <!--hand BACK to other appserver-->
+          <handoff application="f_strHandoffToApp" session="f_strTargetSession"/>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success" link="4" stubbed="1"/>
+            <result name="No Session"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[
+																		
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO HAND OFF TO " + Session.f_strHandoffToApp + ", exit on : " + Result.name ) ;
+}
+else
+{
+	Server.logInfo("Recipient of handoff was: " + Session.f_strTargetSession ) ;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.EndSession.1" ><?xtml-editor x=639 y=262 ?></action>
+      </actions>
+    </function>
+    <function name="OnNotify" start="3" event="OnNotify" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string" pass="byref"/>
+        <parameter name="strAcceptEncoding" type="string" pass="byref"/>
+        <parameter name="strAcceptLanguage" type="string" pass="byref"/>
+        <parameter name="strAllow" type="string" pass="byref"/>
+        <parameter name="strAllowEvents" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strContact" type="string" pass="byref"/>
+        <parameter name="strContent" type="string" pass="byref"/>
+        <parameter name="strContentDisposition" type="string" pass="byref"/>
+        <parameter name="strContentType" type="string" pass="byref"/>
+        <parameter name="strCSeq" type="string" pass="byref"/>
+        <parameter name="strDate" type="string" pass="byref"/>
+        <parameter name="strEncryption" type="string" pass="byref"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strEvent" type="string" pass="byref"/>
+        <parameter name="strExpires" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strMaxForwards" type="string" pass="byref"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string" pass="byref"/>
+        <parameter name="strProxyRequire" type="string" pass="byref"/>
+        <parameter name="strRecordRoute" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string" pass="byref"/>
+        <parameter name="strRequire" type="string" pass="byref"/>
+        <parameter name="strResponseKey" type="string" pass="byref"/>
+        <parameter name="strRoute" type="string" pass="byref"/>
+        <parameter name="strSubscriptionState" type="string" pass="byref"/>
+        <parameter name="strSupported" type="string" pass="byref"/>
+        <parameter name="strTimestamp" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_strMSOutage" type="string" >MSOutage</var>
+      </local-vars>
+      <actions >
+        <action id="3" plug-in="Pactolus.Branch.1" ><?xtml-editor x=197 y=167 ?>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="MSOutage?" link="5" stubbed="0" >strEvent match f_strMSOutage</result>
+          </results>
+        </action>
+        <action id="1" plug-in="Standard.EndSession.1" ><?xtml-editor x=937 y=225 ?></action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=450 y=139 ?>
+          <return value=""/>
+        </action>
+        <action id="5" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=466 y=230 ?>
+          <!--200 OK-->
+          <sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 200 OK"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="6" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=699 y=227 ?>
+          <!--"OnInvite"-->
+          <function name="&quot;OnInvite&quot;" return="" external-function="0" library="" >
+            <parameter >g_oInboundCallLeg.strAccept</parameter>
+            <parameter >g_oInboundCallLeg.strAcceptEncoding</parameter>
+            <parameter >g_oInboundCallLeg.strAcceptLanguage</parameter>
+            <parameter >g_oInboundCallLeg.strAlertInfo</parameter>
+            <parameter >g_oInboundCallLeg.strAllow</parameter>
+            <parameter >g_oInboundCallLeg.strAllowEvents</parameter>
+            <parameter >g_oInboundCallLeg.strAnonymity</parameter>
+            <parameter >g_oInboundCallLeg.strAuthorization</parameter>
+            <parameter >g_oInboundCallLeg.strCallId</parameter>
+            <parameter >g_oInboundCallLeg.strCallInfo</parameter>
+            <parameter >g_oInboundCallLeg.strContact</parameter>
+            <parameter >g_oInboundCallLeg.strContent</parameter>
+            <parameter >g_oInboundCallLeg.strContentDisposition</parameter>
+            <parameter >g_oInboundCallLeg.strContentEncoding</parameter>
+            <parameter >g_oInboundCallLeg.strContentLanguage</parameter>
+            <parameter >g_oInboundCallLeg.strContentType</parameter>
+            <parameter >g_oInboundCallLeg.strCSeq</parameter>
+            <parameter >g_oInboundCallLeg.strDate</parameter>
+            <parameter >g_oInboundCallLeg.strEncryption</parameter>
+            <parameter >g_oInboundCallLeg.strErrorInfo</parameter>
+            <parameter >g_oInboundCallLeg.strExpires</parameter>
+            <parameter >g_oInboundCallLeg.strFrom</parameter>
+            <parameter >g_oInboundCallLeg.strInReplyTo</parameter>
+            <parameter >g_oInboundCallLeg.strMaxForwards</parameter>
+            <parameter >g_oInboundCallLeg.strMIMEVersion</parameter>
+            <parameter >g_oInboundCallLeg.strMinSE</parameter>
+            <parameter >g_oInboundCallLeg.strOrganization</parameter>
+            <parameter >g_oInboundCallLeg.strPriority</parameter>
+            <parameter >g_oInboundCallLeg.strProxyAuthorization</parameter>
+            <parameter >g_oInboundCallLeg.strProxyRequire</parameter>
+            <parameter >g_oInboundCallLeg.strRecordRoute</parameter>
+            <parameter >g_oInboundCallLeg.strReferredBy</parameter>
+            <parameter >g_oInboundCallLeg.strRemotePartyID</parameter>
+            <parameter >g_oInboundCallLeg.strReplaces</parameter>
+            <parameter >g_oInboundCallLeg.strRequestURI</parameter>
+            <parameter >g_oInboundCallLeg.strRequire</parameter>
+            <parameter >g_oInboundCallLeg.strResponseKey</parameter>
+            <parameter >g_oInboundCallLeg.strRoute</parameter>
+            <parameter >g_oInboundCallLeg.strSessionExpires</parameter>
+            <parameter >g_oInboundCallLeg.strSubject</parameter>
+            <parameter >g_oInboundCallLeg.strSupported</parameter>
+            <parameter >g_oInboundCallLeg.strTimestamp</parameter>
+            <parameter >g_oInboundCallLeg.strTo</parameter>
+            <parameter >g_oInboundCallLeg.strUserAgent</parameter>
+            <parameter >g_oInboundCallLeg.strVia</parameter>
+          </function>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var myString = new String(Session.g_oInboundCallLeg.strSubject);
+Server.logInfo("SUBJECT IS: " + myString);
+Session.g_oInboundCallLeg.strSubject = myString.replace(/handoff=\"2\"/, 'handoff=\"3\"');
+Server.logInfo("NEW SUBECT IS: " + Session.g_oInboundCallLeg.strSubject);]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>]]></script>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value="D:/Applications/InternalProduct/SceXMLScripts/Libs"/>
+    <property key="library-modules" value="lib_callcontrol.xml"/>
+    <property key="library-path" value="D:/Applications/InternalProduct/SceXMLScripts/Libs"/>
+  </properties>
+  <application-version >
+    <revision >$Id: conf_proxy.xml,v 1.2 2005/08/08 14:36:37 hlam Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

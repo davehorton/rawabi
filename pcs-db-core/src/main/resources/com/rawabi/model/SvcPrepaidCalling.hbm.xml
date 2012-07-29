@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Jul 24, 2012 12:30:10 PM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.rawabi.model.SvcPrepaidCalling" table="SVC_PREPAID_CALLING" schema="PCSPROD">
+        <id name="serviceId" type="big_decimal">
+            <column name="SERVICE_ID" precision="22" scale="0" />
+            <generator class="assigned" />
+        </id>
+        <property name="longCallInterval" type="big_decimal">
+            <column name="LONG_CALL_INTERVAL" precision="22" scale="0" not-null="true">
+                <comment>The interval in minutes that calls should be interrupted for manual extension. Default should be 0.</comment>
+            </column>
+        </property>
+        <property name="maxRedialsAllowed" type="big_decimal">
+            <column name="MAX_REDIALS_ALLOWED" precision="22" scale="0" not-null="true">
+                <comment>The maximum number of redials allowed for a session. Default should be 0.</comment>
+            </column>
+        </property>
+        <property name="playBalanceFlag" type="char">
+            <column name="PLAY_BALANCE_FLAG" length="1" not-null="true" />
+        </property>
+        <property name="playTimeFlag" type="char">
+            <column name="PLAY_TIME_FLAG" length="1" not-null="true" />
+        </property>
+        <property name="allowMultipartyCalling" type="char">
+            <column name="ALLOW_MULTIPARTY_CALLING" length="1" not-null="true">
+                <comment>Flag indicating whether multiparty calling (3 or more participants) is allowed.</comment>
+            </column>
+        </property>
+        <property name="accessNumRatingFlag" type="char">
+            <column name="ACCESS_NUM_RATING_FLAG" length="1" not-null="true">
+                <comment>T/F flag indicating whether calling rates are based on service only or on the combination of service and access number.</comment>
+            </column>
+        </property>
+        <property name="precallRoundingFlag" type="char">
+            <column name="PRECALL_ROUNDING_FLAG" length="1" not-null="true">
+                <comment>T/F flag indicating whether rounding is factored into the calculation that determine the time allowed for the call. If T, allowed call duration is rounded
+                down to the next rounding increment. If F, rounding is not factored into announced call duration.</comment>
+            </column>
+        </property>
+        <property name="partialBongChargeFlag" type="char">
+            <column name="PARTIAL_BONG_CHARGE_FLAG" length="1" not-null="true">
+                <comment>T/F flag indicating whether the system will cut a call off at one second prior to a bong charge that cannot be paid for (F) or will set the allowed call
+                duration to the time of the bong charge and charge a partial bong charge = whatever balance remains (T)</comment>
+            </column>
+        </property>
+        <property name="clickToDialFlag" type="char">
+            <column name="CLICK_TO_DIAL_FLAG" length="1" not-null="true">
+                <comment>Indicates whether the click to dial feature is enabled for this service.</comment>
+            </column>
+        </property>
+        <property name="twoStageDialFlag" type="char">
+            <column name="TWO_STAGE_DIAL_FLAG" length="1" not-null="true">
+                <comment>Indicates whether two stage dialing is enabled for this service.</comment>
+            </column>
+        </property>
+        <property name="singleStageDialFlag" type="char">
+            <column name="SINGLE_STAGE_DIAL_FLAG" length="1" not-null="true">
+                <comment>Indicates whether single stage dialing is enabled for this service.</comment>
+            </column>
+        </property>
+        <property name="msgInitiatedCallbackFlag" type="char">
+            <column name="MSG_INITIATED_CALLBACK_FLAG" length="1" not-null="true">
+                <comment>Indicates whether message initiated callback is enabled for this service.</comment>
+            </column>
+        </property>
+        <property name="accessNbrInitCallbackFlag" type="char">
+            <column name="ACCESS_NBR_INIT_CALLBACK_FLAG" length="1" not-null="true">
+                <comment>Indicates whether access number initiated callback is enabled for this service.</comment>
+            </column>
+        </property>
+        <property name="ivrInitiatedCallbackFlag" type="char">
+            <column name="IVR_INITIATED_CALLBACK_FLAG" length="1" not-null="true">
+                <comment>Indicates whether IVR initiated callback is enabled for this service.</comment>
+            </column>
+        </property>
+        <property name="lastCallRedialFlag" type="char">
+            <column name="LAST_CALL_REDIAL_FLAG" length="1" not-null="true">
+                <comment>Indicates whether the service supports last call redial.</comment>
+            </column>
+        </property>
+        <property name="directCallFlag" type="char">
+            <column name="DIRECT_CALL_FLAG" length="1" not-null="true">
+                <comment>Indicates whether the service supports the direct call feature.</comment>
+            </column>
+        </property>
+        <property name="allowZeroCostFlag" type="char">
+            <column name="ALLOW_ZERO_COST_FLAG" length="1" not-null="true">
+                <comment>T - permits prepaid subscribers to make calls when the current prepaid balance is less than minimum required prepaid balance - or zero.</comment>
+            </column>
+        </property>
+        <property name="disabledFlag" type="java.lang.Character">
+            <column name="DISABLED_FLAG" length="1" />
+        </property>
+        <property name="maxParties" type="big_decimal">
+            <column name="MAX_PARTIES" precision="22" scale="0">
+                <comment>If multiparty calling is allowed, max number of call legs.</comment>
+            </column>
+        </property>
+        <property name="callMarkupPercent" type="big_decimal">
+            <column name="CALL_MARKUP_PERCENT" precision="22" scale="0">
+                <comment>This is the global postcall markup that is applied to the total call cost.</comment>
+            </column>
+        </property>
+        <property name="warningThreshold1" type="big_decimal">
+            <column name="WARNING_THRESHOLD_1" precision="22" scale="0">
+                <comment>time remaining in seconds at which application will play the first warning threshold prompt</comment>
+            </column>
+        </property>
+        <property name="warningThreshold2" type="big_decimal">
+            <column name="WARNING_THRESHOLD_2" precision="22" scale="0">
+                <comment>time remaining in seconds at which application will play the second warning threshold prompt</comment>
+            </column>
+        </property>
+        <property name="warningThreshold3" type="big_decimal">
+            <column name="WARNING_THRESHOLD_3" precision="22" scale="0">
+                <comment>time remaining in seconds at which application will play the third warning threshold prompt</comment>
+            </column>
+        </property>
+        <property name="minBillingSeconds" type="big_decimal">
+            <column name="MIN_BILLING_SECONDS" precision="22" scale="0" />
+        </property>
+        <property name="roundingSeconds" type="big_decimal">
+            <column name="ROUNDING_SECONDS" precision="22" scale="0" />
+        </property>
+        <property name="roundingThreshold" type="big_decimal">
+            <column name="ROUNDING_THRESHOLD" precision="22" scale="0">
+                <comment>calls less than this number of seconds will not be subject to postcall rounding</comment>
+            </column>
+        </property>
+        <property name="directCallIdLength" type="big_decimal">
+            <column name="DIRECT_CALL_ID_LENGTH" precision="22" scale="0" />
+        </property>
+    </class>
+</hibernate-mapping>

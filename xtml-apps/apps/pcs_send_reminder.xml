@@ -1,0 +1,479 @@
+<?xml version="1.0"?>
+<xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
+  <version sce-version="422a6" prev-sce-version="422a6" last-mod-time="Sunday, December 02, 2007 12:30:22"/>
+  <events >
+    <event name="RemindMe" display="RemindMe" >
+      <parameter name="lVoipSchedCallId" type="i8"/>
+      <parameter name="lAccessLineId" type="i8"/>
+      <parameter name="strPrompt" type="string"/>
+      <parameter name="strTimeSched" type="string"/>
+      <parameter name="strDestPhone" type="string"/>
+      <parameter name="strMailboxAcct" type="string"/>
+      <parameter name="strLanguage" type="string"/>
+    </event>
+  </events>
+  <global-handlers >
+    <handler event="Pactolus.EveSipBye.1" function="OnBye" public="0" always-on="0"/>
+    <handler event="Standard.OnServiceLoad.1" function="OnServiceLoad" public="0" always-on="0"/>
+    <handler event="Standard.OnSessionEnd.1" function="OnSessionEnd" public="0" always-on="0"/>
+    <handler event="RemindMe" function="OnRemindMe" public="1" always-on="0"/>
+  </global-handlers>
+  <global-vars >
+    <var name="g_nReturnValue" type="i4" >0</var>
+    <var name="g_oCallLeg" type="object" ></var>
+    <var name="g_oMS" type="object" ></var>
+    <var name="g_strAppSessionID" type="string" ></var>
+    <var name="g_bRemindMeComplete" type="boolean" >0</var>
+    <var name="g_nStatus" type="i4" >0</var>
+    <var name="g_lTimeStart" type="i8" >0</var>
+    <var name="g_lTimeAnswered" type="i8" >0</var>
+    <var name="g_strSipStatus" type="string" ></var>
+  </global-vars>
+  <shared-vars >
+    <var name="s_strLocalUri" type="string" ></var>
+    <var name="s_strDBName" type="string" ></var>
+    <var name="s_strNIUAddress" type="string" ></var>
+    <var name="s_strMSType" type="string" ></var>
+    <var name="s_nTimeout" type="i4" >0</var>
+    <var name="s_strLocalContact" type="string" ></var>
+    <var name="s_nRingNoAnswerTime" type="i4" >0</var>
+    <var name="s_nPacketizationPeriod" type="i4" >0</var>
+    <var name="s_strCodec" type="string" ></var>
+  </shared-vars>
+  <functions >
+    <function name="OnServiceLoad" start="1" event="ServiceLoad" returns="void" >
+      <parameters >
+        <parameter name="strAppName" type="string" pass="byref"/>
+        <parameter name="nSessionCount" type="i2" pass="byref"/>
+        <parameter name="nMaxIterations" type="i2" pass="byref"/>
+        <parameter name="nServerId" type="i2" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Pactolus.UserFunction.1" ><?xtml-editor x=92 y=109 ?>
+          <user-function xmlns="urn:www.pactolus.com:xtml:application" process="&quot;PACTOLUS_ps_c_adaptor&quot;" function="&quot;get_property&quot;" timeout="s_nTimeout" return="g_nReturnValue" async="0" >
+            <parameter >"media-server-type"</parameter>
+            <parameter >s_strMSType</parameter>
+            <parameter >"packetization-period"</parameter>
+            <parameter >s_nPacketizationPeriod</parameter>
+            <parameter >"db-name"</parameter>
+            <parameter >s_strDBName</parameter>
+            <parameter >"niu-address"</parameter>
+            <parameter >s_strNIUAddress</parameter>
+            <parameter >"ring-no-answer-time"</parameter>
+            <parameter >s_nRingNoAnswerTime</parameter>
+            <parameter >"codec"</parameter>
+            <parameter >s_strCodec</parameter>
+          </user-function>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Session.s_strLocalUri = Server.sipAddress + ":" + Server.sipPort ;
+Session.s_strLocalContact = "<sip:" + Session.s_strLocalUri + ">";
+
+
+if ( 2 != Result.id ) {
+	Server.logError("FAILED TO LOAD APPLICATION PROPERTIES FROM CONFIG") ;
+}
+
+if ( 0 == Session.s_strDBName.length ) {
+	Session.s_strDBName = "pactolusdb" ;
+	Server.logError("Unable to retrieve DB Name from Application Properties. Setting to pactolusdb.") ;
+}
+
+if ( 0 == Session.s_strNIUAddress.length ) {
+	Server.logError("NO NIU ADDRESS PROVIDED. THIS IS A REQUIRED PARAMETER!");
+}
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=326 y=112 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="OnSessionEnd" start="2" event="SessionEnd" returns="void" >
+      <parameters >
+        <parameter name="nSessionEndReason" type="i2" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="strTimeSched" type="string" ></var>
+        <var name="nAPIReturnCode" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="2" plug-in="Pactolus.Branch.1" ><?xtml-editor x=49 y=169 ?>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="g_oCallLeg.bConnected == true" link="3" stubbed="0" >g_oCallLeg.bConnected == true</result>
+          </results>
+        </action>
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=879 y=292 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=49 y=318 ?>
+          <!--HangUpParty-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpParty&quot;" return="g_nReturnValue" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >g_oCallLeg</parameter>
+            <parameter >s_strLocalUri</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_calculate_uri_and_route( false, "SIP/2.0", 
+		Session.g_oCallLeg.strFrom.toString(), 
+		Session.g_oCallLeg.strContact.toString(), 
+		Session.g_oCallLeg.strRecordRoute.toString(), 
+		Session.g_oCallLeg.strRequestUri, 
+		Session.g_oCallLeg.strRoute );
+]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=325 y=317 ?>
+          <!--DeleteMSConnection-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteMSConnection&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >g_oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+          </results>
+        </action>
+        <action id="5" plug-in="Pactolus.Branch.1" ><?xtml-editor x=311 y=172 ?>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="Connected to MS" link="4" stubbed="0" >g_oMS.bCurrentlyConnected == true</result>
+          </results>
+        </action>
+        <action id="8" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=645 y=240 ?>
+          <!--deleteRemindMe-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.broadband.psAPISceBroadbandRemindMe&quot;" method="&quot;deleteRemindMe&quot;" timeout="s_nTimeout" return="g_nReturnValue" method-return-var="nAPIReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >s_strDBName</parameter>
+            <parameter type="in" var-type="string" >g_strAppSessionID</parameter>
+            <parameter type="in" var-type="i8" >g_oCallLeg.lVoipSchedCallId</parameter>
+          </java>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("DELETING VOIP_SCHED_CALL_ID: " + Session.g_oCallLeg.lVoipSchedCallId);]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnBye" start="2" event="Bye" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string" pass="byref"/>
+        <parameter name="strAcceptEncoding" type="string" pass="byref"/>
+        <parameter name="strAcceptLanguage" type="string" pass="byref"/>
+        <parameter name="strAllow" type="string" pass="byref"/>
+        <parameter name="strAllowEvents" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strCSeq" type="string" pass="byref"/>
+        <parameter name="strDate" type="string" pass="byref"/>
+        <parameter name="strEncryption" type="string" pass="byref"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strMaxForwards" type="string" pass="byref"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string" pass="byref"/>
+        <parameter name="strProxyRequire" type="string" pass="byref"/>
+        <parameter name="strRecordRoute" type="string" pass="byref"/>
+        <parameter name="strReferredBy" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string" pass="byref"/>
+        <parameter name="strRequire" type="string" pass="byref"/>
+        <parameter name="strResponseKey" type="string" pass="byref"/>
+        <parameter name="strRoute" type="string" pass="byref"/>
+        <parameter name="strSupported" type="string" pass="byref"/>
+        <parameter name="strTimestamp" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="2" plug-in="Pactolus.Branch.1" ><?xtml-editor x=28 y=125 ?>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Call ID matches" link="1" stubbed="0" >strCallId match g_oCallLeg.strCallId</result>
+          </results>
+        </action>
+        <action id="1" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=265 y=212 ?>
+          <!--200 OK-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 200 OK"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oCallLeg.bConnected = false ;
+]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=266 y=20 ?>
+          <!--481 Call Leg Transaction Does Not Exist-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 481 Call Leg/Transaction Does Not Exist"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=500 y=77 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="5" plug-in="Standard.EndSession.1" ><?xtml-editor x=487 y=233 ?></action>
+      </actions>
+    </function>
+    <function name="OnRemindMe" start="1" event="RemindMe" returns="void" >
+      <parameters >
+        <parameter name="lVoipSchedCallId" type="i8" pass="byref"/>
+        <parameter name="lAccessLineId" type="i8" pass="byref"/>
+        <parameter name="strPrompt" type="string" pass="byref"/>
+        <parameter name="strTimeSched" type="string" pass="byref"/>
+        <parameter name="strDestPhone" type="string" pass="byref"/>
+        <parameter name="strMailboxAcct" type="string" pass="byref"/>
+        <parameter name="strLanguage" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nUnseen" type="i4" >0</var>
+        <var name="bHaveInfo" type="boolean" >0</var>
+        <var name="strSubject" type="string" ></var>
+        <var name="strAttachment" type="string" ></var>
+        <var name="oSaved" type="object" ></var>
+        <var name="nUrgent" type="i4" >0</var>
+        <var name="nSaved" type="i4" >0</var>
+        <var name="oUrgent" type="object" ></var>
+        <var name="oUnseen" type="object" ></var>
+        <var name="nRetryCall" type="i4" >0</var>
+        <var name="bPlaySystemPrompt" type="boolean" >0</var>
+        <var name="lDeptId" type="i8" >0</var>
+        <var name="strDBName" type="string" ></var>
+        <var name="strAppSessionId" type="string" ></var>
+        <var name="nReturnCode" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=24 y=29 ?>
+          <results >
+            <result name="Default" link="13" stubbed="1"/>
+            <result name="bHaveInfo == true" link="14" stubbed="0" >bHaveInfo == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[/* to proceed with the reminder we need at least the dest phone */
+if ( 0 < Session.strDestPhone.length ) {
+	Session.bHaveInfo = true ;
+}
+else {
+	Server.logError("DESTINATION PHONE NOT RECEIVED: " + Session.strDestPhone);
+	Session.g_bRemindMeComplete = false;
+}
+
+if( 0 != Clib.strcmp( "Personal", Session.strPrompt ) ) {
+	Session.bPlaySystemPrompt = true ;
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=527 y=434 ?>
+          <!--Play system default wake up remind me msg-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTimeout" ms-type="s_strMSType" returns="g_nReturnValue" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >.5</audio>
+            <audio type="index" >2319</audio>
+          </play>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="4" plug-in="Pactolus.Branch.1" ><?xtml-editor x=38 y=476 ?>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Prompt == &quot;Personal&quot;" link="5" stubbed="0" >strPrompt match "Personal"</result>
+          </results>
+        </action>
+        <action id="5" plug-in="Pactolus.MailboxStatus.1" ><?xtml-editor x=208 y=642 ?>
+          <!--status "Remind_Me"-->
+          <imap-status xmlns="urn:www.pactolus.com:xtml:imap" username="strMailboxAcct" password="strMailboxAcct" mailbox="&quot;Remind_Me&quot;" flagged-count="nUrgent" unseen-count="nUnseen" saved-count="nSaved" flagged="oUrgent" unseen="oUnseen" saved="oSaved" returns="g_nReturnValue" timeout="s_nTimeout"/>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="nUnseen &gt; 0" link="6" stubbed="0" >nUnseen &gt; 0</result>
+          </results>
+        </action>
+        <action id="6" plug-in="Pactolus.ReadMail.1" ><?xtml-editor x=473 y=643 ?>
+          <imap-read xmlns="urn:www.pactolus.com:xtml:imap" username="strMailboxAcct" password="strMailboxAcct" mailbox="&quot;Remind_Me&quot;" msg-uid="oUnseen[0]" to="" from="" cc="" subject="strSubject" body="" attachment1="strAttachment" attachment2="" attachment3="" timeout="s_nTimeout" returns="g_nReturnValue" timestamp=""/>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success" link="7" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="7" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=759 y=598 ?>
+          <!--Play sub's remind me msg-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTimeout" ms-type="s_strMSType" returns="g_nReturnValue" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="url" >strAttachment</audio>
+          </play>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="8" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="8" plug-in="Standard.EndSession.1" ><?xtml-editor x=789 y=427 ?>
+          <!--Success-->
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("REMIND ME CALL COMPLETED SUCCESSFULLY");
+]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=51 y=325 ?>
+          <!--OutdialPartytoMS-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;OutdialPartyToMS&quot;" return="g_nReturnValue" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >g_oCallLeg</parameter>
+            <parameter >g_oMS</parameter>
+            <parameter >g_lTimeStart</parameter>
+            <parameter >g_lTimeAnswered</parameter>
+            <parameter >g_strSipStatus</parameter>
+            <parameter >strDestPhone</parameter>
+            <parameter >s_strLocalUri</parameter>
+          </function>
+          <results >
+            <result name="Default" link="12" stubbed="0"/>
+            <result name="Success" link="4" stubbed="0" >g_nReturnValue == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_initMS(Session.g_oMS, Session.s_strMSType)
+
+Session.g_oMS.nPacketizationPeriod = Session.s_nPacketizationPeriod;
+Session.g_oCallLeg.nRingNoAnswerTime = Session.s_nRingNoAnswerTime ;
+
+Session.g_oCallLeg.strDestPhone = Session.strDestPhone;
+Session.g_oCallLeg.lVoipSchedCallId = Session.lVoipSchedCallId;
+
+Session.g_oCallLeg.strFrom = "<sip:" + Session.g_oCallLeg.strDestPhone + "@" + Session.s_strLocalUri + ">;tag=" + Server.getUTCTime() ;
+Session.g_oCallLeg.strTo = "<sip:" + Session.g_oCallLeg.strDestPhone + "@" + Session.s_strNIUAddress + ">";
+Session.g_oCallLeg.strRequestUri = "sip:" + Session.g_oCallLeg.strDestPhone + "@" + Session.s_strNIUAddress ;
+if( 0 != Session.lDeptId ) {
+	Session.g_oCallLeg.strRequestUri +=";dept_id=" ;
+	Session.g_oCallLeg.strRequestUri += Session.lDeptId ;
+} 
+Session.g_oCallLeg.strRequestUri += ";target=pcs_voip_terminate;CT=Remind_Me SIP/2.0";
+
+/* if we are playing the system prompt we can use the configured codec; however, if
+	we are playing a personal prompt we can't, because that comes from the IMAP Server 
+	and currently we store in 16Kb and only support transcoding to PCMU
+*/
+if( Session.bPlaySystemPrompt ) {
+	Session.g_oMS.strCodec = Session.s_strCodec ;
+}
+else {
+	Session.g_oMS.strCodec = "PCMU" ;
+}
+
+Session.g_oCallLeg.strCSeq = "1 INVITE";
+Session.g_oCallLeg.strCallId = js_CreateUniqueCallId();
+
+
+
+
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 0 == Session.g_nReturnValue ) {
+	Session.g_oMS.bCurrentlyConnected = true ;
+	Session.g_oCallLeg.bConnected = true ;
+	Session.g_bRemindMeComplete = true;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=599 y=295 ?>
+          <sleep xmlns="urn:www.pactolus.com:xtml:application" duration="30"/>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("REMIND ME UNANSWERED. TRY AGAIN IN 30 SECONDS.");
+Session.nRetryCall++ ;
+
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("Retry attempt: " + Session.nRetryCall);]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Pactolus.Branch.1" ><?xtml-editor x=294 y=306 ?>
+          <results >
+            <result name="Default" link="13" stubbed="0"/>
+            <result name="nRetryCall &lt; 3" link="11" stubbed="0" >nRetryCall &lt; 3</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if ( 3 <= Session.nRetryCall ) {
+	Session.g_bRemindMeComplete = true;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Standard.EndSession.1" ><?xtml-editor x=550 y=373 ?>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("ATTEMPTED REMIND ME CALL <" + Session.nRetryCall + "> TIMES.");]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=271 y=36 ?>
+          <!--lookup dept id-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.broadband.psAPISceBroadbandAuth&quot;" method="&quot;getDeptIdForAccessLine&quot;" timeout="8" return="nReturnCode" method-return-var="lDeptId" method-return-type="1" >
+            <parameter type="in" var-type="string" >strAppSessionId</parameter>
+            <parameter type="in" var-type="string" >strDBName</parameter>
+            <parameter type="in" var-type="i8" >lAccessLineId</parameter>
+          </java>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strAppSessionId = Session._sessionId;
+Session.strDBName = "pactolusdb";
+]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>;]]></script>
+  <properties >
+    <property key="default" value="C:/pactolus_app_server/prompts/pcs_english.vox"/>
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value="C:/eclipse/workspace/Mainline_Applications/InternalProduct/SceXMLScripts/Libs;C:/Applications/Mainline/InternalProduct/SceXMLScripts/Libs"/>
+    <property key="library-modules" value="lib_mediaserver.xml;lib_callcontrol.xml"/>
+    <property key="library-path" value="C:/eclipse/workspace/Mainline_Applications/InternalProduct/SceXMLScripts/Libs;C:/Applications/Mainline/InternalProduct/SceXMLScripts/Libs"/>
+  </properties>
+  <application-version >
+    <revision >$Id: pcs_send_reminder.xml,v 1.12 2007/12/02 17:52:13 dhorton Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

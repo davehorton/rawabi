@@ -1,0 +1,2148 @@
+<?xml version="1.0"?>
+<xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
+  <events >
+    <event name="RequestCSRResponse" display="RequestCSRResponse" >
+      <parameter name="strACDControllerIP" type="string"/>
+      <parameter name="nACDControllerPort" type="string"/>
+      <parameter name="strTransactionId" type="string"/>
+      <parameter name="nReturnCode" type="i4"/>
+      <parameter name="strReturnMsg" type="string"/>
+    </event>
+  </events>
+  <global-handlers/>
+  <global-vars >
+    <var name="g_bGotCSRCancelOutdial" type="boolean" >0</var>
+  </global-vars>
+  <functions >
+    <function name="BeginCSRRequest" start="1" event="BeginCSRRequest" returns="i4" >
+      <parameters >
+        <parameter name="p_oAPIObject" type="object"/>
+        <parameter name="p_oACD" type="object" pass="byref"/>
+        <parameter name="p_oTimerHeartBeat" type="object" pass="byref"/>
+        <parameter name="p_oSUBObject" type="object"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >-66</var>
+        <var name="f_nFAILURE" type="i4" >-1</var>
+        <var name="f_strReturnMsg" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=22 y=55 ?>
+          <!--ACDAPIBeginRequest-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ACDAPIBeginRequest&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oAPIObject</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_oSUBObject</parameter>
+          </function>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="f_nReturnCode == 0" link="3" stubbed="0" >f_nReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (1 == Result.id)
+{
+	Server.logError("ERROR: FAIL TO CAL ACDAPIBeginRequest, Return code is: " + Session.f_nReturnCode);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=14 y=411 ?>
+          <!--f_nFAILURE-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nFAILURE"/>
+        </action>
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=252 y=47 ?>
+          <!--ACDAPIGetDisplayInfo-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ACDAPIGetDisplayInfo&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oAPIObject</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_oSUBObject</parameter>
+          </function>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="f_nReturnCode == 0" link="4" stubbed="0" >f_nReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (1 == Result.id)
+{
+	Server.logError("ERROR: FAIL TO CAL ACDAPIGetDisplayInfo, Return code is: " + Session.f_nReturnCode);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=482 y=43 ?>
+          <!--MsgBeginRequestCSR-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;MsgBeginRequestCSR&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oAPIObject</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_oSUBObject</parameter>
+          </function>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="f_nReturnCode == 0" link="6" stubbed="0" >f_nReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (1 == Result.id)
+{
+	Server.logError("ERROR: FAIL TO SEND MESSAGE BEGIN REQUEST TO ACD CONTROLLER, Return code is: " + Session.f_nReturnCode);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.WaitEvent.1" ><?xtml-editor x=725 y=38 ?>
+          <!--wait for begin request response-->
+          <wait xmlns="urn:www.pactolus.com:xtml:communication" timeout="10" recv-name="" >
+            <msg name="RequestCSRResponse" >
+              <parameter >p_oACD.strACDControllerIP</parameter>
+              <parameter >p_oACD.nACDControllerPort</parameter>
+              <parameter >p_oACD.strTransactionId</parameter>
+              <parameter >f_nReturnCode</parameter>
+              <parameter >f_strReturnMsg</parameter>
+            </msg>
+          </wait>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="8" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO WAIT FOR RESPONSE FOR BEGIN REQUEST CSR.  EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Pactolus.Branch.1" ><?xtml-editor x=11 y=240 ?>
+          <!--return code = -1-->
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+            <result name="f_nReturnCode == -1" link="2" stubbed="1" >f_nReturnCode == -1</result>
+          </results>
+        </action>
+        <action id="10" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=520 y=239 ?>
+          <!--0-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="0"/>
+        </action>
+        <action id="11" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=255 y=237 ?>
+          <!--StartTimer - p_oTimerHeartBeat-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StartTimer&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTimerHeartBeat</parameter>
+          </function>
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oTimerHeartBeat.lSleepTime = 300;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="EndCSRAssignment" start="3" event="EndCSRAssignment" returns="i4" >
+      <parameters >
+        <parameter name="p_oAPIObject" type="object" pass="byref"/>
+        <parameter name="p_oACD" type="object" pass="byref"/>
+        <parameter name="p_strLanguage" type="string"/>
+        <parameter name="p_strAssignmentAction" type="string"/>
+        <parameter name="p_nTerminationReason" type="i4" pass="byref"/>
+        <parameter name="p_oCallLeg" type="object" pass="byref"/>
+        <parameter name="p_strContact" type="string"/>
+        <parameter name="p_oTempConf" type="object" pass="byref"/>
+        <parameter name="p_oMS" type="object" pass="byref"/>
+        <parameter name="p_bZeroOutToCSR" type="boolean"/>
+        <parameter name="p_oTimerBeeps" type="object" pass="byref"/>
+        <parameter name="p_oTimerCSR" type="object" pass="byref"/>
+        <parameter name="p_oTimerMOH" type="object" pass="byref"/>
+        <parameter name="p_oSUBObject" type="object" pass="byref"/>
+        <parameter name="p_oPleaseHoldTimer" type="object" pass="byref"/>
+        <parameter name="p_oCC" type="object" pass="byref"/>
+        <parameter name="p_oRATE" type="object" pass="byref"/>
+        <parameter name="p_oCallLegB" type="object" pass="byref"/>
+        <parameter name="p_oArrayCallLegs" type="object" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >0</var>
+        <var name="f_nPrompt" type="i4" >0</var>
+        <var name="f_nSUCCESS" type="i4" >0</var>
+        <var name="f_nFAILURE" type="i4" >-1</var>
+        <var name="f_lPrepaidSkillId" type="i8" >1</var>
+        <var name="f_lPostpaidSkillId" type="i8" >3</var>
+        <var name="f_strJAVA_CLASS" type="string" ></var>
+        <var name="f_lPinOrSubId" type="i8" >0</var>
+        <var name="f_nRC_OUTDIAL" type="i4" >1</var>
+        <var name="f_nRC_GET_DEST" type="i4" >2</var>
+        <var name="f_nRC_GET_PIN" type="i4" >3</var>
+        <var name="f_lNULL" type="i8" >0</var>
+        <var name="f_nRC_END_SESSION" type="i4" >-99</var>
+        <var name="f_nRC_IVR" type="i4" >4</var>
+        <var name="f_nRC_DO_NOTHING" type="i4" >5</var>
+        <var name="f_nActionCodeNumber" type="i4" >0</var>
+        <var name="f_nRC_BRIDGE" type="i4" >6</var>
+        <var name="f_strDigitMap" type="string" ></var>
+        <var name="f_lUnknownSkillId" type="i8" >0</var>
+        <var name="f_nFuncReturnCode" type="i4" >-50</var>
+      </local-vars>
+      <actions >
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=34 y=298 ?>
+          <!--"ACDAPIEndAssignment"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ACDAPIEndAssignment&quot;" return="" external-function="1" library="" >
+            <parameter >p_oAPIObject</parameter>
+            <parameter >p_oACD</parameter>
+          </function>
+          <results >
+            <result name="Default" link="75" stubbed="0"/>
+            <result name="oAPIObject.strDestinationNumber" link="51" stubbed="0" >p_oACD.strOutdialBLegPhoneNumber != ""</result>
+            <result name="AssignmentAction = 20" link="14" stubbed="1" >p_strAssignmentAction match "20"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oACD.lCSRAssignmentEndTime = Server.getUTCTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if("20" == Session.p_strAssignmentAction) {
+	Session.f_nReturnCode = Session.f_nRC_DO_NOTHING;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=123 y=1398 ?>
+          <!--"ACDAPIEndRequest"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ACDAPIEndRequest&quot;" return="" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oAPIObject</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_oSUBObject</parameter>
+          </function>
+          <results >
+            <result name="Default" link="19" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oAPIObject.nTerminationReason = 2;]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1722 y=1138 ?>
+          <!--JAVA: HangUpParty-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpParty&quot;" return="" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_nTerminationReason = 6;]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=619 y=1270 ?>
+          <!--f_nRC_END_SESSION-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nRC_END_SESSION"/>
+        </action>
+        <action id="10" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=641 y=387 ?>
+          <!--Put Caller On Hold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PutPartyOnHold&quot;" return="f_nFuncReturnCode" external-function="1" library="" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="31" stubbed="1"/>
+            <result name="SUCCESS" link="11" stubbed="0" >f_nFuncReturnCode == f_nSUCCESS</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if(Result.id == 2) {
+	Session.f_nReturnCode = Session.f_nRC_IVR;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=786 y=280 ?>
+          <!--Remove member from temp conference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTempConf</parameter>
+          </function>
+          <results >
+            <result name="Default" link="12" stubbed="0"/>
+          </results>
+        </action>
+        <action id="12" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1027 y=300 ?>
+          <!--delete temp conference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteConference&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTempConf</parameter>
+          </function>
+          <results >
+            <result name="Default" link="13" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Session.p_oTempConf.bUseForACD = false;]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1273 y=290 ?>
+          <!--"MSOutdialParty"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;MSOutdialParty&quot;" return="f_nFuncReturnCode" external-function="1" library="" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_oMS</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="31" stubbed="1"/>
+            <result name="SUCCESS" link="4" stubbed="1" >f_nFuncReturnCode == f_nSUCCESS</result>
+          </results>
+        </action>
+        <action id="14" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=604 y=1398 ?>
+          <!--f_nReturnCode-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nReturnCode"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[//Session.p_oACD.lCSRAssignmentId = 0;]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=869 y=1041 ?>
+          <!--Set and play f_nPrompt-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="10" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="p_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >f_nPrompt</audio>
+          </play>
+          <results >
+            <result name="Default" link="26" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if(Session.p_strAssignmentAction = "13") {
+	Session.f_nPrompt = 1510; // The CSR was disconnected. Please wait..
+} else {
+	Session.f_nPrompt = 340; // Beep,Beep
+}
+
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=868 y=1210 ?>
+          <!--Set and play f_nPrompt-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="10" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="p_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >f_nPrompt</audio>
+          </play>
+          <results >
+            <result name="Default" link="60" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if(Session.p_strAssignmentAction = "13") {
+	Session.f_nPrompt = 1510; // The CSR was disconnected. Please wait..
+} else {
+	Session.f_nPrompt = 890; // Please hold...
+}
+
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="19" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=356 y=1399 ?>
+          <!--MsgCSREndAssRspnse
+Success-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;MsgCSREndAssignmentResponse&quot;" return="" external-function="1" library="" >
+            <parameter >p_oACD</parameter>
+            <parameter >f_nSUCCESS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oACD.nReturnReasonCode = 0;
+Session.p_oACD.strReturnMsg = "";]]></script>
+          </scripts>
+        </action>
+        <action id="20" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1087 y=1240 ?>
+          <!--"DisconnectFromMOH"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DisconnectFromMOH&quot;" return="" external-function="1" library=""/>
+          <results >
+            <result name="Default" link="21" stubbed="0"/>
+          </results>
+        </action>
+        <action id="21" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1316 y=1169 ?>
+          <!--Remove member from temp conference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oTempConf</parameter>
+          </function>
+          <results >
+            <result name="Default" link="23" stubbed="0"/>
+            <result name="f_nReturnCode = 0" link="22" stubbed="0" >f_nReturnCode == 0</result>
+          </results>
+        </action>
+        <action id="22" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1546 y=1298 ?>
+          <!--Put Caller On Hold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PutPartyOnHold&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="23" stubbed="1"/>
+            <result name="ReturnCode=0, MOHFlag=T" link="28" stubbed="0" >p_oACD.strMusicOnHoldFlag match "T"
+AND f_nReturnCode == f_nSUCCESS</result>
+          </results>
+        </action>
+        <action id="23" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1527 y=1145 ?>
+          <!--MsgCSREndAssRspnse
+Failure-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;MsgCSREndAssignmentResponse&quot;" return="" external-function="1" library="" >
+            <parameter >p_oAPIObject</parameter>
+            <parameter >f_nFAILURE</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oACD.nReturnReasonCode = -1;
+Session.p_oACD.strReturnMsg = "";]]></script>
+          </scripts>
+        </action>
+        <action id="25" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=562 y=505 ?>
+          <!--"SetDTMFOn"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;SetDTMFOn&quot;" return="" external-function="1" library="" >
+            <parameter >p_oMS</parameter>
+            <parameter >f_strDigitMap</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_nReturnCode = Session.f_nRC_DO_NOTHING;]]></script>
+          </scripts>
+        </action>
+        <action id="26" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1097 y=1071 ?>
+          <!--StartTimer - p_oTimerMOH-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StartTimer&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTimerBeeps</parameter>
+          </function>
+          <results >
+            <result name="Default" link="27" stubbed="0"/>
+          </results>
+        </action>
+        <action id="27" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1332 y=1068 ?>
+          <!--StartTimer - p_oTimerCSR-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StartTimer&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTimerCSR</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+          </results>
+        </action>
+        <action id="28" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1797 y=1294 ?>
+          <!--StartTimer - p_oTimerCSR-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StartTimer&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTimerMOH</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+          </results>
+        </action>
+        <action id="29" plug-in="Pactolus.Branch.1" ><?xtml-editor x=215 y=159 ?>
+          <results >
+            <result name="Default" link="31" stubbed="1"/>
+            <result name="6, 7, 13 - back in queue" link="36" stubbed="0" >f_nActionCodeNumber == 6
+OR f_nActionCodeNumber == 7
+OR f_nActionCodeNumber == 13</result>
+            <result name="8 - Hangup Caller" link="53" stubbed="1" >f_nActionCodeNumber == 8</result>
+            <result name="9 - IVR" link="83" stubbed="0" >f_nActionCodeNumber == 9</result>
+            <result name="5 - Bridge To Conference" link="31" stubbed="1" >f_nActionCodeNumber == 5</result>
+            <result name="10 - Do Nothing" link="25" stubbed="0" >f_nActionCodeNumber == 10</result>
+            <result name="19 - CSR Leave Conf" link="84" stubbed="0" >f_nActionCodeNumber == 19</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_nActionCodeNumber = new Number(Session.p_strAssignmentAction);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if(1 == Result.id) {
+	Session.p_strAssignmentAction = 10;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="31" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=122 y=1247 ?>
+          <!--"ACDAPIEndRequest"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ACDAPIEndRequest&quot;" return="" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oAPIObject</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_oSUBObject</parameter>
+          </function>
+          <results >
+            <result name="Default" link="32" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oAPIObject.nTerminationReason = 2;]]></script>
+          </scripts>
+        </action>
+        <action id="32" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=367 y=1248 ?>
+          <!--MsgCSREndAssRspnse
+Failure-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;MsgCSREndAssignmentResponse&quot;" return="" external-function="1" library="" >
+            <parameter >p_oACD</parameter>
+            <parameter >f_nFAILURE</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oACD.nReturnReasonCode = -1;
+Session.p_oACD.strReturnMsg = "Failure to end assignment";]]></script>
+          </scripts>
+        </action>
+        <action id="33" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1737 y=247 ?>
+          <!--Remove member from temp conference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTempConf</parameter>
+          </function>
+          <results >
+            <result name="Default" link="38" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("BEFORE REMOVE PARTY FROM CONFERENCE");
+Server.logInfo("session.p_oTempConf.bCurrentlyInConf is: " + Session.p_oTempConf.bCurrentlyInConf);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("AFTER REMOVE PARTY FROM CONFERENCE");
+Server.logInfo("session.p_oTempConf.bCurrentlyInConf is: " + Session.p_oTempConf.bCurrentlyInConf);]]></script>
+          </scripts>
+        </action>
+        <action id="34" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1670 y=62 ?>
+          <!--Put Caller On Hold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PutPartyOnHold&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="31" stubbed="1"/>
+            <result name="SUCCESS" link="33" stubbed="0" >f_nReturnCode == f_nSUCCESS</result>
+          </results>
+        </action>
+        <action id="36" plug-in="Pactolus.Branch.1" ><?xtml-editor x=393 y=26 ?>
+          <!--prepaid or postpaid or unknown-->
+          <results >
+            <result name="Default" link="31" stubbed="1"/>
+            <result name="skill id 1 or 3 or 0" link="81" stubbed="0" >p_oACD.lCSRRequestSkillId == f_lPrepaidSkillId
+OR p_oACD.lCSRRequestSkillId == f_lPostpaidSkillId
+OR p_oACD.lCSRRequestSkillId == f_lUnknownSkillId</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if(Session.f_nActionCodeNumber = 7) {
+	Session.p_oACD.strCSRType = "S";
+}]]></script>
+          </scripts>
+        </action>
+        <action id="38" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1928 y=101 ?>
+          <!--please hold every 10 secs-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StartTimer&quot;" return="" external-function="1" library="" >
+            <parameter >p_oPleaseHoldTimer</parameter>
+          </function>
+          <results >
+            <result name="Default" link="63" stubbed="0"/>
+          </results>
+        </action>
+        <action id="39" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=2283 y=293 ?>
+          <!--5 secs to connect to MOH-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StartTimer&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTimerMOH</parameter>
+          </function>
+          <results >
+            <result name="Default" link="40" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oTimerMOH.lSleepTime = 5;]]></script>
+          </scripts>
+        </action>
+        <action id="40" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=2530 y=306 ?>
+          <!--max wait for CSR-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StartTimer&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTimerCSR</parameter>
+          </function>
+          <results >
+            <result name="Default" link="19" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oTimerCSR.lSleepTime = 3600;
+Session.f_nReturnCode = Session.f_nRC_DO_NOTHING;]]></script>
+          </scripts>
+        </action>
+        <action id="42" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=896 y=784 ?>
+          <!--PrepaidAPIAuthenticatePin-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PrepaidAPIAuthenticatePin&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oAPIObject</parameter>
+            <parameter >p_oSUBObject</parameter>
+            <parameter >p_oCC</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="(0 or 2) or billFlag = F" link="43" stubbed="0" >(f_nReturnCode == 0
+OR f_nReturnCode == 2)
+OR p_oCallLegB.strBillableFlag == "F"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.enableEvents(false);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Session.s_strIgnorePinLanguage == "F" && Session.p_oSUBObject.strPinLanguage.length > 0){
+	Session.p_oAPIObject.strLanguage = Session.p_oSUBObject.strPinLanguage;
+}else{
+    Server.logInfo("ignoring pin level language, continue with access number language");
+}
+
+if(Result.id == 1) {
+	Session.f_nReturnCode = Session.f_nRC_GET_PIN;
+}
+
+Server.enableEvents(true);]]></script>
+          </scripts>
+        </action>
+        <action id="43" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1208 y=775 ?>
+          <!--"psAPIAuthorizeDestination"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIAuthorizeDestination&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oAPIObject</parameter>
+            <parameter >p_oRATE</parameter>
+            <parameter >p_oSUBObject</parameter>
+            <parameter >p_oCallLegB</parameter>
+            <parameter >p_oCallLeg</parameter>
+          </function>
+          <results >
+            <result name="Default" link="11" stubbed="1"/>
+            <result name="0 - Valid, 1- No Limit, billFlag = F" link="59" stubbed="0" >f_nReturnCode == 0
+OR p_oCallLegB.strBillableFlag == "F"
+OR f_nReturnCode == 1</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oAPIObject.strDestinationNumber = Session.p_oACD.strOutdialBLegPhoneNumber;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.p_oAPIObject.strDestinationNumber = Session.p_oCallLegB.strOutdialDestNbr
+
+if(Result.id == 2) {
+	Session.f_nReturnCode = Session.f_nRC_OUTDIAL;
+	Session.p_oCallLegB.strCSROutdialFlag = "T";	
+} else {
+	Session.f_nReturnCode = Session.f_nRC_GET_DEST;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="47" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=409 y=672 ?>
+          <!--Put Caller On Hold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PutPartyOnHold&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="31" stubbed="1"/>
+            <result name="SUCCESS, SoftMS" link="73" stubbed="0" >f_nReturnCode == f_nSUCCESS
+AND p_oMS.strType == "PCS"</result>
+            <result name="Success" link="48" stubbed="0" >f_nReturnCode == f_nSUCCESS</result>
+          </results>
+        </action>
+        <action id="48" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=677 y=649 ?>
+          <!--Put Caller On Hold B-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PutPartyOnHold&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oCallLegB</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="31" stubbed="1"/>
+            <result name="SUCCESS" link="73" stubbed="0" >f_nReturnCode == f_nSUCCESS</result>
+          </results>
+        </action>
+        <action id="50" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1424 y=593 ?>
+          <!--delete temp conference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteConference&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTempConf</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Session.f_nReturnCode = Session.f_nRC_BRIDGE;
+Session.p_oTempConf.bUseForACD = false;]]></script>
+          </scripts>
+        </action>
+        <action id="51" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=389 y=824 ?>
+          <!--psAPIUnlockPin-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIUnlockPin&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oSUBObject</parameter>
+            <parameter >p_oAPIObject</parameter>
+          </function>
+          <results >
+            <result name="Default" link="31" stubbed="1"/>
+            <result name="SUCCESS" link="56" stubbed="0" >f_nReturnCode == 0
+OR f_nReturnCode == -1</result>
+          </results>
+        </action>
+        <action id="53" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=122 y=1075 ?>
+          <!--"ACDAPIEndRequest"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ACDAPIEndRequest&quot;" return="" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oAPIObject</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_oSUBObject</parameter>
+          </function>
+          <results >
+            <result name="Default" link="55" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oAPIObject.nTerminationReason = 2;]]></script>
+          </scripts>
+        </action>
+        <action id="54" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=612 y=1075 ?>
+          <!--f_nRC_END_SESSION-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nRC_END_SESSION"/>
+        </action>
+        <action id="55" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=370 y=1072 ?>
+          <!--MsgCSREndAssRspnse
+Success-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;MsgCSREndAssignmentResponse&quot;" return="" external-function="1" library="" >
+            <parameter >p_oACD</parameter>
+            <parameter >f_nSUCCESS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="54" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oACD.nReturnReasonCode = 0;
+Session.p_oACD.strReturnMsg = "";]]></script>
+          </scripts>
+        </action>
+        <action id="56" plug-in="Pactolus.Branch.1" ><?xtml-editor x=638 y=823 ?>
+          <!--postpaid-->
+          <results >
+            <result name="Default" link="42" stubbed="0"/>
+            <result name="strPostPaidFlag == T" link="57" stubbed="0" >p_oAPIObject.strPostPaidFlag == "T"</result>
+          </results>
+        </action>
+        <action id="57" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=913 y=917 ?>
+          <!--"PostpaidAPIAuthenticatePin"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PostpaidAPIAuthenticatePin&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oAPIObject</parameter>
+            <parameter >p_oSUBObject</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="(0 or 2) or billFlag = F" link="43" stubbed="1" >(f_nReturnCode == 0
+OR f_nReturnCode == 2)
+OR p_oCallLegB.strBillableFlag == "F"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.enableEvents(false);
+Session.f_nReturnCode = -50;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("*********JAVA RETURN*********");
+Server.logInfo("AuthenticateSub returned " + Session.f_nReturnCode);
+
+if (Session.s_strIgnorePinLanguage == "F" && Session.p_oSUBObject.strPinLanguage.length > 0){
+	Session.p_oAPIObject.strLanguage = Session.p_oSUBObject.strPinLanguage;
+}else{
+    Server.logInfo("ignoring pin level language, continue with access number language");
+}
+if (1 == Result.id)
+{
+	Session.p_oACD.strReturnMsg = "Failure to outdial B Leg, because fail to validate pin";
+	Session.f_nReturnCode = Session.f_nRC_GET_PIN;
+}
+
+Server.enableEvents(true);]]></script>
+          </scripts>
+        </action>
+        <action id="58" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1770 y=769 ?>
+          <!--"DeleteConference"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteConference&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oTempConf</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Session.p_oTempConf.bUseForACD = false;]]></script>
+          </scripts>
+        </action>
+        <action id="59" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1483 y=775 ?>
+          <!--"RemoveMemberFromConference"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oTempConf</parameter>
+          </function>
+          <results >
+            <result name="Default" link="58" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if(Session.p_oCallLegB.strBillableFlag == "F") {
+	Session.p_oAPIObject.strOutdialOperatorFlag = "T";
+}	]]></script>
+          </scripts>
+        </action>
+        <action id="60" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1095 y=1355 ?>
+          <!--"DisconnectFromMOH"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DisconnectFromMOH&quot;" return="" external-function="1" library="lib_moh.xml" >
+            <parameter >p_oMS</parameter>
+            <parameter >p_oMS.strSessionId</parameter>
+            <parameter >p_oMS.nConfIndex</parameter>
+            <parameter >p_oAPIObject.strPlatformSessionId</parameter>
+          </function>
+          <results >
+            <result name="Default" link="21" stubbed="0"/>
+          </results>
+        </action>
+        <action id="63" plug-in="Pactolus.Branch.1" ><?xtml-editor x=2077 y=234 ?>
+          <results >
+            <result name="Default" link="65" stubbed="0"/>
+            <result name="ACD.strMusicOnHoldFlag" link="39" stubbed="0" >p_oACD.strMusicOnHoldFlag match "T"</result>
+          </results>
+        </action>
+        <action id="64" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=2532 y=85 ?>
+          <!--please hold for CSR-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="10" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="p_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >898</audio>
+          </play>
+          <results >
+            <result name="Default" link="40" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="65" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=2268 y=87 ?>
+          <!--"MSOutdialParty"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;MSOutdialParty&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_oMS</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="31" stubbed="1"/>
+            <result name="SUCCESS" link="64" stubbed="0" >f_nReturnCode == f_nSUCCESS</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if(Result.id == 2) {
+	Session.f_nReturnCode = Session.f_nRC_IVR;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="66" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=798 y=109 ?>
+          <!--2 secs-->
+          <sleep xmlns="urn:www.pactolus.com:xtml:application" duration="2"/>
+          <results >
+            <result name="Default" link="82" stubbed="0"/>
+            <result name="ACD.bCSRWithAB" link="69" stubbed="0" >p_oACD.bCSRWithAB == true</result>
+            <result name="Action = 13" link="68" stubbed="0" >p_strAssignmentAction match "13"</result>
+          </results>
+        </action>
+        <action id="67" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1146 y=12 ?>
+          <!--B Leg - HangUpParty-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpParty&quot;" return="" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oCallLegB</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="82" stubbed="0"/>
+            <result name="Action = 13" link="68" stubbed="0" >p_strAssignmentAction match "13"</result>
+          </results>
+        </action>
+        <action id="68" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1081 y=206 ?>
+          <!--1510: CSR was disconnected....-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="" endpoint="p_oTempConf.strEndPoint" callid="p_oTempConf.strCallId" repeat="1" timeout="10" ms-type="p_oTempConf.strACDType" returns="" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="p_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >1510</audio>
+          </play>
+          <results >
+            <result name="Default" link="82" stubbed="0"/>
+            <result name="Success" ><?xtml-editor visible=no?></result>
+            <result name="Error" ><?xtml-editor visible=no?></result>
+            <result name="Timeout" ><?xtml-editor visible=no?></result>
+          </results>
+        </action>
+        <action id="69" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=953 y=33 ?>
+          <!--psAPIProcCallCompletion-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIProcCallCompletion&quot;" return="" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oAPIObject</parameter>
+            <parameter >p_oSUBObject</parameter>
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_oCallLegB</parameter>
+            <parameter >p_oRATE</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_oArrayCallLegs</parameter>
+          </function>
+          <results >
+            <result name="Default" link="67" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oCallLegB.lTimeAnswered = 0;
+Session.p_oAPIObject.nCallTerminationReason = 10; // OTher
+]]></script>
+          </scripts>
+        </action>
+        <action id="73" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=935 y=674 ?>
+          <!--RemoveMemberFromConference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="74" stubbed="0"/>
+          </results>
+        </action>
+        <action id="74" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1183 y=630 ?>
+          <!--RemoveMemberFromConference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oTempConf</parameter>
+          </function>
+          <results >
+            <result name="Default" link="50" stubbed="0"/>
+          </results>
+        </action>
+        <action id="75" plug-in="Pactolus.Branch.1" ><?xtml-editor x=29 y=1549 ?>
+          <!--postpaid-->
+          <results >
+            <result name="Default" link="29" stubbed="1"/>
+            <result name="strPostPaidFlag == T, pin" link="76" stubbed="0" >p_oAPIObject.strPostPaidFlag == "T"
+AND p_oSUBObject.strUserPin != ""</result>
+            <result name="pin != &quot;&quot;" link="80" stubbed="0" >p_oSUBObject.strUserPin != ""</result>
+          </results>
+        </action>
+        <action id="76" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=247 y=1564 ?>
+          <!--psAPIUnlockPin-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIUnlockPin&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oSUBObject</parameter>
+            <parameter >p_oAPIObject</parameter>
+          </function>
+          <results >
+            <result name="Default" link="77" stubbed="0"/>
+            <result name="SUCCESS" >f_nReturnCode == 0
+OR f_nReturnCode == -1</result>
+          </results>
+        </action>
+        <action id="77" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=491 y=1584 ?>
+          <!--"PostpaidAPIAuthenticatePin"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PostpaidAPIAuthenticatePin&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oAPIObject</parameter>
+            <parameter >p_oSUBObject</parameter>
+          </function>
+          <results >
+            <result name="Default" link="29" stubbed="1"/>
+            <result name="Success or First Use" >f_nReturnCode == 0
+OR f_nReturnCode == 2</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.enableEvents(false);
+Session.f_nReturnCode = -50;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("*********JAVA RETURN*********");
+Server.logInfo("AuthenticateSub returned " + Session.f_nReturnCode);
+
+if (Session.s_strIgnorePinLanguage == "F" && Session.p_oSUBObject.strPinLanguage.length > 0){
+	Session.p_oAPIObject.strLanguage = Session.p_oSUBObject.strPinLanguage;
+}else{
+    Server.logInfo("ignoring pin level language, continue with access number language");
+}
+if (1 == Result.id)
+{
+	Session.p_oACD.strReturnMsg = "Failure to outdial B Leg, because fail to validate pin";
+	Session.f_nReturnCode = Session.f_nRC_GET_PIN;
+}
+
+Server.enableEvents(true);]]></script>
+          </scripts>
+        </action>
+        <action id="79" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=457 y=1742 ?>
+          <!--PrepaidAPIAuthenticatePin-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PrepaidAPIAuthenticatePin&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oAPIObject</parameter>
+            <parameter >p_oSUBObject</parameter>
+            <parameter >p_oCC</parameter>
+          </function>
+          <results >
+            <result name="Default" link="29" stubbed="1"/>
+            <result name="ReturnCode = 0 or 2" >f_nReturnCode == 0
+OR f_nReturnCode == 2</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.enableEvents(false);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Session.s_strIgnorePinLanguage == "F" && Session.p_oSUBObject.strPinLanguage.length > 0){
+	Session.p_oAPIObject.strLanguage = Session.p_oSUBObject.strPinLanguage;
+}else{
+    Server.logInfo("ignoring pin level language, continue with access number language");
+}
+
+if(Result.id == 1) {
+	Session.f_nReturnCode = Session.f_nRC_GET_PIN;
+}
+
+Server.enableEvents(true);]]></script>
+          </scripts>
+        </action>
+        <action id="80" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=71 y=1760 ?>
+          <!--psAPIUnlockPin-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIUnlockPin&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oSUBObject</parameter>
+            <parameter >p_oAPIObject</parameter>
+          </function>
+          <results >
+            <result name="Default" link="79" stubbed="0"/>
+            <result name="SUCCESS" >f_nReturnCode == 0
+OR f_nReturnCode == -1</result>
+          </results>
+        </action>
+        <action id="81" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=586 y=155 ?>
+          <!--psAPIUnlockPin-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIUnlockPin&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oSUBObject</parameter>
+            <parameter >p_oAPIObject</parameter>
+          </function>
+          <results >
+            <result name="Default" link="66" stubbed="0"/>
+            <result name="SUCCESS" >f_nReturnCode == 0
+OR f_nReturnCode == -1</result>
+          </results>
+        </action>
+        <action id="82" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1432 y=147 ?>
+          <results >
+            <result name="Default" link="34" stubbed="0"/>
+            <result name="bSuppressOnHold" link="33" stubbed="0" >p_oAPIObject.bSuppressOnHold == true</result>
+          </results>
+        </action>
+        <action id="83" plug-in="Pactolus.Branch.1" ><?xtml-editor x=537 y=277 ?>
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+            <result name="bSuppressOnHold" link="11" stubbed="0" >p_oAPIObject.bSuppressOnHold == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if(Result.id == 2) {
+	Session.f_nReturnCode = Session.f_nRC_IVR;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="84" plug-in="Pactolus.Branch.1" ><?xtml-editor x=356 y=564 ?>
+          <results >
+            <result name="Default" link="47" stubbed="0"/>
+            <result name="bSuppressOnHold" link="73" stubbed="0" >p_oAPIObject.bSuppressOnHold == true</result>
+          </results>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="517" y-coord="9" width="208" height="35" text="need to handle conference case" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="BeginCSRAssignment" start="25" event="BeginCSRAssignment" returns="i4" >
+      <parameters >
+        <parameter name="p_nCurrentState" type="i4"/>
+        <parameter name="p_oCallLeg" type="object" pass="byref"/>
+        <parameter name="p_oMS" type="object" pass="byref"/>
+        <parameter name="p_oTempConference" type="object" pass="byref"/>
+        <parameter name="p_strContact" type="string"/>
+        <parameter name="p_strLanguage" type="string"/>
+        <parameter name="p_nJoinPrompt" type="i4"/>
+        <parameter name="p_oAPIObject" type="object" pass="byref"/>
+        <parameter name="p_oACD" type="object" pass="byref"/>
+        <parameter name="p_oPleaseHoldTimer" type="object" pass="byref"/>
+        <parameter name="p_oMOHTimer" type="object" pass="byref"/>
+        <parameter name="p_oMaxWaitCSRTimer" type="object" pass="byref"/>
+        <parameter name="p_oHeartBeatTimer" type="object" pass="byref"/>
+        <parameter name="p_oSUB" type="object" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nWaitForMOH" type="i4" >1</var>
+        <var name="f_nConnectedToMOH" type="i4" >2</var>
+        <var name="f_nZeroOutToCSRFromConf" type="i4" >3</var>
+        <var name="f_nReturnCode" type="i4" >-1</var>
+        <var name="f_nSUCCESS" type="i4" >0</var>
+        <var name="f_nFAILURE" type="i4" >-1</var>
+        <var name="f_oFILLER" type="object" ></var>
+      </local-vars>
+      <actions >
+        <action id="25" plug-in="Pactolus.Branch.1" ><?xtml-editor x=6 y=48 ?>
+          <results >
+            <result name="Default" link="22" stubbed="0"/>
+            <result name="ACD.AssgnmntActn = 20" link="18" stubbed="0" >p_oACD.strCSRAssignmentAction == "20"</result>
+          </results>
+        </action>
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=297 y=312 ?>
+          <!--current state?-->
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="waiting to connect to MOH" link="8" stubbed="1" >p_nCurrentState == f_nWaitForMOH</result>
+            <result name="connected to MOH" link="26" stubbed="0" >p_nCurrentState == f_nConnectedToMOH
+OR p_oMS.bCurrentlyInConf == true</result>
+            <result name="zero out to CSR from conf" link="6" stubbed="0" >p_nCurrentState == f_nZeroOutToCSRFromConf</result>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=629 y=335 ?>
+          <!--Delete MS Connection-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteMSConnection&quot;" return="" external-function="1" library="" >
+            <parameter >p_oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="27" stubbed="0"/>
+          </results>
+        </action>
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=932 y=156 ?>
+          <!--put caller on hold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PutPartyOnHold&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+            <result name="SUCCESS" link="8" stubbed="1" >f_nReturnCode == f_nSUCCESS</result>
+          </results>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=558 y=650 ?>
+          <!--f_nSUCCESS-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nSUCCESS"/>
+        </action>
+        <action id="8" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=44 y=535 ?>
+          <!--AddMemberToTempConference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;AddMemberToConference&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oTempConference</parameter>
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="14" stubbed="1"/>
+            <result name="SUCCESS" link="24" stubbed="0" >f_nReturnCode == f_nSUCCESS</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oTempConference.bDTMFClampFlag = false;]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1123 y=375 ?>
+          <!--f_nFAILURE-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nFAILURE"/>
+        </action>
+        <action id="17" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=809 y=480 ?>
+          <!--put caller on hold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PutPartyOnHold&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="14" stubbed="1"/>
+            <result name="SUCCESS" link="23" stubbed="0" >f_nReturnCode == f_nSUCCESS</result>
+          </results>
+        </action>
+        <action id="18" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=42 y=312 ?>
+          <!--"ACDAPIBeginAssignment"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ACDAPIBeginAssignment&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oAPIObject</parameter>
+            <parameter >p_oACD</parameter>
+          </function>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="ReturnCode &lt; 0" link="14" stubbed="1" >f_nReturnCode &lt; 0</result>
+            <result name="ACD.AssgmntActn = 20" link="6" stubbed="1" >p_oACD.strCSRAssignmentAction == "20"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("BEGIN ASSIGNMENT RECEIVES Assignment Id: " + Session.p_oACD.lCSRAssignmentId);
+Session.g_oACD.lCSRAssignmentStartTime = Server.getUTCTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if(Session.p_oACD.lCSRAssignmentEndTime == 0) {
+	// This was the first assignment for this request.
+	// Subtract assignment start time by request start time.
+	Session.p_oACD.nOnHoldTime = Session.p_oACD.lCSRAssignmentStartTime - Session.p_oACD.lRequestStartTime;
+} else {
+	// This was not the first assignment for this request.
+	// subtract assignment start by previous assignment end time
+	Session.p_oACD.nOnHoldTime = (Session.p_oACD.lCSRAssignmentStartTime - Session.p_oACD.lCSRAssignmentEndTime) + Session.p_oACD.nOnHoldTime;	
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="22" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=262 y=78 ?>
+          <!--StopACDTimers-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StopACDTimers&quot;" return="" external-function="0" library="" >
+            <parameter >p_oMOHTimer</parameter>
+            <parameter >p_oHeartBeatTimer</parameter>
+            <parameter >p_oPleaseHoldTimer</parameter>
+            <parameter >p_oMaxWaitCSRTimer</parameter>
+          </function>
+          <results >
+            <result name="Default" link="18" stubbed="0"/>
+          </results>
+        </action>
+        <action id="23" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1001 y=594 ?>
+          <!--"DisconnectFromMOH"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DisconnectFromMOH&quot;" return="f_nReturnCode" external-function="1" library="lib_moh.xml" >
+            <parameter >p_oMS</parameter>
+            <parameter >p_oMS.strSessionId</parameter>
+            <parameter >p_oMS.nConfIndex</parameter>
+            <parameter >p_oAPIObject.strPlatformSessionId</parameter>
+          </function>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+            <result name="SUCCESS" link="8" stubbed="1" >f_nReturnCode == f_nSUCCESS</result>
+          </results>
+        </action>
+        <action id="24" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=279 y=577 ?>
+          <!--psAPIUnlockPin-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIUnlockPin&quot;" return="" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oSUB</parameter>
+            <parameter >p_oAPIObject</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+          </results>
+        </action>
+        <action id="26" plug-in="Pactolus.Branch.1" ><?xtml-editor x=642 y=576 ?>
+          <results >
+            <result name="Default" link="17" stubbed="0"/>
+            <result name="bSuppressOnHold" link="23" stubbed="0" >p_oAPIObject.bSuppressOnHold == true</result>
+          </results>
+        </action>
+        <action id="27" plug-in="Pactolus.Branch.1" ><?xtml-editor x=861 y=339 ?>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="bSuppressOnHold" link="8" stubbed="0" >p_oAPIObject.bSuppressOnHold == true</result>
+          </results>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="648" y-coord="41" width="222" height="116" text="Since RouteToCSR sets 3 timers:
+please hold timer
+MOH timer
+max wait CSR timer
+So we only stop 3 timers here" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="CSRCallerOffHold" start="13" event="CSRCallerOffHold" returns="i4" >
+      <parameters >
+        <parameter name="p_oAPIObject" type="object" pass="byref"/>
+        <parameter name="p_oACD" type="object" pass="byref"/>
+        <parameter name="p_oTempConf" type="object" pass="byref"/>
+        <parameter name="p_oMOH" type="object" pass="byref"/>
+        <parameter name="p_strContact" type="string"/>
+        <parameter name="p_oCallLeg" type="object" pass="byref"/>
+        <parameter name="p_oSUBObject" type="object"/>
+        <parameter name="p_oTimerPleaseHold" type="object" pass="byref"/>
+        <parameter name="p_oTimerMOH" type="object" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >0</var>
+        <var name="f_nFAILURE" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="13" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=17 y=49 ?>
+          <!--StopOneTimer - p_oTimerPleaseHold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StopOneTimer&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTimerPleaseHold</parameter>
+          </function>
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=17 y=652 ?>
+          <!--0-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="0"/>
+        </action>
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=949 y=159 ?>
+          <!--put caller on hold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PutPartyOnHold&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="SUCCESS" link="4" stubbed="0" >f_nReturnCode == 0</result>
+          </results>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1089 y=286 ?>
+          <!--"DisconnectFromMOH"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DisconnectFromMOH&quot;" return="" external-function="1" library="lib_moh.xml" >
+            <parameter >p_oMOH</parameter>
+            <parameter >p_oMOH.strSessionId</parameter>
+            <parameter >p_oMOH.nConfIndex</parameter>
+            <parameter >p_oAPIObject.strPlatformSessionId</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+          </results>
+        </action>
+        <action id="5" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=29 y=326 ?>
+          <!--AddMemberToConference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;AddMemberToConference&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oTempConf</parameter>
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="FAILURE" link="7" stubbed="0" >f_nReturnCode == -1</result>
+            <result name="CALLERHUNGUP" link="6" stubbed="0" >f_nReturnCode == -2</result>
+          </results>
+        </action>
+        <action id="6" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=268 y=440 ?>
+          <!--MsgEndRequestCSR-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;MsgEndRequestCSR&quot;" return="" external-function="1" library="" >
+            <parameter >p_oACD</parameter>
+          </function>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var strTransId = new String(Server.getUTCTime());
+Session.p_oACD.strTransactionId = strTransId;
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=257 y=320 ?>
+          <!--Hang up caller-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpParty&quot;" return="" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_nTerminationReason = 6;]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=14 y=565 ?>
+          <!--f_nFAILURE-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nFAILURE"/>
+        </action>
+        <action id="9" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=472 y=440 ?>
+          <!--ACDAPIEndAssignment-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ACDAPIEndAssignment&quot;" return="" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oAPIObject</parameter>
+            <parameter >p_oACD</parameter>
+          </function>
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oACD.lCSRAssignmentEndTime = Server.getUTCTime();]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=679 y=438 ?>
+          <!--ACDAPIEndRequest-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;ACDAPIEndRequest&quot;" return="" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oAPIObject</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_oSUBObject</parameter>
+          </function>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oAPIObject.nTerminationReason = 1;]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=471 y=157 ?>
+          <!--StopOneTimer - p_oTimerMOH-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StopOneTimer&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTimerMOH</parameter>
+          </function>
+          <results >
+            <result name="Default" link="23" stubbed="0"/>
+          </results>
+        </action>
+        <action id="15" plug-in="Pactolus.Branch.1" ><?xtml-editor x=220 y=49 ?>
+          <results >
+            <result name="Default" link="19" stubbed="0"/>
+            <result name="ACD.strMOHFlag, MOH.inConf" link="14" stubbed="0" >p_oACD.strMusicOnHoldFlag match "T"
+AND p_oMOH.bCurrentlyInConf == true</result>
+            <result name="ACD.strMOHFlag, !MOH.inConf" link="18" stubbed="0" >p_oACD.strMusicOnHoldFlag match "T"
+AND p_oMOH.bCurrentlyInConf != true</result>
+          </results>
+        </action>
+        <action id="17" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=709 y=328 ?>
+          <!--DeleteMSConnection-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteMSConnection&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oMOH</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+          </results>
+        </action>
+        <action id="18" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=474 y=260 ?>
+          <!--StopOneTimer - p_oTimerMOH-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StopOneTimer&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTimerMOH</parameter>
+          </function>
+          <results >
+            <result name="Default" link="17" stubbed="0"/>
+          </results>
+        </action>
+        <action id="19" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=455 y=22 ?>
+          <!--StopOneTimer - p_oTimerMOH-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StopOneTimer&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTimerMOH</parameter>
+          </function>
+          <results >
+            <result name="Default" link="22" stubbed="0"/>
+          </results>
+        </action>
+        <action id="20" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=975 y=18 ?>
+          <!--put caller on hold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PutPartyOnHold&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="SUCCESS" link="21" stubbed="0" >f_nReturnCode == 0</result>
+          </results>
+        </action>
+        <action id="21" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1160 y=118 ?>
+          <!--DeleteMSConnection-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteMSConnection&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oMOH</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+          </results>
+        </action>
+        <action id="22" plug-in="Pactolus.Branch.1" ><?xtml-editor x=733 y=63 ?>
+          <results >
+            <result name="Default" link="20" stubbed="0"/>
+            <result name="bSuppressOnHold" link="21" stubbed="0" >p_oAPIObject.bSuppressOnHold == true</result>
+          </results>
+        </action>
+        <action id="23" plug-in="Pactolus.Branch.1" ><?xtml-editor x=722 y=215 ?>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="bSuppressOnHold" link="4" stubbed="0" >p_oAPIObject.bSuppressOnHold == true</result>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="CSRCallerOnHold" start="1" event="CSRCallerOnHold" returns="i4" >
+      <parameters >
+        <parameter name="p_oMS" type="object" pass="byref"/>
+        <parameter name="p_oTempConf" type="object" pass="byref"/>
+        <parameter name="p_oACD" type="object" pass="byref"/>
+        <parameter name="p_oCallLeg" type="object" pass="byref"/>
+        <parameter name="p_strContact" type="string"/>
+        <parameter name="p_oTimerMOH" type="object" pass="byref"/>
+        <parameter name="p_strLanguage" type="string"/>
+        <parameter name="p_oTimerHold" type="object" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >0</var>
+        <var name="f_nFAILURE" type="i4" >-1</var>
+        <var name="f_oMS_or_Temp" type="object" ></var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=33 y=264 ?>
+          <results >
+            <result name="Default" link="12" stubbed="0"/>
+            <result name="ACD.strMusicOnHoldFlag" link="2" stubbed="0" >p_oACD.strMusicOnHoldFlag match "T"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Session.p_oMS.bCurrentlyInConf IS: " + Session.p_oMS.bCurrentlyInConf);
+Server.logInfo("Session.p_oMS.bCurrentlyConnected IS: " + Session.p_oMS.bCurrentlyConnected);
+Server.logInfo("Session.p_oMS.strConferenceId IS: " + Session.p_oMS.strConferenceId);
+Server.logInfo("Session.p_oMS.strCallId IS: " + Session.p_oMS.strCallId);
+Server.logInfo("Session.p_oMS.strEndPoint IS: " + Session.p_oMS.strEndPoint);
+Server.logInfo("Session.p_oMS.strConnectionId IS: " + Session.p_oMS.strConnectionId);
+Server.logInfo("Session.p_oMS.strType IS: " + Session.p_oMS.strType);
+
+Server.logInfo("Session.p_oTempConf.bCurrentlyInConf IS: " + Session.p_oTempConf.bCurrentlyInConf);
+Server.logInfo("Session.p_oTempConf.bCurrentlyConnected IS: " + Session.p_oTempConf.bCurrentlyConnected);
+Server.logInfo("Session.p_oTempConf.strConferenceId IS: " + Session.p_oTempConf.strConferenceId);
+Server.logInfo("Session.p_oTempConf.strCallId IS: " + Session.p_oTempConf.strCallId);
+Server.logInfo("Session.p_oTempConf.strEndPoint IS: " + Session.p_oTempConf.strEndPoint);
+Server.logInfo("Session.p_oTempConf.strType IS: " + Session.p_oTempConf.strType);]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=262 y=401 ?>
+          <!--put caller on hold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PutPartyOnHold&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="SUCCESS" link="3" stubbed="0" >f_nReturnCode == 0</result>
+          </results>
+        </action>
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=496 y=476 ?>
+          <!--Remove member from temp conference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTempConf</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+          </results>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=719 y=478 ?>
+          <!--StartTimer - p_oTimerMOH-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StartTimer&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTimerMOH</parameter>
+          </function>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oTimerMOH.lSleepTime = 5;]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=905 y=61 ?>
+          <!--0-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="0"/>
+        </action>
+        <action id="6" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=469 y=65 ?>
+          <!--please hold for CSR-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="f_oMS_or_Temp.strConnectionId" endpoint="f_oMS_or_Temp.strEndPoint" callid="f_oMS_or_Temp.strCallId" repeat="1" timeout="10" ms-type="f_oMS_or_Temp.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="p_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >898</audio>
+          </play>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if(Session.p_oTempConf.bCurrentlyInConf) {
+	Session.f_oMS_or_Temp = Session.p_oTempConf;
+} else {
+	Session.f_oMS_or_Temp = Session.p_oMS;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=694 y=62 ?>
+          <!--StartTimer - p_oTimerHold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StartTimer&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTimerHold</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+          </results>
+        </action>
+        <action id="8" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=479 y=386 ?>
+          <!--f_nFAILURE-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nFAILURE"/>
+        </action>
+        <action id="9" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=909 y=234 ?>
+          <!--"MSOutdialParty"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;MSOutdialParty&quot;" return="f_nReturnCode" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_oMS</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="SUCCESS" link="13" stubbed="0" >f_nReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("Session.p_oMS.bCurrentlyInConf IS: " + Session.p_oMS.bCurrentlyInConf);
+Server.logInfo("Session.p_oMS.bCurrentlyConnected IS: " + Session.p_oMS.bCurrentlyConnected);
+Server.logInfo("Session.p_oMS.strConferenceId IS: " + Session.p_oMS.strConferenceId);
+Server.logInfo("Session.p_oMS.strCallId IS: " + Session.p_oMS.strCallId);
+Server.logInfo("Session.p_oMS.strEndPoint IS: " + Session.p_oMS.strEndPoint);
+Server.logInfo("Session.p_oMS.strConnectionId IS: " + Session.p_oMS.strConnectionId);
+
+Server.logInfo("Session.p_oTempConf.bCurrentlyInConf IS: " + Session.p_oTempConf.bCurrentlyInConf);
+Server.logInfo("Session.p_oTempConf.bCurrentlyConnected IS: " + Session.p_oTempConf.bCurrentlyConnected);
+Server.logInfo("Session.p_oTempConf.strConferenceId IS: " + Session.p_oTempConf.strConferenceId);
+Server.logInfo("Session.p_oTempConf.strCallId IS: " + Session.p_oTempConf.strCallId);
+Server.logInfo("Session.p_oTempConf.strEndPoint IS: " + Session.p_oTempConf.strEndPoint);
+Server.logInfo("Session.p_oTempConf.strConnectionId IS: " + Session.p_oTempConf.strConnectionId);]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=486 y=246 ?>
+          <!--put caller on hold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PutPartyOnHold&quot;" return="f_nReturnCode" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="SUCCESS" link="11" stubbed="0" >f_nReturnCode == 0</result>
+          </results>
+        </action>
+        <action id="11" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=697 y=238 ?>
+          <!--Remove Member From Conference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="f_nReturnCode" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oTempConf</parameter>
+          </function>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="SUCCESS" link="9" stubbed="0" >f_nReturnCode == 0</result>
+          </results>
+        </action>
+        <action id="12" plug-in="Pactolus.Branch.1" ><?xtml-editor x=247 y=136 ?>
+          <!--p_oTempConf.bCurrentlyInConf-->
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="p_oTempConf.bCurrentlyInConf" link="10" stubbed="0" >p_oTempConf.bCurrentlyInConf == true</result>
+          </results>
+        </action>
+        <action id="13" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1125 y=231 ?>
+          <!--please hold for CSR-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="p_oMS.strConnectionId" endpoint="p_oMS.strEndPoint" callid="p_oMS.strCallId" repeat="1" timeout="10" ms-type="p_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="p_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >898</audio>
+          </play>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="RouteToCSR" start="11" event="RouteToCSR" returns="i4" >
+      <parameters >
+        <parameter name="p_oMS" type="object" pass="byref"/>
+        <parameter name="p_oConference" type="object" pass="byref"/>
+        <parameter name="p_oMOHTimer" type="object" pass="byref"/>
+        <parameter name="p_oPleaseHoldTimer" type="object" pass="byref"/>
+        <parameter name="p_oMaxWaitCSRTimer" type="object" pass="byref"/>
+        <parameter name="p_oAPIObject" type="object" pass="byref"/>
+        <parameter name="p_oACD" type="object" pass="byref"/>
+        <parameter name="p_oSUBObject" type="object" pass="byref"/>
+        <parameter name="p_oTimerHeartBeat" type="object" pass="byref"/>
+        <parameter name="p_oCallLeg" type="object" pass="byref"/>
+        <parameter name="p_strContact" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >-50</var>
+        <var name="f_nSUCCESS" type="i4" >0</var>
+        <var name="f_nFAILURE" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="11" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=34 y=254 ?>
+          <!--StartACDTimers-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StartACDTimers&quot;" return="" external-function="0" library="" >
+            <parameter >p_oPleaseHoldTimer</parameter>
+            <parameter >p_oMOHTimer</parameter>
+            <parameter >p_oMaxWaitCSRTimer</parameter>
+            <parameter >p_oACD</parameter>
+          </function>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+            <result name="strMusicOnHoldFlag=T" link="12" stubbed="0" >p_oACD.strMusicOnHoldFlag match "T"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oMOHTimer.lSleepTime = 5;
+Session.p_oMaxWaitCSRTimer.lSleepTime = 3600;]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=483 y=234 ?>
+          <!--put caller on hold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;PutPartyOnHold&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="SUCCESS" link="6" stubbed="0" >f_nReturnCode == f_nSUCCESS</result>
+          </results>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=741 y=184 ?>
+          <!--f_nFAILURE-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nFAILURE"/>
+        </action>
+        <action id="6" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=757 y=369 ?>
+          <!--Delete MS Connection-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteMSConnection&quot;" return="" external-function="1" library="" >
+            <parameter >p_oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+          </results>
+        </action>
+        <action id="7" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=23 y=443 ?>
+          <!--Create a temp Conference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;CreateConference&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oConference</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="SUCCESS" link="8" stubbed="0" >f_nReturnCode == f_nSUCCESS</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_nReturnCode = -50;
+Session.p_oConference.bUseForACD = true;]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=274 y=442 ?>
+          <!--"CSRBeginRequest"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;BeginCSRRequest&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oAPIObject</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_oTimerHeartBeat</parameter>
+            <parameter >p_oSUBObject</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="SUCCESS" link="9" stubbed="0" >f_nReturnCode == f_nSUCCESS</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_nReturnCode = -50;
+Session.p_oACD.strCSRRequestEndPoint = Session.p_oConference.strConferenceId;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO CALL BeginCSRRequest");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=535 y=480 ?>
+          <!--f_nSUCCESS-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nSUCCESS"/>
+        </action>
+        <action id="12" plug-in="Pactolus.Branch.1" ><?xtml-editor x=273 y=326 ?>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="bSuppressOnHold" link="6" stubbed="0" >p_oAPIObject.bSuppressOnHold == true</result>
+          </results>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="177" y-coord="19" width="162" height="149" text="3 timers set here:
+please hold timer
+MOH timer
+max wait CSR timer
+
+So on Begin Assignment,
+must stop these 3 timers" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="StopACDTimers" start="1" event="StopACDTimers" returns="i4" >
+      <parameters >
+        <parameter name="p_oTimerMOH" type="object" pass="byref"/>
+        <parameter name="p_oTimerHeartBeat" type="object" pass="byref"/>
+        <parameter name="p_oTimerPleaseHold" type="object" pass="byref"/>
+        <parameter name="p_oTimerMaxWaitCSR" type="object" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=17 y=24 ?>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="oTimerHeartBeat.bOn" link="2" stubbed="0" >p_oTimerHeartBeat.bOn == true</result>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=183 y=145 ?>
+          <!--StopOneTimer - p_oTimerHeartBeat-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StopOneTimer&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTimerHeartBeat</parameter>
+          </function>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+          </results>
+        </action>
+        <action id="3" plug-in="Pactolus.Branch.1" ><?xtml-editor x=332 y=53 ?>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="MaxWaitForCSR.bOn" link="4" stubbed="0" >p_oTimerMaxWaitCSR.bOn == true</result>
+          </results>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=471 y=164 ?>
+          <!--StopOneTimer - p_oTimerMaxWaitCSR-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StopOneTimer&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTimerMaxWaitCSR</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+          </results>
+        </action>
+        <action id="5" plug-in="Pactolus.Branch.1" ><?xtml-editor x=655 y=56 ?>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+            <result name="p_oTimerMOH.bOn" link="6" stubbed="0" >p_oTimerMOH.bOn == true</result>
+          </results>
+        </action>
+        <action id="6" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=807 y=171 ?>
+          <!--StopOneTimer - p_oTimerMOH-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StopOneTimer&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTimerMOH</parameter>
+          </function>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+          </results>
+        </action>
+        <action id="7" plug-in="Pactolus.Branch.1" ><?xtml-editor x=32 y=363 ?>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="p_oTimerPleaseHold.bOn" link="8" stubbed="0" >p_oTimerPleaseHold.bOn == true</result>
+          </results>
+        </action>
+        <action id="8" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=237 y=441 ?>
+          <!--StopOneTimer - p_oTimerPleaseHold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StopOneTimer&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTimerPleaseHold</parameter>
+          </function>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+          </results>
+        </action>
+        <action id="9" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=578 y=385 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="StartACDTimers" start="1" event="StartACDTimers" returns="i4" >
+      <parameters >
+        <parameter name="p_oTimerPleaseHold" type="object" pass="byref"/>
+        <parameter name="p_oTimerMOH" type="object" pass="byref"/>
+        <parameter name="p_oTimerMaxWaitForCSR" type="object" pass="byref"/>
+        <parameter name="p_oACD" type="object"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=15 y=31 ?>
+          <!--StartTimer - p_oTimerPleaseHold-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StartTimer&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTimerPleaseHold</parameter>
+          </function>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=221 y=28 ?>
+          <!--StartTimer - p_oTimerMaxWaitForCSR-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StartTimer&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTimerMaxWaitForCSR</parameter>
+          </function>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+          </results>
+        </action>
+        <action id="3" plug-in="Pactolus.Branch.1" ><?xtml-editor x=447 y=57 ?>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="strMusicOnHoldFlag = T" link="4" stubbed="0" >p_oACD.strMusicOnHoldFlag match "T"</result>
+          </results>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=648 y=163 ?>
+          <!--StartTimer - p_oTimerMOH-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;StartTimer&quot;" return="" external-function="1" library="" >
+            <parameter >p_oTimerMOH</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+          </results>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=864 y=64 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="ProcOnCSROutdialParty" start="1" event="ProcOnCSROutdialParty" returns="i4" >
+      <parameters >
+        <parameter name="p_oMS" type="object" pass="byref"/>
+        <parameter name="p_oCallLeg" type="object" pass="byref"/>
+        <parameter name="p_oACD" type="object"/>
+        <parameter name="p_strContact" type="string"/>
+        <parameter name="p_oCallLegA" type="object" pass="byref"/>
+        <parameter name="p_oAPI" type="object" pass="byref"/>
+        <parameter name="p_oSUB" type="object" pass="byref"/>
+        <parameter name="p_oRATE" type="object" pass="byref"/>
+        <parameter name="p_oArrayCallLegs" type="object" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_lStartTime" type="i8" >0</var>
+        <var name="f_lAnswerTime" type="i8" >0</var>
+        <var name="f_strSIPStatus" type="string" ></var>
+        <var name="f_strCallingNumber" type="string" ></var>
+        <var name="f_nReturnCode" type="i4" >-50</var>
+        <var name="f_nSUCCESS" type="i4" >0</var>
+        <var name="f_nFAILURE" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=34 y=51 ?>
+          <!--"OutdialPartyToConference"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;OutdialPartyToConference&quot;" return="f_nReturnCode" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_oMS</parameter>
+            <parameter >f_lStartTime</parameter>
+            <parameter >f_lAnswerTime</parameter>
+            <parameter >f_strSIPStatus</parameter>
+            <parameter >f_strCallingNumber</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="SUCCESS" link="2" stubbed="0" >f_nReturnCode == f_nSUCCESS</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_strCallingNumber = Session.p_oCallLegA.strCallingNumber;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.p_oCallLeg.lTimeAnswered = Session.f_lAnswerTime;
+Session.p_oCallLeg.lTimeStart = Session.f_lStartTime;
+Session.p_oCallLeg.strSIPStatus = Session.f_strSIPStatus;
+
+Session.p_oCallLeg.strCSROutdialFlag = "T";
+
+if(Session.p_oCallLeg.strBillableFlag == "F") {
+	Session.p_oAPI.strOutdialOperatorFlag = "T";
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=228 y=287 ?>
+          <!--MsgCSREndAssRspnse
+Success-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;MsgCSROutdialBLegResponse&quot;" return="" external-function="1" library="lib_soap.xml" >
+            <parameter >p_oACD</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oACD.nReturnReasonCode = 0;
+Session.p_oACD.strReturnMsg = "";]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=283 y=49 ?>
+          <!--"MsgCSROutdialBLegResponse"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;MsgCSROutdialBLegResponse&quot;" return="" external-function="1" library="lib_soap.xml" >
+            <parameter >p_oACD</parameter>
+          </function>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[switch (Session.f_nReturnCode)
+{
+	case 1:
+		Session.p_oACD.nReturnReasonCode = 408;  //no answer
+		Session.p_oACD.strReturnMsg = "There is no answer";
+		break;
+	case 2:
+		Session.p_oACD.nReturnReasonCode = 486;  //busy
+		Session.p_oACD.strReturnMsg = "Phone is busy";
+		break;
+	default:
+		Session.p_oACD.nReturnReasonCode = -999;
+		Session.p_oACD.strReturnMsg = "Failure to outdial party";
+		break;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=844 y=268 ?>
+          <!--f_nReturnCode-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nReturnCode"/>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=580 y=356 ?>
+          <!--f_nSUCCESS-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nSUCCESS"/>
+        </action>
+        <action id="6" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=726 y=30 ?>
+          <!--"psAPIProcCallCompletion"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPIProcCallCompletion&quot;" return="" external-function="1" library="lib_APISce.xml" >
+            <parameter >p_oAPI</parameter>
+            <parameter >p_oSUB</parameter>
+            <parameter >p_oCallLegA</parameter>
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_oRATE</parameter>
+            <parameter >p_oACD</parameter>
+            <parameter >p_oArrayCallLegs</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oArrayCallLegs[0] = Session.p_oCallLeg;]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Pactolus.Branch.1" ><?xtml-editor x=498 y=70 ?>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="g_bGotCSRCancelOutdial" link="4" stubbed="0" >g_bGotCSRCancelOutdial == true</result>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="ProcOnCSRCancelOutdial" start="1" event="ProcOnCSRCancelOutdial" returns="i4" >
+      <parameters >
+        <parameter name="p_oCallLeg" type="object" pass="byref"/>
+        <parameter name="p_oMS" type="object"/>
+        <parameter name="p_oACDObject" type="object"/>
+        <parameter name="p_strContact" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >-50</var>
+        <var name="f_nSUCCESS" type="i4" >0</var>
+        <var name="f_nFAILURE" type="i4" >-1</var>
+        <var name="f_strCSeq" type="string" ></var>
+        <var name="f_bSendMoreCancel" type="boolean" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=81 y=205 ?>
+          <!--dialing out-->
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+            <result name="currently dialing out == true" link="9" stubbed="0" >p_oCallLeg.bCurrentlyDialing == true</result>
+            <result name="currently in conference == true" link="8" stubbed="0" >p_oMS.bCurrentlyInConf == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_strCSeq = Session.p_oCallLeg.strCSeq;
+Server.logInfo("CSEQ BEFORE CANCEL: " + Session.f_strCSeq);]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=326 y=62 ?>
+          <!--Cancel PartyB-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;CancelParty&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="SUCCESS" link="4" stubbed="1" >f_nReturnCode == f_nSUCCESS</result>
+          </results>
+        </action>
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=560 y=383 ?>
+          <!--Hang Up Party-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpParty&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="SUCCESS" link="4" stubbed="0" >f_nReturnCode == f_nSUCCESS</result>
+          </results>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=798 y=474 ?>
+          <!--"MsgCSRCancelOutdialBLeg"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;MsgCSRCancelOutdialBLeg&quot;" return="" external-function="1" library="lib_soap.xml" >
+            <parameter >p_oACDObject</parameter>
+          </function>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oACDObject.nReturnReasonCode = 0;
+Session.p_oACDObject.strReturnMsg = "CSR outdial B leg canceled";]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=781 y=368 ?>
+          <!--"MsgCSRCancelOutdialBLeg"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;MsgCSRCancelOutdialBLeg&quot;" return="" external-function="1" library="lib_soap.xml" >
+            <parameter >p_oACDObject</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oACDObject.nReturnReasonCode = -999;
+Session.p_oACDObject.strReturnMsg = "Fail to cancel CSR outdial B leg";]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=999 y=362 ?>
+          <!--f_nFAILURE-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nFAILURE"/>
+        </action>
+        <action id="7" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1025 y=461 ?>
+          <!--f_nSUCCESS-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nSUCCESS"/>
+        </action>
+        <action id="8" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=340 y=387 ?>
+          <!--"RemoveMemberFromConference"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+          </results>
+        </action>
+        <action id="9" plug-in="Pactolus.SipCancel.1" ><?xtml-editor x=324 y=174 ?>
+          <!--B Leg-->
+          <sip-bye xmlns="urn:www.pactolus.com:xtml:sip" add-record-route="0" add-via="1" handle-responses="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >p_oCallLeg.strCallId</call-id>
+            <contact >p_strContact</contact>
+            <cseq >f_strCSeq</cseq>
+            <from >p_oCallLeg.strFrom</from>
+            <record-route >p_oCallLeg.strRecordRoute</record-route>
+            <request-uri >p_oCallLeg.strRequestUri</request-uri>
+            <route >p_oCallLeg.strRoute</route>
+            <to >p_oCallLeg.strTo</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="Success" link="10" stubbed="0"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[//work around Cisco2, it added the tag to the To field in the non final response
+Session.p_oCallLeg.strTo = js_strip_tag(Session.p_oCallLeg.strTo);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.p_oCallLeg.bConnected = false;
+Session.p_oCallLeg.bCurrentlyDialing = false;
+if (Result.id != 2)
+{
+	Server.logError("CANCEL PARTY B FAILS, EXIT ON: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Pactolus.Branch.1" ><?xtml-editor x=600 y=175 ?>
+          <!--send more cancel?-->
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="f_bSendMoreCancel" link="9" stubbed="1" >f_bSendMoreCancel == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var myCSeq = new SipCSeq(Session.f_strCSeq);
+if (myCSeq.value > 1100)
+{
+	myCSeq.value--;
+	Session.f_strCSeq = myCSeq.encode();
+	Session.f_bSendMoreCancel = true;
+	Server.logInfo("MORE CANCEL TO SEND, CSEQ: " + Session.f_strCSeq);
+}
+else
+{
+	//don't want to try to send another CANCEL
+	Session.f_bSendMoreCancel = false;
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="ProcOnCSRHangupBLeg" start="6" event="ProcOnCSRHangupBLeg" returns="i4" >
+      <parameters >
+        <parameter name="p_oCallLeg" type="object" pass="byref"/>
+        <parameter name="p_oMS" type="object"/>
+        <parameter name="p_oACDObject" type="object"/>
+        <parameter name="p_strContact" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >-50</var>
+        <var name="f_nFAILURE" type="i4" >-1</var>
+        <var name="f_nSUCCESS" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="6" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=82 y=297 ?>
+          <!--"RemoveMemberFromConference"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;RemoveMemberFromConference&quot;" return="" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >p_oMS</parameter>
+          </function>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+          </results>
+        </action>
+        <action id="1" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=322 y=290 ?>
+          <!--Hang Up Party-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;HangUpParty&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="SUCCESS" link="2" stubbed="0" >f_nReturnCode == f_nSUCCESS</result>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=578 y=414 ?>
+          <!--"MsgCSRHangupBLegResponse"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;MsgCSRHangupBLegResponse&quot;" return="" external-function="1" library="lib_soap.xml" >
+            <parameter >p_oACDObject</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oACDObject.nReturnReasonCode = 0;
+Session.p_oACDObject.strReturnMsg = "CSR outdial B leg hungup";]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=563 y=202 ?>
+          <!--"MsgCSRHangupBLegResponse"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;MsgCSRHangupBLegResponse&quot;" return="" external-function="1" library="lib_soap.xml" >
+            <parameter >p_oACDObject</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oACDObject.nReturnReasonCode = -999;
+Session.p_oACDObject.strReturnMsg = "Fail to hangup CSR outdial B leg";]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=830 y=205 ?>
+          <!--f_nFAILURE-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nFAILURE"/>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=854 y=410 ?>
+          <!--f_nSUCCESS-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nSUCCESS"/>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>]]></script>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value="../Libs"/>
+    <property key="library-modules" value="lib_3WayCalling.xml;lib_acd.xml;lib_APISce.xml;lib_callcontrol.xml;lib_mediaserver.xml;lib_moh.xml;lib_soap.xml;lib_speeddial.xml;lib_utils.xml;javascript_utils.jsh"/>
+    <property key="library-path" value="../Libs"/>
+  </properties>
+  <application-version >
+    <revision >$Id: lib_acd.xml,v 1.97 2007/02/02 13:33:05 sbhatt Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

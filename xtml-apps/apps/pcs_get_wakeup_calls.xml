@@ -1,0 +1,146 @@
+<?xml version="1.0"?>
+<xtml version="1.0" >
+  <version sce-version="422a6" prev-sce-version="422a6" last-mod-time="Monday, January 24, 2005 17:31:16"/>
+  <global-handlers >
+    <handler event="Standard.OnSessionStart.1" function="OnSessionStart" public="0" always-on="0"/>
+    <handler event="Standard.OnSessionEnd.1" function="OnSessionEnd" public="0" always-on="0"/>
+  </global-handlers>
+  <global-vars >
+    <var name="g_iReturnValue" type="i4" >0</var>
+  </global-vars>
+  <shared-vars >
+    <var name="s_iTimeout" type="i4" >20</var>
+    <var name="s_strDBName" type="string" ></var>
+    <var name="s_strAppSessionID" type="string" ></var>
+  </shared-vars>
+  <functions >
+    <function name="OnSessionStart" start="1" event="SessionStart" returns="void" >
+      <parameters >
+        <parameter name="strSessionId" type="string" pass="byref"/>
+        <parameter name="nIteration" type="i4" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="oWakeUpCalls" type="object" ></var>
+        <var name="iAPIReturnCode" type="i4" >0</var>
+        <var name="iIdx" type="i4" >0</var>
+        <var name="strMsgDest" type="string" ></var>
+        <var name="strDestSession" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=67 y=155 ?>
+          <!--getCurrentWakeUpCalls-->
+          <java class="&quot;com.pactolus.broadband.psAPISceBroadbandWakeUpCall&quot;" method="&quot;getCurrentWakeUpCalls&quot;" timeout="s_iTimeout" return="g_iReturnValue" method-return-var="iAPIReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >s_strDBName</parameter>
+            <parameter type="in" var-type="string" >s_strAppSessionID</parameter>
+            <parameter type="inout" var-type="i8" >oWakeUpCalls[0].lVoipSchedCallID</parameter>
+            <parameter type="inout" var-type="i8" >oWakeUpCalls[0].lAccessLineID</parameter>
+            <parameter type="inout" var-type="string" >oWakeUpCalls[0].strPrompt</parameter>
+            <parameter type="inout" var-type="string" >oWakeUpCalls[0].strTimeSched</parameter>
+            <parameter type="inout" var-type="string" >oWakeUpCalls[0].strDestPhone</parameter>
+            <parameter type="inout" var-type="i8" >oWakeUpCalls[1].lVoipSchedCallID</parameter>
+            <parameter type="inout" var-type="i8" >oWakeUpCalls[1].lAccessLineID</parameter>
+            <parameter type="inout" var-type="string" >oWakeUpCalls[1].strPrompt</parameter>
+            <parameter type="inout" var-type="string" >oWakeUpCalls[1].strTimeSched</parameter>
+            <parameter type="inout" var-type="string" >oWakeUpCalls[1].strDestPhone</parameter>
+            <parameter type="inout" var-type="i8" >oWakeUpCalls[2].lVoipSchedCallID</parameter>
+            <parameter type="inout" var-type="i8" >oWakeUpCalls[2].lAccessLineID</parameter>
+            <parameter type="inout" var-type="string" >oWakeUpCalls[2].strPrompt</parameter>
+            <parameter type="inout" var-type="string" >oWakeUpCalls[2].strTimeSched</parameter>
+            <parameter type="inout" var-type="string" >oWakeUpCalls[2].strDestPhone</parameter>
+            <parameter type="inout" var-type="i8" >oWakeUpCalls[3].lVoipSchedCallID</parameter>
+            <parameter type="inout" var-type="i8" >oWakeUpCalls[3].lAccessLineID</parameter>
+            <parameter type="inout" var-type="string" >oWakeUpCalls[3].strPrompt</parameter>
+            <parameter type="inout" var-type="string" >oWakeUpCalls[3].strTimeSched</parameter>
+            <parameter type="inout" var-type="string" >oWakeUpCalls[3].strDestPhone</parameter>
+            <parameter type="inout" var-type="i8" >oWakeUpCalls[4].lVoipSchedCallID</parameter>
+            <parameter type="inout" var-type="i8" >oWakeUpCalls[4].lAccessLineID</parameter>
+            <parameter type="inout" var-type="string" >oWakeUpCalls[4].strPrompt</parameter>
+            <parameter type="inout" var-type="string" >oWakeUpCalls[4].strTimeSched</parameter>
+            <parameter type="inout" var-type="string" >oWakeUpCalls[4].strDestPhone</parameter>
+          </java>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="4" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="no wake up calls" link="3" stubbed="0" >iAPIReturnCode == -6
+AND 'Result'  == 'Success'
+</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.s_strAppSessionID = Session._sessionId;
+Session.s_strDBName = "pactolusdb";
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[/* determine how many wake up calls were returned */
+var calls = 0;
+for( var i = 0; i < Session.oWakeUpCalls.length; i++, calls++ ) {
+	if( 0 == Session.oWakeUpCalls.lVoipSchedCallID ) {
+		break ;
+	}
+}
+/* reset the length */
+Session.oWakeUpCalls.length = calls ;
+]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.EndSession.1" ><?xtml-editor x=373 y=377 ?></action>
+        <action id="4" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=342 y=97 ?>
+          <SOAP destination-ip="" transaction="" message-name="&quot;WakeUp&quot;" destination-port="" destination-type="1" destination-session="" waiting-session-selected="strDestSession" >
+            <parameter tag="" value="oWakeUpCalls[iIdx].lVoipSchedCallID"/>
+            <parameter tag="" value="oWakeUpCalls[iIdx].lAccessLineID"/>
+            <parameter tag="" value="oWakeUpCalls[iIdx].strPrompt"/>
+            <parameter tag="" value="oWakeUpCalls[iIdx].strTimeSched"/>
+            <parameter tag="" value="oWakeUpCalls[iIdx].strDestPhone"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[/* start at the end of the list and work backwards */
+Session.iIdx = Session.oWakeUpCalls.length - 1;]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if ( 2 == Result.id ) {
+	Server.logInfo("[" + Session.iIdx + "]" + " SENT WAKE UP CALL DETAILS TO: " + Session.strDestSession);
+	Server.logInfo("VoipSchedCallID <" + Session.oWakeUpCalls[Session.iIdx].lVoipSchedCallID + ">");
+	Server.logInfo("AccessLineID < " + Session.oWakeUpCalls[Session.iIdx].lAccessLineID + ">");
+	Server.logInfo("Prompt <" + Session.oWakeUpCalls[Session.iIdx].strPrompt + ">");
+	Server.logInfo("TimeSched <" + Session.oWakeUpCalls[Session.iIdx].strTimeSched + ">");
+	Server.logInfo("DestPhone <" + Session.oWakeUpCalls[Session.iIdx].strDestPhone + ">");
+} ]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.Branch.1" ><?xtml-editor x=583 y=98 ?>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="iIdx &gt; 0" link="4" stubbed="1" >iIdx &gt; 0
+</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.iIdx--;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnSessionEnd" start="1" event="SessionEnd" returns="void" >
+      <parameters >
+        <parameter name="nSessionEndReason" type="i2" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=117 y=120 ?>
+          <return value=""/>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value=""/>
+    <property key="library-modules" value=""/>
+    <property key="library-path" value=""/>
+  </properties>
+  <application-version >
+    <revision >$Id: pcs_get_wakeup_calls.xml,v 1.2 2006/04/18 17:00:52 kfitzgerald Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

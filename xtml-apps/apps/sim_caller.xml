@@ -1,0 +1,302 @@
+<?xml version="1.0"?>
+<xtml version="1.0"><events><event name="LoginCSRIVRResponse" display="LoginCSRIVRResponse"><parameter name="strACDControllerIP" type="string"/><parameter name="intACDControllerPort" type="i4"/><parameter name="strTransactionId" type="string"/><parameter name="intReturnCode" type="i4"/><parameter name="strReturnMsg" type="string"/></event><event name="RequestCSRResponse" display="RequestCSRResponse"><parameter name="strACDControllerIP" type="string"/><parameter name="intACDControllerPort" type="i4"/><parameter name="strTransactionId" type="string"/><parameter name="intReturnCode" type="i4"/><parameter name="strReturnMsg" type="string"/></event><event name="CSRBeginAssignment" display="CSRBeginAssignment"><parameter name="strACDControllerIP" type="string"/><parameter name="intACDControllerPort" type="i4"/><parameter name="strTransactionId" type="string"/><parameter name="lAssignmentId" type="i8"/><parameter name="lRequestId" type="i8"/><parameter name="lACDUserId" type="i8"/></event><event name="CSREndAssignment" display="CSREndAssignment"><parameter name="strACDControllerID" type="string"/><parameter name="intACDControllerPort" type="i4"/><parameter name="strTransactionId" type="string"/><parameter name="strAssignmentId" type="string"/><parameter name="lRequestId" type="i8"/><parameter name="lACDUserId" type="i8"/><parameter name="strAssignmentAction" type="string"/><parameter name="strPasscode" type="string"/></event></events><global-handlers><handler event="Pactolus.EveSipInvite.1" function="OnInvite" public="1" always-on="0"/><handler event="Pactolus.EveSipBye.1" function="OnBye" public="0" always-on="0"/><handler event="Standard.OnServiceLoad.1" function="OnServiceLoad" public="0" always-on="0"/><handler event="Standard.OnSessionStart.1" function="OnSessionStart" public="0" always-on="0"/><handler event="Standard.OnSessionEnd.1" function="OnSessionEnd" public="0" always-on="0"/><handler event="Pactolus.EveSipOptions.1" function="OnOptions" public="0" always-on="0"/><handler event="RequestCSRResponse" function="OnRequestCSRResponse" public="0" always-on="0"/><handler event="CSRBeginAssignment" function="OnCSRBeginAssignment" public="0" always-on="0"/><handler event="CSREndAssignment" function="OnCSREndAssignment" public="0" always-on="0"/></global-handlers><global-vars><var name="g_strACDControllerIP" type="string">10.10.100.159</var><var name="g_intACDControllerPort" type="i4">7905</var><var name="g_oMS" type="object"></var><var name="g_oCallLegA" type="object"></var><var name="g_strAccessNumber" type="string"></var><var name="g_strSessionId" type="string"></var><var name="g_strContact" type="string"></var><var name="g_strLanguage" type="string">eng</var><var name="g_strCollectedDigits" type="string"></var><var name="g_strTransactionId" type="string"></var><var name="g_intSoapAgentPort" type="i4">7301</var><var name="g_strEventReceived" type="string"></var><var name="g_strRequestId" type="string">3</var><var name="g_strAssignmentId" type="string">1</var><var name="g_strNullString" type="string"></var><var name="g_lServiceProviderID" type="i8">1</var><var name="g_lCSRRequestServiceId" type="i8">0</var><var name="g_lCSRRequestOfferingId" type="i8">0</var><var name="g_intTerminationReason" type="i4">0</var><var name="g_strCSRAssignmentTimeZone" type="string"></var><var name="g_strConfEventId" type="string"></var><var name="g_lSubscriberId" type="i8">0</var><var name="g_lTempLong" type="i8">0</var><var name="g_lCSRAssignmentEndTime" type="i8">0</var><var name="g_lCSRAssignmentStartTime" type="i8">0</var><var name="g_intCSRAssignmentLanguageId" type="i4">0</var><var name="g_intCSRAssignmentSkillId" type="i4">0</var><var name="g_strCSRAssignmentType" type="string"></var><var name="g_lCSRAssignmentUserId" type="i8">0</var><var name="g_lCSRAssignmentId" type="i8">0</var><var name="g_strSessionID" type="string"></var><var name="g_bCSRAssignmentFlag" type="boolean">0</var><var name="g_lCSRRequestId" type="i8">0</var><var name="g_strDBNAME" type="string">pactolusdb</var><var name="g_intCSRAssignmentGroupId" type="i4">0</var><var name="g_intAccessNumberId" type="i4">1</var><var name="g_intCSRRouteReasonCode" type="i4">1</var><var name="g_lCSRRequestSkillId" type="i8">4</var><var name="g_intCSRRequestGroupId" type="i4">1</var></global-vars><shared-vars><var name="s_intTIMEOUT" type="i4">45</var><var name="s_intSUCCESS" type="i4">0</var><var name="s_intFAILURE" type="i4">-1</var><var name="s_strLocalHost" type="string"></var><var name="s_strMSRetryFlag" type="string"></var><var name="s_intCALLERHUNGUP" type="i4">-2</var><var name="s_intPacketizationPeriod" type="i4">0</var><var name="s_strMediaServerType" type="string"></var><var name="s_strApplicationName" type="string">conference.xml</var></shared-vars><functions><function name="OnInvite" start="1" returns="void"><parameters><parameter name="strAccept" type="string" pass="byref"/><parameter name="strAcceptEncoding" type="string" pass="byref"/><parameter name="strAcceptLanguage" type="string" pass="byref"/><parameter name="strAuthorization" type="string" pass="byref"/><parameter name="strCallId" type="string" pass="byref"/><parameter name="strContact" type="string" pass="byref"/><parameter name="strContent" type="string" pass="byref"/><parameter name="strContentDisposition" type="string" pass="byref"/><parameter name="strContentType" type="string" pass="byref"/><parameter name="strCSeq" type="string" pass="byref"/><parameter name="strDate" type="string" pass="byref"/><parameter name="strEncryption" type="string" pass="byref"/><parameter name="strExpires" type="string" pass="byref"/><parameter name="strFrom" type="string" pass="byref"/><parameter name="nMaxForwards" type="i2" pass="byref"/><parameter name="strProxyAuthorization" type="string" pass="byref"/><parameter name="strProxyRequire" type="string" pass="byref"/><parameter name="strRecordRoute" type="string" pass="byref"/><parameter name="strRequestURI" type="string" pass="byref"/><parameter name="strRequire" type="string" pass="byref"/><parameter name="strResponseKey" type="string" pass="byref"/><parameter name="strRoute" type="string" pass="byref"/><parameter name="strSessionExpires" type="string" pass="byref"/><parameter name="strSubject" type="string" pass="byref"/><parameter name="strSupported" type="string" pass="byref"/><parameter name="strTimestamp" type="string" pass="byref"/><parameter name="strTo" type="string" pass="byref"/><parameter name="strVia" type="string" pass="byref"/></parameters><local-vars><var name="f_intReturnCode" type="i4">-1</var><var name="f_strACDControllerIP" type="string"></var><var name="f_intACDControllerPort" type="i4">0</var><var name="f_strTransactionID" type="string"></var><var name="f_strReturnMsg" type="string"></var></local-vars><actions><action id="1" plug-in="Standard.FunctionCall.1"><?xtml-editor x=156 y=135 ?><!--Direct caller to MS--><function name="&quot;DirectCallerToMS&quot;" return="f_intReturnCode"><parameter>g_oCallLegA</parameter><parameter>g_oMS</parameter></function><results><result name="Default" link="2" stubbed="0"/></results><scripts><script language="javascript" timing="first"><![CDATA[Session.g_strSessionID = Session._sessionId;
+Session.g_strContact = "sip:" + Server.ipAddress;
+if( Server.sipPort != 5060 )
+{
+ Session.g_strContact += ":" + Server.sipPort;
+}
+// Phone A object
+Session.g_oCallLegA.bReverseFromTo = true;
+Session.g_oCallLegA.strFrom = Session.strFrom;
+Session.g_oCallLegA.strTo = Session.strTo;
+Session.g_oCallLegA.strCallId = Session.strCallId;
+Session.g_oCallLegA.strContact = Session.strContact;
+Session.g_oCallLegA.strContent = Session.strContent;
+Session.g_oCallLegA.strOriginalContent = Session.strContent;
+Session.g_oCallLegA.strContentType = Session.strContentType;
+Session.g_oCallLegA.strCSeq = Session.strCSeq;
+Session.g_oCallLegA.strRecordRoute = Session.strRecordRoute;
+Session.g_oCallLegA.strRoute = Session.strRoute;
+Session.g_oCallLegA.strVia = Session.strVia;
+Session.g_oCallLegA.intSessionTimer = Clib.strtod(Session.strSessionExpires);
+Session.g_oCallLegA.intTearDownTime = 0;
+
+var contact = new SipNameAddr(Session.strContact);
+Session.g_oCallLegA.strRequestURI = contact.url.toString();
+
+var to = new SipTo(Session.strTo);
+Session.g_strAccessNumber = to.url.user;
+
+//mediaserver object
+Session.g_oMS.strEndPoint = "";
+Session.g_oMS.strConnectionId = "";
+Session.g_oMS.strCallId = "";
+Session.g_oMS.strContent = "";
+Session.g_oMS.strConferenceId = "";	//use through out
+Session.g_oMS.strType = Session.s_strMediaServerType;
+Session.g_oMS.bMuteFlag = false;
+Session.g_oMS.bDeafFlag = false;
+Session.g_oMS.bCurrentlyInConf = false;
+Session.g_oMS.bCurrentlyConnected = false;
+Session.g_oMS.intPacketizationPeriod = Session.s_intPacketizationPeriod;
+
+if (Session.s_strMSRetryFlag == "T")
+{
+	Session.g_oMS.bRetry = true;
+}
+else
+{
+	Session.g_oMS.bRetry = false;
+}]]></script></scripts></action><action id="2" plug-in="Pactolus.Branch.1"><?xtml-editor x=394 y=132 ?><!--failure?--><results><result name="Default" link="8" stubbed="0"/><result name="failure" link="4" stubbed="0">f_intReturnCode == s_intFAILURE</result><result name="caller hung up" link="3" stubbed="0">f_intReturnCode == s_intCALLERHUNGUP</result></results></action><action id="3" plug-in="Standard.EndSession.1"><?xtml-editor x=691 y=206 ?></action><action id="4" plug-in="Pactolus.SipResponse.1"><?xtml-editor x=692 y=79 ?><!--503 Service Unavailable--><sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0"><call-id>strCallId</call-id><cseq>strCSeq</cseq><from>strFrom</from><status>"SIP/2.0 503 Service Unavailable"</status><to>strTo</to><via>strVia</via></sip-response><results><result name="Default" link="3" stubbed="1"/><result name="Success"/><result name="Error"/><result name="Timeout"/></results></action><action id="5" plug-in="Pactolus.MGCPPlay.1"><?xtml-editor x=164 y=661 ?><!--Collect digits--><play connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_intTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(x|*|#|x.T|x.#)&quot;" language="g_strLanguage" digits="g_strCollectedDigits" retry-count="" clear-digits="1" terminating-digit=""><audio type="index">310</audio><audio type="index">1</audio><audio type="index">311</audio><audio type="index">312</audio><audio type="index">313</audio><audio type="index">314</audio><audio type="index">315</audio><audio type="index">316</audio><audio type="index">317</audio><audio type="index">318</audio><audio type="index">319</audio></play><results><result name="Default" link="18" stubbed="1"/><result name="Success" link="7" stubbed="0"/><result name="Error"/><result name="Timeout"/></results></action><action id="7" plug-in="Pactolus.Branch.1"><?xtml-editor x=384 y=734 ?><!--press number?--><results><result name="Default" link="18" stubbed="0"/><result name="0" link="17" stubbed="0">g_strCollectedDigits match "0"</result><result name="1" link="19" stubbed="0">g_strCollectedDigits match "1"</result><result name="2" link="21" stubbed="0">g_strCollectedDigits match "2"</result><result name="3" link="22" stubbed="0">g_strCollectedDigits match "3"</result><result name="4">g_strCollectedDigits match "4"</result><result name="5">g_strCollectedDigits match "5"</result><result name="6">g_strCollectedDigits match "6"</result><result name="7">g_strCollectedDigits match "7"</result><result name="8">g_strCollectedDigits match "8"</result><result name="9">g_strCollectedDigits match "9"</result></results></action><action id="8" plug-in="Pactolus.MGCPPlay.1"><?xtml-editor x=155 y=319 ?><!--Welcome, please hold--><play connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_intTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit=""><audio type="index">4010</audio><audio type="index">898</audio></play><results><result name="Default" link="9" stubbed="0"/><result name="Success"/><result name="Error"/><result name="Timeout"/></results></action><action id="9" plug-in="Standard.FunctionCall.1"><?xtml-editor x=405 y=317 ?><!--put caller on hold--><function name="&quot;PutPartyOnHold&quot;" return="f_intReturnCode"><parameter>g_oCallLegA</parameter></function><results><result name="Default" link="10" stubbed="0"/></results></action><action id="10" plug-in="Pactolus.Branch.1"><?xtml-editor x=646 y=312 ?><!--success?--><results><result name="Default" link="14" stubbed="0"/><result name="success?" link="11" stubbed="0">f_intReturnCode == s_intSUCCESS</result></results></action><action id="11" plug-in="Standard.FunctionCall.1"><?xtml-editor x=899 y=371 ?><!--Delete MS Connection--><function name="&quot;DeleteMSConnection&quot;" return=""><parameter>g_oMS</parameter></function><results><result name="Default" link="13" stubbed="0"/></results></action><action id="12" plug-in="Pactolus.Branch.1"><?xtml-editor x=397 y=537 ?><!--success?--><results><result name="Default" link="14" stubbed="1"/><result name="success?" link="15" stubbed="0">f_intReturnCode == s_intSUCCESS</result></results></action><action id="13" plug-in="Standard.FunctionCall.1"><?xtml-editor x=165 y=538 ?><!--CreateAConference--><function name="&quot;CreateConference&quot;" return="f_intReturnCode"><parameter>g_oMS</parameter></function><results><result name="Default" link="12" stubbed="0"/></results></action><action id="14" plug-in="Standard.FunctionCall.1"><?xtml-editor x=893 y=285 ?><!--HangUpPartyA--><function name="&quot;HangUpParty&quot;" return="f_intReturnCode"><parameter>g_oCallLegA</parameter></function><results><result name="Default" link="3" stubbed="1"/></results></action><action id="15" plug-in="Standard.FunctionCall.1"><?xtml-editor x=650 y=533 ?><!--AddMemberToConference--><function name="&quot;AddMemberToConference&quot;" return="f_intReturnCode"><parameter>g_oMS</parameter><parameter>g_oCallLegA</parameter></function><results><result name="Default" link="16" stubbed="0"/></results></action><action id="16" plug-in="Pactolus.Branch.1"><?xtml-editor x=888 y=529 ?><!--success?--><results><result name="Default" link="5" stubbed="0"/><result name="FAILURE" link="14" stubbed="1">f_intReturnCode == s_intFAILURE</result><result name="CALLERHUNGUP" link="3" stubbed="1">f_intReturnCode == s_intCALLERHUNGUP</result></results></action><action id="17" plug-in="Pactolus.SOAPMessage.1"><?xtml-editor x=665 y=780 ?><!--s_strMSG_BEGIN_REQUEST_CSR--><SOAP destination-ip="g_strACDControllerIP" transaction="g_strTransactionId" message-name="&quot;BeginRequestCSR&quot;" destination-port="g_intACDControllerPort" destination-type="4" destination-session="" waiting-session-selected=""><parameter tag="&quot;RequestID&quot;" value="g_strRequestId"/><parameter tag="&quot;RequestType&quot;" value="1"/><parameter tag="&quot;RequestTypeName&quot;" value="&quot;Conf Assistance&quot;"/><parameter tag="&quot;LanguageId&quot;" value="1001"/><parameter tag="&quot;Language&quot;" value="g_strLanguage"/><parameter tag="&quot;OfferingId&quot;" value="4"/><parameter tag="&quot;OfferingName&quot;" value="&quot;Pactolus Conference Offering&quot;"/><parameter tag="&quot;ServiceId&quot;" value="4"/><parameter tag="&quot;ServiceName&quot;" value="&quot;Pactolus Conference Service&quot;"/><parameter tag="&quot;SkillId&quot;" value="2"/><parameter tag="&quot;SkillName&quot;" value="&quot;Conferencing&quot;"/><parameter tag="&quot;AccessNumber&quot;" value="g_strAccessNumber"/><parameter tag="&quot;ConferenceId&quot;" value="0"/><parameter tag="&quot;ServiceProviderId&quot;" value="1"/><parameter tag="&quot;ServiceProviderName&quot;" value="&quot;Pactolus Service Provider&quot;"/><parameter tag="&quot;ConferenceEndPoint&quot;" value="g_oMS.strConferenceId"/><parameter tag="&quot;SoapAgentPort&quot;" value="g_intSoapAgentPort"/><parameter tag="&quot;confModPasscode&quot;" value="g_strNullString"/></SOAP><results><result name="Default" link="18" stubbed="0"/><result name="Success"/><result name="Error"/></results><scripts><script language="javascript" timing="first"><![CDATA[var strTransId = new String(Server.getUTCTime());
+Session.g_strTransactionId = strTransId;]]></script><script language="javascript" timing="last"><![CDATA[if (Result.id != 2)
+{
+	Server.logError("FAIL TO SEND BEGINREQUESTCSR.");
+}]]></script></scripts></action><action id="18" plug-in="Standard.FunctionReturn.1"><?xtml-editor x=678 y=695 ?><return value=""/></action><action id="19" plug-in="Pactolus.SOAPMessage.1"><?xtml-editor x=691 y=950 ?><!--s_strMSG_LOGIN_REQUEST--><SOAP destination-ip="g_strACDControllerIP" transaction="g_strTransactionId" message-name="&quot;LoginCSRIVR&quot;" destination-port="g_intACDControllerPort" destination-type="4" destination-session="" waiting-session-selected=""><parameter tag="&quot;ACDUserId&quot;" value="1"/><parameter tag="&quot;SoapPort&quot;" value="g_intSoapAgentPort"/></SOAP><results><result name="Default" link="5" stubbed="1"/><result name="Success"/><result name="Error"/></results><scripts><script language="javascript" timing="first"><![CDATA[var strTransId = new String(Server.getUTCTime());
+Session.g_strTransactionId = strTransId;]]></script><script language="javascript" timing="last"><![CDATA[if (Result.id != 2)
+{
+	Server.logError("FAIL TO SEND LOGINCSRIVR.");
+}]]></script></scripts></action><action id="21" plug-in="Pactolus.SOAPMessage.1"><?xtml-editor x=677 y=1108 ?><!--s_strMSG_LOGOUT_REQUEST--><SOAP destination-ip="g_strACDControllerIP" transaction="g_strTransactionId" message-name="&quot;LogoutCSRIVR&quot;" destination-port="g_intACDControllerPort" destination-type="4" destination-session="" waiting-session-selected=""><parameter tag="&quot;ACDUserId&quot;" value="1"/></SOAP><results><result name="Default" link="5" stubbed="1"/><result name="Success"/><result name="Error"/></results><scripts><script language="javascript" timing="first"><![CDATA[var strTransId = new String(Server.getUTCTime());
+Session.g_strTransactionId = strTransId;]]></script><script language="javascript" timing="last"><![CDATA[if (Result.id != 2)
+{
+	Server.logError("FAIL TO SEND LOGOUTCSRIVR.");
+}]]></script></scripts></action><action id="22" plug-in="Pactolus.SOAPMessage.1"><?xtml-editor x=679 y=1258 ?><!--s_strMSG_END_REQUEST_CSR--><SOAP destination-ip="g_strACDControllerIP" transaction="g_strTransactionId" message-name="&quot;EndRequestCSR&quot;" destination-port="g_intACDControllerPort" destination-type="4" destination-session="" waiting-session-selected=""><parameter tag="&quot;RequestId&quot;" value="g_strRequestId"/><parameter tag="&quot;AssignmentId&quot;" value="g_strAssignmentId"/></SOAP><results><result name="Default" link="5" stubbed="1"/><result name="Success"/><result name="Error"/></results><scripts><script language="javascript" timing="first"><![CDATA[var strTransId = new String(Server.getUTCTime());
+Session.g_strTransactionId = strTransId;]]></script><script language="javascript" timing="last"><![CDATA[if (Result.id != 2)
+{
+	Server.logError("FAIL TO SEND ENDREQUESTCSR.");
+}]]></script></scripts></action></actions></function><function name="OnServiceLoad" start="1" returns="void"><parameters><parameter name="strAppName" type="string" pass="byref"/><parameter name="nSessionCount" type="i2" pass="byref"/><parameter name="nMaxIterations" type="i2" pass="byref"/><parameter name="nServerId" type="i2" pass="byref"/></parameters><local-vars><var name="f_intReturnCode" type="i4">-1</var></local-vars><actions><action id="1" plug-in="Pactolus.UserFunction.1"><?xtml-editor x=109 y=141 ?><!--GET PSX IP from config--><user-function process="&quot;PACTOLUS_ps_c_adaptor&quot;" function="&quot;get_property&quot;" timeout="s_intTIMEOUT" return="f_intReturnCode" async="0"><parameter>"appserver-logical-ip"</parameter><parameter>s_strLocalHost</parameter><parameter>"packetization-period"</parameter><parameter>s_intPacketizationPeriod</parameter><parameter>"media-server-type"</parameter><parameter>s_strMediaServerType</parameter><parameter>"ms-connect-retry"</parameter><parameter>s_strMSRetryFlag</parameter></user-function><results><result name="Default" link="2" stubbed="0"/><result name="Success"/><result name="Error"/><result name="Timeout"/></results></action><action id="2" plug-in="Standard.FunctionReturn.1"><?xtml-editor x=376 y=138 ?><return value=""/><scripts><script language="javascript" timing="first"><![CDATA[if (Session.s_strLocalHost.length <= 0)
+{
+	Session.s_strLocalHost = Server.ipAddress;
+	Server.logInfo("WARNING:  NO SETTING FOR LOCAL HOST IP ADDRESS.  USE DEFAULT: " + Session.s_strLocalHost);
+}
+if (Session.s_intPacketizationPeriod <= 0)
+{
+	Session.s_intPacketizationPeriod = 20;
+	Server.logInfo("WARNING: NO SETTING FOR PACKETIZATION PERIOD.  USE DEFAULT: " + Session.s_intPacketizationPeriod);
+}]]></script></scripts></action></actions></function><function name="OnSessionEnd" start="4" returns="void"><parameters><parameter name="nSessionEndReason" type="i2" pass="byref"/></parameters><actions><action id="4" plug-in="Standard.FunctionReturn.1"><?xtml-editor x=70 y=71 ?><return value=""/></action></actions></function><function name="OnBye" start="1" returns="void"><parameters><parameter name="strAccept" type="string" pass="byref"/><parameter name="strAcceptEncoding" type="string" pass="byref"/><parameter name="strAcceptLanguage" type="string" pass="byref"/><parameter name="strAuthorization" type="string" pass="byref"/><parameter name="strCallId" type="string" pass="byref"/><parameter name="strCSeq" type="string" pass="byref"/><parameter name="strDate" type="string" pass="byref"/><parameter name="strEncryption" type="string" pass="byref"/><parameter name="strFrom" type="string" pass="byref"/><parameter name="nMaxForwards" type="i2" pass="byref"/><parameter name="strProxyAuthorization" type="string" pass="byref"/><parameter name="strProxyRequire" type="string" pass="byref"/><parameter name="strRecordRoute" type="string" pass="byref"/><parameter name="strRequestURI" type="string" pass="byref"/><parameter name="strRequire" type="string" pass="byref"/><parameter name="strResponseKey" type="string" pass="byref"/><parameter name="strRoute" type="string" pass="byref"/><parameter name="strSupported" type="string" pass="byref"/><parameter name="strTimestamp" type="string" pass="byref"/><parameter name="strTo" type="string" pass="byref"/><parameter name="strVia" type="string" pass="byref"/></parameters><actions><action id="1" plug-in="Pactolus.SipResponse.1"><?xtml-editor x=192 y=288 ?><sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0"><call-id>strCallId</call-id><cseq>strCSeq</cseq><from>strFrom</from><status>"SIP/2.0 200 OK"</status><to>strTo</to><via>strVia</via></sip-response><results><result name="Default" link="3" stubbed="0"/><result name="Success"/><result name="Error"/><result name="Timeout"/></results></action><action id="2" plug-in="Standard.EndSession.1"><?xtml-editor x=735 y=282 ?></action><action id="3" plug-in="Pactolus.SOAPMessage.1"><?xtml-editor x=457 y=285 ?><!--s_strMSG_END_REQUEST_CSR--><SOAP destination-ip="g_strACDControllerIP" transaction="g_strTransactionId" message-name="&quot;EndRequestCSR&quot;" destination-port="g_intACDControllerPort" destination-type="4" destination-session="" waiting-session-selected=""><parameter tag="&quot;RequestId&quot;" value="g_strRequestId"/><parameter tag="&quot;AssignmentId&quot;" value="g_strAssignmentId"/></SOAP><results><result name="Default" link="2" stubbed="0"/><result name="Success"/><result name="Error"/></results><scripts><script language="javascript" timing="first"><![CDATA[var strTransId = new String(Server.getUTCTime());
+Session.g_strTransactionId = strTransId;]]></script><script language="javascript" timing="last"><![CDATA[if (Result.id != 2)
+{
+	Server.logError("FAIL TO SEND ENDREQUESTCSR.");
+}]]></script></scripts></action></actions></function><function name="OnOptions" start="3" returns="void"><parameters><parameter name="strAccept" type="string" pass="byref"/><parameter name="strAcceptEncoding" type="string" pass="byref"/><parameter name="strAcceptLanguage" type="string" pass="byref"/><parameter name="strAuthorization" type="string" pass="byref"/><parameter name="strCallId" type="string" pass="byref"/><parameter name="strContact" type="string" pass="byref"/><parameter name="strContent" type="string" pass="byref"/><parameter name="strContentDisposition" type="string" pass="byref"/><parameter name="strContentType" type="string" pass="byref"/><parameter name="strCSeq" type="string" pass="byref"/><parameter name="strDate" type="string" pass="byref"/><parameter name="strEncryption" type="string" pass="byref"/><parameter name="strFrom" type="string" pass="byref"/><parameter name="nMaxForwards" type="i2" pass="byref"/><parameter name="strProxyAuthorization" type="string" pass="byref"/><parameter name="strProxyRequire" type="string" pass="byref"/><parameter name="strRecordRoute" type="string" pass="byref"/><parameter name="strRequestURI" type="string" pass="byref"/><parameter name="strRequire" type="string" pass="byref"/><parameter name="strResponseKey" type="string" pass="byref"/><parameter name="strRoute" type="string" pass="byref"/><parameter name="strSupported" type="string" pass="byref"/><parameter name="strTimestamp" type="string" pass="byref"/><parameter name="strTo" type="string" pass="byref"/><parameter name="strVia" type="string" pass="byref"/></parameters><actions><action id="3" plug-in="Pactolus.SipResponse.1"><?xtml-editor x=247 y=233 ?><!--200 OK--><sip-response remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0"><call-id>strCallId</call-id><cseq>strCSeq</cseq><from>strFrom</from><status>"SIP/2.0 200 OK"</status><to>strTo</to><via>strVia</via></sip-response><results><result name="Default" link="2" stubbed="0"/><result name="Success"/><result name="Error"/><result name="Timeout"/></results></action><action id="2" plug-in="Standard.FunctionReturn.1"><?xtml-editor x=480 y=237 ?><return value=""/></action></actions></function><function name="OnRequestCSRResponse" start="1" returns="void"><parameters><parameter name="strACDControllerIP" type="string" pass="byref"/><parameter name="intACDControllerPort" type="i4" pass="byref"/><parameter name="strTransactionId" type="string" pass="byref"/><parameter name="intReturnCode" type="i4" pass="byref"/><parameter name="strReturnMsg" type="string" pass="byref"/></parameters><actions><action id="1" plug-in="Pactolus.Branch.1"><?xtml-editor x=81 y=378 ?><!--returncode?--><results><result name="Default" link="2" stubbed="0"/><result name="1-REQUEST ASSIGNED" link="3" stubbed="0">intReturnCode == 1</result><result name="2-REQUEST QUEUED" link="4" stubbed="0">intReturnCode == 2</result><result name="3-REQUEST REJECTED" link="6" stubbed="0">intReturnCode == 3</result></results></action><action id="2" plug-in="Standard.FunctionReturn.1"><?xtml-editor x=494 y=409 ?><return value=""/><scripts><script language="javascript" timing="first"><![CDATA[Server.logInfo("GET REQUEST CSR RESPONSE: UNKNOWN");
+Server.logInfo("RESPONSE CODE: " + Session.intReturnCode);
+Server.logInfo("RESPONSE MSG: " + Session.strReturnMsg);]]></script></scripts></action><action id="3" plug-in="Standard.FunctionReturn.1"><?xtml-editor x=513 y=510 ?><return value=""/><scripts><script language="javascript" timing="first"><![CDATA[Server.logInfo("GET REQUEST CSR RESPONSE: REQUEST ASSIGNED");
+Server.logInfo("RESPONSE CODE: " + Session.intReturnCode);
+Server.logInfo("RESPONSE MSG: " + Session.strReturnMsg);]]></script></scripts></action><action id="4" plug-in="Standard.FunctionReturn.1"><?xtml-editor x=513 y=604 ?><return value=""/><scripts><script language="javascript" timing="first"><![CDATA[Server.logInfo("GET REQUEST CSR RESPONSE: QUEUED");
+Server.logInfo("RESPONSE CODE: " + Session.intReturnCode);
+Server.logInfo("RESPONSE MSG: " + Session.strReturnMsg);]]></script></scripts></action><action id="6" plug-in="Pactolus.Branch.1"><?xtml-editor x=312 y=732 ?><!--Log details--><results><result name="Default" link="7" stubbed="0"/></results><scripts><script language="javascript" timing="first"><![CDATA[Server.logInfo("GET REQUEST CSR RESPONSE: REJECTED");
+Server.logInfo("RESPONSE CODE: " + Session.intReturnCode);
+Server.logInfo("RESPONSE MSG: " + Session.strReturnMsg);]]></script></scripts></action><action id="7" plug-in="Standard.EndSession.1"><?xtml-editor x=563 y=739 ?></action></actions></function><function name="OnCSRBeginAssignment" start="2" returns="void"><parameters><parameter name="strACDControllerIP" type="string" pass="byref"/><parameter name="intACDControllerPort" type="i4" pass="byref"/><parameter name="strTransactionId" type="string" pass="byref"/><parameter name="lAssignmentId" type="i8" pass="byref"/><parameter name="lRequestId" type="i8" pass="byref"/><parameter name="lACDUserId" type="i8" pass="byref"/></parameters><actions><action id="2" plug-in="Pactolus.Sleep.1"><?xtml-editor x=29 y=36 ?><sleep duration="10"/><results><result name="Default" link="3" stubbed="0"/></results><scripts><script language="javascript" timing="first"><![CDATA[Server.logInfo("RECEIVE CSRBeginAssignment");
+Server.logInfo("Assignment Id: " + Session.lAssignmentId);
+Server.logInfo("Request Id: " + Session.lRequestId);
+Server.logInfo("ACD User Id: " + Session.lACDUserId);]]></script></scripts></action><action id="3" plug-in="Standard.EndSession.1"><?xtml-editor x=186 y=253 ?></action></actions></function><function name="OnSessionStart" start="6" returns="void"><parameters><parameter name="strSessionId" type="string" pass="byref"/><parameter name="nIteration" type="i4" pass="byref"/></parameters><local-vars><var name="f_intReturnCode" type="i4">0</var></local-vars><actions><action id="6" plug-in="Pactolus.JavaStaticMethod.1"><?xtml-editor x=38 y=31 ?><!--BeginRequest--><java class="&quot;com.pactolus.acd.psAPISceBeginRequest&quot;" method="&quot;logBeginRequest&quot;" timeout="s_intTIMEOUT" return="" method-return-var="f_intReturnCode" method-return-type="0"><parameter type="in">g_strDBNAME</parameter><parameter type="in">g_strSessionID</parameter><parameter type="in">s_strApplicationName</parameter><parameter type="in">g_strContact</parameter><parameter type="in">g_intAccessNumberId</parameter><parameter type="in">g_intCSRRouteReasonCode</parameter><parameter type="in">g_strLanguage</parameter><parameter type="in">g_lCSRRequestSkillId</parameter><parameter type="in">g_lTempLong</parameter><parameter type="in">g_intCSRRequestGroupId</parameter><parameter type="in">g_lSubscriberId</parameter><parameter type="in">g_strConfEventId</parameter><parameter type="inout">g_lCSRRequestId</parameter></java><results><result name="Default" link="7" stubbed="0"/><result name="Success" link="1" stubbed="0"/><result name="Error"/><result name="Timeout"/></results><scripts><script language="javascript" timing="first"><![CDATA[
+Session.g_strSessionID = Session.strSessionId;
+Session.g_strContact = Server.ipAddress;
+
+Server.logInfo("INFO: *********JAVA CALLING psAPISceBeginRequest *********");
+Server.logInfo("INFO: BEFORE DB name = " + Session.g_strDBNAME);
+Server.logInfo("INFO: BEFORE session ID = " + Session.g_strSessionID);
+Server.logInfo("INFO: BEFORE application name = " + Session.s_strApplicationName);
+Server.logInfo("INFO: BEFORE request server ip = " + Session.g_strContact);
+Server.logInfo("INFO: BEFORE access number id = " + Session.g_intAccessNumberId);
+Server.logInfo("INFO: BEFORE route reason code = " + Session.g_intCSRRouteReasonCode);
+Server.logInfo("INFO: BEFORE language = " + Session.g_strLanguage);
+Server.logInfo("INFO: BEFORE request skill id = " + Session.g_lCSRRequestSkillId);
+Server.logInfo("INFO: BEFORE request time = " + Session.g_lTempLong);
+Server.logInfo("INFO: BEFORE subscriber id = " + Session.g_lSubscriberId);
+Server.logInfo("INFO: BEFORE conf event id = " + Session.g_strConfEventId);]]></script><script language="javascript" timing="last"><![CDATA[Server.logInfo("INFO: ********* iJavaReturnCode " + Session.f_intReturnCode);
+if (Result.id == 2)
+{
+	Server.logInfo("INFO: SUCCESS LOG BEGIN REQUEST.");
+	if (-99 == Session.f_intReturnCode)
+		Session.g_intErrorMsgNumber = 1001; //db error
+	else
+		Session.g_intErrorMsgNumber = 0;
+}
+else
+{
+	Server.logError("ERROR: FAIL TO VALIDATE DESTINATION, EXIT ON: " + Result.name);
+	Session.g_intTerminationReason = 6;
+	Session.g_intErrorMsgNumber = 1000; //jvm server error
+}]]></script></scripts></action><action id="1" plug-in="Pactolus.SOAPMessage.1"><?xtml-editor x=54 y=271 ?><!--s_strMSG_BEGIN_REQUEST_CSR--><SOAP destination-ip="g_strACDControllerIP" transaction="g_strTransactionId" message-name="&quot;BeginRequestCSR&quot;" destination-port="g_intACDControllerPort" destination-type="4" destination-session="" waiting-session-selected=""><parameter tag="&quot;RequestID&quot;" value="g_lCSRRequestId"/><parameter tag="&quot;RequestType&quot;" value="1"/><parameter tag="&quot;RequestTypeName&quot;" value="&quot;Conf Assistance&quot;"/><parameter tag="&quot;LanguageId&quot;" value="1001"/><parameter tag="&quot;Language&quot;" value="g_strLanguage"/><parameter tag="&quot;OfferingId&quot;" value="4"/><parameter tag="&quot;OfferingName&quot;" value="&quot;Pactolus Conference Offering&quot;"/><parameter tag="&quot;ServiceId&quot;" value="4"/><parameter tag="&quot;ServiceName&quot;" value="&quot;Pactolus Conference Service&quot;"/><parameter tag="&quot;SkillId&quot;" value="2"/><parameter tag="&quot;SkillName&quot;" value="&quot;Conferencing&quot;"/><parameter tag="&quot;AccessNumber&quot;" value="g_strAccessNumber"/><parameter tag="&quot;ConferenceId&quot;" value="0"/><parameter tag="&quot;ServiceProviderId&quot;" value="1"/><parameter tag="&quot;ServiceProviderName&quot;" value="&quot;Pactolus Service Provider&quot;"/><parameter tag="&quot;ConferenceEndPoint&quot;" value="g_oMS.strConferenceId"/><parameter tag="&quot;SoapAgentPort&quot;" value="g_intSoapAgentPort"/><parameter tag="&quot;confModPasscode&quot;" value="g_strNullString"/></SOAP><results><result name="Default" link="2" stubbed="0"/><result name="Success"/><result name="Error" link="3" stubbed="0"/></results><scripts><script language="javascript" timing="first"><![CDATA[var strTransId = new String(Server.getUTCTime());
+Session.g_strTransactionId = strTransId;]]></script><script language="javascript" timing="last"><![CDATA[if (Result.id != 2)
+{
+	Server.logError("FAIL TO SEND BEGINREQUESTCSR.");
+}]]></script></scripts></action><action id="2" plug-in="Pactolus.Sleep.1"><?xtml-editor x=275 y=136 ?><sleep duration="120"/><results><result name="Default" link="5" stubbed="0"/></results></action><action id="3" plug-in="Standard.EndSession.1"><?xtml-editor x=296 y=432 ?></action><action id="4" plug-in="Pactolus.JavaStaticMethod.1"><?xtml-editor x=447 y=232 ?><!--EndRequest--><java class="&quot;com.pactolus.acd.psAPISceEndRequest&quot;" method="&quot;logEndRequest&quot;" timeout="s_intTIMEOUT" return="" method-return-var="f_intReturnCode" method-return-type="0"><parameter type="in">g_strDBNAME</parameter><parameter type="in">g_lCSRRequestId</parameter><parameter type="in">g_bCSRAssignmentFlag</parameter><parameter type="in">g_strSessionID</parameter><parameter type="in">g_strSessionID</parameter><parameter type="in">g_strContact</parameter><parameter type="in">g_lCSRAssignmentId</parameter><parameter type="in">g_lCSRAssignmentUserId</parameter><parameter type="in">g_intCSRAssignmentGroupId</parameter><parameter type="in">g_strCSRAssignmentType</parameter><parameter type="in">g_intCSRAssignmentSkillId</parameter><parameter type="in">g_intCSRAssignmentLanguageId</parameter><parameter type="in">g_lCSRAssignmentStartTime</parameter><parameter type="in">g_lCSRAssignmentEndTime</parameter><parameter type="in">g_lTempLong</parameter><parameter type="in">g_lSubscriberId</parameter><parameter type="in">g_strConfEventId</parameter><parameter type="in">g_strCSRAssignmentTimeZone</parameter><parameter type="in">g_intTerminationReason</parameter><parameter type="in">g_lCSRRequestOfferingId</parameter><parameter type="in">g_lCSRRequestServiceId</parameter><parameter type="in">g_lServiceProviderID</parameter></java><results><result name="Default" link="3" stubbed="0"/><result name="Success"/><result name="Error"/><result name="Timeout"/></results><scripts><script language="javascript" timing="first"><![CDATA[Session.g_lTempLong = Server.getUTCTime();
+Server.logInfo("INFO: *********JAVA CALLING psAPISceBeginRequest *********");
+Server.logInfo("INFO: BEFORE DB name = " + Session.g_strDBNAME);
+Server.logInfo("INFO: BEFORE session ID = " + Session.g_strSessionID);
+Server.logInfo("INFO: BEFORE application name = " + Session.s_strApplicationName);
+Server.logInfo("INFO: BEFORE request server ip = " + Session.g_strContact);
+Server.logInfo("INFO: BEFORE access number id = " + Session.g_intAccessNumberId);
+Server.logInfo("INFO: BEFORE route reason code = " + Session.g_intCSRRouteReasonCode);
+Server.logInfo("INFO: BEFORE language = " + Session.g_strLanguage);
+Server.logInfo("INFO: BEFORE request skill id = " + Session.g_lCSRRequestSkillId);
+Server.logInfo("INFO: BEFORE request end time = " + Session.g_lTempLong);
+Server.logInfo("INFO: BEFORE subscriber id = " + Session.g_lSubscriberId);
+Server.logInfo("INFO: BEFORE conf event id = " + Session.g_strConfEventId);]]></script><script language="javascript" timing="last"><![CDATA[Server.logInfo("INFO: ********* iJavaReturnCode " + Session.f_intReturnCode);
+if (Result.id == 2)
+{
+	Server.logInfo("INFO: SUCCESS LOG BEGIN REQUEST.");
+	if (-99 == Session.f_intReturnCode)
+		Session.g_intErrorMsgNumber = 1001; //db error
+	else
+		Session.g_intErrorMsgNumber = 0;
+}
+else
+{
+	Server.logError("ERROR: FAIL TO VALIDATE DESTINATION, EXIT ON: " + Result.name);
+	Session.g_intTerminationReason = 6;
+	Session.g_intErrorMsgNumber = 1000; //jvm server error
+}]]></script></scripts></action><action id="5" plug-in="Pactolus.SOAPMessage.1"><?xtml-editor x=477 y=76 ?><!--s_strMSG_END_REQUEST_CSR--><SOAP destination-ip="g_strACDControllerIP" transaction="g_strTransactionId" message-name="&quot;EndRequestCSR&quot;" destination-port="g_intACDControllerPort" destination-type="4" destination-session="" waiting-session-selected=""><parameter tag="&quot;RequestId&quot;" value="g_lCSRRequestId"/><parameter tag="&quot;AssignmentId&quot;" value="g_lCSRAssignmentId"/></SOAP><results><result name="Default" link="4" stubbed="0"/><result name="Success"/><result name="Error"/></results><scripts><script language="javascript" timing="first"><![CDATA[var strTransId = new String(Server.getUTCTime());
+Session.g_strTransactionID = strTransId;]]></script></scripts></action><action id="7" plug-in="Standard.EndSession.1"><?xtml-editor x=247 y=28 ?></action></actions></function><function name="OnCSREndAssignment" start="1" returns="void"><parameters><parameter name="strACDControllerID" type="string" pass="byref"/><parameter name="intACDControllerPort" type="i4" pass="byref"/><parameter name="strTransactionId" type="string" pass="byref"/><parameter name="strAssignmentId" type="string" pass="byref"/><parameter name="lRequestId" type="i8" pass="byref"/><parameter name="lACDUserId" type="i8" pass="byref"/><parameter name="strAssignmentAction" type="string" pass="byref"/><parameter name="strPasscode" type="string" pass="byref"/></parameters><actions><action id="1" plug-in="Standard.EndSession.1"><?xtml-editor x=88 y=126 ?><scripts><script language="javascript" timing="first"><![CDATA[Server.logInfo("RECEIVE CSREndAssignment");
+Server.logInfo("Assignment Id: " + Session.lAssignmentId);
+Server.logInfo("Request Id: " + Session.lRequestId);
+Server.logInfo("ACD User Id: " + Session.lACDUserId);]]></script></scripts></action></actions></function></functions><script language="javascript"><![CDATA[function calcNewExpDate(dCardExpDate, activationPeriod) {
+
+	//Server.logInfo("==calcNewExpDate==");
+	//Server.logInfo("==Input Param dCardExpDate): " + dCardExpDate.toGMTString());
+	//Server.logInfo("==Input Param activationPeriod): " + activationPeriod);
+
+	nbrYearsToAdd = activationPeriod/12;
+	nbrMonthsToAdd = activationPeriod%12;
+
+	//Server.logInfo("===nbrYearsToAdd: " + nbrYearsToAdd);
+	//Server.logInfo("===nbrMonthsToAdd: " + nbrMonthsToAdd);
+
+	dCurrDate = new Date();
+	dNewExpDate = new Date();
+	
+	dNewExpDate.setFullYear(dNewExpDate.getFullYear() + nbrYearsToAdd);
+	
+	//Server.logInfo("===NewExpDate after adding Years : " + dNewExpDate.toString());
+	
+	if ((dCurrDate.getMonth() + nbrMonthsToAdd) > 12) {	
+		dNewExpDate.setFullYear(dNewExpDate.getFullYear() + 1);
+		//Server.logInfo("===1 Year added: " + dNewExpDate.toString());		
+		dNewExpDate.setMonth((dCurrDate.getMonth() + nbrMonthsToAdd) - 12);
+		//Server.logInfo("===Months Added : " + (dCurrDate.getMonth() + nbrMonthsToAdd) - 12);		
+	} else {
+		dNewExpDate.setMonth(dCurrDate.getMonth() + nbrMonthsToAdd);
+		//Server.logInfo("===Months Added : " + nbrMonthsToAdd);				
+	}
+	
+	//Server.logInfo("===NewExpDate after adding Months : " + dNewExpDate.toString());	
+	
+		
+	dNewExpDate.setHours(0);
+	dNewExpDate.setMinutes(0);
+	dNewExpDate.setSeconds(0);
+	dNewExpDate.setMilliseconds(0);	
+	
+	//Server.logInfo("===NewExpDate after zero-out Time : " + dNewExpDate.toString());	
+	
+	return dNewExpDate;
+
+} //calcNewExpDate
+
+/* 
+Author: Sachin Bhatt
+Created: 02/27/02
+Function: convertDateToPST
+Params: p_dDate - Date
+		p_bInGMT - Boolean used to determine if the TimezoneOffset should be added
+*/
+
+function convertDateToPST(p_dDate, p_bInGMT) {
+
+	//Date dDateInPST = new Date();
+	
+	//Server.logInfo(" START <convertDateToPST()> ");
+	//Server.logInfo("p_dDate: " + p_dDate);
+	//Server.logInfo("p_dDate.getTimezoneOffset() * 60 * 1000: " + (p_dDate.getTimezoneOffset() * 60 * 1000));
+	//Server.logInfo("p_dDate.getTime(): " + p_dDate.getTime());
+	
+	var millSecsGMT = p_dDate.getTime();
+
+	
+	// if not in GMT, must add TimezoneOffset
+	if(!p_bInGMT) {
+		millSecsGMT = millSecsGMT + (p_dDate.getTimezoneOffset() * 60 * 1000);
+	}
+
+	//Server.logInfo("millSecsGMT: " + millSecsGMT);	
+
+	//Server.logInfo("Session.g_intDBTimezoneOffset * 60 * 60 * 1000: " + (Session.g_intDBTimezoneOffset * 60 * 60 * 1000));	
+
+	millSecsPST = millSecsGMT + (Session.g_intDBTimezoneOffset * 60 * 60 * 1000); 	
+	
+	//Server.logInfo("millSecsInPST: " + millSecsPST);	
+	
+	//Date dDateInPST = new Date(millSecsPST);
+	
+	p_dDate.setTime(millSecsPST);
+	/*Server.logInfo("dDateInPST: " + dDateInPST);*/
+	//Server.logInfo("p_dDate: " + p_dDate);
+
+	//Server.logInfo(" END <convertDateToPST()> ");
+	
+	return p_dDate;
+
+} // end convertDateToPST()
+
+
+/* 
+Author: Sachin Bhatt
+Created: 02/27/02
+Function: concertDateToGMTMillisecs
+*/
+
+function convertDateToGMTMillisecs(p_dDate) {
+
+	//Date dCurrentDate = new Date();
+
+	//Server.logInfo(" START <convertDateToGMTMillisecs()> ");
+	//Server.logInfo("p_dDate: " + p_dDate);
+	//Server.logInfo("p_dDate.getTimezoneOffset() * 60 * 1000: " + (p_dDate.getTimezoneOffset() * 60 * 1000));
+	//Server.logInfo("p_dDate.getTime(): " + p_dDate.getTime());
+
+	millSecsGMT = p_dDate.getTime() - (Session.g_intDBTimezoneOffset * 60 * 60 * 1000);
+	
+	/*Server.logInfo("dCurrentDate.getTime: " + dCurrentDate.getTime());*/
+	//Date dDate = new Date(millSecsGMT);
+	//Server.logInfo("dDate (GMT): " + Date(millSecsGMT));
+	//Server.logInfo("millSecsGMT: " + millSecsGMT);	
+	
+	//Server.logInfo(" END <convertDateToGMTMillisecs()> ");
+
+	return millSecsGMT;
+}
+
+function getDefaultDate() {
+
+	//Server.logInfo(" START <getDefaultDate()> ");
+	Date dDate = new Date();
+	dDate.setMonth(0);	
+	dDate.setDate(1);
+	dDate.setFullYear(1990);
+	dDate.setMilliseconds(0);
+	dDate.setMinutes(0);
+	dDate.setHours(0);
+	dDate.setSeconds(0);
+	//Server.logInfo(" END <getDefaultDate()> ");		
+	return dDate;
+}
+
+function checkFor1200AM(p_strDate) { 		
+	
+	var len = Clib.strlen( p_strDate ) ;
+	var strMatch = "12:00AM" ;
+	var strSubString ;
+	
+	//if the last 7 characters of the string are "12:00AM" change them to "00:00AM"
+	if( len > 7 && null != ( strSubString = Clib.strstr( p_strDate, strMatch) ) &&
+		7 == Clib.strlen( strSubString ) ) {
+		
+		var strFirst ;		
+		Clib.strncpy( strFirst, p_strDate, len - 7 ) ;		
+		p_strDate = strFirst + "00:00AM" ;			
+	}
+	
+	return p_strDate;
+}
+
+]]></script><properties><property key="disable-logging" value=""/></properties></xtml>

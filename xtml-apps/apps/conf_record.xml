@@ -1,0 +1,879 @@
+<?xml version="1.0"?>
+<xtml version="1.0" >
+  <events >
+    <event name="ConfStartRecordRequest" display="ConfStartRecordRequest" >
+      <parameter name="strConfControllerIP" type="string"/>
+      <parameter name="intConfControllerPort" type="i4"/>
+      <parameter name="strTransactionId" type="string"/>
+      <parameter name="strConferenceSessionId" type="string"/>
+      <parameter name="strConferenceId" type="string"/>
+      <parameter name="strRequestorSessionId" type="string"/>
+      <parameter name="strRecordFileName" type="string"/>
+    </event>
+    <event name="ConfStopRecordRequest" display="ConfStopRecordRequest" >
+      <parameter name="strConfControllerIP" type="string"/>
+      <parameter name="intConfControllerPort" type="i4"/>
+      <parameter name="strTransactionId" type="string"/>
+      <parameter name="intTerminationReason" type="i4"/>
+    </event>
+    <event name="Pactolus.MGCPRecordFail.1" display="RecordFailed" >
+      <parameter name="strEndPointName" type="string"/>
+      <parameter name="strRequestId" type="string"/>
+      <parameter name="intReasonCode" type="i4"/>
+      <parameter name="strRecordId" type="string"/>
+    </event>
+    <event name="Ping" display="Ping" >
+      <parameter name="strConfControllerIP" type="string"/>
+      <parameter name="intConfControllerPort" type="i4"/>
+      <parameter name="strTransactionId" type="string"/>
+      <parameter name="strPingIP" type="string"/>
+      <parameter name="intPingPort" type="i4"/>
+    </event>
+  </events>
+  <global-handlers >
+    <handler event="Pactolus.MGCPRecordDone.1" function="OnRecordDone" public="0" always-on="0"/>
+    <handler event="Standard.OnServiceLoad.1" function="OnServiceLoad" public="0" always-on="0"/>
+    <handler event="Standard.OnSessionEnd.1" function="OnSessionEnd" public="0" always-on="0"/>
+    <handler event="Standard.OnTimer.1" function="OnTimer" public="0" always-on="0"/>
+    <handler event="ConfStartRecordRequest" function="OnConfStartRecordRequest" public="1" always-on="0"/>
+    <handler event="ConfStopRecordRequest" function="OnConfStopRecordRequest" public="0" always-on="0"/>
+    <handler event="Pactolus.MGCPRecordFail.1" function="OnRecordFailed" public="0" always-on="0"/>
+    <handler event="Ping" function="OnPing" public="0" always-on="0"/>
+  </global-handlers>
+  <global-vars >
+    <var name="g_oMS" type="object" ></var>
+    <var name="g_oConference" type="object" ></var>
+    <var name="g_strRecordId" type="string" ></var>
+    <var name="g_strRecordedSessionId" type="string" ></var>
+    <var name="g_intTerminationReason" type="i4" >0</var>
+    <var name="g_strResultMsg" type="string" ></var>
+    <var name="g_strConfControllerIP" type="string" ></var>
+    <var name="g_intConfControllerPort" type="i4" >0</var>
+    <var name="g_lPingTimerId" type="i8" >0</var>
+    <var name="g_strBlankString" type="string" ></var>
+  </global-vars>
+  <shared-vars >
+    <var name="s_intTIMEOUT" type="i4" >20</var>
+    <var name="s_strConfMSType" type="string" >CONV</var>
+    <var name="s_intPacketizationPeriod" type="i4" >20</var>
+    <var name="s_intSUCCESS" type="i4" >0</var>
+    <var name="s_intFAILURE" type="i4" >-1</var>
+    <var name="s_strSTART_RECORD_RESPONSE" type="string" >ConfStartRecordResponse</var>
+    <var name="s_strSTOP_RECORD_RESPONSE" type="string" >ConfStopRecordResponse</var>
+    <var name="s_strRECORDSTOPPED" type="string" >RecordStoppedByMS</var>
+    <var name="s_intINTERVALPING" type="i4" >123</var>
+    <var name="s_strRecordServerName" type="string" >nfs://10.10.100.98/</var>
+    <var name="s_strCodec" type="string" ></var>
+  </shared-vars>
+  <functions >
+    <function name="OnConfStartRecordRequest" start="1" event="OnConfStartRecordRequest" returns="void" >
+      <parameters >
+        <parameter name="strConfControllerIP" type="string"/>
+        <parameter name="intConfControllerPort" type="i4"/>
+        <parameter name="strTransactionId" type="string"/>
+        <parameter name="strConferenceSessionId" type="string"/>
+        <parameter name="strConferenceId" type="string"/>
+        <parameter name="strRequestorSessionId" type="string"/>
+        <parameter name="strRecordFileName" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="f_intReturnCode" type="i4" >-99</var>
+        <var name="f_strRecordedFileLocation" type="string" ></var>
+        <var name="f_strCodec" type="string" >PCMU</var>
+        <var name="f_lRecordStartTime" type="i8" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.MGCPCreate.1" ><?xtml-editor x=165 y=210 ?>
+          <!--on PCS ms-->
+          <crcx callid="g_oMS.strCallId" remote-sdp="" mode="inactive" capability="2" returns="f_intReturnCode" endpoint="g_oMS.strEndPoint" connection-id="g_oMS.strConnectionId" local-sdp="g_oMS.strContent" packetization-period="g_oMS.intPacketizationPeriod" codec="0" timeout="s_intTIMEOUT" local-connection-options="" second-endpoint-id="" telephone-events="0" ms-type="g_oMS.strType" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </crcx>
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+            <result name="Success" link="9" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strRecordedSessionId = Session._sessionId;
+Session.g_oMS = js_initMS(Session.g_oMS, Session.s_strConfMSType);
+Session.g_oConference = js_initMS(Session.g_oConference, Session.s_strConfMSType);
+
+Server.logInfo("RECEIVE START RECORD");
+Server.logInfo("CONF CONTROLLER IP IS: " + Session.strConfControllerIP);
+Server.logInfo("CONF CONTROLLER PORT IS: " + Session.intConfControllerPort);
+Server.logInfo("TRANSACTION ID IS: " + Session.strTransactionId);
+Server.logInfo("CONFERENCE ID IS: " + Session.strConferenceId);
+Server.logInfo("CONFERENCE CONF SESSION ID IS: " + Session.strConferenceSessionId);
+Server.logInfo("REQUESTED SESSION ID IS: " + Session.strRequestorSessionId);
+Session.g_oConference.strConferenceId = Session.strConferenceId;
+Session.g_strConfControllerIP = Session.strConfControllerIP;
+Session.g_intConfControllerPort = Session.intConfControllerPort;
+
+Session.g_oMS.intPacketizationPeriod = Session.s_intPacketizationPeriod;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (2 == Result.id)
+{
+	Session.g_oMS.bCurrentlyConnected = true;
+}
+else
+{
+	Server.logError("ERROR: NOT ABLE TO CREATE AN ENDPOINT, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE: " + Session.f_intReturnCode);
+	Server.logError("ERROR: MEDIA SERVER TYPE: " + Session.g_oMS.strType);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.EndSession.1" ><?xtml-editor x=698 y=136 ?></action>
+        <action id="6" plug-in="Pactolus.MGCPModify.1" ><?xtml-editor x=753 y=400 ?>
+          <!--PCS to listen on conference-->
+          <mdcx connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" returns="f_intReturnCode" remote-sdp="g_oConference.strContent" mode="send/receive" packetization-period="g_oMS.intPacketizationPeriod" codec="0" timeout="s_intTIMEOUT" local-connection-options="" second-endpoint-id="" ms-type="g_oMS.strType" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </mdcx>
+          <results >
+            <result name="Default" link="11" stubbed="1"/>
+            <result name="Success" link="7" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: NOT ABLE TO MODIFY AN ENDPOINT, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE: " + Session.f_intReturnCode);
+	Server.logError("ERROR: MEDIA SERVER TYPE: " + Session.g_oMS.strType);
+	Server.logError("ERROR: EndPoint: " + Session.g_oMS.strEndPoint);
+	Server.logError("ERROR: CallId: " + Session.g_oMS.strCallId);
+	Server.logError("EROOR: ConnectionId: " + Session.g_oMS.strConnectionId);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Pactolus.MGCPRecord.1" ><?xtml-editor x=162 y=614 ?>
+          <!--start record conference-->
+          <record op-mode="0" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" timeout="" returns="f_intReturnCode" return-immediate="1" ms-type="g_oMS.strType" rid="f_strRecordedFileLocation" eik="" rlt="1080000" prt="6000" pst="6000" rl="" dc="" rc="" id-cleanup="0" play-beep="0" ef="&quot;PCM8M16&quot;" agc="0" agcta="" ga="" sla="" bpf="" bpa="" bpd=""/>
+          <results >
+            <result name="Default" link="11" stubbed="1"/>
+            <result name="Success" link="10" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No Speech Detected"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[/*
+var myDate = new Date();
+Server.logInfo("FULL YEAR IS: " + myDate.getFullYear() );
+Server.logInfo("FULL MONTH IS: " + myDate.getMonth() );
+Server.logInfo("FULL DAY IS: " + myDate.getDay() );
+Server.logInfo("FULL HOUR IS: " + myDate.getHours() );
+Server.logInfo("FULL MIN IS: " + myDate.getMinutes() );
+Server.logInfo("FULL SEC IS: " + myDate.getSeconds());
+
+var myFileName = new String();
+var currentYear = new String( myDate.getFullYear() );
+var currentMonth = new String( myDate.getMonth() );
+var currentDay = new String( myDate.getDay() );
+var currentHours = new String( myDate.getHours() );
+var currentMins = new String( myDate.getMinutes() );
+var currentSecs = new String( myDate.getSeconds() );
+
+myFileName = currentYear + currentMonth + currentDay + currentHours + currentMins + currentSecs;
+*/
+
+Server.logInfo("INFO: RECORD SERVER NAME = " + Session.s_strRecordServerName);
+Server.logInfo("INFO: RECORD SESSION NAME = " + Session._sessionId);
+// Server.logInfo("INFO: RECORD FILE NAME = " + myFileName);
+// Session.f_strRecordedFileLocation = Session.s_strRecordServerName + Session._sessionId + myFileName + ".wav";
+Server.logInfo("INFO: RECORD FILE NAME = " + Session.strRecordFileName);
+Session.f_strRecordedFileLocation = Session.strRecordFileName;
+Server.logInfo("INFO: RECORDED FILE LOCATION = " + Session.f_strRecordedFileLocation);
+var currentDate = new Date();
+Session.f_lRecordStartTime = currentDate.getTime();
+Server.logInfo("INFO: RECORDED START TIME  = " + Session.f_lRecordStartTime);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: NOT ABLE TO START RECORD, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE: " + Session.f_intReturnCode);
+	Server.logError("ERROR: MEDIA SERVER TYPE: " + Session.g_oMS.strType);
+	Server.logError("ERROR: EndPoint: " + Session.g_oMS.strEndPoint);
+	Server.logError("ERROR: CallId: " + Session.g_oMS.strCallId);
+	Server.logError("EROOR: ConnectionId: " + Session.g_oMS.strConnectionId);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1220 y=600 ?>
+          <return value=""/>
+        </action>
+        <action id="9" plug-in="Pactolus.MGCPCreate.1" ><?xtml-editor x=463 y=341 ?>
+          <!--create conference endpoint-->
+          <crcx callid="g_oConference.strCallId" remote-sdp="g_oMS.strContent" mode="conference" capability="2" returns="f_intReturnCode" endpoint="g_oConference.strConferenceId" connection-id="g_oConference.strConnectionId" local-sdp="g_oConference.strContent" packetization-period="g_oMS.intPacketizationPeriod" codec="0" timeout="s_intTIMEOUT" local-connection-options="" second-endpoint-id="" telephone-events="0" ms-type="g_oConference.strType" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </crcx>
+          <results >
+            <result name="Default" link="11" stubbed="1"/>
+            <result name="Success" link="6" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (2 == Result.id)
+{
+	Session.g_oConference.bCurrentlyConnected = true;
+}
+else
+{
+	Server.logError("ERROR: NOT ABLE TO CREATE AN ENDPOINT, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE: " + Session.f_intReturnCode);
+	Server.logError("ERROR: MEDIA SERVER TYPE: " + Session.g_oConference.strType);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=433 y=613 ?>
+          <!--"insertRecordEvent"-->
+          <java class="&quot;com.pactolus.conferencing.psAPISceConfMisc&quot;" method="&quot;insertRecordEvent&quot;" timeout="s_intTIMEOUT" return="" method-return-var="f_intReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >g_strRecordedSessionId</parameter>
+            <parameter type="in" var-type="unknown" >strConferenceSessionId</parameter>
+            <parameter type="in" var-type="unknown" >f_strRecordedFileLocation</parameter>
+            <parameter type="in" var-type="unknown" >strRequestorSessionId</parameter>
+            <parameter type="in" var-type="unknown" >g_strRecordedSessionId</parameter>
+            <parameter type="in" var-type="unknown" >f_strCodec</parameter>
+            <parameter type="inout" var-type="unknown" >g_strRecordId</parameter>
+          </java>
+          <results >
+            <result name="Default" link="11" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="SUCCESS" link="12" stubbed="0" >'Result'  == 'Success'
+AND f_intReturnCode == s_intSUCCESS</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_intReturnCode = -50;
+
+Server.logInfo("INFO: ********** JAVA CALLING insertRecordEvent *********");
+Server.logInfo("INFO: SESSION ID = " + Session._sessionId);
+Server.logInfo("INFO: RECORDED FILE LOCATION = " + Session.f_strRecordedFileLocation);
+Server.logInfo("INFO: REQUESTED SESSION ID = " + Session.strRequestorSessionId);
+Server.logInfo("INFO: RECORDED SESSION ID = " + Session.g_strRecordedSessionId);
+Server.logInfo("INFO: CODEC = " + Session.f_strCodec);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("INFO: ********** iJavaReturnCode " + Session.f_intReturnCode);
+if (Session.f_intReturnCode != Session.s_intSUCCESS)
+{
+	Server.logError("ERROR: FAIL TO INSERT RECORD EVENT");
+	Server.logError("ERROR: RETURN CODE: " + Session.f_intReturnCode);
+	Server.logError("ERROR: EXIT ON: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=446 y=139 ?>
+          <!--FAILURE-->
+          <SOAP destination-ip="strConfControllerIP" transaction="strTransactionId" message-name="s_strSTART_RECORD_RESPONSE" destination-port="intConfControllerPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;resultCode&quot;" value="s_intFAILURE"/>
+            <parameter tag="&quot;resultMessage&quot;" value="g_strResultMsg"/>
+            <parameter tag="&quot;recordingID&quot;" value="g_strRecordId"/>
+            <parameter tag="&quot;recordStartTime&quot;" value="f_lRecordStartTime"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strResultMsg = "ERROR FAIL TO START CONFERENCE RECORDING";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND START RECORD RESPONSE TO CONF CONTROLLER.");
+	Server.logError("ERROR: CONF CONTROLLER IP: " + Session.strConfControllerIP);
+	Server.logError("ERROR: CONF CONTROLLER PORT: " + Session.intConfControllerPort);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=730 y=607 ?>
+          <!--SUCCESS-->
+          <SOAP destination-ip="strConfControllerIP" transaction="strTransactionId" message-name="s_strSTART_RECORD_RESPONSE" destination-port="intConfControllerPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;resultCode&quot;" value="s_intSUCCESS"/>
+            <parameter tag="&quot;resultMessage&quot;" value="g_strResultMsg"/>
+            <parameter tag="&quot;recordingID&quot;" value="g_strRecordId"/>
+            <parameter tag="&quot;recordStartTime&quot;" value="f_lRecordStartTime"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="13" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strResultMsg = "SUCCESS START CONFERENCE RECORDING";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND START RECORD RESPONSE TO CONF CONTROLLER.");
+	Server.logError("ERROR: CONF CONTROLLER IP: " + Session.strConfControllerIP);
+	Server.logError("ERROR: CONF CONTROLLER PORT: " + Session.intConfControllerPort);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Standard.Timer.1" ><?xtml-editor x=975 y=599 ?>
+          <!--set timer for PING-->
+          <timer start="1" id="g_lPingTimerId" duration="s_intINTERVALPING"/>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+          </results>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="150" y-coord="776" width="189" height="68" text="Max recording:        6 hours
+Pre Speech:         10 secs
+Post Speech:        10 secs" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="OnConfStopRecordRequest" start="1" event="OnConfStopRecordRequest" returns="void" >
+      <parameters >
+        <parameter name="strConfControllerIP" type="string"/>
+        <parameter name="intConfControllerPort" type="i4"/>
+        <parameter name="strTransactionId" type="string"/>
+        <parameter name="intTerminationReason" type="i4"/>
+      </parameters>
+      <local-vars >
+        <var name="f_intReturnCode" type="i4" >-99</var>
+        <var name="f_lRecordStopTime" type="i8" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.MGCPRecord.1" ><?xtml-editor x=117 y=288 ?>
+          <!--stop record conference-->
+          <record op-mode="1" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" timeout="5" returns="f_intReturnCode" return-immediate="0" ms-type="g_oMS.strType" rid="" eik="" rlt="300" prt="" pst="" rl="" dc="" rc="" id-cleanup="0" play-beep="0" ef="&quot;PCM8M16&quot;" agc="0" agcta="" ga="" sla="" bpf="" bpa="" bpd=""/>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success" link="9" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No Speech Detected" link="9" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("RECEIVE STOP RECORD");
+Server.logInfo("TERMINATION REASON IS: " + Session.intTerminationReason);
+var currentDate = new Date();
+Session.f_lRecordStopTime = currentDate.getTime();
+Server.logInfo("INFO: RECORDED STOP TIME  = " + Session.f_lRecordStopTime);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2 && Result.id != 5)
+{
+	Server.logError("ERROR: NOT ABLE TO STOP RECORD, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE: " + Session.f_intReturnCode);
+	Server.logError("ERROR: MEDIA SERVER TYPE: " + Session.g_oMS.strType);
+	Server.logError("ERROR: EndPoint: " + Session.g_oMS.strEndPoint);
+	Server.logError("ERROR: CallId: " + Session.g_oMS.strCallId);
+	Server.logError("EROOR: ConnectionId: " + Session.g_oMS.strConnectionId);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.EndSession.1" ><?xtml-editor x=879 y=288 ?></action>
+        <action id="4" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=369 y=290 ?>
+          <!--FAILURE-->
+          <SOAP destination-ip="strConfControllerIP" transaction="strTransactionId" message-name="s_strSTOP_RECORD_RESPONSE" destination-port="intConfControllerPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;resultCode&quot;" value="s_intFAILURE"/>
+            <parameter tag="&quot;resultMessage&quot;" value="g_strResultMsg"/>
+            <parameter tag="&quot;recordStopTime&quot;" value="f_lRecordStopTime"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strResultMsg = "ERROR FAIL TO STOP CONFERENCE RECORDING";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND STOP RECORD RESPONSE TO CONF CONTROLLER.");
+	Server.logError("ERROR: CONF CONTROLLER IP: " + Session.strConfControllerIP);
+	Server.logError("ERROR: CONF CONTROLLER PORT: " + Session.intConfControllerPort);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=636 y=589 ?>
+          <!--SUCCESS-->
+          <SOAP destination-ip="strConfControllerIP" transaction="strTransactionId" message-name="s_strSTOP_RECORD_RESPONSE" destination-port="intConfControllerPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;resultCode&quot;" value="s_intSUCCESS"/>
+            <parameter tag="&quot;resultMessage&quot;" value="g_strResultMsg"/>
+            <parameter tag="&quot;recordStopTime&quot;" value="f_lRecordStopTime"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strResultMsg = "SUCCESS STOP CONFERENCE RECORDING";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND STOP RECORD RESPONSE TO CONF CONTROLLER.");
+	Server.logError("ERROR: CONF CONTROLLER IP: " + Session.strConfControllerIP);
+	Server.logError("ERROR: CONF CONTROLLER PORT: " + Session.intConfControllerPort);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=621 y=439 ?>
+          <!--FAILURE-->
+          <SOAP destination-ip="strConfControllerIP" transaction="strTransactionId" message-name="s_strSTOP_RECORD_RESPONSE" destination-port="intConfControllerPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;resultCode&quot;" value="s_intFAILURE"/>
+            <parameter tag="&quot;resultMessage&quot;" value="g_strResultMsg"/>
+            <parameter tag="&quot;recordStopTime&quot;" value="f_lRecordStopTime"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strResultMsg = "ERROR FAIL TO STOP CONFERENCE RECORDING";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND STOP RECORD RESPONSE TO CONF CONTROLLER.");
+	Server.logError("ERROR: CONF CONTROLLER IP: " + Session.strConfControllerIP);
+	Server.logError("ERROR: CONF CONTROLLER PORT: " + Session.intConfControllerPort);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=620 y=288 ?>
+          <!--"psAPIEndConfEvent"-->
+          <function name="&quot;psAPIEndConfEvent&quot;" return="f_intReturnCode" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_intReturnCode = -50;
+Session.g_intTerminationReason = Session.intTerminationReason;]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=386 y=484 ?>
+          <!--"psAPIEndConfEvent"-->
+          <function name="&quot;psAPIEndConfEvent&quot;" return="f_intReturnCode" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="SUCCESS" link="5" stubbed="0" >f_intReturnCode == s_intSUCCESS</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_intReturnCode = -50;
+Session.g_intTerminationReason = Session.intTerminationReason;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnRecordDone" start="4" event="OnRecordDone" returns="void" >
+      <parameters >
+        <parameter name="strEndpoint" type="string" pass="byref"/>
+        <parameter name="strRequestID" type="string" pass="byref"/>
+        <parameter name="nReason" type="i2" pass="byref"/>
+        <parameter name="strDigits" type="string" pass="byref"/>
+        <parameter name="nRecordLength" type="i2" pass="byref"/>
+        <parameter name="strRecordID" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_intReturnCode" type="i4" >-50</var>
+        <var name="f_strTransactionId" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=221 y=259 ?>
+          <!--"psAPIEndConfEvent"-->
+          <function name="&quot;psAPIEndConfEvent&quot;" return="f_intReturnCode" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_intReturnCode = -50;
+Session.g_intTerminationReason = 2;
+Server.logError("ERROR: RECORD DONE EVENT TRIGGERED.");
+Server.logError("ERROR: REASON: " + Session.nReason);
+Server.logError("ERROR: ENDPOINT: " + Session.strEndpoint);
+Server.logError("ERROR: RECORD ID: " + Session.strRecordID);
+Server.logError("ERROR: REQUEST ID: " + Session.strRequestID);]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.EndSession.1" ><?xtml-editor x=779 y=251 ?>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("RECORD STOPPED");]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=467 y=258 ?>
+          <!--RECORDSTOPPED-->
+          <SOAP destination-ip="g_strConfControllerIP" transaction="f_strTransactionId" message-name="s_strRECORDSTOPPED" destination-port="g_intConfControllerPort" destination-type="4" destination-session="" waiting-session-selected=""/>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_strTransactionId = Server.getUTCTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND CONF RECORD STOPPED BY MS TO CONF CONTROLLER.");
+	Server.logError("ERROR: CONF CONTROLLER IP: " + Session.g_strConfControllerIP);
+	Server.logError("ERROR: CONF CONTROLLER PORT: " + Session.g_intConfControllerPort);
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnSessionEnd" start="1" event="OnSessionEnd" returns="void" >
+      <parameters >
+        <parameter name="nSessionEndReason" type="i2" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_intReturnCode" type="i4" >-50</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=174 y=229 ?>
+          <!--g_oMS.bCurrentlyConnected == true?-->
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="g_oMS.bCurrentlyConnected == true?" link="2" stubbed="0" >g_oMS.bCurrentlyConnected == true</result>
+          </results>
+        </action>
+        <action id="2" plug-in="Pactolus.MGCPDelete.1" ><?xtml-editor x=461 y=302 ?>
+          <!--delete g_oMS-->
+          <dlcx connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" timeout="s_intTIMEOUT" returns="f_intReturnCode" ms-type="g_oMS.strType" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </dlcx>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: NOT ABLE TO DELETE CONNECTION, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE: " + Session.f_intReturnCode);
+	Server.logError("ERROR: MEDIA SERVER TYPE: " + Session.g_oMS.strType);
+	Server.logError("ERROR: EndPoint: " + Session.g_oMS.strEndPoint);
+	Server.logError("ERROR: CallId: " + Session.g_oMS.strCallId);
+	Server.logError("EROOR: ConnectionId: " + Session.g_oMS.strConnectionId);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Pactolus.Branch.1" ><?xtml-editor x=442 y=123 ?>
+          <!--g_oConference.bCurrentlyConnected == true?-->
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="g_oConference.bCurrentlyConnected == true?" link="4" stubbed="0" >g_oConference.bCurrentlyConnected == true</result>
+          </results>
+        </action>
+        <action id="4" plug-in="Pactolus.MGCPDelete.1" ><?xtml-editor x=697 y=305 ?>
+          <!--delete g_oConference-->
+          <dlcx connection-id="g_oConference.strConnectionId" endpoint="g_oConference.strConferenceId" callid="g_oConference.strCallId" timeout="s_intTIMEOUT" returns="f_intReturnCode" ms-type="g_oConference.strType" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </dlcx>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: NOT ABLE TO DELETE CONNECTION, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE: " + Session.f_intReturnCode);
+	Server.logError("ERROR: MEDIA SERVER TYPE: " + Session.g_oConference.strType);
+	Server.logError("ERROR: EndPoint: " + Session.g_oConference.strConferenceId);
+	Server.logError("ERROR: CallId: " + Session.g_oConference.strCallId);
+	Server.logError("EROOR: ConnectionId: " + Session.g_oConference.strConnectionId);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=679 y=121 ?>
+          <return value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="OnServiceLoad" start="1" event="OnServiceLoad" returns="void" >
+      <parameters >
+        <parameter name="strAppName" type="string" pass="byref"/>
+        <parameter name="nSessionCount" type="i2" pass="byref"/>
+        <parameter name="nMaxIterations" type="i2" pass="byref"/>
+        <parameter name="nServerId" type="i2" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Pactolus.UserFunction.1" ><?xtml-editor x=181 y=258 ?>
+          <!--GET PSX IP from config-->
+          <user-function process="&quot;PACTOLUS_ps_c_adaptor&quot;" function="&quot;get_property&quot;" timeout="s_intTIMEOUT" return="" async="0" >
+            <parameter >"conferencing-media-server-type"</parameter>
+            <parameter >s_strConfMSType</parameter>
+            <parameter >"packetization-period"</parameter>
+            <parameter >s_intPacketizationPeriod</parameter>
+            <parameter >"codec"</parameter>
+            <parameter >s_strCodec</parameter>
+          </user-function>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Session.s_strConfMSType.length <= 0)
+{
+	Session.s_strConfMSType = "CONV";
+	Server.logInfo("WARNING:  NO SETTING FOR CONFERENCE MS TYPE.  USE DEFAULT: " + Session.s_strConfMSType);
+}
+if (Session.s_intPacketizationPeriod <= 0)
+{
+	Session.s_intPacketizationPeriod = 20;
+	Server.logInfo("WARNING: NO SETTING FOR PACKETIZATION PERIOD.  USE DEFAULT: " + Session.s_intPacketizationPeriod);
+}
+if (Session.s_strCodec.length <= 0)
+{
+	Session.s_strCodec = "PCMU";
+	Server.logInfo("WARNING:  NO SETTING FOR CODEC.  USE DEFAULT: " + Session.s_strCodec);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=435 y=256 ?>
+          <return value=""/>
+        </action>
+      </actions>
+    </function>
+    <function name="OnRecordFailed" start="5" event="OnRecordFailed" returns="void" >
+      <parameters >
+        <parameter name="strEndPointName" type="string" pass="byref"/>
+        <parameter name="strRequestId" type="string" pass="byref"/>
+        <parameter name="intReasonCode" type="i4" pass="byref"/>
+        <parameter name="strRecordId" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_intReturnCode" type="i4" >-50</var>
+        <var name="f_strTransactionId" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="5" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=175 y=190 ?>
+          <!--"psAPIEndConfEvent"-->
+          <function name="&quot;psAPIEndConfEvent&quot;" return="f_intReturnCode" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_intReturnCode = -50;
+Session.g_intTerminationReason = 2;
+if (Session.intReasonCode != 622)
+{
+	Server.logError("ERROR: RECORD FAILED EVENT TRIGGERED.")
+	Server.logError("ERROR: REASON CODE: " + Session.intReasonCode);
+	Server.logError("ERROR: RECORD ID: " + Session.strRecordId);
+	Server.logError("ERROR: REQUEST ID: " + Session.strRequestId);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.EndSession.1" ><?xtml-editor x=694 y=185 ?></action>
+        <action id="4" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=427 y=183 ?>
+          <!--RECORDSTOPPED-->
+          <SOAP destination-ip="g_strConfControllerIP" transaction="f_strTransactionId" message-name="s_strRECORDSTOPPED" destination-port="g_intConfControllerPort" destination-type="4" destination-session="" waiting-session-selected=""/>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_strTransactionId = Server.getUTCTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND CONF RECORD FAILED TO CONF CONTROLLER.");
+	Server.logError("ERROR: CONF CONTROLLER IP: " + Session.g_strConfControllerIP);
+	Server.logError("ERROR: CONF CONTROLLER PORT: " + Session.g_intConfControllerPort);
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnPing" start="2" event="OnPing" returns="void" >
+      <parameters >
+        <parameter name="strConfControllerIP" type="string"/>
+        <parameter name="intConfControllerPort" type="i4"/>
+        <parameter name="strTransactionId" type="string"/>
+        <parameter name="strPingIP" type="string"/>
+        <parameter name="intPingPort" type="i4"/>
+      </parameters>
+      <actions >
+        <action id="2" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=248 y=203 ?>
+          <!--RESPONSE SUCCESS-->
+          <SOAP destination-ip="strConfControllerIP" transaction="strTransactionId" message-name="&quot;PingResponse&quot;" destination-port="intConfControllerPort" destination-type="4" destination-session="" waiting-session-selected=""/>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.enableEvents(false);]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1022 y=198 ?>
+          <return value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.enableEvents(true);]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.Timer.1" ><?xtml-editor x=504 y=202 ?>
+          <!--stop timer for PING-->
+          <timer start="0" id="g_lPingTimerId" duration=""/>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+          </results>
+        </action>
+        <action id="4" plug-in="Standard.Timer.1" ><?xtml-editor x=749 y=200 ?>
+          <!--reset timer for PING-->
+          <timer start="1" id="g_lPingTimerId" duration="s_intINTERVALPING"/>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="OnTimer" start="1" event="OnTimer" returns="void" >
+      <parameters >
+        <parameter name="nTimerId" type="i4" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_intReturnCode" type="i4" >-50</var>
+        <var name="f_strTransactionId" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=156 y=194 ?>
+          <!--PING timer?-->
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="nTimerId == g_lPingTimerId" link="3" stubbed="0" >nTimerId == g_lPingTimerId</result>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=404 y=179 ?>
+          <return value=""/>
+        </action>
+        <action id="3" plug-in="Pactolus.MGCPRecord.1" ><?xtml-editor x=420 y=295 ?>
+          <!--stop record conference-->
+          <record op-mode="1" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" timeout="5" returns="f_intReturnCode" return-immediate="0" ms-type="g_oMS.strType" rid="" eik="" rlt="300" prt="" pst="" rl="" dc="" rc="" id-cleanup="0" play-beep="0" ef="&quot;PCM8M16&quot;" agc="0" agcta="" ga="" sla="" bpf="" bpa="" bpd=""/>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No Speech Detected"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("TIMER EXPIRED, NO PING RECEIVED");]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: NOT ABLE TO STOP RECORD, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE: " + Session.f_intReturnCode);
+	Server.logError("ERROR: MEDIA SERVER TYPE: " + Session.g_oMS.strType);
+	Server.logError("ERROR: EndPoint: " + Session.g_oMS.strEndPoint);
+	Server.logError("ERROR: CallId: " + Session.g_oMS.strCallId);
+	Server.logError("EROOR: ConnectionId: " + Session.g_oMS.strConnectionId);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.EndSession.1" ><?xtml-editor x=1151 y=292 ?>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("RECORD STOPPED");]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=910 y=295 ?>
+          <!--RECORDSTOPPED-->
+          <SOAP destination-ip="g_strConfControllerIP" transaction="f_strTransactionId" message-name="s_strRECORDSTOPPED" destination-port="g_intConfControllerPort" destination-type="4" destination-session="" waiting-session-selected=""/>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_strTransactionId = Server.getUTCTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND CONF RECORD STOPPED, TIMER EXPIRED TO CONF CONTROLLER.");
+	Server.logError("ERROR: CONF CONTROLLER IP: " + Session.g_strConfControllerIP);
+	Server.logError("ERROR: CONF CONTROLLER PORT: " + Session.g_intConfControllerPort);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=667 y=298 ?>
+          <!--"psAPIEndConfEvent"-->
+          <function name="&quot;psAPIEndConfEvent&quot;" return="f_intReturnCode" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_intReturnCode = -50;
+Session.g_intTerminationReason = 4;
+Server.logInfo("ON TIMER, NOT RECEIVE PING, STOP RECORDING");]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="psAPIEndConfEvent" start="1" event="psAPIEndConfEvent" returns="i4" >
+      <local-vars >
+        <var name="f_intReturnCode" type="i4" >-50</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=200 y=244 ?>
+          <!--"endRecordEvent"-->
+          <java class="&quot;com.pactolus.conferencing.psAPISceConfMisc&quot;" method="&quot;endRecordEvent&quot;" timeout="s_intTIMEOUT" return="" method-return-var="f_intReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >g_strRecordedSessionId</parameter>
+            <parameter type="in" var-type="unknown" >g_strRecordId</parameter>
+            <parameter type="in" var-type="unknown" >g_intTerminationReason</parameter>
+          </java>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("INFO: ********** JAVA CALLING endRecordEvent *********");
+Server.logInfo("INFO: SESSION ID = " + Session.g_strRecordedSessionId);
+Server.logInfo("INFO: RECORD ID = " + Session.g_strRecordId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("INFO: ********** iJavaReturnCode " + Session.f_intReturnCode);
+if (Session.f_intReturnCode != Session.s_intSUCCESS)
+{
+	Server.logError("ERROR: FAIL TO END RECORD EVENT");
+	Server.logError("ERROR: RETURN CODE: " + Session.f_intReturnCode);
+	Server.logError("ERROR: EXIT ON: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=485 y=243 ?>
+          <!--f_intReturnCode-->
+          <return value="f_intReturnCode"/>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>]]></script>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value="D:/Applications/InternalProduct/SceXMLScripts/Libs"/>
+    <property key="library-modules" value="lib_mediaserver.xml"/>
+    <property key="library-path" value="D:/Applications/InternalProduct/SceXMLScripts/Libs"/>
+  </properties>
+  <application-version >
+    <revision >$Id: conf_record.xml,v 1.3 2006/06/21 15:54:26 hlam Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

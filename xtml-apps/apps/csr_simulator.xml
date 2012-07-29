@@ -1,0 +1,123 @@
+<?xml version="1.0"?>
+<xtml version="1.0"><events><event name="LoginCSRIVRResponse" display="LoginCSRIVRResponse"><parameter name="strACDControllerIpAddress" type="string"/><parameter name="intACDControllerPort" type="i4"/><parameter name="strTransactionID" type="string"/><parameter name="intResultCode" type="i4"/><parameter name="strResultMessage" type="string"/></event></events><global-handlers><handler event="Standard.OnSessionStart.1" function="OnSessionStart" public="0" always-on="0"/><handler event="LoginCSRIVRResponse" function="LoginCSRIVRResponse" public="1" always-on="1"/></global-handlers><global-vars><var name="g_strProcDBName" type="string">pactolusdb</var><var name="g_strDBSessionID" type="string"></var><var name="g_strPin" type="string"></var><var name="g_strOriginationNumber" type="string"></var><var name="g_intNbrLoginAttempts" type="i4">0</var><var name="g_intGroupID" type="i4">0</var><var name="g_intInitialState" type="i4">0</var><var name="g_strCSRType" type="string"></var><var name="g_strFirstName" type="string"></var><var name="g_strLastName" type="string"></var><var name="g_strWorkstationPhoneNbr" type="string"></var><var name="g_intPrimaryLanguageID" type="i4">0</var><var name="g_intPrimarySkillID" type="i4">0</var><var name="g_strACDManagerIP" type="string"></var><var name="g_intACDManagerPort" type="i4">0</var><var name="g_longACDUserID" type="i8">0</var><var name="g_strAppName" type="string"></var><var name="g_intSoapPort" type="i4">0</var><var name="g_intSOAPMsgTimeout" type="i4">0</var></global-vars><shared-vars><var name="s_intTIMEOUT" type="i4">0</var><var name="s_intCSRNumber" type="i4">1</var></shared-vars><functions><function name="OnSessionStart" start="4" returns="void"><parameters><parameter name="strSessionId" type="string" pass="byref"/><parameter name="nIteration" type="i4" pass="byref"/></parameters><local-vars><var name="f_intReturnCode" type="i4">0</var><var name="f_intReturnValue" type="i4">0</var><var name="f_intSecondsToSleep" type="i4">0</var><var name="f_strACDControllerIP" type="string"></var><var name="f_intACDControllerPort" type="i4">0</var><var name="f_strTransactionNbr" type="string"></var><var name="f_intLoginResultCode" type="i4">0</var><var name="f_strLoginResultMessage" type="string"></var><var name="fn_strEventReceived" type="string"></var></local-vars><actions><action id="4" plug-in="Pactolus.Sleep.1"><?xtml-editor x=122 y=27 ?><sleep duration="f_intSecondsToSleep"/><results><result name="Default" link="3" stubbed="0"/></results><scripts><script language="javascript" timing="first"><![CDATA[//grap the AS soap port
+
+Session.g_intSoapPort = Server.soapPort;
+Server.logInfo("SOAP Port " + Session.g_intSoapPort);
+
+//generate a random # of seconds to sleep (between 1 and 90 seconds)
+Session.f_intSecondsToSleep = rand(10)*10;
+Server.logInfo("Sleeping for: " + Session.f_intSecondsToSleep);]]></script></scripts></action><action id="1" plug-in="Pactolus.JavaStaticMethod.1"><?xtml-editor x=334 y=247 ?><!--authenticateCSRPin()--><java class="&quot;com.pactolus.acd.psAPISceAuthCSRPin&quot;" method="&quot;validateCSRPin&quot;" timeout="s_intTIMEOUT" return="f_intReturnValue" method-return-var="f_intReturnCode" method-return-type="0"><parameter type="in">g_strProcDBName</parameter><parameter type="in">g_strDBSessionID</parameter><parameter type="in">g_strAppName</parameter><parameter type="in">g_strPin</parameter><parameter type="in">g_strOriginationNumber</parameter><parameter type="in">g_intNbrLoginAttempts</parameter><parameter type="inout">g_longACDUserID</parameter><parameter type="inout">g_intGroupID</parameter><parameter type="inout">g_intInitialState</parameter><parameter type="inout">g_strCSRType</parameter><parameter type="inout">g_strFirstName</parameter><parameter type="inout">g_strLastName</parameter><parameter type="inout">g_strWorkstationPhoneNbr</parameter><parameter type="inout">g_intPrimaryLanguageID</parameter><parameter type="inout">g_intPrimarySkillID</parameter><parameter type="inout">g_strACDManagerIP</parameter><parameter type="inout">g_intACDManagerPort</parameter></java><results><result name="Default" link="2" stubbed="0"/><result name="Success" link="5" stubbed="0"/><result name="Error" link="2" stubbed="0"/><result name="Timeout" link="2" stubbed="0"/></results><scripts><script language="javascript" timing="first"><![CDATA[// Session.g_strPin = Session.g_oCallLegA.strCallingNumber;
+
+//get sesssionID
+
+Session.g_strDBSessionID = "1";
+
+//hardcode some variables
+
+Session.g_strOriginationNumber = "5551234567";
+
+Session.f_intReturnCode = -50;
+
+
+Server.logInfo("Input Parameters");
+Server.logInfo("  DB Name : " + Session.g_strProcDBName);
+Server.logInfo("  SessionID : " + Session.g_strDBSessionID);
+Server.logInfo("  AppName : csr.xml");
+Server.logInfo("  PIN : " + Session.g_strPin);
+Server.logInfo("  Origination Number : " + Session.g_strOriginationNumber);
+Server.logInfo("  Number of login attemps: " + Session.g_intNbrLoginAttempts);]]></script><script language="javascript" timing="last"><![CDATA[
+//Server.logInfo("*********JAVA RETURN*********");
+Server.logInfo("AuthenticateCSR returned " + Session.f_intReturnCode);
+Server.logInfo("Output Parameters");
+Server.logInfo("  ACDUserID : " + Session.g_longACDUserID);
+Server.logInfo("  groupID : " + Session.g_intGroupID);
+Server.logInfo("  initialState : " + Session.g_intInitialState);
+Server.logInfo("  CSRType : " + Session.g_strCSRType);
+Server.logInfo("  FirstName : " + Session.g_strFirstName);
+Server.logInfo("  LastName : " + Session.g_strLastName);
+Server.logInfo("  WorkstationPhoneNumber : " + Session.g_strWorkstationPhoneNbr);
+Server.logInfo("  PrimaryLanguageID : " + Session.g_intPrimaryLanguageID);
+Server.logInfo("  PrimarySkill : " + Session.g_intPrimarySkillID);
+Server.logInfo("  ACDManagerIP : " + Session.g_strACDManagerIP);
+Server.logInfo("  ACDManagerPort : " + Session.g_intACDManagerPort);
+
+if (Result.id == 2)
+{
+	Server.logInfo("INFO: SUCCESS CALL JAVA AUTHENTICATE PIN.");
+}
+else
+{
+	Server.logError("ERROR: FAIL TO CALL JAVA AUTHENTICATE PIN, EXIT ON: " + Result.name);
+}
+
+]]></script></scripts></action><action id="2" plug-in="Standard.EndSession.1"><?xtml-editor x=749 y=210 ?></action><action id="3" plug-in="Pactolus.Branch.1"><?xtml-editor x=203 y=137 ?><results><result name="Default" link="1" stubbed="0"/></results><scripts><script language="javascript" timing="first"><![CDATA[
+
+
+//assign a CSR Pin to the first 3 sessions.  This app will only work with however many pins 
+
+Server.lockSharedVariables();
+
+if (Session.s_intCSRNumber == 1) {
+	//Set CSR to available test CSR
+	Session.g_strPin = "1234";
+} else if (Session.s_intCSRNumber == 2) {
+	//Set CSR to unavailable test CSR
+	Session.g_strPin = "2345";
+} else if (Session.s_intCSRNumber == 3) {
+	//Set CSR to supervisor
+	Session.g_strPin = "3456";
+} else {
+	Sesison.g_strPin = "";
+}
+
+Session.s_intCSRNumber++;
+
+Server.unlockSharedVariables();]]></script></scripts></action><action id="5" plug-in="Pactolus.SOAPMessage.1"><?xtml-editor x=480 y=438 ?><SOAP destination-ip="g_strACDManagerIP" transaction="&quot;0&quot;" message-name="&quot;LoginCSRIVR&quot;" destination-port="g_intACDManagerPort" destination-type="4" destination-session="" waiting-session-selected=""><parameter tag="&quot;acdUserID&quot;" value="g_longACDUserID"/><parameter tag="&quot;soapPort&quot;" value="g_intSoapPort"/></SOAP><results><result name="Default" link="2" stubbed="0"/><result name="Success" link="7" stubbed="0"/><result name="Error"/></results><scripts><script language="javascript" timing="first"><![CDATA[Server.enableEvents(false);
+
+
+
+Server.logInfo("ACDUserID " + Session.g_longACDUserID);
+Server.logInfo("Sending SOAP Message to :" + Session.g_strACDManagerIP + ":" + Session.g_intACDManagerPort);
+Server.logInfo("  ...with values - ACDUserID <" + Session.g_longACDUserID + ">");
+Server.logInfo("                 - ReturnSoapPort <" + Session.g_intSoapPort + ">");]]></script><script language="javascript" timing="last"><![CDATA[Server.enableEvents(true);
+
+
+if (Result.id == 2)
+{
+	Server.logInfo("INFO: SUCCESS SENDING SOAP MESSAGE.");
+}
+else
+{
+	Server.logError("ERROR: FAIL TO SEND SOAP MESSAGE, EXIT ON: " + Result.name);
+}
+
+]]></script></scripts></action><action id="7" plug-in="Standard.WaitEvent.1"><?xtml-editor x=541 y=606 ?><!--...for loginCSRIVRResponse--><wait timeout="g_intSOAPMsgTimeout" recv-name="fn_strEventReceived"><msg name="LoginCSRIVRResponse"><parameter>f_strACDControllerIP</parameter><parameter>f_intACDControllerPort</parameter><parameter>f_strTransactionNbr</parameter><parameter>f_intLoginResultCode</parameter><parameter>f_strLoginResultMessage</parameter></msg></wait><results><result name="Default" link="2" stubbed="0"/><result name="Success" link="8" stubbed="0"/><result name="Error"/><result name="Timeout"/></results><scripts><script language="javascript" timing="last"><![CDATA[
+if (Result.id == 2)
+{
+	Server.logInfo("INFO: SUCCESS RECEIVING SOAP MESSAGE.");
+}
+else
+{
+	Server.logError("ERROR: FAIL TO RECEIVE RESPONSE SOAP MESSAGE, EXIT ON: " + Result.name);
+}
+
+
+Server.logInfo("Wait SIBB LastJavaScript");
+Server.logInfo("ResultCode : " +  Session.f_intLoginResultCode);
+Server.logInfo("ResultMessage : " + Session.f_strLoginResultMessage);
+Server.logInfo("Event Received : " + Session.fn_strEventReceived);]]></script></scripts></action><action id="8" plug-in="Standard.EndSession.1"><?xtml-editor x=834 y=671 ?></action></actions></function><function name="LoginCSRIVRResponse" start="1" returns="void"><parameters><parameter name="strACDControllerIpAddress" type="string" pass="byref"/><parameter name="intACDControllerPort" type="i4" pass="byref"/><parameter name="strTransactionID" type="string" pass="byref"/><parameter name="intResultCode" type="i4" pass="byref"/><parameter name="strResultMessage" type="string" pass="byref"/></parameters><actions><action id="1" plug-in="Pactolus.Branch.1"><?xtml-editor x=574 y=505 ?><results><result name="Default" link="3" stubbed="0"/></results></action><action id="3" plug-in="Standard.FunctionReturn.1"><?xtml-editor x=789 y=598 ?><return value=""/></action></actions></function></functions><script language="javascript"><![CDATA[
+function rand(number) {
+
+        return Math.ceil(rnd()*number);
+};
+
+
+function rnd() {
+
+	rnd.today=new Date();
+	rnd.seed=rnd.today.getTime();
+
+    rnd.seed = (rnd.seed*9301+49297) % 233280;
+    return rnd.seed/(233280.0);
+
+};]]></script><properties><property key="disable-logging" value=""/></properties></xtml>

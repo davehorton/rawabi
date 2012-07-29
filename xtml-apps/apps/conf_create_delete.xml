@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<xtml version="1.0"><global-handlers><handler event="Standard.OnSessionStart.1" function="OnSessionStart" public="0" always-on="0"/><handler event="Standard.OnSessionEnd.1" function="OnSessionEnd" public="0" always-on="0"/></global-handlers><global-vars><var name="g_strMSEndPoint" type="string"></var><var name="g_strMSSDP" type="string"></var><var name="g_strMSCallID" type="string"></var><var name="g_strMSConnectionID" type="string"></var><var name="g_intReturnCode" type="i4">0</var><var name="g_strContent" type="string"></var></global-vars><shared-vars><var name="s_intTIMEOUT" type="i4">30</var><var name="s_intNumFailures" type="i4">0</var><var name="s_intNumSucceeds" type="i4">0</var></shared-vars><functions><function name="OnSessionStart" start="1" returns="void"><parameters><parameter name="strSessionId" type="string"/><parameter name="nIteration" type="i4"/></parameters><actions><action id="1" plug-in="Pactolus.MGCPCreate.1"><?xtml-editor x=249 y=132 ?><!--create conf endpoint--><crcx callid="g_strMSCallID" remote-sdp="g_strContent" mode="conference" capability="2" returns="g_intReturnCode" endpoint="g_strMSEndPoint" connection-id="g_strMSConnectionID" local-sdp="g_strMSSDP" packetization-period="10" codec="0" timeout="s_intTIMEOUT" local-connection-options="" second-endpoint-id=""><parameters><quarantine step="0" loop="0" process="0" discard="0"/><events><![CDATA[]]></events><signals><![CDATA[]]></signals><digit-map><![CDATA[]]></digit-map></parameters></crcx><results><result name="Default" link="2" stubbed="0"/><result name="Success" link="6" stubbed="0"/><result name="Error"/><result name="Timeout"/></results><scripts><script language="javascript" timing="first"><![CDATA[Session.g_strContent =  "v=0\n";
+Session.g_strContent += "o=Pingtel 5 5 IN IP4 10.10.221.19\n";
+Session.g_strContent += "s=phone-call\n";
+Session.g_strContent += "c=IN IP4 10.10.221.19\n";
+Session.g_strContent += "t=0 0\n";
+Session.g_strContent += "m=audio 8766 RTP/AVP 0\n";
+Session.g_strContent += "a=rtpmap:0 pcmu/8000/1\n";]]></script></scripts></action><action id="2" plug-in="Pactolus.Branch.1"><?xtml-editor x=500 y=131 ?><results><result name="Default" link="3" stubbed="0"/></results><scripts><script language="javascript" timing="first"><![CDATA[Server.logError("ERROR: OnSessionStart.2: FAIL TO CREATE CONF END POINT.");
+Server.logError("ERROR: OnSessionStart.2: CONNECTION ID: " + Session.g_strMSConnectionID);
+Server.logError("ERROR: OnSessionStart.2: END POINT: " + Session.g_strMSEndPoint);]]></script></scripts></action><action id="3" plug-in="Standard.EndSession.1"><?xtml-editor x=1028 y=181 ?><scripts><script language="javascript" timing="first"><![CDATA[Server.lockSharedVariables();
+	Session.s_intNumFailures++;
+Server.unlockSharedVariables();]]></script></scripts></action><action id="6" plug-in="Pactolus.MGCPDelete.1"><?xtml-editor x=519 y=243 ?><!--delete conf endpoint--><dlcx connection-id="g_strMSConnectionID" endpoint="g_strMSEndPoint" callid="g_strMSCallID" timeout="s_intTIMEOUT" returns="g_intReturnCode"><parameters><quarantine step="0" loop="0" process="0" discard="0"/><events><![CDATA[]]></events><signals><![CDATA[]]></signals><digit-map><![CDATA[]]></digit-map></parameters></dlcx><results><result name="Default" link="7" stubbed="0"/><result name="Success" link="9" stubbed="0"/><result name="Error"/><result name="Timeout"/></results></action><action id="7" plug-in="Pactolus.Branch.1"><?xtml-editor x=729 y=241 ?><results><result name="Default" link="3" stubbed="0"/></results><scripts><script language="javascript" timing="first"><![CDATA[Server.logError("ERROR: OnSessionStart.7: FAIL TO DELETE CONF END POINT.");
+Server.logError("ERROR: OnSessionStart.7: CONNECTION ID: " + Session.g_strMSConnectionID);
+Server.logError("ERROR: OnSessionStart.7: END POINT: " + Session.g_strMSEndPoint);]]></script></scripts></action><action id="9" plug-in="Standard.EndSession.1"><?xtml-editor x=748 y=325 ?><scripts><script language="javascript" timing="first"><![CDATA[Server.lockSharedVariables();
+	Session.s_intNumSucceeds++;
+Server.unlockSharedVariables();]]></script></scripts></action></actions></function><function name="OnSessionEnd" start="3" returns="void"><parameters><parameter name="nSessionEndReason" type="i2"/></parameters><actions><action id="3" plug-in="Standard.FunctionReturn.1"><?xtml-editor x=147 y=122 ?><return value=""/><scripts><script language="javascript" timing="first"><![CDATA[Server.logError("ERROR: OnSessionEnd.3: NUMBER OF SUCCEEDS AND FAILURES: " + Session.s_intNumSucceeds + "  " + Session.s_intNumFailures);]]></script></scripts></action></actions></function></functions><script language="javascript"><![CDATA[function formatPhone(inPhone)
+{
+	var number = /\d/;
+	var i = 0;
+	var result;
+	var outPhone="";
+	
+	while(i < inPhone.length)
+	{
+		result = inPhone.charAt(i).match(number);
+		if ( result != null)
+		{
+			outPhone += inPhone.charAt(i);
+		}
+		i++;
+	}
+
+	// Server.logInfo("RETURN VALUE: " + outPhone);
+	return outPhone;
+
+}]]></script></xtml>

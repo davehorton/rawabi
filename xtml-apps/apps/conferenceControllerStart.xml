@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<xtml version="1.0"><global-handlers><handler event="Standard.OnSessionStart.1" function="OnSessionStart" public="0" always-on="0"/></global-handlers><global-vars><var name="iJavaReturn" type="i4">0</var></global-vars><functions><function name="OnSessionStart" start="1" returns="void"><parameters><parameter name="strSessionId" type="string" pass="byref"/><parameter name="nIteration" type="i4" pass="byref"/></parameters><local-vars><var name="int_lJavaReturn" type="i4">0</var></local-vars><actions><action id="1" plug-in="Pactolus.JavaStaticMethod.1"><?xtml-editor x=20 y=20 ?><java class="&quot;com.pactolus.conferenceController.psAPISceConferenceController&quot;" method="&quot;startConferenceController&quot;" timeout="30" return="" method-return-var="iJavaReturn" method-return-type="0"/><results><result name="Default" link="3" stubbed="0"/><result name="Success" link="3" stubbed="0"/><result name="Error" link="3" stubbed="0"/><result name="Timeout" link="3" stubbed="0"/></results><scripts><script language="javascript" timing="first"><![CDATA[Server.logInfo("********************************************************");
+Server.logInfo("***** Starting Conference Controller ...");
+Server.logInfo("********************************************************")]]></script><script language="javascript" timing="last"><![CDATA[Server.logInfo("********************************************************");
+Server.logInfo("***** Started Conference Controller with return: " + Session.iJavaReturn + " *****");
+Server.logInfo("********************************************************");]]></script></scripts></action><action id="3" plug-in="Standard.EndSession.1"><?xtml-editor x=256 y=54 ?></action></actions></function></functions><script language="javascript"><![CDATA[function stripIpAddress( strOldIp )
+{
+	var matchStr = new RegExp( "([0-9]{1,}).([0-9]{1,}).([0-9]{1,}).([0-9]{1,2})");
+	
+	var result = matchStr.exec( strOldIp ) ;
+	
+	return result[0] ;
+}]]></script><properties><property key="disable-logging" value=""/><property key="library-modules" value=""/><property key="library-path" value=""/></properties></xtml>

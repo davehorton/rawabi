@@ -1,0 +1,1748 @@
+<?xml version="1.0"?>
+<xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
+  <version sce-version="6019" prev-sce-version="6019" last-mod-time="Thursday, April 10, 2008 09:38:03"/>
+  <events >
+    <event name="ConfMuteRequest" display="ConfMuteRequest" >
+      <parameter name="strConfControllerIP" type="string"/>
+      <parameter name="nConfControllerPort" type="i4"/>
+      <parameter name="strTransactionId" type="string"/>
+      <parameter name="strConfScheduleId" type="string"/>
+      <parameter name="strConferenceEndpoint" type="string"/>
+      <parameter name="strEndpointConnnectionId" type="string"/>
+    </event>
+    <event name="ConfUnmuteRequest" display="ConfUnmuteRequest" >
+      <parameter name="strConfControllerIP" type="string"/>
+      <parameter name="nConfControllerPort" type="i4"/>
+      <parameter name="strTransactionId" type="string"/>
+      <parameter name="strConfScheduleId" type="string"/>
+      <parameter name="strConferenceEndpoint" type="string"/>
+      <parameter name="strEndpointConnnectionId" type="string"/>
+    </event>
+    <event name="ConfEndRequest" display="ConfEndRequest" >
+      <parameter name="strConfControllerIP" type="string"/>
+      <parameter name="nConfControllerPort" type="i4"/>
+      <parameter name="strTransactionId" type="string"/>
+      <parameter name="strConfScheduleId" type="string"/>
+      <parameter name="strConferenceEndpoint" type="string"/>
+      <parameter name="strConnections" type="string"/>
+    </event>
+    <event name="ConfMusicOnRequest" display="ConfMusicOnRequest" >
+      <parameter name="strConfControllerIP" type="string"/>
+      <parameter name="nConfControllerPort" type="i4"/>
+      <parameter name="strTransactionId" type="string"/>
+      <parameter name="strConfScheduleId" type="string"/>
+      <parameter name="strConferenceEndpoint" type="string"/>
+      <parameter name="lServiceProviderId" type="i8"/>
+    </event>
+    <event name="ConfMusicOffRequest" display="ConfMusicOffRequest" >
+      <parameter name="strConfControllerIP" type="string"/>
+      <parameter name="nConfControllerPort" type="i4"/>
+      <parameter name="strTransactionId" type="string"/>
+      <parameter name="strConfScheduleId" type="string"/>
+      <parameter name="strConferenceEndpoint" type="string"/>
+      <parameter name="strReleaseEndpoint" type="string"/>
+    </event>
+  </events>
+  <global-handlers >
+    <handler event="Standard.OnServiceLoad.1" function="OnServiceLoad" public="0" always-on="0"/>
+    <handler event="ConfMuteRequest" function="OnConfMuteRequest" public="1" always-on="1"/>
+    <handler event="ConfUnmuteRequest" function="OnConfUnmuteRequest" public="1" always-on="1"/>
+    <handler event="ConfEndRequest" function="OnConfEndRequest" public="1" always-on="1"/>
+    <handler event="ConfMusicOnRequest" function="OnConfMusicOnRequest" public="1" always-on="1"/>
+    <handler event="ConfMusicOffRequest" function="OnConfMusicOffRequest" public="1" always-on="1"/>
+  </global-handlers>
+  <global-vars >
+    <var name="g_strDBName" type="string" >pactolusdb</var>
+    <var name="g_strSessionId" type="string" ></var>
+    <var name="g_strApplicationName" type="string" >global_command</var>
+    <var name="g_strConferenceEndpoint" type="string" ></var>
+    <var name="g_strConfEventId" type="string" ></var>
+    <var name="g_nTimeout" type="i4" >10</var>
+    <var name="g_oMS" type="object" ></var>
+    <var name="strLanguage" type="string" >eng</var>
+    <var name="g_oPlayEndPointMap" type="object" ></var>
+    <var name="g_strMostAvailPortMSName" type="string" >cs-cms1000.pactolus.com</var>
+  </global-vars>
+  <shared-vars >
+    <var name="s_strConfMSType" type="string" >SIP+MSML</var>
+    <var name="s_nConferenceMaxParties" type="i4" >16</var>
+    <var name="s_nConferenceMaxTalkers" type="i4" >3</var>
+    <var name="s_strCodec" type="string" ></var>
+    <var name="s_nNbrActiveSpeakers" type="i4" >0</var>
+    <var name="s_nReportingInterval" type="i4" >5</var>
+    <var name="s_nDBThreshold" type="i4" >-96</var>
+  </shared-vars>
+  <functions >
+    <function name="OnConfMuteRequest" start="3" event="ConfMuteRequest" returns="void" >
+      <parameters >
+        <parameter name="strConfControllerIP" type="string" pass="byref"/>
+        <parameter name="nConfControllerPort" type="i4" pass="byref"/>
+        <parameter name="strTransactionId" type="string" pass="byref"/>
+        <parameter name="strConfScheduleId" type="string" pass="byref"/>
+        <parameter name="strConferenceEndpoint" type="string" pass="byref"/>
+        <parameter name="strEndpointConnnectionId" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nReturnCode" type="i4" >-1</var>
+        <var name="strMSType" type="string" >CONV</var>
+        <var name="nTimeout" type="i4" >20</var>
+        <var name="strEmptyString" type="string" ></var>
+        <var name="bMuteIndividual" type="boolean" >0</var>
+        <var name="strEndpoint" type="string" ></var>
+        <var name="strConnectionId" type="string" ></var>
+        <var name="strReturnMsg" type="string" ></var>
+        <var name="cnf" type="Conference" ></var>
+        <var name="ep" type="MediaEndpoint" ></var>
+      </local-vars>
+      <actions >
+        <action id="3" plug-in="Pactolus.Branch.1" ><?xtml-editor x=76 y=310 ?>
+          <!--MuteALL?-->
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+            <result name="*" link="16" stubbed="0" >strEndpointConnnectionId match "\*"</result>
+            <result name="list" link="11" stubbed="0" >bMuteIndividual == false</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_disable_event();
+Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: OnConfMuteRequest");
+Server.logInfo("CC IP : " + Session.strConfControllerIP);
+Server.logInfo("CC PORT : " + Session.nConfControllerPort);
+Server.logInfo("TRANSACTION ID : " + Session.strTransactionId);
+Server.logInfo("CONFERENCE ENDPOINT : " + Session.strConferenceEndpoint);
+Server.logInfo("ENDPOINT CONNECTION ID: " + Session.strEndpointConnnectionId);
+
+if ("*" == Session.strEndpointConnnectionId)
+{
+	Server.logInfo("MUTE ALL PARTIES");
+	Session.cnf.name = Session.strConferenceEndpoint;
+}
+else
+{
+	var myString = new String (Session.strEndpointConnnectionId);
+	var myArray = myString.split(",");
+	Server.logInfo("ARRAY LENGTH IS: " + myArray.length);
+	if (1 == myArray.length)
+	{
+		Server.logInfo("MUTE SINGLE PARTY");
+		Session.bMuteIndividual = true;
+		myArray.length = 0;
+		myArray = myString.split("#");
+		Session.strEndpoint = myArray[0];
+		Session.strConnectionId = myArray[1];
+		Server.logInfo("ENDPOINT IS : " + Session.strEndpoint);
+		Server.logInfo("CONNECTION ID IS : " + Session.strConnectionId);
+		Session.ep.connection_id = Session.strConnectionId;
+		Session.ep.name = Session.strEndpoint;
+		Session.cnf.name = Session.strConferenceEndpoint;
+	}
+	else
+	{
+		Session.bMuteIndividual = false;
+		Server.logInfo("MUTE MULTIPLE PARTIES");
+	}
+}]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=804 y=541 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_enable_event();
+Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: OnConfMuteRequest");
+Server.logInfo("CC IP : " + Session.strConfControllerIP);
+Server.logInfo("CC PORT : " + Session.nConfControllerPort);
+Server.logInfo("TRANSACTION ID : " + Session.strTransactionId);
+Server.logInfo("CONFERENCE ENDPOINT : " + Session.strConferenceEndpoint);
+Server.logInfo("ENDPOINT CONNECTION ID: " + Session.strEndpointConnnectionId);]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=576 y=542 ?>
+          <!--"ConfMuteResponse"-->
+          <SOAP xmlns="urn:www.pactolus.com:xtml:communication" destination-ip="strConfControllerIP" transaction="strTransactionId" message-name="&quot;ConfMuteResponse&quot;" destination-port="nConfControllerPort" destination-type="4" destination-session="" waiting-session-selected="" xml-namespace="" >
+            <parameter tag="&quot;Status&quot;" value="0"/>
+            <parameter tag="&quot;StatusMessage&quot;" value="strReturnMsg"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strReturnMsg = "SUCCESS CONF MUTE REQUEST";
+Server.logInfo("MODIFY MEMBER RETURNS : " + Session.nReturnCode);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND RESPONSE TO CC, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=810 y=92 ?>
+          <!--"ConfMuteResponse"-->
+          <SOAP xmlns="urn:www.pactolus.com:xtml:communication" destination-ip="strConfControllerIP" transaction="strTransactionId" message-name="&quot;ConfMuteResponse&quot;" destination-port="nConfControllerPort" destination-type="4" destination-session="" waiting-session-selected="" xml-namespace="" >
+            <parameter tag="&quot;Status&quot;" value="-1"/>
+            <parameter tag="&quot;StatusMessage&quot;" value="strReturnMsg"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strReturnMsg = "FAILURE CONF MUTE REQUEST";
+Server.logError("ERROR MODIFY MEMBER, RETURNS : " + Session.nReturnCode);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND RESPONSE TO CC, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Pactolus.MGCPModify.1" ><?xtml-editor x=342 y=545 ?>
+          <mdcx xmlns="urn:www.pactolus.com:xtml:media" connection-id="strEndpointConnnectionId" endpoint="strConferenceEndpoint" callid="strEmptyString" returns="nReturnCode" remote-sdp="" mode="convedia listen only" packetization-period="" codec="-1" timeout="g_nTimeout" local-connection-options="" second-endpoint-id="" ms-type="strMSType" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </mdcx>
+          <results >
+            <result name="Default" link="12" stubbed="1"/>
+            <result name="Success" link="7" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("MUTE A LIST");
+Server.logInfo("CONFERENCE ENDPOINT : " + Session.strConferenceEndpoint);
+Server.logInfo("ENDPOINT PLUS CONNECTION ID: " + Session.strEndpointConnnectionId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("MUTE A LIST RETURNS : " + Session.nReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Pactolus.Branch.1" ><?xtml-editor x=581 y=180 ?>
+          <!--not really an error?-->
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="nReturnCode==800006" link="13" stubbed="0" >nReturnCode == 800006</result>
+          </results>
+        </action>
+        <action id="13" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=827 y=268 ?>
+          <!--"ConfMuteResponse"-->
+          <SOAP xmlns="urn:www.pactolus.com:xtml:communication" destination-ip="strConfControllerIP" transaction="strTransactionId" message-name="&quot;ConfMuteResponse&quot;" destination-port="nConfControllerPort" destination-type="4" destination-session="" waiting-session-selected="" xml-namespace="" >
+            <parameter tag="&quot;Status&quot;" value="1"/>
+            <parameter tag="&quot;StatusMessage&quot;" value="strReturnMsg"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strReturnMsg = "SUCCESS CONF MUTE REQUEST, BUT NOBODY IN CONFERENCE";
+Server.logInfo("MUTE CONF, BUT NOBODY IN CONF, MODIFY MEMBER, RETURNS : " + Session.nReturnCode);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND RESPONSE TO CC, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Pactolus.ModifyConference.1" ><?xtml-editor x=579 y=366 ?>
+          <modify-conference xmlns="urn:www.pactolus.com:xtml:conference" action="1" conference="cnf" max-talkers="s_nConferenceMaxTalkers" hysteresis="" time-constant="" active-speakers-to-report="" reporting-interval="" active-speaker-threshold="" return-value="nReturnCode" timeout="nTimeout" asn-mode="1" gain-setting="0"/>
+          <results >
+            <result name="Default" link="12" stubbed="1"/>
+            <result name="Success" link="7" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("MUTE ALL");
+Session.cnf.LogInfo();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("MODIFY CONFERENCE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO MODIFY CONFERENCE TO MUTE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Pactolus.ModifyParty.1" ><?xtml-editor x=311 y=182 ?>
+          <!--Mute mode-->
+          <modify-party xmlns="urn:www.pactolus.com:xtml:conference" action="0" conference="cnf" media-endpoint="ep" participant-mode="&quot;Mute&quot;" coachee-endpoint="" return-value="nReturnCode" timeout="nTimeout" dtmf-clamp-mode="2" gain-operation="0" gain-mode="0" gain-amount="" max-gain="" direction=""/>
+          <results >
+            <result name="Default" link="12" stubbed="1"/>
+            <result name="Success" link="7" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("MUTE INDIVIDUAL");
+Session.cnf.LogInfo();
+Session.ep.LogInfo();
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("CHANGE TO MUTE MODE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO CHANGE TO MUTE MODE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=340 y=369 ?>
+          <!--"getConfEndpoint"-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.conferencing.psAPISceGetConfEndpoint&quot;" method="&quot;getConfEndpoint&quot;" timeout="g_nTimeout" return="" method-return-var="nReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_strDBName</parameter>
+            <parameter type="in" var-type="string" >g_strSessionId</parameter>
+            <parameter type="in" var-type="string" >strConfScheduleId</parameter>
+            <parameter type="inout" var-type="string" >cnf.name</parameter>
+            <parameter type="inout" var-type="string" >cnf.media_server_name</parameter>
+            <parameter type="inout" var-type="string" >cnf.media_server_type</parameter>
+            <parameter type="inout" var-type="string" >cnf.sip_dialog.dialog.from</parameter>
+            <parameter type="inout" var-type="string" >cnf.sip_dialog.dialog.to</parameter>
+            <parameter type="inout" var-type="string" >cnf.sip_dialog.dialog.call_id</parameter>
+            <parameter type="inout" var-type="string" >cnf.sip_dialog.local.cseq</parameter>
+            <parameter type="inout" var-type="string" >g_strConfEventId</parameter>
+          </java>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="Success" link="14" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[// intialize conference object...
+Server.logInfo("INFO: ********JAVA CALLING getConfEndpoint *********");
+Server.logInfo("INFO: session Id = " + Session.g_strSessionId);
+Server.logInfo("INFO: DB name = " + Session.g_strDBName);
+Server.logInfo("INFO: Conf Schedule Id = " + Session.strConfScheduleId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("INFO: ********** iJavaReturnCode " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO GET CONFERENCE ENDPOINT, EXIT ON: " + Result.name);
+	Session.strReturnMsg = "FAIL TO GET CONFERENCE ENDPOINT";
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnConfUnmuteRequest" start="5" event="ConfUnmuteRequest" returns="void" >
+      <parameters >
+        <parameter name="strConfControllerIP" type="string" pass="byref"/>
+        <parameter name="nConfControllerPort" type="i4" pass="byref"/>
+        <parameter name="strTransactionId" type="string" pass="byref"/>
+        <parameter name="strConfScheduleId" type="string" pass="byref"/>
+        <parameter name="strConferenceEndpoint" type="string" pass="byref"/>
+        <parameter name="strEndpointConnnectionId" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nReturnCode" type="i4" >-1</var>
+        <var name="strMSType" type="string" >CONV</var>
+        <var name="nTimeout" type="i4" >20</var>
+        <var name="strEmptyString" type="string" ></var>
+        <var name="bMuteIndividual" type="boolean" >0</var>
+        <var name="strEndpoint" type="string" ></var>
+        <var name="strConnectionId" type="string" ></var>
+        <var name="strReturnMsg" type="string" ></var>
+        <var name="cnf" type="Conference" ></var>
+        <var name="ep" type="MediaEndpoint" ></var>
+      </local-vars>
+      <actions >
+        <action id="5" plug-in="Pactolus.Branch.1" ><?xtml-editor x=93 y=234 ?>
+          <!--UnmuteALL?-->
+          <results >
+            <result name="Default" link="16" stubbed="0"/>
+            <result name="*" link="18" stubbed="0" >strEndpointConnnectionId match "\*"</result>
+            <result name="list" link="11" stubbed="0" >bMuteIndividual == false</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_disable_event();
+Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: OnConfUnmuteRequest");
+Server.logInfo("CC IP : " + Session.strConfControllerIP);
+Server.logInfo("CC PORT : " + Session.nConfControllerPort);
+Server.logInfo("TRANSACTION ID : " + Session.strTransactionId);
+Server.logInfo("CONFERENCE ENDPOINT : " + Session.strConferenceEndpoint);
+Server.logInfo("ENDPOINT CONNECTION ID: " + Session.strEndpointConnnectionId);
+
+if ("*" == Session.strEndpointConnnectionId)
+{
+	Server.logInfo("UNMUTE ALL PARTIES");
+	Session.cnf.name = Session.strConferenceEndpoint;
+}
+else
+{
+	var myString = new String (Session.strEndpointConnnectionId);
+	var myArray = myString.split(",");
+	Server.logInfo("ARRAY LENGTH IS: " + myArray.length);
+	if (1 == myArray.length)
+	{
+		Server.logInfo("UNMUTE SINGLE PARTY");
+		Session.bMuteIndividual = true;
+		myArray.length = 0;
+		myArray = myString.split("#");
+		Session.strEndpoint = myArray[0];
+		Session.strConnectionId = myArray[1];
+		Server.logInfo("ENDPOINT IS : " + Session.strEndpoint);
+		Server.logInfo("CONNECTION ID IS : " + Session.strConnectionId);
+		Session.cnf.name = Session.strConferenceEndpoint;
+		Session.ep.connection_id = Session.strConnectionId;
+		Session.ep.name = Session.strEndpoint;
+	}
+	else
+	{
+		Session.bMuteIndividual = false;
+		Server.logInfo("UNMUTE MULTIPLE PARTIES");
+	}
+}]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1068 y=101 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_enable_event();]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=629 y=435 ?>
+          <!--"ConfUnmuteResponse"-->
+          <SOAP xmlns="urn:www.pactolus.com:xtml:communication" destination-ip="strConfControllerIP" transaction="strTransactionId" message-name="&quot;ConfUnmuteResponse&quot;" destination-port="nConfControllerPort" destination-type="4" destination-session="" waiting-session-selected="" xml-namespace="" >
+            <parameter tag="&quot;Status&quot;" value="0"/>
+            <parameter tag="&quot;StatusMessage&quot;" value="strReturnMsg"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strReturnMsg = "SUCCESS CONF UNMUTE REQUEST";
+Server.logInfo("MODIFY MEMBER RETURNS : " + Session.nReturnCode);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND RESPONSE TO CC, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=851 y=99 ?>
+          <!--"ConfUnmuteResponse"-->
+          <SOAP xmlns="urn:www.pactolus.com:xtml:communication" destination-ip="strConfControllerIP" transaction="strTransactionId" message-name="&quot;ConfUnmuteResponse&quot;" destination-port="nConfControllerPort" destination-type="4" destination-session="" waiting-session-selected="" xml-namespace="" >
+            <parameter tag="&quot;Status&quot;" value="-1"/>
+            <parameter tag="&quot;StatusMessage&quot;" value="strReturnMsg"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strReturnMsg = "FAILURE CONF UNMUTE REQUEST";
+Server.logError("ERROR MODIFY MEMBER, RETURNS : " + Session.nReturnCode);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND RESPONSE TO CC, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Pactolus.MGCPModify.1" ><?xtml-editor x=398 y=435 ?>
+          <mdcx xmlns="urn:www.pactolus.com:xtml:media" connection-id="strEndpointConnnectionId" endpoint="strConferenceEndpoint" callid="strEmptyString" returns="nReturnCode" remote-sdp="" mode="conference" packetization-period="" codec="-1" timeout="g_nTimeout" local-connection-options="" second-endpoint-id="" ms-type="strMSType" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </mdcx>
+          <results >
+            <result name="Default" link="12" stubbed="1"/>
+            <result name="Success" link="6" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("UNMUTE A LIST");
+Server.logInfo("CONFERENCE ENDPOINT : " + Session.strConferenceEndpoint);
+Server.logInfo("ENDPOINT PLUS CONNECTION ID: " + Session.strEndpointConnnectionId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("UNMUTE A LIST RETURNS : " + Session.nReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Pactolus.Branch.1" ><?xtml-editor x=606 y=145 ?>
+          <!--not really an error?-->
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="nReturnCode==800006" link="14" stubbed="0" >nReturnCode == 800006</result>
+          </results>
+        </action>
+        <action id="14" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=866 y=239 ?>
+          <!--"ConfUnmuteResponse"-->
+          <SOAP xmlns="urn:www.pactolus.com:xtml:communication" destination-ip="strConfControllerIP" transaction="strTransactionId" message-name="&quot;ConfUnmuteResponse&quot;" destination-port="nConfControllerPort" destination-type="4" destination-session="" waiting-session-selected="" xml-namespace="" >
+            <parameter tag="&quot;Status&quot;" value="1"/>
+            <parameter tag="&quot;StatusMessage&quot;" value="strReturnMsg"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strReturnMsg = "SUCCESS CONF UNMUTE REQUEST, BUT NOBODY IN CONFERENCE";
+Server.logInfo("UNMUTE CONF, BUT NOBODY IN CONF, MODIFY MEMBER, RETURNS : " + Session.nReturnCode);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND RESPONSE TO CC, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Pactolus.ModifyConference.1" ><?xtml-editor x=628 y=290 ?>
+          <!--Unmute-->
+          <modify-conference xmlns="urn:www.pactolus.com:xtml:conference" action="1" conference="cnf" max-talkers="s_nConferenceMaxTalkers" hysteresis="" time-constant="" active-speakers-to-report="" reporting-interval="" active-speaker-threshold="" return-value="nReturnCode" timeout="nTimeout" asn-mode="1" gain-setting="1"/>
+          <results >
+            <result name="Default" link="12" stubbed="1"/>
+            <result name="Success" link="6" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("UNMUTE ALL");
+Session.cnf.LogInfo();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("MODIFY CONFERENCE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO MODIFY CONFERENCE TO UNMUTE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Pactolus.ModifyParty.1" ><?xtml-editor x=375 y=80 ?>
+          <!--Conference mode-->
+          <modify-party xmlns="urn:www.pactolus.com:xtml:conference" action="0" conference="cnf" media-endpoint="ep" participant-mode="&quot;Full&quot;" coachee-endpoint="" return-value="nReturnCode" timeout="nTimeout" dtmf-clamp-mode="2" gain-operation="0" gain-mode="0" gain-amount="" max-gain="" direction=""/>
+          <results >
+            <result name="Default" link="12" stubbed="1"/>
+            <result name="Success" link="6" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("UNMUTE INDIVIDUAL");
+Session.cnf.LogInfo();
+Session.ep.LogInfo();
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("CHANGE TO UNMUTE MODE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO CHANGE TO UNMUTE MODE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="18" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=391 y=293 ?>
+          <!--"getConfEndpoint"-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.conferencing.psAPISceGetConfEndpoint&quot;" method="&quot;getConfEndpoint&quot;" timeout="g_nTimeout" return="" method-return-var="nReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_strDBName</parameter>
+            <parameter type="in" var-type="string" >g_strSessionId</parameter>
+            <parameter type="in" var-type="string" >strConfScheduleId</parameter>
+            <parameter type="inout" var-type="string" >cnf.name</parameter>
+            <parameter type="inout" var-type="string" >cnf.media_server_name</parameter>
+            <parameter type="inout" var-type="string" >cnf.media_server_type</parameter>
+            <parameter type="inout" var-type="string" >cnf.sip_dialog.dialog.from</parameter>
+            <parameter type="inout" var-type="string" >cnf.sip_dialog.dialog.to</parameter>
+            <parameter type="inout" var-type="string" >cnf.sip_dialog.dialog.call_id</parameter>
+            <parameter type="inout" var-type="string" >cnf.sip_dialog.local.cseq</parameter>
+            <parameter type="inout" var-type="string" >g_strConfEventId</parameter>
+          </java>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+            <result name="Success" link="15" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[// intialize conference object...
+Server.logInfo("INFO: ********JAVA CALLING getConfEndpoint *********");
+Server.logInfo("INFO: session Id = " + Session.g_strSessionId);
+Server.logInfo("INFO: DB name = " + Session.g_strDBName);
+Server.logInfo("INFO: Conf Schedule Id = " + Session.strConfScheduleId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("INFO: ********** iJavaReturnCode " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO GET CONFERENCE ENDPOINT, EXIT ON: " + Result.name);
+	Session.strReturnMsg = "FAIL TO GET CONFERENCE ENDPOINT";
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnConfEndRequest" start="6" event="ConfEndRequest" returns="void" >
+      <parameters >
+        <parameter name="strConfControllerIP" type="string" pass="byref"/>
+        <parameter name="nConfControllerPort" type="i4" pass="byref"/>
+        <parameter name="strTransactionId" type="string" pass="byref"/>
+        <parameter name="strConfScheduleId" type="string" pass="byref"/>
+        <parameter name="strConferenceEndpoint" type="string" pass="byref"/>
+        <parameter name="strConnections" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="strReturnMsg" type="string" ></var>
+        <var name="nReturnCode" type="i4" >0</var>
+        <var name="cnf" type="Conference" ></var>
+      </local-vars>
+      <actions >
+        <action id="6" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=148 y=191 ?>
+          <!--"getConfEndpoint"-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.conferencing.psAPISceGetConfEndpoint&quot;" method="&quot;getConfEndpoint&quot;" timeout="g_nTimeout" return="" method-return-var="nReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_strDBName</parameter>
+            <parameter type="in" var-type="string" >g_strSessionId</parameter>
+            <parameter type="in" var-type="string" >strConfScheduleId</parameter>
+            <parameter type="inout" var-type="string" >cnf.name</parameter>
+            <parameter type="inout" var-type="string" >cnf.media_server_name</parameter>
+            <parameter type="inout" var-type="string" >cnf.media_server_type</parameter>
+            <parameter type="inout" var-type="string" >cnf.sip_dialog.dialog.from</parameter>
+            <parameter type="inout" var-type="string" >cnf.sip_dialog.dialog.to</parameter>
+            <parameter type="inout" var-type="string" >cnf.sip_dialog.dialog.call_id</parameter>
+            <parameter type="inout" var-type="string" >cnf.sip_dialog.local.cseq</parameter>
+            <parameter type="inout" var-type="string" >g_strConfEventId</parameter>
+          </java>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="7" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_disable_event();
+Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: OnConfEndRequest");
+Server.logInfo("session.strConfScheduleId" + Session.strConfScheduleId);
+Server.logInfo("session.strConferenceEndpoint" + Session.strConferenceEndpoint);
+Server.logInfo("session.strConnections" + Session.strConnections);
+Server.logInfo("session.strTransactionId" + Session.strTransactionId);
+Session.g_strSessionId = Session._sessionId;
+Server.logInfo("INFO: ********JAVA CALLING getConfEndpoint *********");
+Server.logInfo("INFO: session Id = " + Session.g_strSessionId);
+Server.logInfo("INFO: DB name = " + Session.g_strDBName);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("INFO: ********** iJavaReturnCode " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO GET CONFERENCE ENDPOINT, EXIT ON: " + Result.name);
+	Session.strReturnMsg = "FAIL TO GET CONFERENCE ENDPOINT";
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=660 y=169 ?>
+          <!--"ConfEndResponse" Failure-->
+          <SOAP xmlns="urn:www.pactolus.com:xtml:communication" destination-ip="strConfControllerIP" transaction="strTransactionId" message-name="&quot;ConfEndResponse&quot;" destination-port="nConfControllerPort" destination-type="4" destination-session="" waiting-session-selected="" xml-namespace="" >
+            <parameter tag="&quot;Status&quot;" value="-1"/>
+            <parameter tag="&quot;StatusMessage&quot;" value="strReturnMsg"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strReturnMsg = "FAILURE ConfEndRequest";
+Server.logError("ERROR DELETE CONFERENCE RETURNS : " + Session.nReturnCode);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND RESPONSE TO CC, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=674 y=298 ?>
+          <!--"ConfEndResponse" SUCCESS-->
+          <SOAP xmlns="urn:www.pactolus.com:xtml:communication" destination-ip="strConfControllerIP" transaction="strTransactionId" message-name="&quot;ConfEndResponse&quot;" destination-port="nConfControllerPort" destination-type="4" destination-session="" waiting-session-selected="" xml-namespace="" >
+            <parameter tag="&quot;Status&quot;" value="0"/>
+            <parameter tag="&quot;StatusMessage&quot;" value="strReturnMsg"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strReturnMsg = "SUCCESS ConfEndRequest";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND RESPONSE TO CC, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=896 y=167 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_enable_event();]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Pactolus.DeleteConference.1" ><?xtml-editor x=384 y=187 ?>
+          <delete-conference xmlns="urn:www.pactolus.com:xtml:conference" conference="cnf" return-value="nReturnCode" timeout="g_nTimeout"/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="4" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.cnf.LogInfo();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("FAIL TO DELETE CONFERENCE, EXIT ON BRANCH: " + Result.name);
+}
+else
+{
+	Server.logInfo("SUCCESS DELETE CONFERENCE: " + Session.strConferenceEndpoint);
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnServiceLoad" start="1" event="ServiceLoad" returns="void" >
+      <parameters >
+        <parameter name="strAppName" type="string" pass="byref"/>
+        <parameter name="nSessionCount" type="i2" pass="byref"/>
+        <parameter name="nMaxIterations" type="i2" pass="byref"/>
+        <parameter name="nServerId" type="i2" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Pactolus.UserFunction.1" ><?xtml-editor x=192 y=106 ?>
+          <!--get conference MS type-->
+          <user-function xmlns="urn:www.pactolus.com:xtml:application" process="&quot;PACTOLUS_ps_c_adaptor&quot;" function="&quot;get_property&quot;" timeout="30" return="" async="0" >
+            <parameter >"conferencing-media-server-type"</parameter>
+            <parameter >s_strConfMSType</parameter>
+            <parameter >"conference-max-parties"</parameter>
+            <parameter >s_nConferenceMaxParties</parameter>
+            <parameter >"conference-max-talkers"</parameter>
+            <parameter >s_nConferenceMaxTalkers</parameter>
+            <parameter >"number-active-speaker-report"</parameter>
+            <parameter >s_nNbrActiveSpeakers</parameter>
+            <parameter >"asn-reporting-interval"</parameter>
+            <parameter >s_nReportingInterval</parameter>
+            <parameter >"asn-threshold-db"</parameter>
+            <parameter >s_nDBThreshold</parameter>
+            <parameter >"codec"</parameter>
+            <parameter >s_strCodec</parameter>
+          </user-function>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=466 y=103 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if (0 == Session.s_strConfMSType.length)
+{
+	Server.logInfo("NO SETTINGS FOR CONFERENCE MS TYPE, DEFAULT TO CONV");
+	Session.s_strConfMSType = "CONV";
+}
+if (Session.s_nConferenceMaxParties <= 0)
+{
+	Session.s_nConferenceMaxParties = 125;
+	Server.logInfo("WARNING: NO SETTING CONFERENCE MAX PARTIES.  USE DEFAULT: 125");
+}
+if (Session.s_nConferenceMaxTalkers <= 0)
+{
+	Session.s_nConferenceMaxTalkers = 16;
+	Server.logInfo("WARNING: NO SETTING CONFERENCE MAX TALKERS.  USE DEFAULT: 16");
+}
+if (Session.s_strCodec.length <= 0)
+{
+	Session.s_strCodec = "PCMU";
+	Server.logInfo("WARNING: NO SETTING CODEC.  USE DEFAULT: PCMU");
+}
+if (Session.s_nNbrActiveSpeakers <= 0)
+{
+	Session.s_nNbrActiveSpeakers = 3;
+	Server.logInfo("WARNING: NO SETTING FOR s_nNbrActiveSpeakers.  USE DEFAULT: 3");
+}
+if (Session.s_nDBThreshold <= -96)
+{
+	Session.s_nDBThreshold = -96;
+	Server.logInfo("WARNING: NO SETTING FOR s_nDBThreshold.  USE DEFAULT: -96");
+}
+if (Session.s_nReportingInterval <= 0)
+{
+	Session.s_nReportingInterval = 5;
+	Server.logInfo("WARNING: NO SETTING FOR s_nReportingInterval.  USE DEFAULT: 5");
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnConfMusicOnRequest" start="3" event="ConfMusicOnRequest" returns="void" >
+      <parameters >
+        <parameter name="strConfControllerIP" type="string" pass="byref"/>
+        <parameter name="nConfControllerPort" type="i4" pass="byref"/>
+        <parameter name="strTransactionId" type="string" pass="byref"/>
+        <parameter name="strConfScheduleId" type="string" pass="byref"/>
+        <parameter name="strConferenceEndpoint" type="string" pass="byref"/>
+        <parameter name="lServiceProviderId" type="i8" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="strReturnMsg" type="string" ></var>
+        <var name="nReturnCode" type="i4" >-50</var>
+        <var name="nCounter" type="i4" >0</var>
+        <var name="strEmptyString" type="string" ></var>
+        <var name="bNullString" type="boolean" >0</var>
+        <var name="nNumberOfPrompts" type="i4" >0</var>
+        <var name="strPromptType" type="string" ></var>
+        <var name="oPromptList" type="object" ></var>
+        <var name="strGlobalMusicIsOn" type="string" >T</var>
+        <var name="nNumRetry" type="i4" >0</var>
+        <var name="cnf" type="Conference" ></var>
+        <var name="epPlay" type="MediaEndpoint" ></var>
+        <var name="epInConf" type="MediaEndpoint" ></var>
+        <var name="nMSType" type="i4" >0</var>
+        <var name="strMSOneName" type="string" ></var>
+        <var name="nMSOneCapacity" type="i4" >0</var>
+        <var name="strMSTwoName" type="string" ></var>
+        <var name="nMSTwoCapacity" type="i4" >0</var>
+        <var name="strMSThreeName" type="string" ></var>
+        <var name="nMSThreeCapacity" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="3" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=273 y=198 ?>
+          <!--"getConfEndpoint"-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.conferencing.psAPISceGetConfEndpoint&quot;" method="&quot;getConfEndpoint&quot;" timeout="g_nTimeout" return="" method-return-var="nReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_strDBName</parameter>
+            <parameter type="in" var-type="string" >g_strSessionId</parameter>
+            <parameter type="in" var-type="string" >strConfScheduleId</parameter>
+            <parameter type="inout" var-type="string" >cnf.name</parameter>
+            <parameter type="inout" var-type="string" >cnf.media_server_name</parameter>
+            <parameter type="inout" var-type="string" >cnf.media_server_type</parameter>
+            <parameter type="inout" var-type="string" >cnf.sip_dialog.dialog.from</parameter>
+            <parameter type="inout" var-type="string" >cnf.sip_dialog.dialog.to</parameter>
+            <parameter type="inout" var-type="string" >cnf.sip_dialog.dialog.call_id</parameter>
+            <parameter type="inout" var-type="string" >cnf.sip_dialog.local.cseq</parameter>
+            <parameter type="inout" var-type="string" >g_strConfEventId</parameter>
+          </java>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success" link="5" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_disable_event();
+Session.g_strConferenceEndpoint = "";
+Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: OnConfMusicOnRequest");
+Server.logInfo("Session.strConfControllerIP : " + Session.strConfControllerIP);
+Server.logInfo("Session.nConfControllerPort : " + Session.nConfControllerPort);
+Server.logInfo("Session.strTransactionId : " + Session.strTransactionId);
+Server.logInfo("Session.strConferenceEndpoint : " + Session.strConferenceEndpoint);
+Server.logInfo("Session.strConfScheduleId : " + Session.strConfScheduleId);
+js_initMS (Session.g_oMS, Session.s_strConfMSType);
+
+// initialize the media server object ...
+Session.epPlay.media_server_type = Session.s_strConfMSType;
+// intialize conference object...
+Session.cnf.max_parties = Session.s_nConferenceMaxParties;
+Session.cnf.max_talkers = Session.s_nConferenceMaxTalkers;
+Session.cnf.media_server_name = Session.g_strMostAvailPortMSName; 
+Session.cnf.media_server_type = Session.s_strConfMSType;
+Session.cnf.asn.active_speaker_threshold = Session.s_nDBThreshold;
+Session.cnf.asn.num_speakers = Session.s_nNbrActiveSpeakers;
+Session.cnf.asn.report_interval = Session.s_nReportingInterval;
+Session.cnf.nAGCTargetLevelIn = Session.s_nAGCTargetLevelIn;
+Session.cnf.nAGCMaxLevelIn = Session.s_nAGCMaxLevelIn;
+Session.cnf.nAGCTargetLevelOut = Session.s_nAGCTargetLevelOut;
+Session.cnf.nAGCMaxLevelOut = Session.s_nAGCMaxLevelOut;
+Session.g_strSessionId = Session._sessionId;
+Server.logInfo("INFO: ********JAVA CALLING getConfEndpoint *********");
+Server.logInfo("INFO: session Id = " + Session.g_strSessionId);
+Server.logInfo("INFO: DB name = " + Session.g_strDBName);
+Server.logInfo("INFO: Conf Schedule Id = " + Session.strConfScheduleId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("INFO: ********** iJavaReturnCode " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO GET CONFERENCE ENDPOINT, EXIT ON: " + Result.name);
+	Session.strReturnMsg = "FAIL TO GET CONFERENCE ENDPOINT";
+}]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=1499 y=697 ?>
+          <!--"ConfMusicOnResponse" SUCCESS-->
+          <SOAP xmlns="urn:www.pactolus.com:xtml:communication" destination-ip="strConfControllerIP" transaction="strTransactionId" message-name="&quot;ConfMusicOnResponse&quot;" destination-port="nConfControllerPort" destination-type="4" destination-session="" waiting-session-selected="" xml-namespace="" >
+            <parameter tag="&quot;Status&quot;" value="0"/>
+            <parameter tag="&quot;StatusMessage&quot;" value="strReturnMsg"/>
+            <parameter tag="&quot;ConferenceEndpoint&quot;" value="g_strConferenceEndpoint"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Session.strConfControllerIP : " + Session.strConfControllerIP);
+Server.logInfo("Session.nConfControllerPort : " + Session.nConfControllerPort);
+Server.logInfo("Session.strTransactionId : " + Session.strTransactionId);
+Server.logInfo("Session.strConferenceEndpoint : " + Session.strConferenceEndpoint);
+Server.logInfo("Session.strConfScheduleId : " + Session.strConfScheduleId);
+Session.strReturnMsg = "SUCCESS ConfMusicOnRequest";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND RESPONSE TO CC, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=787 y=187 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strConferenceEndpoint = "";
+js_enable_event();]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=529 y=194 ?>
+          <!--"ConfMusicOnResponse" FAILURE-->
+          <SOAP xmlns="urn:www.pactolus.com:xtml:communication" destination-ip="strConfControllerIP" transaction="strTransactionId" message-name="&quot;ConfMusicOnResponse&quot;" destination-port="nConfControllerPort" destination-type="4" destination-session="" waiting-session-selected="" xml-namespace="" >
+            <parameter tag="&quot;Status&quot;" value="-1"/>
+            <parameter tag="&quot;StatusMessage&quot;" value="strReturnMsg"/>
+            <parameter tag="&quot;ConferenceEndpoint&quot;" value="strConferenceEndpoint"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND RESPONSE TO CC, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.Branch.1" ><?xtml-editor x=537 y=347 ?>
+          <!--SUCCESS?-->
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="2 - wait for conf resource" link="6" stubbed="0" >nReturnCode == 2
+AND nCounter &lt; 3</result>
+            <result name="1 - get the conference endpoint" link="37" stubbed="0" >nReturnCode == 1</result>
+            <result name="0 - endpoint found" link="31" stubbed="1" >nReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nCounter++;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (-1 == Session.nReturnCode)
+{
+	Session.strReturnMsg = "FAILURE ConfMusicOnRequest, INVALID CONFERENCE ID";
+}
+else if (-99 == Session.nReturnCode)
+{
+	Session.strReturnMsg = "FAILURE ConfMusicOnRequest, DB ERROR";
+}
+else if (2 == Session.nReturnCode)
+{
+	Session.strReturnMsg = "FAILURE ConfMusicOnRequest, EXCEED MAX WAIT FOR CONFERENCE RESOURCE";
+}]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=781 y=345 ?>
+          <!--2 secs-->
+          <sleep xmlns="urn:www.pactolus.com:xtml:application" duration="2"/>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+          </results>
+        </action>
+        <action id="9" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=808 y=700 ?>
+          <!--"setConfResource"-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.conferencing.psAPISceSetConfResource&quot;" method="&quot;setConfResource&quot;" timeout="g_nTimeout" return="" method-return-var="nReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_strDBName</parameter>
+            <parameter type="in" var-type="string" >g_strSessionId</parameter>
+            <parameter type="in" var-type="string" >g_strConfEventId</parameter>
+            <parameter type="in" var-type="string" >cnf.name</parameter>
+            <parameter type="in" var-type="string" >cnf.media_server_name</parameter>
+            <parameter type="in" var-type="string" >cnf.media_server_type</parameter>
+            <parameter type="in" var-type="string" >cnf.sip_dialog.dialog.from</parameter>
+            <parameter type="in" var-type="string" >cnf.sip_dialog.dialog.to</parameter>
+            <parameter type="in" var-type="string" >cnf.sip_dialog.dialog.call_id</parameter>
+            <parameter type="in" var-type="string" >cnf.sip_dialog.local.cseq</parameter>
+            <parameter type="in" var-type="string" >strEmptyString</parameter>
+          </java>
+          <results >
+            <result name="Default" link="35" stubbed="1"/>
+            <result name="Success" link="26" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: OnConfMusicOnRequest");
+Server.logInfo("Session.strConfControllerIP : " + Session.strConfControllerIP);
+Server.logInfo("Session.nConfControllerPort : " + Session.nConfControllerPort);
+Server.logInfo("Session.strTransactionId : " + Session.strTransactionId);
+Server.logInfo("Session.strConferenceEndpoint : " + Session.strConferenceEndpoint);
+Server.logInfo("Session.strConfScheduleId : " + Session.strConfScheduleId);
+
+Session.g_strSessionId = Session._sessionId;
+Session.g_strApplicationName = Session._appName;
+Server.logInfo("INFO: ********JAVA CALLING setConfResource *********");
+Server.logInfo("INFO: session Id = " + Session.g_strSessionId);
+Server.logInfo("INFO: application name = " + Session.g_strApplicationName);
+Server.logInfo("INFO: DB name = " + Session.g_strDBName);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("INFO: ********** iJavaReturnCode " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SET CONFERENCE ENDPOINT, EXIT ON: " + Result.name);
+	Session.strReturnMsg = "FAIL TO SET CONFERENCE ENDPOINT";
+}]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Pactolus.Branch.1" ><?xtml-editor x=66 y=202 ?>
+          <!--get conference endpoint?-->
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="!bNullString" link="17" stubbed="1" >bNullString == false</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_disable_event();
+Session.g_strConferenceEndpoint = "";
+Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: OnConfMusicOnRequest");
+Server.logInfo("Session.strConfControllerIP : " + Session.strConfControllerIP);
+Server.logInfo("Session.nConfControllerPort : " + Session.nConfControllerPort);
+Server.logInfo("Session.strTransactionId : " + Session.strTransactionId);
+Server.logInfo("Session.strConferenceEndpoint : " + Session.strConferenceEndpoint);
+Server.logInfo("Session.strConfScheduleId : " + Session.strConfScheduleId);
+js_initMS (Session.g_oMS, Session.s_strConfMSType);
+
+if (0 == Session.strConferenceEndpoint.length)
+{
+	Server.logInfo("NO CONFERENCE ENDPOINT, NEED TO GET IT FROM DB");
+	Session.bNullString = true;
+}
+else
+{
+	Server.logInfo("HAS CONFERENCE ENDPOINT");
+	Session.bNullString = false;
+	Session.g_strConferenceEndpoint = Session.strConferenceEndpoint;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="17" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=59 y=607 ?>
+          <!--"getMusicPrompts"-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.psAPISceMisc&quot;" method="&quot;getMusicPrompts&quot;" timeout="g_nTimeout" return="" method-return-var="nReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_strSessionId</parameter>
+            <parameter type="in" var-type="string" >g_strDBName</parameter>
+            <parameter type="in" var-type="i8" >lServiceProviderId</parameter>
+            <parameter type="inout" var-type="i4" >nNumberOfPrompts</parameter>
+            <parameter type="inout" var-type="string" >strPromptType</parameter>
+            <parameter type="inout" var-type="string" >oPromptList[0].strURL</parameter>
+            <parameter type="inout" var-type="i4" >oPromptList[0].nIndex</parameter>
+            <parameter type="inout" var-type="string" >oPromptList[1].strURL</parameter>
+            <parameter type="inout" var-type="i4" >oPromptList[1].nIndex</parameter>
+            <parameter type="inout" var-type="string" >oPromptList[2].strURL</parameter>
+            <parameter type="inout" var-type="i4" >oPromptList[2].nIndex</parameter>
+            <parameter type="inout" var-type="string" >oPromptList[3].strURL</parameter>
+            <parameter type="inout" var-type="i4" >oPromptList[3].nIndex</parameter>
+            <parameter type="inout" var-type="string" >oPromptList[4].strURL</parameter>
+            <parameter type="inout" var-type="i4" >oPromptList[4].nIndex</parameter>
+          </java>
+          <results >
+            <result name="Default" link="19" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var name = MakeUniqueConferenceName( Session.cnf ) ;
+
+/* save the two special endpoints that we created to use for playing prompts into the conference */
+	Session.g_oPlayEndPointMap[name].epPlay = Session.epPlay ;
+	Session.g_oPlayEndPointMap[name].epInConf = Session.epInConf ;
+
+for (var i = 0; i < 5; i++)
+{
+	Session.oPromptList[i].strURL = "file://99";
+	Session.oPromptList[i].nIndex = 99;
+}
+Server.logInfo("INFO: ********JAVA CALLING psAPISceMisc.getMusicPrompts *********");
+Server.logInfo(" SESSION Id: " + Session.g_strSessionId);
+Server.logInfo(" DB NAME: " + Session.g_strDBName);
+Server.logInfo(" SERVICE PROVIDER Id: " + Session.lServiceProviderId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("INFO: ********** iJavaReturnCode " + Session.nReturnCode);
+Server.logInfo(" Prompt type: " + Session.strPromptType);
+for (var i = 0; i < Session.oPromptList.length; i++)
+{
+	Server.logInfo(" Prompt url: " + Session.oPromptList[i].strURL);
+	Server.logInfo(" Prompt index: " + Session.oPromptList[i].nIndex);
+}
+if (Result.id !=2 || Session.nReturnCode !=0)
+{
+	Server.logInfo("NO PROMPT FOR SERVICE PROVIDER, USE PACTOLUS DEFAULT");
+	Session.oPromptList[0].nIndex = 4090;
+	Session.oPromptList[1].nIndex = 4091;
+	Session.oPromptList[2].nIndex = 4092;
+	Session.oPromptList[3].nIndex = 99;
+	Session.oPromptList[4].nIndex = 99;
+	Session.strPromptType = "I";
+}]]></script>
+          </scripts>
+        </action>
+        <action id="19" plug-in="Pactolus.Branch.1" ><?xtml-editor x=293 y=607 ?>
+          <!--URL or Index-->
+          <results >
+            <result name="Default" link="34" stubbed="0"/>
+            <result name="strPromptType==&quot;U&quot;" link="33" stubbed="0" >strPromptType match "U"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[for (var i = 0; i < 5; i++)
+{
+	if (0 == Session.oPromptList[i].nIndex)
+	{
+		Server.logInfo("PROMPT INDEX IS 0, SET TO 99");
+		Session.oPromptList[i].nIndex = 99;
+	}
+	if (Session.oPromptList[i].strURL.length <= 0)
+	{
+		Server.logInfo("PROMPT URL LENGTH IS ZERO, SET TO file://99");
+		Session.oPromptList[i].strURL = "file://99";
+	}
+}]]></script>
+          </scripts>
+        </action>
+        <action id="21" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=1259 y=698 ?>
+          <!--"setGlobalMusicFlag"-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.conferencing.psAPISceGlobalMusicFlag&quot;" method="&quot;setGlobalMusicFlag&quot;" timeout="g_nTimeout" return="" method-return-var="nReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_strDBName</parameter>
+            <parameter type="in" var-type="string" >g_strSessionId</parameter>
+            <parameter type="in" var-type="string" >g_strConfEventId</parameter>
+            <parameter type="in" var-type="string" >strGlobalMusicIsOn</parameter>
+          </java>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("INFO: ********JAVA CALLING setGlobalMusicFlag *********");
+Server.logInfo("Session.strConfScheduleId : " + Session.strConfScheduleId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("INFO: ********** iJavaReturnCode " + Session.nReturnCode);
+if (Result.id != 2 || Session.nReturnCode != 0)
+{
+	Server.logError("ERROR: FAIL TO SET MUSIC IS ON FLAG, EXIT ON: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="22" plug-in="Pactolus.CNFDeleteConf.1" ><?xtml-editor x=460 y=885 ?>
+          <delete-conference xmlns="urn:www.pactolus.com:xtml:conference" ci="g_strConferenceEndpoint" ms-type="s_strConfMSType" timeout="g_nTimeout" returns="nReturnCode"/>
+          <results >
+            <result name="Default" link="23" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("DELETE CONFERENCE: " + Session.g_strConferenceEndpoint);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO DELETE CONFERENCE. RETURN CODE IS: " + Session.nReturnCode);
+	Server.logError("ERROR: FAIL TO DELETE CONFERENCE. EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="23" plug-in="Pactolus.Branch.1" ><?xtml-editor x=687 y=885 ?>
+          <!--max retry?-->
+          <results >
+            <result name="Default" link="25" stubbed="0"/>
+            <result name="nNumRetry&gt;=3" link="4" stubbed="1" >nNumRetry &gt;= 3</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nNumRetry++;
+Session.g_strConferenceEndpoint = "";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (2 == Result.id)
+{
+	Session.strReturnMsg = "FAIL TO SET CONFERENCE ENDPOINT, EXCEED MAX RETRIES";
+}]]></script>
+          </scripts>
+        </action>
+        <action id="25" plug-in="Pactolus.CNFCreateConf.1" ><?xtml-editor x=898 y=883 ?>
+          <create-conference xmlns="urn:www.pactolus.com:xtml:conference" ci="g_strConferenceEndpoint" persist="1" ms-type="s_strConfMSType" timeout="g_nTimeout" returns="nReturnCode" mp="s_nConferenceMaxParties" mt="s_nConferenceMaxTalkers" hysteresis="" time-constant="" active-speakers="s_nNbrActiveSpeakers" reporting-interval="s_nReportingInterval" active-speaker-threshold="s_nDBThreshold" >
+            <attributes mp="s_nConferenceMaxParties" mt="s_nConferenceMaxTalkers" ig="0" og="0" iat="-10" ias="-40" oat="-10" oas="-40" atn="s_nNbrActiveSpeakers" att="s_nReportingInterval" ia="1" oa="1" te="1" le="1" tp="0" dc="1" tc="1" ate="0" se="0"/>
+          </create-conference>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success" link="31" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("INFO: CREATE A CONFERENCE");
+Server.logInfo("INFO: MAX PARTIES = " + Session.s_nConferenceMaxParties);
+Server.logInfo("INFO: MAX TALKERS = " + Session.s_nConferenceMaxTalkers);
+Server.logInfo("INFO: NUMBER OF ASN TO REPORT = " + Session.s_nNbrActiveSpeakers);
+Server.logInfo("INFO: ASN REPORTING INTERVAL = " + Session.s_nReportingInterval);
+Server.logInfo("INFO: ASN DB THRESHOLD = " + Session.s_nDBThreshold);
+Server.logInfo("INFO: CONFERENCE ENDPOINT ID = " + Session.g_strConferenceEndpoint);
+Server.logInfo("INFO: MS CODEC = " + Session.s_strCodec);
+Server.logInfo("INFO: MS TYPE = " + Session.s_strConfMSType);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("INFO: AFTER CREATE CONFERENCE");
+Server.logInfo("INFO: CONFERENCE ENDPOINT ID = " + Session.g_strConferenceEndpoint);
+Server.logInfo("INFO: MS CODEC = " + Session.s_strCodec);
+Server.logInfo("INFO: MS TYPE = " + Session.s_strConfMSType);
+if (Result.id !=2)
+{
+	Server.logError("FAIL TO CREATE CONFERENCE, EXIT ON BRANCH: " + Result.name);
+	Server.logError("RETURN CODE: " + Session.nReturnCode);
+	Session.strReturnMsg = "FAILURE ConfMusicOnRequest, FAIL TO CREATE CONFERENCE";
+}]]></script>
+          </scripts>
+        </action>
+        <action id="26" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1027 y=707 ?>
+          <!--success?-->
+          <results >
+            <result name="Default" link="35" stubbed="1"/>
+            <result name="nReturnCode == 0" link="21" stubbed="0" >nReturnCode == 0</result>
+          </results>
+        </action>
+        <action id="27" plug-in="Pactolus.CreateConference.1" ><?xtml-editor x=1056 y=486 ?>
+          <create-conference xmlns="urn:www.pactolus.com:xtml:conference" conference="cnf" persist="1" media-server-type="s_strConfMSType" media-server-name="g_strMostAvailPortMSName" max-parties="s_nConferenceMaxParties" max-talkers="s_nConferenceMaxTalkers" hysteresis="" time-constant="" active-speakers-to-report="s_nNbrActiveSpeakers" reporting-interval="s_nReportingInterval" active-speaker-threshold="s_nDBThreshold" return-value="nReturnCode" timeout="g_nTimeout"/>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success" link="31" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("INFO: CREATE A CONFERENCE");]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("INFO: AFTER CREATE CONFERENCE");
+Server.logInfo("INFO: MS CODEC = " + Session.s_strCodec);
+Session.cnf.LogInfo();
+if (Result.id !=2)
+{
+	Server.logError("FAIL TO CREATE CONFERENCE, EXIT ON BRANCH: " + Result.name);
+	Server.logError("RETURN CODE: " + Session.nReturnCode);
+	Session.strReturnMsg = "FAILURE ConfMusicOnRequest, FAIL TO CREATE CONFERENCE";
+}]]></script>
+          </scripts>
+        </action>
+        <action id="29" plug-in="Pactolus.DeleteConference.1" ><?xtml-editor x=1272 y=327 ?>
+          <!--delete conference and try again-->
+          <delete-conference xmlns="urn:www.pactolus.com:xtml:conference" conference="cnf" return-value="nReturnCode" timeout="g_nTimeout"/>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO DELETE CONFERENCE, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE IS: " + Session.nReturnCode);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="30" plug-in="Pactolus.DeleteConnection.2" ><?xtml-editor x=1497 y=504 ?>
+          <!--clean up endpoint and try again-->
+          <dlcx xmlns="urn:www.pactolus.com:xtml:media" media-endpoint="epPlay" returns="nReturnCode" timeout="g_nTimeout" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </dlcx>
+          <results >
+            <result name="Default" link="29" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO DELETE CONNECTION, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE IS: " + Session.nReturn);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="31" plug-in="Pactolus.CreateConnection.2" ><?xtml-editor x=1055 y=328 ?>
+          <!--create a connection to play from-->
+          <crcx xmlns="urn:www.pactolus.com:xtml:media" media-endpoint="epPlay" mode="inactive" remote-sdp="" codec="0" packetization-period="" local-connection-options="" capability="1" second-endpoint="" media-server-type="s_strConfMSType" media-server-name="g_strMostAvailPortMSName" returns="nReturnCode" timeout="g_nTimeout" telephone-events="0" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </crcx>
+          <results >
+            <result name="Default" link="29" stubbed="0"/>
+            <result name="Success" link="32" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO CREATE EP TO PLAY, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE IS: " + Session.nReturnCode);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="32" plug-in="Pactolus.ModifyExistingDialog.1" ><?xtml-editor x=1288 y=503 ?>
+          <modify-session xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="epPlay.sip_dialog" action="4" media-endpoint="epInConf" media-server-type="s_strConfMSType" endpoint-type="&quot;ivr&quot;" media-sdp="" sip-address="" media-allocate-new-endpoint="1" transfer-mode="1" media-status="" codec="0" telephone-events="0" media-server-name="g_strMostAvailPortMSName" conference="cnf" new-conference="0" persistent-conference="0" participant-mode="&quot;Deaf&quot;" coachee-endpoint="" max-parties="" dtmf-clamp-setting="0" max-talkers="" hysteresis="" time-constant="" active-speakers-to-report="" reporting-interval="" active-speaker-threshold="" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >1</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >1</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-B>
+          </modify-session>
+          <results >
+            <result name="Default" link="30" stubbed="0"/>
+            <result name="Success" link="17" stubbed="1"/>
+            <result name="No response"/>
+            <result name="Not completed in time"/>
+            <result name="Caller hung up"/>
+            <result name="Media resource failure"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO MODIFY DIALOG, EXIT ON: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="33" plug-in="Pactolus.Play.2" ><?xtml-editor x=550 y=693 ?>
+          <!--play url-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" play-on-endpoint="1" media-endpoint="epPlay" conference="" timeout="0.1" played-length="" digits="" terminating-char="" rc="" returns="nReturnCode" start-play="1" return-immediate="1" play-offset="" language="strLanguage" retry-count="1" time-to-play="" interrupt="0" repeat="1" clear-digits="1" digit-map="" fdt="" idt="" ict="" terminating-digit="" >
+            <audio type="url" >oPromptList[0].strURL</audio>
+            <audio type="url" >oPromptList[1].strURL</audio>
+            <audio type="url" >oPromptList[2].strURL</audio>
+            <audio type="url" >oPromptList[3].strURL</audio>
+            <audio type="url" >oPromptList[4].strURL</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="35" stubbed="1"/>
+            <result name="Success" link="9" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First Digit Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("PLAY MUSIC URL");]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY PROMPT, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE IS: " + Session.nReturnCode);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="34" plug-in="Pactolus.Play.2" ><?xtml-editor x=532 y=494 ?>
+          <!--play indexed clip-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" play-on-endpoint="1" media-endpoint="epPlay" conference="" timeout="0.1" played-length="" digits="" terminating-char="" rc="" returns="nReturnCode" start-play="1" return-immediate="1" play-offset="" language="strLanguage" retry-count="1" time-to-play="" interrupt="0" repeat="1" clear-digits="1" digit-map="" fdt="" idt="" ict="" terminating-digit="" >
+            <audio type="index" >oPromptList[0].nIndex</audio>
+            <audio type="index" >oPromptList[1].nIndex</audio>
+            <audio type="index" >oPromptList[2].nIndex</audio>
+            <audio type="index" >oPromptList[3].nIndex</audio>
+            <audio type="index" >oPromptList[4].nIndex</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="35" stubbed="1"/>
+            <result name="Success" link="9" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First Digit Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("PLAY MUSIC INDEX");]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY PROMPT, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE IS: " + Session.nReturnCode);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="35" plug-in="Pactolus.DeleteConnection.2" ><?xtml-editor x=41 y=886 ?>
+          <!--clean up endpoint and try again-->
+          <dlcx xmlns="urn:www.pactolus.com:xtml:media" media-endpoint="epPlay" returns="nReturnCode" timeout="g_nTimeout" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </dlcx>
+          <results >
+            <result name="Default" link="36" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO DELETE CONNECTION, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE IS: " + Session.nReturn);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="36" plug-in="Pactolus.DeleteConnection.2" ><?xtml-editor x=250 y=886 ?>
+          <!--clean up in conf endpoint and try again-->
+          <dlcx xmlns="urn:www.pactolus.com:xtml:media" media-endpoint="epInConf" returns="nReturnCode" timeout="g_nTimeout" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </dlcx>
+          <results >
+            <result name="Default" link="22" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[var name = MakeUniqueConferenceName( Session.cnf ) ;
+delete Session.g_oPlayEndPointMap[name] ;
+
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO DELETE CONNECTION, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE IS: " + Session.nReturn);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="37" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=799 y=488 ?>
+          <!--getMediaServersByCapacity-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.conferencing.psAPISceGetMediaServersByCapacity&quot;" method="&quot;getMediaServersByCapacity&quot;" timeout="g_nTimeout" return="" method-return-var="nReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_strDBName</parameter>
+            <parameter type="in" var-type="string" >g_strSessionId</parameter>
+            <parameter type="in" var-type="i4" >nMSType</parameter>
+            <parameter type="inout" var-type="string" >strMSOneName</parameter>
+            <parameter type="inout" var-type="i4" >nMSOneCapacity</parameter>
+            <parameter type="inout" var-type="string" >strMSTwoName</parameter>
+            <parameter type="inout" var-type="i4" >nMSTwoCapacity</parameter>
+            <parameter type="inout" var-type="string" >strMSThreeName</parameter>
+            <parameter type="inout" var-type="i4" >nMSThreeCapacity</parameter>
+          </java>
+          <results >
+            <result name="Default" link="27" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: psAPISceGetMediaServersByCapacity");
+Server.logInfo("INFO: ********JAVA CALLING getMediaServersByCapacity *********");
+Server.logInfo("INFO: BEFORE DB name = " + Session.g_strDBNAME);
+Server.logInfo("INFO: BEFORE session Id = " + Session.g_strSessionId);
+switch (Session.s_strConfMSType)  {
+	case "PCS":
+		Session.nMSType = 0;
+		break;
+	case "CONV":
+		Session.nMSType = 1;
+		break;
+	case "SIP+MSML":
+		Session.nMSType = 2;
+		break;
+	case "SIP+MSCML":
+		Session.nMSType = 3;
+		break;
+	default:
+		Session.nMSType = 2;
+		break;
+}
+Server.logInfo("INFO: BEFORE Conf MS Type = " + Session.nMSType);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("INFO: ********** iJavaReturnCode " + Session.nReturnCode);
+Server.logInfo("MS ONE NAME:  " + Session.strMSOneName);
+Server.logInfo("MS ONE CAPACITY:  " + Session.nMSOneCapacity);
+Server.logInfo("MS TWO NAME:  " + Session.strMSTwoName);
+Server.logInfo("MS TWO CAPACITY:  " + Session.nMSTwoCapacity);
+Server.logInfo("MS THREE NAME:  " + Session.strMSThreeName);
+Server.logInfo("MS THREE CAPACITY:  " + Session.nMSThreeCapacity);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: GET MEDIASERVERS BY CAPACITY EXIT ON BRANCH: " + Result.name);
+}
+else
+{
+	Session.g_strMostAvailPortMSName = Session.strMSOneName;
+	Server.logInfo("MOST AVAILABLE PORT MS NAME IS: " + Session.g_strMostAvailPortMSName);
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="751" y-coord="651" width="278" height="46" text="SET CONFERENCE ENDPOINT
+" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="OnConfMusicOffRequest" start="11" event="ConfMusicOffRequest" returns="void" >
+      <parameters >
+        <parameter name="strConfControllerIP" type="string" pass="byref"/>
+        <parameter name="nConfControllerPort" type="i4" pass="byref"/>
+        <parameter name="strTransactionId" type="string" pass="byref"/>
+        <parameter name="strConfScheduleId" type="string" pass="byref"/>
+        <parameter name="strConferenceEndpoint" type="string" pass="byref"/>
+        <parameter name="strReleaseEndpoint" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="strReturnMsg" type="string" ></var>
+        <var name="nReturnCode" type="i4" >0</var>
+        <var name="strGlobalMusicIsOn" type="string" >F</var>
+        <var name="cnf" type="Conference" ></var>
+        <var name="epPlay" type="MediaEndpoint" ></var>
+        <var name="epInConf" type="MediaEndpoint" ></var>
+      </local-vars>
+      <actions >
+        <action id="11" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=40 y=30 ?>
+          <!--"getConfEndpoint"-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.conferencing.psAPISceGetConfEndpoint&quot;" method="&quot;getConfEndpoint&quot;" timeout="g_nTimeout" return="" method-return-var="nReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_strDBName</parameter>
+            <parameter type="in" var-type="string" >g_strSessionId</parameter>
+            <parameter type="in" var-type="string" >strConfScheduleId</parameter>
+            <parameter type="inout" var-type="string" >cnf.name</parameter>
+            <parameter type="inout" var-type="string" >cnf.media_server_name</parameter>
+            <parameter type="inout" var-type="string" >cnf.media_server_type</parameter>
+            <parameter type="inout" var-type="string" >cnf.sip_dialog.dialog.from</parameter>
+            <parameter type="inout" var-type="string" >cnf.sip_dialog.dialog.to</parameter>
+            <parameter type="inout" var-type="string" >cnf.sip_dialog.dialog.call_id</parameter>
+            <parameter type="inout" var-type="string" >cnf.sip_dialog.local.cseq</parameter>
+            <parameter type="inout" var-type="string" >g_strConfEventId</parameter>
+          </java>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_disable_event();
+Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: OnConfMusicOffRequest");
+Server.logInfo("Session.strConfControllerIP : " + Session.strConfControllerIP);
+Server.logInfo("Session.nConfControllerPort : " + Session.nConfControllerPort);
+Server.logInfo("Session.strTransactionId : " + Session.strTransactionId);
+Server.logInfo("Session.strConferenceEndpoint : " + Session.strConferenceEndpoint);
+Server.logInfo("Session.strReleaseEndpoint : " + Session.strReleaseEndpoint);
+Server.logInfo("Session.strConfScheduleId : " + Session.strConfScheduleId);
+Server.logInfo("session.strTransactionId" + Session.strTransactionId);
+Session.g_strSessionId = Session._sessionId;
+Server.logInfo("INFO: ********JAVA CALLING getConfEndpoint *********");
+Server.logInfo("INFO: session Id = " + Session.g_strSessionId);
+Server.logInfo("INFO: DB name = " + Session.g_strDBName);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("INFO: ********** iJavaReturnCode " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO GET CONFERENCE ENDPOINT, EXIT ON: " + Result.name);
+	Session.strReturnMsg = "FAIL TO GET CONFERENCE ENDPOINT";
+}]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=282 y=327 ?>
+          <!--"ConfMusicOffResponse" SUCCESS-->
+          <SOAP xmlns="urn:www.pactolus.com:xtml:communication" destination-ip="strConfControllerIP" transaction="strTransactionId" message-name="&quot;ConfMusicOffResponse&quot;" destination-port="nConfControllerPort" destination-type="4" destination-session="" waiting-session-selected="" xml-namespace="" >
+            <parameter tag="&quot;Status&quot;" value="0"/>
+            <parameter tag="&quot;StatusMessage&quot;" value="strReturnMsg"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strReturnMsg = "SUCCESS ConfMusicOffRequest";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND RESPONSE TO CC, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=41 y=498 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_enable_event();]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=497 y=23 ?>
+          <!--"ConfMusicOffResponse" FAILURE-->
+          <SOAP xmlns="urn:www.pactolus.com:xtml:communication" destination-ip="strConfControllerIP" transaction="strTransactionId" message-name="&quot;ConfMusicOffResponse&quot;" destination-port="nConfControllerPort" destination-type="4" destination-session="" waiting-session-selected="" xml-namespace="" >
+            <parameter tag="&quot;Status&quot;" value="-1"/>
+            <parameter tag="&quot;StatusMessage&quot;" value="strReturnMsg"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strReturnMsg = "FAILURE ConfMusicOffRequest";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND RESPONSE TO CC, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=41 y=328 ?>
+          <!--"setGlobalMusicFlag"-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.conferencing.psAPISceGlobalMusicFlag&quot;" method="&quot;setGlobalMusicFlagByScheduleID&quot;" timeout="g_nTimeout" return="" method-return-var="nReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_strDBName</parameter>
+            <parameter type="in" var-type="string" >g_strSessionId</parameter>
+            <parameter type="in" var-type="string" >strConfScheduleId</parameter>
+            <parameter type="in" var-type="string" >strGlobalMusicIsOn</parameter>
+            <parameter type="in" var-type="string" >strReleaseEndpoint</parameter>
+          </java>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("INFO: ********JAVA CALLING setGlobalMusicFlag *********");
+Server.logInfo("Session.strConfScheduleId : " + Session.strConfScheduleId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("INFO: ********** iJavaReturnCode " + Session.nReturnCode);
+if (Result.id != 2 || Session.nReturnCode != 0)
+{
+	Server.logError("ERROR: FAIL TO SET MUSIC IS OFF FLAG, EXIT ON: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Pactolus.Branch.1" ><?xtml-editor x=496 y=317 ?>
+          <!--release endpoint?-->
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="strReleaseEndpoint==&quot;T&quot;" link="8" stubbed="0" >strReleaseEndpoint match "T"</result>
+          </results>
+        </action>
+        <action id="8" plug-in="Pactolus.DeleteConference.1" ><?xtml-editor x=726 y=309 ?>
+          <delete-conference xmlns="urn:www.pactolus.com:xtml:conference" conference="cnf" return-value="nReturnCode" timeout="g_nTimeout"/>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("DELETE CONFERENCE");
+Session.cnf.LogInfo();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("FAIL TO DELETE CONFERENCE, EXIT ON BRANCH: " + Result.name);
+}
+else
+{
+	Server.logInfo("SUCCESS DELETE CONFERENCE: " + Session.strConferenceEndpoint);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Pactolus.Branch.1" ><?xtml-editor x=45 y=566 ?>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var name = MakeUniqueConferenceName( Session.cnf ) ;
+
+/* save the two special endpoints that we created to use for playing prompts into the conference */
+	Session.g_oPlayEndPointMap[name].epPlay = Session.epPlay ;
+	Session.g_oPlayEndPointMap[name].epInConf = Session.epInConf ;
+	
+/* retrieve the two special endpoints that we created to use for playing prompts into the conference */
+Session.epPlay = Session.g_oPlayEndPointMap[name].epPlay ;
+Session.epInConf = Session.g_oPlayEndPointMap[name].epInConf ;
+
+delete Session.g_oPlayEndPointMap[name] ;]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Pactolus.DeleteConnection.2" ><?xtml-editor x=505 y=150 ?>
+          <!--clean up endpoint and try again-->
+          <dlcx xmlns="urn:www.pactolus.com:xtml:media" media-endpoint="epPlay" returns="nReturnCode" timeout="g_nTimeout" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </dlcx>
+          <results >
+            <result name="Default" link="13" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO DELETE CONNECTION, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE IS: " + Session.nReturn);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Pactolus.DeleteConnection.2" ><?xtml-editor x=718 y=145 ?>
+          <!--clean up in conf endpoint and try again-->
+          <dlcx xmlns="urn:www.pactolus.com:xtml:media" media-endpoint="epInConf" returns="nReturnCode" timeout="g_nTimeout" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </dlcx>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[var name = MakeUniqueConferenceName( Session.cnf ) ;
+Server.logInfo("BEFORE DELETE PLAY EP, ARRAY LENGTH IS: " + Session.g_oPlayEndPointMap.length);
+delete Session.g_oPlayEndPointMap[name] ;
+Server.logInfo("AFTER DELETE PLAY EP, ARRAY LENGTH IS: " + Session.g_oPlayEndPointMap.length);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO DELETE CONNECTION, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE IS: " + Session.nReturn);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Pactolus.Play.2" ><?xtml-editor x=276 y=28 ?>
+          <!--Stop play on epPlay-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" play-on-endpoint="1" media-endpoint="epPlay" conference="" timeout="" played-length="" digits="" terminating-char="" rc="" returns="nReturnCode" start-play="0" return-immediate="0" play-offset="" language="" retry-count="" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="" fdt="" idt="" ict="" terminating-digit=""/>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success" link="12" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First Digit Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var name = MakeUniqueConferenceName( Session.cnf ) ;
+/* retrieve the two special endpoints that we created to use for playing prompts into the conference */
+Session.epPlay = Session.g_oPlayEndPointMap[name].epPlay ;
+Session.epInConf = Session.g_oPlayEndPointMap[name].epInConf ;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO STOP PLAY MUSIC TO CONFERENCE. RETURN CODE IS: " + Session.nReturnCode);
+	Server.logError("ERROR: FAIL TO STOP PLAY MUSIC TO CONFERENCE. EXIT ON BRANCH: " + Result.name);
+	Session.strReturnMsg = "FAILURE ConfMusicOffRequest, FAIL TO STOP PLAY MUSIC TO CONFERENCE TO PLAY MUSIC";
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>
+/* 	MakeUniqueConferenceName
+	returns: string, a unique identifier for a conference, taking into account that the same conference
+	name could be used on different media servers.
+*/
+function MakeUniqueConferenceName( &cnf )
+{
+	return cnf.name + "|" + cnf.media_server_name ;
+}]]></script>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value="C:/eclipse/workspace/Applications/InternalProduct/SceXMLScripts/Libs"/>
+    <property key="library-modules" value=""/>
+    <property key="library-path" value="C:/eclipse/workspace/Applications/InternalProduct/SceXMLScripts/Libs"/>
+  </properties>
+  <application-version >
+    <revision >$Id: sip_global_command.xml,v 1.4 2008/04/10 22:36:22 hlam Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

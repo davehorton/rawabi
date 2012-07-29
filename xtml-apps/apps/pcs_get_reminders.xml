@@ -1,0 +1,246 @@
+<?xml version="1.0"?>
+<xtml version="1.0" >
+  <version sce-version="422a6" prev-sce-version="422a6" last-mod-time="Monday, February 28, 2005 11:47:26"/>
+  <global-handlers >
+    <handler event="Standard.OnSessionStart.1" function="OnSessionStart" public="0" always-on="0"/>
+    <handler event="Standard.OnSessionEnd.1" function="OnSessionEnd" public="0" always-on="0"/>
+  </global-handlers>
+  <global-vars >
+    <var name="g_iReturnValue" type="i4" >0</var>
+  </global-vars>
+  <shared-vars >
+    <var name="s_iTimeout" type="i4" >20</var>
+  </shared-vars>
+  <functions >
+    <function name="OnSessionStart" start="1" event="SessionStart" returns="void" >
+      <parameters >
+        <parameter name="strSessionId" type="string" pass="byref"/>
+        <parameter name="nIteration" type="i4" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nAPIReturnCode" type="i4" >0</var>
+        <var name="nIdx" type="i4" >0</var>
+        <var name="strMsgDest" type="string" ></var>
+        <var name="strDestSession" type="string" ></var>
+        <var name="bMsgAccepted" type="boolean" >0</var>
+        <var name="strAppSessionId" type="string" ></var>
+        <var name="strDBName" type="string" ></var>
+        <var name="strStatus" type="string" ></var>
+        <var name="oRemindMeQueue" type="object" ></var>
+        <var name="oReminder" type="object" ></var>
+        <var name="strHaveMoreFlag" type="string" ></var>
+        <var name="nStatus" type="i4" >0</var>
+        <var name="strCallSched" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=41 y=61 ?>
+          <!--getCurrentRemindMeQueue-->
+          <java class="&quot;com.pactolus.broadband.psAPISceBroadbandRemindMe&quot;" method="&quot;getCurrentRemindMeQueue&quot;" timeout="s_iTimeout" return="g_iReturnValue" method-return-var="nAPIReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >strDBName</parameter>
+            <parameter type="in" var-type="string" >strAppSessionId</parameter>
+            <parameter type="inout" var-type="string" >strHaveMoreFlag</parameter>
+            <parameter type="inout" var-type="i8" >oReminder[0].lVoipSchedCallId</parameter>
+            <parameter type="inout" var-type="i8" >oReminder[0].lAccessLineId</parameter>
+            <parameter type="inout" var-type="string" >oReminder[0].strPrompt</parameter>
+            <parameter type="inout" var-type="string" >oReminder[0].strTimeSched</parameter>
+            <parameter type="inout" var-type="string" >oReminder[0].strDestPhone</parameter>
+            <parameter type="inout" var-type="string" >oReminder[0].strMailboxAcct</parameter>
+            <parameter type="inout" var-type="string" >oReminder[0].strLanguage</parameter>
+            <parameter type="inout" var-type="i8" >oReminder[1].lVoipSchedCallId</parameter>
+            <parameter type="inout" var-type="i8" >oReminder[1].lAccessLineId</parameter>
+            <parameter type="inout" var-type="string" >oReminder[1].strPrompt</parameter>
+            <parameter type="inout" var-type="string" >oReminder[1].strTimeSched</parameter>
+            <parameter type="inout" var-type="string" >oReminder[1].strDestPhone</parameter>
+            <parameter type="inout" var-type="string" >oReminder[1].strMailboxAcct</parameter>
+            <parameter type="inout" var-type="string" >oReminder[1].strLanguage</parameter>
+            <parameter type="inout" var-type="i8" >oReminder[2].lVoipSchedCallId</parameter>
+            <parameter type="inout" var-type="i8" >oReminder[2].lAccessLineId</parameter>
+            <parameter type="inout" var-type="string" >oReminder[2].strPrompt</parameter>
+            <parameter type="inout" var-type="string" >oReminder[2].strTimeSched</parameter>
+            <parameter type="inout" var-type="string" >oReminder[2].strDestPhone</parameter>
+            <parameter type="inout" var-type="string" >oReminder[2].strMailboxAcct</parameter>
+            <parameter type="inout" var-type="string" >oReminder[2].strLanguage</parameter>
+            <parameter type="inout" var-type="i8" >oReminder[3].lVoipSchedCallId</parameter>
+            <parameter type="inout" var-type="i8" >oReminder[3].lAccessLineId</parameter>
+            <parameter type="inout" var-type="string" >oReminder[3].strPrompt</parameter>
+            <parameter type="inout" var-type="string" >oReminder[3].strTimeSched</parameter>
+            <parameter type="inout" var-type="string" >oReminder[3].strDestPhone</parameter>
+            <parameter type="inout" var-type="string" >oReminder[3].strMailboxAcct</parameter>
+            <parameter type="inout" var-type="string" >oReminder[3].strLanguage</parameter>
+            <parameter type="inout" var-type="i8" >oReminder[4].lVoipSchedCallId</parameter>
+            <parameter type="inout" var-type="i8" >oReminder[4].lAccessLineId</parameter>
+            <parameter type="inout" var-type="string" >oReminder[4].strPrompt</parameter>
+            <parameter type="inout" var-type="string" >oReminder[4].strTimeSched</parameter>
+            <parameter type="inout" var-type="string" >oReminder[4].strDestPhone</parameter>
+            <parameter type="inout" var-type="string" >oReminder[4].strMailboxAcct</parameter>
+            <parameter type="inout" var-type="string" >oReminder[4].strLanguage</parameter>
+          </java>
+          <results >
+            <result name="Default" link="10" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="no wake up calls" link="10" stubbed="1" >nAPIReturnCode == -6</result>
+            <result name="success" link="4" stubbed="1" >nAPIReturnCode == 0
+AND oReminder[0].lVoipSchedCallId != 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strAppSessionId = Session._sessionId;
+Session.strDBName = "pactolusdb";
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[/* determine how many reminders calls were returned */
+var reminders = 0;
+for( var i = 0; i < 5; i++ ) {
+	if( 0 != Session.oReminder[i].lVoipSchedCallId ) {
+		reminders = i + 1;
+	}
+	else {
+		break ;
+	}
+}
+
+/* set nIdx to the last item in the Array, and we will work backwards through the list */
+Session.nIdx = reminders - 1 ;
+
+Server.logInfo("FOUND " + reminders + " REMINDERS NOW DUE");
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=295 y=82 ?>
+          <!--Send RemindMe event-->
+          <SOAP destination-ip="" transaction="" message-name="&quot;RemindMe&quot;" destination-port="" destination-type="1" destination-session="" waiting-session-selected="strDestSession" >
+            <parameter tag="" value="oReminder[nIdx].lVoipSchedCallId"/>
+            <parameter tag="" value="oReminder[nIdx].lAccessLineId"/>
+            <parameter tag="" value="oReminder[nIdx].strPrompt"/>
+            <parameter tag="" value="oReminder[nIdx].strTimeSched"/>
+            <parameter tag="" value="oReminder[nIdx].strDestPhone"/>
+            <parameter tag="" value="oReminder[nIdx].strMailboxAcct"/>
+            <parameter tag="" value="oReminder[nIdx].strLanguage"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+            <result name="Success" link="5" stubbed="0"/>
+            <result name="Error"/>
+            <result name="bMsgAccepted = false" link="6" stubbed="1" >bMsgAccepted == false</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="middle" ><![CDATA[if ( 2 == Result.id ) {
+	Server.logInfo("[" + Session.nIdx + "]" + " SENT REMIND ME DETAILS TO: " + Session.strDestSession);
+	Server.logInfo("VoipSchedCallID <" + Session.oReminder[Session.nIdx].lVoipSchedCallId + ">");
+	Server.logInfo("AccessLineID < " + Session.oReminder[Session.nIdx].lAccessLineId + ">");
+	Server.logInfo("Prompt <" + Session.oReminder[Session.nIdx].strPrompt + ">");
+	Server.logInfo("TimeSched <" + Session.oReminder[Session.nIdx].strTimeSched + ">");
+	Server.logInfo("DestPhone <" + Session.oReminder[Session.nIdx].strDestPhone + ">");
+	Server.logInfo("MailboxAcct <" + Session.oReminder[Session.nIdx].strMailboxAcct + ">");
+	Server.logInfo("Language <" + Session.oReminder[Session.nIdx].strLanguage + ">");
+} 
+
+Session.bMsgAccepted = false;
+if ( 0 < Session.strDestSession.length ) {
+	Session.bMsgAccepted = true ;
+}
+else {
+	Server.logError("REMIND ME MESSAGE WAS UNHANDLED. RESETTING STATUS OF CALL: " + Session.oReminder[Session.nIdx].lVoipSchedCallId);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.Branch.1" ><?xtml-editor x=592 y=98 ?>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="nIdx &gt; 0" link="4" stubbed="1" >nIdx &gt;= 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[/* We've set nIdx equal to the last id of the array. So, now we work backwards through the list.  */
+Session.nIdx--;]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=603 y=252 ?>
+          <!--updateRemindMe - set back to Pending-->
+          <java class="&quot;com.pactolus.broadband.psAPISceBroadbandRemindMe&quot;" method="&quot;updateRemindMe&quot;" timeout="s_iTimeout" return="g_iReturnValue" method-return-var="" method-return-type="0" >
+            <parameter type="in" var-type="string" >strDBName</parameter>
+            <parameter type="in" var-type="string" >strAppSessionId</parameter>
+            <parameter type="in" var-type="i8" >oReminder[nIdx].lVoipSchedCallId</parameter>
+            <parameter type="in" var-type="i4" >nStatus</parameter>
+            <parameter type="in" var-type="string" >strCallSched</parameter>
+          </java>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[/* Return to pending status with current time */
+Session.nStatus = 0; 
+
+var update = new Date();
+Session.strCallSched = update.toGMTString();
+var i = Session.strCallSched.indexOf("GMT")
+var gmt = new Date(Session.strCallSched.substr(0, (i - 1)));
+/* convert to format "MM/dd/yyyy HH:mm:ss"" */
+var month = gmt.getMonth() + 1;
+if ( 10 > month ) {
+	month = 0 + "" + month;
+}
+var mo_date = gmt.getDate();
+if ( 10 > mo_date ) {
+	mo_date = 0 + "" + mo_date;
+}
+var year = gmt.getFullYear();
+
+var hours = gmt.getHours();
+if ( 10 > hours ) {
+	hours = 0 + "" + hours;
+}
+var minutes = gmt.getMinutes();
+if ( 10 > minutes ) {
+	minutes = 0 + "" + minutes;
+}
+
+Session.strCallSched = month + "/" + mo_date + "/" + year + " " + hours + ":" + minutes + ":00";
+Server.logInfo("Resetting reminder to current GMT date and time: " + Session.strCallSched);
+]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Pactolus.Branch.1" ><?xtml-editor x=856 y=94 ?>
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+            <result name="Reminders &gt; 5" link="1" stubbed="1" >strHaveMoreFlag match "T"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if ( "T" == Session.strHaveMoreFlag ) {
+	Server.logInfo("MORE REMINDERS DUE. RUNNING AGAIN");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=1004 y=241 ?>
+          <sleep duration="60"/>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="OnSessionEnd" start="1" event="SessionEnd" returns="void" >
+      <parameters >
+        <parameter name="nSessionEndReason" type="i2" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=117 y=120 ?>
+          <return value=""/>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value=""/>
+    <property key="library-modules" value=""/>
+    <property key="library-path" value=""/>
+  </properties>
+  <application-version >
+    <revision >$Id: pcs_get_reminders.xml,v 1.3 2006/04/18 17:00:52 kfitzgerald Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

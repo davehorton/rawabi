@@ -1,0 +1,335 @@
+<?xml version="1.0"?>
+<xtml version="1.0" >
+  <version sce-version="500a2" prev-sce-version="500a2" last-mod-time="Monday, November 14, 2005 17:35:01"/>
+  <events >
+    <event name="StartPlayMusicToConfRequest" display="StartPlayMusicToConfRequest" >
+      <parameter name="strCCIP" type="string"/>
+      <parameter name="nCCPort" type="i4"/>
+      <parameter name="strTransactionId" type="string"/>
+      <parameter name="strConferenceEndPoint" type="string"/>
+      <parameter name="strLanguage" type="string"/>
+      <parameter name="strPromptType" type="string"/>
+      <parameter name="strPromptOne" type="string"/>
+      <parameter name="strPromptTwo" type="string"/>
+      <parameter name="strPromptThree" type="string"/>
+    </event>
+    <event name="StopPlayMusicToConfRequest" display="StopPlayMusicToConfRequest" >
+      <parameter name="strCCIP" type="string"/>
+      <parameter name="nCCPort" type="i4"/>
+      <parameter name="strTransactionId" type="string"/>
+    </event>
+    <event name="MuteConference" display="MuteConference" >
+      <parameter name="strCCIP" type="string"/>
+      <parameter name="nCCPort" type="i4"/>
+      <parameter name="strTransactionId" type="string"/>
+      <parameter name="strConferenceEndPointId" type="string"/>
+    </event>
+    <event name="UnMuteConference" display="UnMuteConference" >
+      <parameter name="strCCIP" type="string"/>
+      <parameter name="nCCPort" type="i4"/>
+      <parameter name="strTransactionId" type="string"/>
+      <parameter name="strConferenceEndpoinId" type="string"/>
+    </event>
+  </events>
+  <global-handlers >
+    <handler event="StartPlayMusicToConfRequest" function="OnStartPlayMusicToConfRequest" public="1" always-on="0"/>
+    <handler event="StopPlayMusicToConfRequest" function="OnStopPlayMusicToConfRequest" public="0" always-on="0"/>
+    <handler event="MuteConference" function="OnMuteConference" public="1" always-on="0"/>
+    <handler event="UnMuteConference" function="OnUnMuteConference" public="1" always-on="0"/>
+  </global-handlers>
+  <global-vars >
+    <var name="g_oMS" type="object" ></var>
+    <var name="g_nTimeout" type="i4" >30</var>
+    <var name="g_lStartPlayMusicTimerId" type="i8" >0</var>
+    <var name="g_nStartPlayMusicTimerDuration" type="i4" >3600</var>
+  </global-vars>
+  <shared-vars >
+    <var name="s_strStartPlayMusicToConfRes" type="string" >StartPlayMusicToConfResponse</var>
+    <var name="s_strStopPlayMusicToConfRes" type="string" >StopPlayMusicToConfResponse</var>
+    <var name="s_strMuteConferenceRes" type="string" >MuteConferenceResponse</var>
+    <var name="s_strUnMuteConferenceRes" type="string" >UnmuteConferenceResponse</var>
+  </shared-vars>
+  <functions >
+    <function name="OnStartPlayMusicToConfRequest" start="5" event="StartPlayMusicToConfRequest" returns="void" >
+      <parameters >
+        <parameter name="strCCIP" type="string" pass="byref"/>
+        <parameter name="nCCPort" type="i4" pass="byref"/>
+        <parameter name="strTransactionId" type="string" pass="byref"/>
+        <parameter name="strConferenceEndPoint" type="string" pass="byref"/>
+        <parameter name="strLanguage" type="string" pass="byref"/>
+        <parameter name="strPromptType" type="string" pass="byref"/>
+        <parameter name="strPromptOne" type="string" pass="byref"/>
+        <parameter name="strPromptTwo" type="string" pass="byref"/>
+        <parameter name="strPromptThree" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nPromptIndex1" type="i4" >0</var>
+        <var name="nPromptIndex2" type="i4" >0</var>
+        <var name="nPromptIndex3" type="i4" >0</var>
+        <var name="nReturnCode" type="i4" >-1</var>
+        <var name="nFailure" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="5" plug-in="Pactolus.Branch.1" ><?xtml-editor x=114 y=325 ?>
+          <!--URL or Index-->
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="g_strPromptType==&quot;U&quot;" link="4" stubbed="0" >strPromptType match "U"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: OnStartPlayMusicToConfRequest");
+js_initMS (Session.g_oMS, Session.s_strCONF_MS_TYPE);
+Session.g_oMS.strConnectionId = "*";
+Session.g_oMS.strEndPoint = Session.strConferenceEndPoint;]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.EndSession.1" ><?xtml-editor x=843 y=384 ?></action>
+        <action id="4" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=369 y=384 ?>
+          <!--Play music URL-->
+          <play connection-id="" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="-1" timeout="g_nTimeout" ms-type="g_oMS.strType" returns="nReturnCode" start-play="1" interrupt="0" return-immediate="1" digit-map="" language="strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="url" >strPromptOne</audio>
+            <audio type="url" >strPromptTwo</audio>
+            <audio type="url" >strPromptThree</audio>
+          </play>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="6" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=367 y=228 ?>
+          <!--Play music Index-->
+          <play connection-id="" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="-1" timeout="g_nTimeout" ms-type="g_oMS.strType" returns="nReturnCode" start-play="1" interrupt="0" return-immediate="1" digit-map="" language="strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >nPromptIndex1</audio>
+            <audio type="index" >nPromptIndex2</audio>
+            <audio type="index" >nPromptIndex3</audio>
+          </play>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="Success" link="9" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="7" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1095 y=214 ?>
+          <return value=""/>
+        </action>
+        <action id="8" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=599 y=383 ?>
+          <!--nFailure-->
+          <SOAP destination-ip="strCCIP" transaction="strTransactionId" message-name="s_strStartPlayMusicToConfRes" destination-port="nCCPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;ReturnCode&quot;" value="nFailure"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+        </action>
+        <action id="9" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=611 y=223 ?>
+          <!--nSuccess-->
+          <SOAP destination-ip="strCCIP" transaction="strTransactionId" message-name="s_strStartPlayMusicToConfRes" destination-port="nCCPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;ReturnCode&quot;" value="nSuccess"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+        </action>
+        <action id="10" plug-in="Standard.Timer.1" ><?xtml-editor x=860 y=214 ?>
+          <!--3600-->
+          <timer start="1" id="g_lStartPlayMusicTimerId" duration="g_nStartPlayMusicTimerDuration"/>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="OnStopPlayMusicToConfRequest" start="7" event="StopPlayMusicToConfRequest" returns="void" >
+      <parameters >
+        <parameter name="strCCIP" type="string" pass="byref"/>
+        <parameter name="nCCPort" type="i4" pass="byref"/>
+        <parameter name="strTransactionId" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nFailure" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+        <var name="nReturnCode" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="7" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=115 y=48 ?>
+          <!--Stop Play-->
+          <play connection-id="" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="-1" timeout="g_nTimeout" ms-type="g_oMS.strType" returns="nReturnCode" start-play="0" interrupt="0" return-immediate="1" digit-map="" language="" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer=""/>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success" link="5" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: OnStopPlayMusicToConfRequest");]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.EndSession.1" ><?xtml-editor x=593 y=25 ?></action>
+        <action id="4" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=349 y=24 ?>
+          <!--nFailure-->
+          <SOAP destination-ip="strCCIP" transaction="strTransactionId" message-name="s_strStopPlayMusicToConfRes" destination-port="nCCPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;ReturnCode&quot;" value="nFailure"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+        </action>
+        <action id="5" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=356 y=140 ?>
+          <!--nSuccess-->
+          <SOAP destination-ip="strCCIP" transaction="strTransactionId" message-name="s_strStopPlayMusicToConfRes" destination-port="nCCPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;ReturnCode&quot;" value="nSuccess"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+        </action>
+        <action id="6" plug-in="Standard.Timer.1" ><?xtml-editor x=605 y=131 ?>
+          <!--stop timer-->
+          <timer start="0" id="g_lStartPlayMusicTimerId" duration=""/>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="OnMuteConference" start="1" event="MuteConference" returns="void" >
+      <parameters >
+        <parameter name="strCCIP" type="string" pass="byref"/>
+        <parameter name="nCCPort" type="i4" pass="byref"/>
+        <parameter name="strTransactionId" type="string" pass="byref"/>
+        <parameter name="strConferenceEndPointId" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nReturnCode" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+        <var name="nFailure" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.MGCPModify.1" ><?xtml-editor x=161 y=89 ?>
+          <mdcx connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" returns="nReturnCode" remote-sdp="" mode="data" packetization-period="" codec="-1" timeout="g_nTimeout" local-connection-options="" second-endpoint-id="" ms-type="g_oMS.strType" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </mdcx>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success" link="2" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: OnMuteConference");
+js_initMS (Session.g_oMS, Session.s_strCONF_MS_TYPE);
+Session.g_oMS.strConnectionId = "*";
+Session.g_oMS.strEndPoint = Session.strConferenceEndPointId;]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=430 y=181 ?>
+          <!--nFailure-->
+          <SOAP destination-ip="strCCIP" transaction="strTransactionId" message-name="s_strMuteConferenceRes" destination-port="nCCPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;ReturnCode&quot;" value="nFailure"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+        </action>
+        <action id="3" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=415 y=37 ?>
+          <!--nSuccess-->
+          <SOAP destination-ip="strCCIP" transaction="strTransactionId" message-name="s_strMuteConferenceRes" destination-port="nCCPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;ReturnCode&quot;" value="nSuccess"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+        </action>
+        <action id="4" plug-in="Standard.EndSession.1" ><?xtml-editor x=675 y=31 ?></action>
+      </actions>
+    </function>
+    <function name="OnUnMuteConference" start="1" event="UnMuteConference" returns="void" >
+      <parameters >
+        <parameter name="strCCIP" type="string" pass="byref"/>
+        <parameter name="nCCPort" type="i4" pass="byref"/>
+        <parameter name="strTransactionId" type="string" pass="byref"/>
+        <parameter name="strConferenceEndpoinId" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nReturnCode" type="i4" >0</var>
+        <var name="nFailure" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.MGCPModify.1" ><?xtml-editor x=77 y=176 ?>
+          <mdcx connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" returns="nReturnCode" remote-sdp="" mode="conference" packetization-period="" codec="-1" timeout="g_nTimeout" local-connection-options="" second-endpoint-id="" ms-type="g_oMS.strType" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </mdcx>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="4" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: OnMuteConference");
+js_initMS (Session.g_oMS, Session.s_strCONF_MS_TYPE);
+Session.g_oMS.strConnectionId = "*";
+Session.g_oMS.strEndPoint = Session.strConferenceEndPointId;]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=331 y=124 ?>
+          <!--nSuccess-->
+          <SOAP destination-ip="strCCIP" transaction="strTransactionId" message-name="s_strUnMuteConferenceRes" destination-port="nCCPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;ReturnCode&quot;" value="nSuccess"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+        </action>
+        <action id="3" plug-in="Standard.EndSession.1" ><?xtml-editor x=591 y=118 ?></action>
+        <action id="4" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=346 y=268 ?>
+          <!--nFailure-->
+          <SOAP destination-ip="strCCIP" transaction="strTransactionId" message-name="s_strUnMuteConferenceRes" destination-port="nCCPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;ReturnCode&quot;" value="nFailure"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>]]></script>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value="C:/Applications/InternalProduct/SceXMLScripts/Libs"/>
+    <property key="library-modules" value="lib_mediaserver.xml"/>
+    <property key="library-path" value="C:/Applications/InternalProduct/SceXMLScripts/Libs"/>
+  </properties>
+</xtml>

@@ -1,0 +1,854 @@
+<?xml version="1.0"?>
+<xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
+  <version sce-version="422a4" prev-sce-version="422a4" last-mod-time="Thursday, February 28, 2008 09:39:15"/>
+  <global-handlers >
+    <handler event="Standard.OnServiceLoad.1" function="OnServiceLoad" public="0" always-on="0"/>
+    <handler event="Pactolus.EveSipRegister.1" function="OnRegister" public="1" always-on="0"/>
+  </global-handlers>
+  <shared-vars >
+    <var name="s_SUCCESS" type="i2" >0</var>
+    <var name="s_UNKNOWN_USERNAME" type="i2" >-1</var>
+    <var name="s_AUTHENTICATION_FAILED" type="i2" >-2</var>
+    <var name="s_ACCESS_LINE_DISABLED" type="i2" >-3</var>
+    <var name="s_SUBSCRIBER_DISABLED" type="i2" >-4</var>
+    <var name="s_SERVICE_PROVIDER_DISABLED" type="i2" >-5</var>
+    <var name="s_NO_ACTIVE_REGISTRATION" type="i2" >-6</var>
+    <var name="s_DB_ERROR" type="i2" >-99</var>
+    <var name="s_strDefaultRealm" type="string" ></var>
+    <var name="s_strForcedRealm" type="string" ></var>
+    <var name="s_strLocalUri" type="string" ></var>
+    <var name="s_strNIU" type="string" ></var>
+  </shared-vars>
+  <functions >
+    <function name="OnRegister" start="15" event="OnRegister" returns="void" >
+      <parameters >
+        <parameter name="strAccept" type="string" pass="byref"/>
+        <parameter name="strAcceptEncoding" type="string" pass="byref"/>
+        <parameter name="strAcceptLanguage" type="string" pass="byref"/>
+        <parameter name="strAllow" type="string" pass="byref"/>
+        <parameter name="strAllowEvents" type="string" pass="byref"/>
+        <parameter name="strAuthorization" type="string" pass="byref"/>
+        <parameter name="strCallId" type="string" pass="byref"/>
+        <parameter name="strCallInfo" type="string" pass="byref"/>
+        <parameter name="strContact" type="string" pass="byref"/>
+        <parameter name="strContent" type="string" pass="byref"/>
+        <parameter name="strContentDisposition" type="string" pass="byref"/>
+        <parameter name="strContentEncoding" type="string" pass="byref"/>
+        <parameter name="strContentLanguage" type="string" pass="byref"/>
+        <parameter name="strContentType" type="string" pass="byref"/>
+        <parameter name="strCSeq" type="string" pass="byref"/>
+        <parameter name="strDate" type="string" pass="byref"/>
+        <parameter name="strEncryption" type="string" pass="byref"/>
+        <parameter name="strErrorInfo" type="string" pass="byref"/>
+        <parameter name="strExpires" type="string" pass="byref"/>
+        <parameter name="strFrom" type="string" pass="byref"/>
+        <parameter name="strMaxForwards" type="string" pass="byref"/>
+        <parameter name="strMIMEVersion" type="string" pass="byref"/>
+        <parameter name="strOrganization" type="string" pass="byref"/>
+        <parameter name="strProxyAuthorization" type="string" pass="byref"/>
+        <parameter name="strProxyRequire" type="string" pass="byref"/>
+        <parameter name="strRecordRoute" type="string" pass="byref"/>
+        <parameter name="strReferredBy" type="string" pass="byref"/>
+        <parameter name="strRemotePartyID" type="string" pass="byref"/>
+        <parameter name="strRequestURI" type="string" pass="byref"/>
+        <parameter name="strRequire" type="string" pass="byref"/>
+        <parameter name="strResponseKey" type="string" pass="byref"/>
+        <parameter name="strRoute" type="string" pass="byref"/>
+        <parameter name="strSupported" type="string" pass="byref"/>
+        <parameter name="strTimestamp" type="string" pass="byref"/>
+        <parameter name="strTo" type="string" pass="byref"/>
+        <parameter name="strUserAgent" type="string" pass="byref"/>
+        <parameter name="strVia" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nExpires" type="i4" >0</var>
+        <var name="strPhoneNumber" type="string" ></var>
+        <var name="strSipAddress" type="string" ></var>
+        <var name="strRealm" type="string" ></var>
+        <var name="strNonce" type="string" ></var>
+        <var name="strSessionId" type="string" ></var>
+        <var name="strUserName" type="string" ></var>
+        <var name="strUri" type="string" ></var>
+        <var name="bHasAuthorizationHeader" type="boolean" >0</var>
+        <var name="strWWWAuthenticate" type="string" ></var>
+        <var name="nRows" type="i4" >0</var>
+        <var name="oSubscriber" type="object" ></var>
+        <var name="strResponseCalculated" type="string" ></var>
+        <var name="strResponsePresented" type="string" ></var>
+        <var name="nValue" type="i4" >0</var>
+        <var name="strNatProxy" type="string" ></var>
+        <var name="strPlatformSessionId" type="string" ></var>
+        <var name="strDeviceAddress" type="string" ></var>
+        <var name="nDevicePort" type="i4" >0</var>
+        <var name="strMacAddress" type="string" ></var>
+        <var name="strDBName" type="string" >pactolusdb</var>
+        <var name="nReturnCode" type="i4" >0</var>
+        <var name="strNatTraversalAddress" type="string" ></var>
+        <var name="lAccessLineId" type="i8" >0</var>
+        <var name="lSubscriberId" type="i8" >0</var>
+        <var name="lServiceProviderId" type="i8" >0</var>
+        <var name="nVoipServiceId" type="i4" >0</var>
+        <var name="nVoicemailServiceId" type="i4" >0</var>
+        <var name="f_strContact" type="string" ></var>
+        <var name="strDeviceNatAddress" type="string" ></var>
+        <var name="bGenerateSubscribe" type="boolean" >0</var>
+        <var name="strSubscribeCallId" type="string" ></var>
+        <var name="strStatus" type="string" ></var>
+        <var name="nTimeout" type="i4" >20</var>
+        <var name="strEvtRcvd" type="string" ></var>
+        <var name="strEvent" type="string" ></var>
+        <var name="lCSeqValue" type="i8" >0</var>
+        <var name="strSubscriptionState" type="string" ></var>
+        <var name="strAcctName" type="string" ></var>
+        <var name="nAPIReturn" type="i4" >0</var>
+        <var name="strRemoteUri" type="string" ></var>
+        <var name="strNotifyRoute" type="string" ></var>
+        <var name="strSIPResponse" type="string" ></var>
+        <var name="strSubscribeCSeq" type="string" ></var>
+        <var name="oSaved" type="object" ></var>
+        <var name="oUnseen" type="object" ></var>
+        <var name="oUrgent" type="object" ></var>
+        <var name="nUrgentCount" type="i4" >0</var>
+        <var name="nUnseenCount" type="i4" >0</var>
+        <var name="nSavedCount" type="i4" >0</var>
+        <var name="nStatus" type="i4" >0</var>
+        <var name="strNotifyContentDisposition" type="string" ></var>
+        <var name="strNotifyContentType" type="string" ></var>
+        <var name="strNotifyContent" type="string" ></var>
+        <var name="bSipura" type="boolean" >0</var>
+        <var name="lDummy" type="i8" >0</var>
+        <var name="strMWIOffFlag" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="15" plug-in="Pactolus.Branch.1" ><?xtml-editor x=54 y=223 ?>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="has credentials" link="14" stubbed="0" >bHasAuthorizationHeader == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[
+if( Session.strAuthorization.length > 0 ) {
+	
+	Session.bHasAuthorizationHeader = true ;
+	
+	/* get values */
+	var s = Session.strAuthorization ;
+	if( !js_parse_value( s, "nonce", Session.strNonce ) ||
+		!js_parse_value( s, "uri", Session.strUri ) ||
+		!js_parse_value( s, "username", Session.strUserName ) ||
+		!js_parse_value( s, "realm", Session.strRealm ) ||
+		!js_parse_value( s, "response", Session.strResponsePresented ) )
+	{
+		Server.logError("failed to parse attributes for authentication") ;
+	
+		Server.logInfo("nonce:     " + Session.strNonce ) ;
+		Server.logInfo("username:  " + Session.strUserName ) ;
+		Server.logInfo("uri:       " + Session.strUri ) ;
+		Server.logInfo("realm:     " + Session.strRealm ) ;
+		Server.logInfo("response:  " + Session.strResponsePresented ) ;
+		Server.logInfo("expires:   " + Session.nExpires ); 
+		Session.bHasAuthorizationHeader = false ;
+	}
+	else {
+		Server.logInfo("nonce:     " + Session.strNonce ) ;
+		Server.logInfo("username:  " + Session.strUserName ) ;
+		Server.logInfo("uri:       " + Session.strUri ) ;
+		Server.logInfo("realm:     " + Session.strRealm ) ;
+		Server.logInfo("response:  " + Session.strResponsePresented ) ;
+				
+		var expires ;
+		if( !js_parse_value( Session.strContact, "expires", expires  ) ) {
+			if( 0 == Session.strExpires.length ) {
+				expires = 7200 ;	/* default */
+			}
+			else {
+				expires = Session.strExpires ;
+			}
+		}
+		Session.nExpires = Clib.atoi( expires )  ;
+		Server.logInfo("expires:   " + Session.nExpires ); 
+		
+		
+		Server.logInfo("SIP contact:  " + Session.strContact ) ;
+		var myNameAddr = new SipNameAddr(Session.strContact);
+		Session.f_strContact = myNameAddr.url;
+		Server.logInfo("DB contact:  " + Session.f_strContact ) ;
+	}
+}
+else {
+	//Server.logError("failed to parse attributes for authentication -- no header provided") ;
+	Session.bHasAuthorizationHeader = false ;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=635 y=378 ?>
+          <!--200 OK-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <contact >strContact</contact>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 200 OK"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="19" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="expires &gt; 0" >nExpires &gt; 0</result>
+            <result name="expires == 0" >nExpires == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[/* if contact came in without an expires parameter, add one */
+if( -1 == Session.strContact.indexOf("expires=") ) {
+	Session.strContact += ";expires=" ;
+	Session.strContact += Session.nExpires ;
+}
+
+
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=572 y=203 ?>
+          <!--Send 401 Unauthorized with WWW-Authenticate header-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 401 Unauthorized"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+            <www-authenticate >strWWWAuthenticate</www-authenticate>
+          </sip-response>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[
+/* set the realm value in the ProxyAuthenticate header as follows: 
+	1. If the configuration is set to force a realm, use that
+	2. If a "realm=" parameter exists in the Request-URI, use that
+	3. If the host in the From header is not a dot decimal ip address use that
+	4. Otherwise, if there is a default realm use that
+*/
+var pos ;
+Session.strRealm = "" ;
+
+if( Session.s_strForcedRealm.length > 0 ) {
+	Session.strRealm = Session.s_strForcedRealm ;
+}
+else {
+	var s = new String( Session.strRequestURI ) ;
+	pos = s.indexOf( ";domain=" ) ;
+	if( -1 != pos ) {
+		pos += 8; 	//advance past the keyword
+		var pos2 = s.indexOf( " ", pos ) ;
+		Session.strRealm = s.substr( pos, pos2 - pos ) ;
+	}
+}
+
+if( 0 == Session.strRealm.length ) {
+	var uri = new SipTo( Session.strTo.toString() ) ;
+	if( !(uri.url.host.charAt(0) >= '0' && uri.url.host.charAt(0) <= '9') ) {
+		Session.strRealm = uri.url.host ;
+	}
+}
+
+if( 0 == Session.strRealm.length && Session.s_strDefaultRealm.length > 0 ) {
+	Session.strRealm = Session.s_strDefaultRealm ;
+}
+
+
+Session.strWWWAuthenticate = "Digest " ;
+if( Session.strRealm.length > 0 ) {
+	Session.strWWWAuthenticate += "realm=\"" ;
+	Session.strWWWAuthenticate += Session.strRealm ;
+	Session.strWWWAuthenticate += "\", " ;
+}
+Session.strWWWAuthenticate += "nonce=\"" + Session.strNonce + "\"" ;
+]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.UserFunction.1" ><?xtml-editor x=294 y=124 ?>
+          <!--Generate a nonce value-->
+          <user-function xmlns="urn:www.pactolus.com:xtml:application" process="&quot;PACTOLUS_ps_c_adaptor&quot;" function="&quot;generate_nonce&quot;" timeout="3" return="" async="0" >
+            <parameter >strSessionId</parameter>
+            <parameter >strNonce</parameter>
+          </user-function>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success" link="4" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="6" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=559 y=36 ?>
+          <!--Decline registration: Send 401 Unauthorized with no WWW-Authenticate header-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 401 Unauthorized"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="7" plug-in="Standard.EndSession.1" ><?xtml-editor x=809 y=203 ?></action>
+        <action id="14" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=311 y=421 ?>
+          <!--registerPhone-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.broadband.psAPISceRegister&quot;" method="&quot;registerTADevice&quot;" timeout="5" return="" method-return-var="nReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >strSessionId</parameter>
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+            <parameter type="in" var-type="string" >strUserName</parameter>
+            <parameter type="in" var-type="string" >strNatTraversalAddress</parameter>
+            <parameter type="in" var-type="string" >strRealm</parameter>
+            <parameter type="in" var-type="string" >strDeviceAddress</parameter>
+            <parameter type="in" var-type="string" >strDeviceNatAddress</parameter>
+            <parameter type="in" var-type="string" >"REGISTER"</parameter>
+            <parameter type="in" var-type="string" >strUri</parameter>
+            <parameter type="in" var-type="string" >strNonce</parameter>
+            <parameter type="in" var-type="string" >strResponsePresented</parameter>
+            <parameter type="in" var-type="string" >strMacAddress</parameter>
+            <parameter type="in" var-type="string" >strCallId</parameter>
+            <parameter type="in" var-type="string" >strCSeq</parameter>
+            <parameter type="in" var-type="string" >f_strContact</parameter>
+            <parameter type="in" var-type="i4" >nExpires</parameter>
+            <parameter type="in" var-type="string" >strUserAgent</parameter>
+            <parameter type="inout" var-type="i8" >lAccessLineId</parameter>
+            <parameter type="inout" var-type="i8" >lSubscriberId</parameter>
+            <parameter type="inout" var-type="i8" >lServiceProviderId</parameter>
+            <parameter type="inout" var-type="i4" >nVoipServiceId</parameter>
+            <parameter type="inout" var-type="i4" >nVoicemailServiceId</parameter>
+          </java>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="valid" link="1" stubbed="0" >nReturnCode == s_SUCCESS</result>
+            <result name="unknown device" link="16" stubbed="0" >nReturnCode == s_UNKNOWN_USERNAME</result>
+            <result name="authentication failed" link="18" stubbed="0" >nReturnCode == s_AUTHENTICATION_FAILED</result>
+            <result name="service provider disabled" link="18" stubbed="0" >nReturnCode == s_SERVICE_PROVIDER_DISABLED</result>
+            <result name="subscriber disabled" link="18" stubbed="1" >nReturnCode == s_SUBSCRIBER_DISABLED</result>
+            <result name="access line disabled" link="18" stubbed="1" >nReturnCode == s_ACCESS_LINE_DISABLED</result>
+            <result name="db error" link="17" stubbed="0" >nReturnCode == s_DB_ERROR</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strSessionId = Session._sessionId ;
+
+/* if there is a Record-Route, add that */
+Session.strNatTraversalAddress = Session.strRecordRoute ;
+
+/* the device signaling address is the bottommost via */
+var vias = new SipViaArray( Session.strVia.toString() ) ;
+var hops = vias.vias.length ;
+Session.strDeviceAddress = vias.vias[hops-1].url ;
+
+/* nat'ed device address will be in the nat parameter of the contact, if its nat'ed */
+var s = new String( Session.strContact ) ;
+var i = s.indexOf("nat=") ;
+if( -1 != i ) {
+	i += 4 ;
+	var j = s.indexOf( ";", i ) ;
+	if( -1 == j ) {
+		var j = s.indexOf( ">", i ) ;
+	}
+	if( -1 == j ) {
+		Session.strDeviceNatAddress = s.substr(i) ;
+	}
+	else {
+		Session.strDeviceNatAddress = s.slice(i, j - 1) ;
+	}
+	Server.logInfo("Device nat'ed address is: " + Session.strDeviceNatAddress ) ;
+}
+]]></script>
+            <script language="javascript" timing="middle" ><![CDATA[if( 2 == Result.id ) {
+
+	switch( Session.nReturnCode ) {
+	case 0: Server.logInfo("Authentication succeeded") ; 
+			Server.logInfo("Access line Id: " + Session.lAccessLineId ) ;
+			Server.logInfo("Subscriber Id: " + Session.lSubscriberId ) ;
+			Server.logInfo("Service Provider Id: " + Session.lServiceProviderId ) ;
+			Server.logInfo("Voip service id: " + Session.nVoipServiceId ) ;
+			Server.logInfo("Voicemail service id: " + Session.nVoicemailServiceId ) ;
+			break ;
+	case -1: Server.logInfo("Device attempting to register with unknown authentication name"); break ;
+	case -2: Server.logInfo("MD5 Authentication failed"); break ;
+	case -3: Server.logInfo("Access line disabled"); break ;
+	case -4: Server.logInfo("Subscriber disabled"); break ;
+	case -5: Server.logInfo("Service provider disabled"); break ;
+	case -6: Server.logInfo("Device attempting to unregister but no registration exists"); break ;
+	case -99: Server.logError("DB error during device registration"); break ;
+	default: Server.logError("Unknown error during device registration: " + Session.nReturnCode ) ; break ;
+	}
+	
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if( -1 == Session.strTo.indexOf("tag=") ) {
+	var to = new SipTo(Session.strTo);
+	to.tag = Server.getUTCTime();
+	Session.strTo = to.encode();
+}]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=637 y=540 ?>
+          <!--SIP/2.0 404 Not Found-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 404 Not Found"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="17" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=678 y=840 ?>
+          <!--SIP/2.0 500 Internal Server Error-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 500 Internal Server Error"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="18" plug-in="Pactolus.SipResponse.1" ><?xtml-editor x=686 y=688 ?>
+          <!--SIP/2.0 403 Forbidden-->
+          <sip-response xmlns="urn:www.pactolus.com:xtml:sip" remove-via="0" reliable="0" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strCallId</call-id>
+            <cseq >strCSeq</cseq>
+            <from >strFrom</from>
+            <status >"SIP/2.0 403 Forbidden"</status>
+            <to >strTo</to>
+            <via >strVia</via>
+          </sip-response>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="19" plug-in="Pactolus.Branch.1" ><?xtml-editor x=938 y=409 ?>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="generate subscribe" link="34" stubbed="0" >bGenerateSubscribe == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[
+/*
+	Currently, we subscribe on behalf of the following:
+	
+	1. Cisco ATA devices
+	2. Cisco 7905 phones
+	3. Cisco Linksys PAP-2
+	4. Telco devices
+	5. Sipura Devices
+	6. Any device which does not identify itself in the User-Agent header
+*/
+if( -1 != Session.strUserAgent.indexOf("Cisco ATA") ||
+	-1 != Session.strUserAgent.indexOf("Cisco-CP7905" ) ||
+	-1 != Session.strUserAgent.indexOf("Linksys/PAP2") ||
+	-1 != Session.strUserAgent.indexOf("Telco Systems AC-211") ||
+	-1 != Session.strUserAgent.indexOf("Sipura") ||
+	-1 != Session.strUserAgent.indexOf("Linksys/SPA") ||
+	0 == Session.strUserAgent.length ) {
+	
+	Session.bGenerateSubscribe = true ;
+}
+
+if ( -1 != Session.strUserAgent.indexOf("Sipura") ) {
+	Session.bSipura = true;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="22" plug-in="Standard.EndSession.1" ><?xtml-editor x=2215 y=649 ?></action>
+        <action id="23" plug-in="Pactolus.SipNotify.1" ><?xtml-editor x=1855 y=423 ?>
+          <!--Active-->
+          <sip-notify xmlns="urn:www.pactolus.com:xtml:sip" add-record-route="0" add-via="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <accept >strAccept</accept>
+            <call-id >strSubscribeCallId</call-id>
+            <contact >s_strLocalUri</contact>
+            <content >strNotifyContent</content>
+            <content-disposition >strNotifyContentDisposition</content-disposition>
+            <content-type >strNotifyContentType</content-type>
+            <cseq >strSubscribeCSeq</cseq>
+            <event >strEvent</event>
+            <from >strTo</from>
+            <request-uri >strRemoteUri</request-uri>
+            <route >strNotifyRoute</route>
+            <to >strFrom</to>
+            <subscription-state >strSubscriptionState</subscription-state>
+          </sip-notify>
+          <results >
+            <result name="Default" link="22" stubbed="0"/>
+            <result name="Success" link="24" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strNotifyContentType = "application/simple-message-summary" ;
+
+var to = new SipTo(Session.strTo);
+var uri = "sip:";
+uri += to.url.user;
+uri += "@";
+uri += to.url.host;
+
+if ( 0 != Session.nUrgentCount || 0 != Session.nUnseenCount ) {
+	Session.strNotifyContent = "Messages-Waiting: yes\r\n" ;
+	//Session.strNotifyContent += "Message-Account: " + uri + "\r\n" ;
+	Session.strNotifyContent += "Voice-Message: " + (Session.nUrgentCount + Session.nUnseenCount) + "/" + Session.nSavedCount ;
+	Session.strNotifyContent += " (" + Session.nUrgentCount + "/" + "0)\r\n" ;
+}
+else if ( "F" == Session.strMWIOffFlag ) {
+	Session.strNotifyContent = "Messages-Waiting: yes\r\n" ;
+}
+else {
+	Session.strNotifyContent = "Messages-Waiting: no\r\n" ;
+}
+
+
+
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="24" plug-in="Standard.WaitEvent.1" ><?xtml-editor x=1861 y=617 ?>
+          <wait xmlns="urn:www.pactolus.com:xtml:communication" timeout="nTimeout" recv-name="strEvtRcvd" >
+            <msg name="Pactolus.EveSipResponse.1" >
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter >strStatus</parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+              <parameter ></parameter>
+            </msg>
+          </wait>
+          <results >
+            <result name="Default" link="22" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout" link="28" stubbed="0"/>
+            <result name="Non-200 Status" link="28" stubbed="0" >(nStatus &lt; 200
+OR nStatus &gt; 299)
+AND 'Result'  == 'Success'
+AND nStatus != 415
+AND bSipura == false</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="middle" ><![CDATA[var status = new SipStatus(Session.strStatus) ;
+Session.nStatus = status.code ;
+
+Server.logInfo("SIP Status Code: " + Session.nStatus) ;
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("Exiting Wait PAC with Return Value: " + Session.nReturnCode) ;]]></script>
+          </scripts>
+        </action>
+        <action id="25" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=1242 y=370 ?>
+          <!--subscribeForEvent -->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.broadband.psAPISceSubscribe&quot;" method="&quot;subscribeForEvent&quot;" timeout="nTimeout" return="nReturnCode" method-return-var="nAPIReturn" method-return-type="0" >
+            <parameter type="in" var-type="string" >strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+            <parameter type="in" var-type="string" >strUserName</parameter>
+            <parameter type="in" var-type="string" >strRealm</parameter>
+            <parameter type="in" var-type="string" >strRemoteUri</parameter>
+            <parameter type="in" var-type="string" >strNotifyRoute</parameter>
+            <parameter type="in" var-type="string" >strEvent</parameter>
+            <parameter type="in" var-type="string" >strSubscribeCallId</parameter>
+            <parameter type="in" var-type="i8" >lCSeqValue</parameter>
+            <parameter type="in" var-type="string" >strFrom</parameter>
+            <parameter type="in" var-type="string" >strTo</parameter>
+            <parameter type="in" var-type="string" >strSubscriptionState</parameter>
+            <parameter type="in" var-type="string" >strAccept</parameter>
+            <parameter type="in" var-type="i4" >nExpires</parameter>
+            <parameter type="inout" var-type="string" >strAcctName</parameter>
+          </java>
+          <results >
+            <result name="Default" link="33" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout" link="33" stubbed="1"/>
+            <result name="Success Subscribe (0)" link="30" stubbed="0" >nAPIReturn == 0
+AND 'Result'  == 'Success'
+AND nExpires &gt; 0</result>
+            <result name="DB Error (-99) -active" link="33" stubbed="1" >nAPIReturn == -99
+AND strSubscriptionState match "active"</result>
+            <result name="No VM Acct (-3)" link="33" stubbed="1" >nAPIReturn == -3</result>
+            <result name="nExpires == 0" link="29" stubbed="0" >nExpires == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strEvent = "message-summary";
+
+if ( "0" == Session.strExpires ) {
+	Session.strSubscriptionState = "terminated";
+}
+else {
+	Session.strSubscriptionState = "active";
+}
+
+var cseq = new SipCSeq(Session.strCSeq);
+Session.lCSeqValue = cseq.value;
+Session.strSubscribeCSeq = Session.lCSeqValue + " NOTIFY";
+
+Session.strSubscribeCallId = js_CreateUniqueCallId();
+
+/* 	Send Notify without a tag on the To header.  
+	Since we are using the From header we received in the REGISTER as the To in the Notify, modify that
+*/
+var from = new SipFrom( Session.strFrom ) ;
+from.tag = ""; 
+Session.strFrom = from ;
+
+js_calculate_uri_and_route( false, "SIP/2.0", 
+	Session.strFrom.toString(),
+	Session.f_strContact.toString(),
+	Session.strRecordRoute.toString(),
+	Session.strRemoteUri,
+	Session.strNotifyRoute ) ;
+	
+
+Server.logInfo("***ATTEMPTING TO UPDATE SUBSCRIPTION FOR THIS DEVICE***");
+Server.logInfo("UserName: " + Session.strUserName);
+Server.logInfo("Realm: " + Session.strRealm);
+Server.logInfo("Call ID: " + Session.strSubscribeCallId);
+Server.logInfo("CSeq Value: " + Session.lCSeqValue);
+Server.logInfo("From: " +  Session.strFrom);
+Server.logInfo("To: " + Session.strTo);
+Server.logInfo("Accept: " + Session.strAccept);
+Server.logInfo("Expires: " + Session.nExpires);
+Server.logInfo("SubscriptionState: " + Session.strSubscriptionState);
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if ( 7 == Result.id ) {
+	Session.strSubscriptionState = "terminated;retry-after=60;reason=giveup" ;
+}
+
+Server.logInfo("Returning out of update Subscribe with API return code: " + Session.nAPIReturn) ;
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="28" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=1861 y=805 ?>
+          <!--subscribeForEvent - Terminated-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.broadband.psAPISceSubscribe&quot;" method="&quot;subscribeForEvent&quot;" timeout="nTimeout" return="nReturnCode" method-return-var="nAPIReturn" method-return-type="0" >
+            <parameter type="in" var-type="string" >strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+            <parameter type="in" var-type="string" >strUserName</parameter>
+            <parameter type="in" var-type="string" >strRealm</parameter>
+            <parameter type="in" var-type="string" >strRemoteUri</parameter>
+            <parameter type="in" var-type="string" >strNotifyRoute</parameter>
+            <parameter type="in" var-type="string" >strEvent</parameter>
+            <parameter type="in" var-type="string" >strSubscribeCallId</parameter>
+            <parameter type="in" var-type="i8" >lCSeqValue</parameter>
+            <parameter type="in" var-type="string" >strFrom</parameter>
+            <parameter type="in" var-type="string" >strTo</parameter>
+            <parameter type="in" var-type="string" >strSubscriptionState</parameter>
+            <parameter type="in" var-type="string" >strAccept</parameter>
+            <parameter type="in" var-type="i4" >nExpires</parameter>
+            <parameter type="inout" var-type="string" >strAcctName</parameter>
+          </java>
+          <results >
+            <result name="Default" link="22" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strSubscriptionState = "terminated" ;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("API return code: " + Session.nAPIReturn) ;
+
+switch (Session.nAPIReturn) {
+	case 0:
+		Server.logInfo("SUBSCRIPTION SUCCESSFULLY TERMINATED") ;
+		break ;
+	case -1:
+		Server.logError("SUBSCRIBING_DEVICE_NOT_FOUND") ;
+		break ;
+	case -2:
+		Server.logError("SUBSCRIPTION_NOT_FOUND") ;
+		break ;
+	case -99:
+		Server.logError("DB_ERROR") ;
+		break;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="29" plug-in="Pactolus.SipNotify.1" ><?xtml-editor x=1565 y=608 ?>
+          <!--Terminated-->
+          <sip-notify xmlns="urn:www.pactolus.com:xtml:sip" add-record-route="0" add-via="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >strSubscribeCallId</call-id>
+            <contact >s_strLocalUri</contact>
+            <cseq >strSubscribeCSeq</cseq>
+            <event >strEvent</event>
+            <from >strTo</from>
+            <request-uri >strRemoteUri</request-uri>
+            <route >strNotifyRoute</route>
+            <to >strFrom</to>
+            <subscription-state >strSubscriptionState</subscription-state>
+          </sip-notify>
+          <results >
+            <result name="Default" link="24" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="30" plug-in="Pactolus.MailboxStatus.1" ><?xtml-editor x=1566 y=425 ?>
+          <imap-status xmlns="urn:www.pactolus.com:xtml:imap" username="strAcctName" password="strAcctName" mailbox="&quot;InBox&quot;" flagged-count="nUrgentCount" unseen-count="nUnseenCount" saved-count="nSavedCount" flagged="oUrgent" unseen="oUnseen" saved="oSaved" returns="nReturnCode" timeout="nTimeout"/>
+          <results >
+            <result name="Default" link="23" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="33" plug-in="Standard.EndSession.1" ><?xtml-editor x=1564 y=830 ?></action>
+        <action id="34" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1163 y=186 ?>
+          <!--getSipAddress-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;GetSIPAddress&quot;" return="" external-function="1" library="lib_voip.xml" >
+            <parameter >strDBName</parameter>
+            <parameter >strPlatformSessionId</parameter>
+            <parameter >oSubscriber</parameter>
+            <parameter >strRealm</parameter>
+            <parameter >0</parameter>
+            <parameter >0</parameter>
+            <parameter >0</parameter>
+            <parameter >strMWIOffFlag</parameter>
+          </function>
+          <results >
+            <result name="Default" link="25" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var phone = new SipFrom(Session.strFrom);
+if ( 0 < phone.url.phoneNumber.length ) {
+	Session.oSubscriber.strPhone = phone.url.phoneNumber ;
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnServiceLoad" start="2" event="OnServiceLoad" returns="void" >
+      <parameters >
+        <parameter name="strAppName" type="string" pass="byref"/>
+        <parameter name="nSessionCount" type="i2" pass="byref"/>
+        <parameter name="nMaxIterations" type="i2" pass="byref"/>
+        <parameter name="nServerId" type="i2" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="2" plug-in="Pactolus.UserFunction.1" ><?xtml-editor x=22 y=32 ?>
+          <user-function xmlns="urn:www.pactolus.com:xtml:application" process="&quot;PACTOLUS_ps_c_adaptor&quot;" function="&quot;get_property&quot;" timeout="5" return="" async="0" >
+            <parameter >"default-realm"</parameter>
+            <parameter >s_strDefaultRealm</parameter>
+            <parameter >"force-realm"</parameter>
+            <parameter >s_strForcedRealm</parameter>
+            <parameter >"niu-address"</parameter>
+            <parameter >s_strNIU</parameter>
+          </user-function>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[
+if( 0 == Session.s_strDefaultRealm.length ) {
+	Server.logInfo("No default realm supplied") ;
+}
+else {
+	Server.logInfo("Default realm: " + Session.s_strDefaultRealm) ;
+}
+
+if( 0 == Session.s_strForcedRealm.length ) {
+	Server.logInfo("No forced realm supplied") ;
+}
+else {
+	Server.logInfo("Forced realm: " + Session.s_strForcedRealm) ;
+}
+
+Session.s_strLocalUri = "<sip:" + Server.sipAddress  ;
+if( Server.sipPort != undefined && Server.sipPort != 5060 ) {
+	Session.s_strLocalUri += ":" ;
+	Session.s_strLocalUri += Server.sipPort ;
+}
+Session.s_strLocalUri += ">" ;]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=263 y=58 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>]]></script>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value="C:/pactolus_app_server/apps/voip/libs;C:/Applications/Mainline/InternalProduct/SceXMLScripts/Libs"/>
+    <property key="library-modules" value="lib_auth.xml;lib_voip.xml"/>
+    <property key="library-path" value="C:/pactolus_app_server/apps/voip/libs;C:/Applications/Mainline/InternalProduct/SceXMLScripts/Libs"/>
+  </properties>
+  <application-version >
+    <revision >$Id: pcs_registrar.xml,v 1.37 2008/08/11 17:50:26 erobbins Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

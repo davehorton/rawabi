@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-reverse-engineering PUBLIC "-//Hibernate/Hibernate Reverse Engineering DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-reverse-engineering-3.0.dtd" >
+
+<hibernate-reverse-engineering>
+	<table-filter match-schema="PCSPROD" match-name="SUBSCRIBER" />
+	<table-filter match-schema="PCSPROD" match-name="SUB_AUTH_ANI" />
+	<table-filter match-schema="PCSPROD" match-name="LOCKED_PINS"></table-filter>
+	<table-filter match-schema="PCSPROD" match-name="PRE_ACTIVATED_SUBSCRIBERS"></table-filter>
+	<table-filter match-schema="PCSPROD" match-name="SERVICE_PROVIDER"></table-filter>
+	<table-filter match-schema="PCSPROD" match-name="SERVICE_PROVIDER_SETTINGS"></table-filter>
+	<table-filter match-schema="PCSPROD" match-name="PRODUCT_OFFERING"></table-filter>
+	<table-filter match-schema="PCSPROD" match-name="ACCOUNT_ACTIVITY"></table-filter>
+	<table-filter match-schema="PCSPROD" match-name="EVT_BALANCE_TRANSFER"></table-filter>
+	<table-filter match-schema="PCSPROD" match-name="SVC_PREPAID_CALLING"></table-filter>
+	<table-filter match-schema="PCSPROD" match-name="ACCESS_NUMBER"></table-filter>
+	<table-filter match-schema="PCSPROD" match-name="LANGUAGE_REF"></table-filter>
+	<table-filter match-schema="PCSPROD" match-name="CURRENCY_REF"></table-filter>
+</hibernate-reverse-engineering>

@@ -1,0 +1,1763 @@
+<?xml version="1.0"?>
+<xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
+  <version sce-version="6016" prev-sce-version="6016" last-mod-time="Tuesday, June 16, 2009 12:59:55"/>
+  <global-handlers/>
+  <functions >
+    <function name="sip_createConference" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="cnf" type="Conference" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nFailure" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+        <var name="nReturnCode" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=90 y=144 ?>
+          <!--persist conference?-->
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name=".bPersist" link="7" stubbed="0" >cnf.persistent == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: sip_createConference");
+Session.cnf.LogInfo();
+Server.logInfo("max_parties " + Session.cnf.max_parties);
+Server.logInfo("max_talkers " + Session.cnf.max_talkers);
+Server.logInfo("media_server_name " + Session.cnf.media_server_name);
+Server.logInfo("media_server_type " + Session.cnf.media_server_type);
+Server.logInfo("persistent " + Session.cnf.persistent);
+Server.logInfo("nMaxActiveSpeakers " + Session.cnf.nMaxActiveSpeakers);
+Server.logInfo("nNbrActiveSpeakers " + Session.cnf.nNbrActiveSpeakers);
+Server.logInfo("nReportingInterval " + Session.cnf.nReportingInterval);
+Server.logInfo("nDBThreshold " + Session.cnf.nDBThreshold);]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.CreateConference.1" ><?xtml-editor x=629 y=264 ?>
+          <create-conference xmlns="urn:www.pactolus.com:xtml:conference" conference="cnf" persist="1" wideband="0" media-server-type="cnf.media_server_type" media-server-name="cnf.media_server_name" max-parties="cnf.max_parties" max-talkers="cnf.max_talkers" hysteresis="" time-constant="" active-speakers-to-report="cnf.nNbrActiveSpeakers" reporting-interval="cnf.nReportingInterval" active-speaker-threshold="cnf.nDBThreshold" return-value="nReturnCode" timeout="5"/>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success" link="5" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("CREATE CONFERENCE, EXIT ON BRANCH: " + Result.name);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO ADD TO CONFERENCE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Pactolus.CreateConference.1" ><?xtml-editor x=623 y=147 ?>
+          <create-conference xmlns="urn:www.pactolus.com:xtml:conference" conference="cnf" persist="0" wideband="1" media-server-type="cnf.media_server_type" media-server-name="cnf.media_server_name" max-parties="cnf.max_parties" max-talkers="cnf.max_talkers" hysteresis="" time-constant="" active-speakers-to-report="cnf.nNbrActiveSpeakers" reporting-interval="cnf.nReportingInterval" active-speaker-threshold="cnf.nDBThreshold" return-value="nReturnCode" timeout="5"/>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success" link="5" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("CREATE CONFERENCE, EXIT ON BRANCH: " + Result.name);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO CREATE CONFERENCE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=864 y=115 ?>
+          <!--nFailure-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nFailure"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("FAIL TO CREATE CONFERENCE WITH RETURN CODE: " + Session.nReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=882 y=260 ?>
+          <!--nSuccess-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nSuccess"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS CREATE CONFERENCE") ;
+Session.cnf.LogInfo();
+Server.logInfo("max_parties" + Session.cnf.max_parties);
+Server.logInfo("max_talkers" + Session.cnf.max_talkers);
+Server.logInfo("media_server_name" + Session.cnf.media_server_name);
+Server.logInfo("media_server_type" + Session.cnf.media_server_type);
+Server.logInfo("persistent" + Session.cnf.persistent);
+Server.logInfo("nMaxActiveSpeakers" + Session.cnf.nMaxActiveSpeakers);
+Server.logInfo("nNbrActiveSpeakers" + Session.cnf.nNbrActiveSpeakers);
+Server.logInfo("nReportingInterval" + Session.cnf.nReportingInterval);
+Server.logInfo("nDBThreshold" + Session.cnf.nDBThreshold);]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.Branch.1" ><?xtml-editor x=293 y=127 ?>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="Wideband" link="3" stubbed="0" >cnf.wide_band == true</result>
+          </results>
+        </action>
+        <action id="7" plug-in="Pactolus.Branch.1" ><?xtml-editor x=297 y=264 ?>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Wideband" link="9" stubbed="0" >cnf.wide_band == true</result>
+          </results>
+        </action>
+        <action id="8" plug-in="Pactolus.CreateConference.1" ><?xtml-editor x=614 y=15 ?>
+          <create-conference xmlns="urn:www.pactolus.com:xtml:conference" conference="cnf" persist="0" wideband="0" media-server-type="cnf.media_server_type" media-server-name="cnf.media_server_name" max-parties="cnf.max_parties" max-talkers="cnf.max_talkers" hysteresis="" time-constant="" active-speakers-to-report="cnf.nNbrActiveSpeakers" reporting-interval="cnf.nReportingInterval" active-speaker-threshold="cnf.nDBThreshold" return-value="nReturnCode" timeout="5"/>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success" link="5" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("CREATE CONFERENCE, EXIT ON BRANCH: " + Result.name);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO CREATE CONFERENCE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Pactolus.CreateConference.1" ><?xtml-editor x=631 y=370 ?>
+          <create-conference xmlns="urn:www.pactolus.com:xtml:conference" conference="cnf" persist="1" wideband="1" media-server-type="cnf.media_server_type" media-server-name="cnf.media_server_name" max-parties="cnf.max_parties" max-talkers="cnf.max_talkers" hysteresis="" time-constant="" active-speakers-to-report="cnf.nNbrActiveSpeakers" reporting-interval="cnf.nReportingInterval" active-speaker-threshold="cnf.nDBThreshold" return-value="nReturnCode" timeout="5"/>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success" link="5" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("CREATE CONFERENCE, EXIT ON BRANCH: " + Result.name);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO ADD TO CONFERENCE");
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="sip_addToConference" start="4" event="" returns="i4" >
+      <parameters >
+        <parameter name="dlg" type="SipDialog" pass="byref"/>
+        <parameter name="cnf" type="Conference" pass="byref"/>
+        <parameter name="ep" type="MediaEndpoint" pass="byref"/>
+        <parameter name="nAudioMode" type="i4" pass="byref"/>
+        <parameter name="strCodec" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nFailure" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+        <var name="strAudioMode" type="string" ></var>
+        <var name="nReturnCode" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="4" plug-in="Pactolus.Branch.1" ><?xtml-editor x=227 y=291 ?>
+          <!--clamping?-->
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="ep.NODTMFClamp" link="7" stubbed="0" >ep.NODTMFClamp == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: sip_addToConference");
+Session.dlg.LogInfo();
+Session.cnf.LogInfo();
+Session.ep.LogInfo();
+Server.logInfo("media_server_name " + Session.cnf.media_server_name);
+Server.logInfo("media_server_type " + Session.cnf.media_server_type);
+Server.logInfo("name " + Session.cnf.name);
+Server.logInfo("audio mode " + Session.nAudioMode);
+Server.logInfo("codec " + Session.strCodec);
+if (0 == Session.nAudioMode)
+	Session.strAudioMode = "Full";
+else if (2 == Session.nAudioMode)
+	Session.strAudioMode = "Mute";
+else
+	Session.strAudioMode = "Mute & Deaf";
+
+Server.logInfo("ep.NODTMFClamp " + Session.ep.NODTMFClamp);
+Server.logInfo("PAI IS: " + Session.ep.strPAssertedIdentity);
+//assume conference already created, work around for csr app create conference, but conf app going to join
+Session.cnf.state = 1;
+Server.logInfo("SET THE STATE OF CONFERENCE TO 1");]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Pactolus.ModifyExistingDialog.1" ><?xtml-editor x=718 y=193 ?>
+          <!--add to conference-->
+          <modify-session xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="dlg" action="4" media-endpoint="ep" media-server-type="cnf.media_server_type" endpoint-type="&quot;ivr&quot;" media-sdp="" sip-address="" media-allocate-new-endpoint="0" transfer-mode="0" media-status="nReturnCode" codec="strCodec" telephone-events="1" media-server-name="cnf.media_server_name" conference="cnf" new-conference="0" persistent-conference="1" wideband="0" participant-mode="strAudioMode" coachee-endpoint="" max-parties="" dtmf-clamp-setting="1" max-talkers="" hysteresis="" time-constant="" active-speakers-to-report="" reporting-interval="" active-speaker-threshold="" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >1</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >1</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-B>
+          </modify-session>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="No response"/>
+            <result name="Not completed in time"/>
+            <result name="Caller hung up"/>
+            <result name="Media resource failure"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("ADD TO CONFERENCE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO ADD TO CONFERENCE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=947 y=170 ?>
+          <!--nFailure-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nFailure"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("FAIL TO ADD TO CONFERENCE");]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=953 y=265 ?>
+          <!--nSuccess-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nSuccess"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS ADD TO CONFERENCE") ;
+Session.cnf.LogInfo();
+Session.ep.LogInfo();]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.ModifyExistingDialog.1" ><?xtml-editor x=726 y=406 ?>
+          <!--add to conference-->
+          <modify-session xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="dlg" action="4" media-endpoint="ep" media-server-type="cnf.media_server_type" endpoint-type="&quot;ivr&quot;" media-sdp="" sip-address="" media-allocate-new-endpoint="0" transfer-mode="0" media-status="nReturnCode" codec="strCodec" telephone-events="1" media-server-name="cnf.media_server_name" conference="cnf" new-conference="0" persistent-conference="1" wideband="0" participant-mode="strAudioMode" coachee-endpoint="" max-parties="" dtmf-clamp-setting="0" max-talkers="" hysteresis="" time-constant="" active-speakers-to-report="" reporting-interval="" active-speaker-threshold="" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >1</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >1</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-B>
+          </modify-session>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="3" stubbed="1"/>
+            <result name="No response"/>
+            <result name="Not completed in time"/>
+            <result name="Caller hung up"/>
+            <result name="Media resource failure"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("ADD TO CONFERENCE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO ADD TO CONFERENCE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.ModifyExistingDialog.1" ><?xtml-editor x=462 y=185 ?>
+          <!--put on hold-->
+          <modify-session xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="dlg" action="0" media-endpoint="ep" media-server-type="cnf.media_server_type" endpoint-type="&quot;ivr&quot;" media-sdp="" sip-address="" media-allocate-new-endpoint="0" transfer-mode="0" media-status="nReturnCode" codec="strCodec" telephone-events="1" media-server-name="cnf.media_server_name" conference="cnf" new-conference="0" persistent-conference="1" wideband="1" participant-mode="strAudioMode" coachee-endpoint="" max-parties="" dtmf-clamp-setting="1" max-talkers="" hysteresis="" time-constant="" active-speakers-to-report="" reporting-interval="" active-speaker-threshold="" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >1</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >1</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-B>
+          </modify-session>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="1" stubbed="0"/>
+            <result name="No response"/>
+            <result name="Not completed in time"/>
+            <result name="Caller hung up"/>
+            <result name="Media resource failure"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PUT ON HOLD");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Pactolus.ModifyExistingDialog.1" ><?xtml-editor x=477 y=403 ?>
+          <!--put on hold-->
+          <modify-session xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="dlg" action="0" media-endpoint="ep" media-server-type="cnf.media_server_type" endpoint-type="&quot;ivr&quot;" media-sdp="" sip-address="" media-allocate-new-endpoint="0" transfer-mode="0" media-status="nReturnCode" codec="strCodec" telephone-events="1" media-server-name="cnf.media_server_name" conference="cnf" new-conference="0" persistent-conference="1" wideband="1" participant-mode="strAudioMode" coachee-endpoint="" max-parties="" dtmf-clamp-setting="0" max-talkers="" hysteresis="" time-constant="" active-speakers-to-report="" reporting-interval="" active-speaker-threshold="" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >1</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >1</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-B>
+          </modify-session>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="5" stubbed="0"/>
+            <result name="No response"/>
+            <result name="Not completed in time"/>
+            <result name="Caller hung up"/>
+            <result name="Media resource failure"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PUT ON HOLD");
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="sip_fullMode" start="5" event="" returns="i4" >
+      <parameters >
+        <parameter name="cnf" type="Conference" pass="byref"/>
+        <parameter name="ep" type="MediaEndpoint" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nReturnCode" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+        <var name="nFailure" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="5" plug-in="Pactolus.ModifyParty.1" ><?xtml-editor x=126 y=69 ?>
+          <!--Full mode-->
+          <modify-party xmlns="urn:www.pactolus.com:xtml:conference" action="0" conference="cnf" media-endpoint="ep" participant-mode="&quot;Full&quot;" coachee-endpoint="" return-value="nReturnCode" timeout="5" dtmf-clamp-mode="2" gain-operation="0" gain-mode="0" gain-amount="" max-gain="" direction=""/>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success" link="7" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: sip_fullMode");
+Session.cnf.LogInfo();
+Session.ep.LogInfo();
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("CHANGE TO FULL CONFERENCE MODE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO CHANGE TO FULL CONFERENCE MODE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=342 y=23 ?>
+          <!--nFailure-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nFailure"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("FAIL TO CHANGE TO CONFERENCE MODE WITH RETURN CODE: " + Session.nReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=360 y=168 ?>
+          <!--nSuccess-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nSuccess"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS CHANGE TO CONFERENCE MODE") ;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="sip_muteMode" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="cnf" type="Conference" pass="byref"/>
+        <parameter name="ep" type="MediaEndpoint" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nReturnCode" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+        <var name="nFailure" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.ModifyParty.1" ><?xtml-editor x=126 y=69 ?>
+          <!--Mute mode-->
+          <modify-party xmlns="urn:www.pactolus.com:xtml:conference" action="0" conference="cnf" media-endpoint="ep" participant-mode="&quot;Mute&quot;" coachee-endpoint="" return-value="nReturnCode" timeout="5" dtmf-clamp-mode="2" gain-operation="0" gain-mode="0" gain-amount="" max-gain="" direction=""/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: sip_muteMode");
+Session.cnf.LogInfo();
+Session.ep.LogInfo();
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("CHANGE TO MUTE MODE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO CHANGE TO MUTE MODE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=342 y=23 ?>
+          <!--nFailure-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nFailure"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("FAIL TO CHANGE TO MUTE MODE WITH RETURN CODE: " + Session.nReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=360 y=168 ?>
+          <!--nSuccess-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nSuccess"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS CHANGE TO MUTE MODE") ;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="sip_muteAndDeafMode" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="cnf" type="Conference" pass="byref"/>
+        <parameter name="ep" type="MediaEndpoint" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nReturnCode" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+        <var name="nFailure" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.ModifyParty.1" ><?xtml-editor x=126 y=69 ?>
+          <!--Mute and deaf mode-->
+          <modify-party xmlns="urn:www.pactolus.com:xtml:conference" action="0" conference="cnf" media-endpoint="ep" participant-mode="&quot;Mute &amp; Deaf&quot;" coachee-endpoint="" return-value="nReturnCode" timeout="5" dtmf-clamp-mode="2" gain-operation="0" gain-mode="0" gain-amount="" max-gain="" direction=""/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: sip_muteAndDeafMode");
+Session.cnf.LogInfo();
+Session.ep.LogInfo();
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("CHANGE TO MUTE AND DEAF MODE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO CHANGE TO MUTE AND DEAF MODE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=342 y=23 ?>
+          <!--nFailure-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nFailure"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("FAIL TO CHANGE TO MUTE AND DEAF MODE WITH RETURN CODE: " + Session.nReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=360 y=168 ?>
+          <!--nSuccess-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nSuccess"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS CHANGE TO MUTE ADN DEAF MODE") ;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="sip_deleteConference" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="cnf" type="Conference" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nFailure" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+        <var name="nReturnCode" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.DeleteConference.1" ><?xtml-editor x=141 y=131 ?>
+          <delete-conference xmlns="urn:www.pactolus.com:xtml:conference" conference="cnf" return-value="nReturnCode" timeout="5"/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: sip_deleteConference");
+Session.cnf.LogInfo();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("DELETE CONFERENCE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO DELETE CONFERENCE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=401 y=83 ?>
+          <!--nFailure-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nFailure"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("FAIL TO DELETE CONFERENCE WITH RETURN CODE: " + Session.nReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=419 y=228 ?>
+          <!--nSuccess-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nSuccess"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS DELETE CONFERENCE") ;
+Session.cnf.LogInfo();]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="sip_removeFromConference" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="cnf" type="Conference" pass="byref"/>
+        <parameter name="ep" type="MediaEndpoint" pass="byref"/>
+        <parameter name="dlg" type="SipDialog" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nFailure" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+        <var name="nReturnCode" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.RemoveParty.1" ><?xtml-editor x=139 y=158 ?>
+          <remove-party xmlns="urn:www.pactolus.com:xtml:conference" conference="cnf" media-endpoint="ep" session="dlg" hang-up-party="0" return-value="nReturnCode" timeout="5"/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: sip_addToConference");
+Session.dlg.LogInfo();
+Session.cnf.LogInfo();
+Session.ep.LogInfo();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("REMOVE PARTY FROM CONFERENCE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO REMOVE FROM CONFERENCE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=388 y=104 ?>
+          <!--nFailure-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nFailure"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("FAIL TO REMOVE FROM CONFERENCE");]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=403 y=249 ?>
+          <!--nSuccess-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nSuccess"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS TO REMOVE FROM CONFERENCE") ;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="sip_moveFromConfToAnotherConf" start="3" event="" returns="i4" >
+      <parameters >
+        <parameter name="dlg" type="SipDialog" pass="byref"/>
+        <parameter name="cnf1" type="Conference" pass="byref"/>
+        <parameter name="ep1" type="MediaEndpoint" pass="byref"/>
+        <parameter name="cnf2" type="Conference" pass="byref"/>
+        <parameter name="ep2" type="MediaEndpoint" pass="byref"/>
+        <parameter name="strCodec" type="string" pass="byref"/>
+        <parameter name="bCreateNewConf" type="boolean" pass="byref"/>
+        <parameter name="strDeleteOldConf" type="string" pass="byref"/>
+        <parameter name="nAudioMode" type="i4"/>
+      </parameters>
+      <local-vars >
+        <var name="nFailure" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+        <var name="nReturnCode" type="i4" >-1</var>
+        <var name="strAudioMode" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="3" plug-in="Pactolus.RemoveParty.1" ><?xtml-editor x=49 y=112 ?>
+          <!--remove from conference 1-->
+          <remove-party xmlns="urn:www.pactolus.com:xtml:conference" conference="cnf1" media-endpoint="ep1" session="dlg" hang-up-party="0" return-value="nReturnCode" timeout="5"/>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="Success" link="4" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: sip_moveFromConfToAnotherConf");
+Server.logInfo("DIALOG INFO");
+Session.dlg.LogInfo();
+Server.logInfo("CNF1 INFO");
+Session.cnf1.LogInfo();
+Server.logInfo("EP1 INFO");
+Session.ep1.LogInfo();
+Server.logInfo("CNF2 INFO");
+Session.cnf2.LogInfo();
+Server.logInfo("EP2 INFO");
+Session.ep2.LogInfo();
+Server.logInfo("CREATE NEW CONFERENCE FLAG: " + Session.bCreateNewConf);
+Server.logInfo("DELETE OLD CONFERENCE FLAG: " + Session.strDeleteOldConf);
+Server.logInfo("AUDIO MODE: " + Session.nAudioMode);
+if (1 == Session.nAudioMode)
+{
+	Session.strAudioMode = "Mute & Deaf";
+}
+else if (2 == Session.nAudioMode)
+{
+	Session.strAudioMode = "Mute";
+}
+else
+{
+	Session.strAudioMode = "Full";
+}
+Server.logInfo("String AUDIO MODE: " + Session.strAudioMode);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("REMOVE PARTY FROM CONFERENCE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO REMOVE FROM CONFERENCE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=254 y=103 ?>
+          <!--nFailure-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nFailure"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("FAIL TO REMOVE FROM CONFERENCE");]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1415 y=636 ?>
+          <!--nSuccess-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nSuccess"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS MOVE FROM CONFERENCE 1 TO CONFERENCE 2") ;
+Server.logInfo("DIALOG INFO");
+Session.dlg.LogInfo();
+Server.logInfo("CNF1 INFO");
+Session.cnf1.LogInfo();
+Server.logInfo("EP1 INFO");
+Session.ep1.LogInfo();
+Server.logInfo("CNF2 INFO");
+Session.cnf2.LogInfo();
+Server.logInfo("EP2 INFO");
+Session.ep2.LogInfo();]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.Branch.1" ><?xtml-editor x=269 y=189 ?>
+          <!--create new conference 2?-->
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+            <result name="bCreateNewConference" link="14" stubbed="0" >bCreateNewConf == true</result>
+          </results>
+        </action>
+        <action id="5" plug-in="Pactolus.ModifyExistingDialog.1" ><?xtml-editor x=742 y=45 ?>
+          <!--add to conference2-->
+          <modify-session xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="dlg" action="4" media-endpoint="ep2" media-server-type="cnf2.media_server_type" endpoint-type="&quot;ivr&quot;" media-sdp="" sip-address="" media-allocate-new-endpoint="0" transfer-mode="0" media-status="nReturnCode" codec="strCodec" telephone-events="1" media-server-name="cnf2.media_server_name" conference="cnf2" new-conference="0" persistent-conference="0" wideband="0" participant-mode="strAudioMode" coachee-endpoint="" max-parties="" dtmf-clamp-setting="1" max-talkers="" hysteresis="" time-constant="" active-speakers-to-report="" reporting-interval="" active-speaker-threshold="" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-B>
+          </modify-session>
+          <results >
+            <result name="Default" link="12" stubbed="1"/>
+            <result name="Success" link="8" stubbed="1"/>
+            <result name="No response"/>
+            <result name="Not completed in time"/>
+            <result name="Caller hung up"/>
+            <result name="Media resource failure"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("ADD TO CONFERENCE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO ADD TO CONFERENCE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.ModifyExistingDialog.1" ><?xtml-editor x=971 y=654 ?>
+          <!--add to conference2-->
+          <modify-session xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="dlg" action="4" media-endpoint="ep2" media-server-type="cnf2.media_server_type" endpoint-type="&quot;ivr&quot;" media-sdp="" sip-address="" media-allocate-new-endpoint="0" transfer-mode="0" media-status="nReturnCode" codec="strCodec" telephone-events="1" media-server-name="cnf2.media_server_name" conference="cnf2" new-conference="1" persistent-conference="0" wideband="1" participant-mode="strAudioMode" coachee-endpoint="" max-parties="cnf2.max_parties" dtmf-clamp-setting="1" max-talkers="cnf2.max_talkers" hysteresis="" time-constant="" active-speakers-to-report="cnf2.nNbrActiveSpeakers" reporting-interval="cnf2.nReportingInterval" active-speaker-threshold="cnf2.nDBThreshold" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-B>
+          </modify-session>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+            <result name="Success" link="8" stubbed="1"/>
+            <result name="No response"/>
+            <result name="Not completed in time"/>
+            <result name="Caller hung up"/>
+            <result name="Media resource failure"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("ADD TO CONFERENCE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO ADD TO CONFERENCE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Pactolus.ModifyExistingDialog.1" ><?xtml-editor x=1153 y=82 ?>
+          <!--put back to conference1-->
+          <modify-session xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="dlg" action="4" media-endpoint="ep1" media-server-type="cnf1.media_server_type" endpoint-type="&quot;ivr&quot;" media-sdp="" sip-address="" media-allocate-new-endpoint="0" transfer-mode="0" media-status="nReturnCode" codec="strCodec" telephone-events="1" media-server-name="cnf1.media_server_name" conference="cnf1" new-conference="0" persistent-conference="0" wideband="0" participant-mode="&quot;Full&quot;" coachee-endpoint="" max-parties="" dtmf-clamp-setting="1" max-talkers="" hysteresis="" time-constant="" active-speakers-to-report="" reporting-interval="" active-speaker-threshold="" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-B>
+          </modify-session>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+            <result name="Success"/>
+            <result name="No response"/>
+            <result name="Not completed in time"/>
+            <result name="Caller hung up"/>
+            <result name="Media resource failure"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("ADD TO CONFERENCE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO ADD TO CONFERENCE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1214 y=642 ?>
+          <!--delete conference1?-->
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="strDeleteOldConference==T" link="9" stubbed="0" >strDeleteOldConf match "T"</result>
+          </results>
+        </action>
+        <action id="9" plug-in="Pactolus.DeleteConference.1" ><?xtml-editor x=1432 y=725 ?>
+          <delete-conference xmlns="urn:www.pactolus.com:xtml:conference" conference="ep1" return-value="nReturnCode" timeout="5"/>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.ep1.name = Session.cnf1.name;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("DELETE CONFERENCE MODE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO DELETE CONFERENCE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Pactolus.Branch.1" ><?xtml-editor x=481 y=141 ?>
+          <!--clamping?-->
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="ep2.NODTMFClamp" link="17" stubbed="0" >ep2.NODTMFClamp == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("ABOUT TO CHECK FOR DTMF CLAMPING");
+if ('NODTMFClamp' in Session.ep2)
+{
+	Server.logInfo("DTMF CLAMPING IS DEFINED");
+	Server.logInfo("ep2.NODTMFClamp " + Session.ep2.NODTMFClamp);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Pactolus.Branch.1" ><?xtml-editor x=928 y=170 ?>
+          <!--clamping?-->
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="ep1.NODTMFClamp" link="13" stubbed="0" >ep1.NODTMFClamp == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("ep1.NODTMFClamp " + Session.ep1.NODTMFClamp);]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Pactolus.ModifyExistingDialog.1" ><?xtml-editor x=1165 y=266 ?>
+          <!--put back to conference1-->
+          <modify-session xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="dlg" action="4" media-endpoint="ep1" media-server-type="cnf1.media_server_type" endpoint-type="&quot;ivr&quot;" media-sdp="" sip-address="" media-allocate-new-endpoint="0" transfer-mode="0" media-status="nReturnCode" codec="strCodec" telephone-events="1" media-server-name="cnf1.media_server_name" conference="cnf1" new-conference="0" persistent-conference="0" wideband="0" participant-mode="&quot;Full&quot;" coachee-endpoint="" max-parties="" dtmf-clamp-setting="0" max-talkers="" hysteresis="" time-constant="" active-speakers-to-report="" reporting-interval="" active-speaker-threshold="" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-B>
+          </modify-session>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+            <result name="Success"/>
+            <result name="No response"/>
+            <result name="Not completed in time"/>
+            <result name="Caller hung up"/>
+            <result name="Media resource failure"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("ADD TO CONFERENCE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO ADD TO CONFERENCE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Pactolus.Branch.1" ><?xtml-editor x=402 y=742 ?>
+          <!--clamping?-->
+          <results >
+            <result name="Default" link="24" stubbed="0"/>
+            <result name="ep2.NODTMFClamp" link="25" stubbed="0" >ep2.NODTMFClamp == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("ABOUT TO CHECK FOR DTMF CLAMPING");
+if ('NODTMFClamp' in Session.ep2)
+{
+	Server.logInfo("DTMF CLAMPING IS DEFINED");
+	Server.logInfo("ep2.NODTMFClamp " + Session.ep2.NODTMFClamp)
+}]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Pactolus.ModifyExistingDialog.1" ><?xtml-editor x=987 y=878 ?>
+          <!--add to conference2-->
+          <modify-session xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="dlg" action="4" media-endpoint="ep2" media-server-type="cnf2.media_server_type" endpoint-type="&quot;ivr&quot;" media-sdp="" sip-address="" media-allocate-new-endpoint="0" transfer-mode="0" media-status="nReturnCode" codec="strCodec" telephone-events="1" media-server-name="cnf2.media_server_name" conference="cnf2" new-conference="1" persistent-conference="0" wideband="0" participant-mode="strAudioMode" coachee-endpoint="" max-parties="cnf2.max_parties" dtmf-clamp-setting="0" max-talkers="cnf2.max_talkers" hysteresis="" time-constant="" active-speakers-to-report="cnf2.nNbrActiveSpeakers" reporting-interval="cnf2.nReportingInterval" active-speaker-threshold="cnf2.nDBThreshold" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-B>
+          </modify-session>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+            <result name="Success" link="8" stubbed="1"/>
+            <result name="No response"/>
+            <result name="Not completed in time"/>
+            <result name="Caller hung up"/>
+            <result name="Media resource failure"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("ADD TO CONFERENCE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO ADD TO CONFERENCE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="17" plug-in="Pactolus.ModifyExistingDialog.1" ><?xtml-editor x=744 y=250 ?>
+          <!--add to conference2-->
+          <modify-session xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="dlg" action="4" media-endpoint="ep2" media-server-type="cnf2.media_server_type" endpoint-type="&quot;ivr&quot;" media-sdp="" sip-address="" media-allocate-new-endpoint="0" transfer-mode="0" media-status="nReturnCode" codec="strCodec" telephone-events="1" media-server-name="cnf2.media_server_name" conference="cnf2" new-conference="0" persistent-conference="0" wideband="0" participant-mode="strAudioMode" coachee-endpoint="" max-parties="" dtmf-clamp-setting="0" max-talkers="" hysteresis="" time-constant="" active-speakers-to-report="" reporting-interval="" active-speaker-threshold="" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-B>
+          </modify-session>
+          <results >
+            <result name="Default" link="12" stubbed="1"/>
+            <result name="Success" link="8" stubbed="1"/>
+            <result name="No response"/>
+            <result name="Not completed in time"/>
+            <result name="Caller hung up"/>
+            <result name="Media resource failure"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("ADD TO CONFERENCE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO ADD TO CONFERENCE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="24" plug-in="Pactolus.Branch.1" ><?xtml-editor x=651 y=662 ?>
+          <results >
+            <result name="Default" link="26" stubbed="0"/>
+            <result name="Wideband" link="6" stubbed="0" >cnf2.wide_band == true</result>
+          </results>
+        </action>
+        <action id="25" plug-in="Pactolus.Branch.1" ><?xtml-editor x=697 y=861 ?>
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+            <result name="Wideband" link="27" stubbed="0" >cnf2.wide_band == true</result>
+          </results>
+        </action>
+        <action id="26" plug-in="Pactolus.ModifyExistingDialog.1" ><?xtml-editor x=960 y=487 ?>
+          <!--add to conference2-->
+          <modify-session xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="dlg" action="4" media-endpoint="ep2" media-server-type="cnf2.media_server_type" endpoint-type="&quot;ivr&quot;" media-sdp="" sip-address="" media-allocate-new-endpoint="0" transfer-mode="0" media-status="nReturnCode" codec="strCodec" telephone-events="1" media-server-name="cnf2.media_server_name" conference="cnf2" new-conference="1" persistent-conference="0" wideband="0" participant-mode="strAudioMode" coachee-endpoint="" max-parties="cnf2.max_parties" dtmf-clamp-setting="1" max-talkers="cnf2.max_talkers" hysteresis="" time-constant="" active-speakers-to-report="cnf2.nNbrActiveSpeakers" reporting-interval="cnf2.nReportingInterval" active-speaker-threshold="cnf2.nDBThreshold" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-B>
+          </modify-session>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+            <result name="Success" link="8" stubbed="1"/>
+            <result name="No response"/>
+            <result name="Not completed in time"/>
+            <result name="Caller hung up"/>
+            <result name="Media resource failure"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("ADD TO CONFERENCE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO ADD TO CONFERENCE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="27" plug-in="Pactolus.ModifyExistingDialog.1" ><?xtml-editor x=986 y=1056 ?>
+          <!--add to conference2-->
+          <modify-session xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="dlg" action="4" media-endpoint="ep2" media-server-type="cnf2.media_server_type" endpoint-type="&quot;ivr&quot;" media-sdp="" sip-address="" media-allocate-new-endpoint="0" transfer-mode="0" media-status="nReturnCode" codec="strCodec" telephone-events="1" media-server-name="cnf2.media_server_name" conference="cnf2" new-conference="1" persistent-conference="0" wideband="1" participant-mode="strAudioMode" coachee-endpoint="" max-parties="cnf2.max_parties" dtmf-clamp-setting="0" max-talkers="cnf2.max_talkers" hysteresis="" time-constant="" active-speakers-to-report="cnf2.nNbrActiveSpeakers" reporting-interval="cnf2.nReportingInterval" active-speaker-threshold="cnf2.nDBThreshold" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-B>
+          </modify-session>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+            <result name="Success" link="8" stubbed="1"/>
+            <result name="No response"/>
+            <result name="Not completed in time"/>
+            <result name="Caller hung up"/>
+            <result name="Media resource failure"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("ADD TO CONFERENCE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO ADD TO CONFERENCE");
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="59" y-coord="331" width="113" height="66" text="0=full
+1=hold
+2=mute" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="sip_deleteConnection" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="ep" type="MediaEndpoint" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nFailure" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+        <var name="nReturnCode" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.DeleteConnection.2" ><?xtml-editor x=67 y=71 ?>
+          <dlcx xmlns="urn:www.pactolus.com:xtml:media" media-endpoint="ep" returns="nReturnCode" timeout="5" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </dlcx>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: sip_deleteConnection");
+Session.ep.LogInfo();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("DELETE CONNECTION EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO DELETE CONECTION");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=299 y=62 ?>
+          <!--nFailure-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nFailure"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("FAIL TO DELETE CONNECTION");]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=314 y=159 ?>
+          <!--nSuccess-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nSuccess"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS DELETE CONNECTION") ;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="sip_outdialPartyToMS" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="dlg" type="SipDialog" pass="byref"/>
+        <parameter name="ep" type="MediaEndpoint" pass="byref"/>
+        <parameter name="strCallingNumber" type="string" pass="byref"/>
+        <parameter name="strCalledNumber" type="string" pass="byref"/>
+        <parameter name="strGatewayIP" type="string" pass="byref"/>
+        <parameter name="strMSName" type="string" pass="byref"/>
+        <parameter name="strMSType" type="string" pass="byref"/>
+        <parameter name="strCodec" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nMSReturnStatus" type="i4" >-1</var>
+        <var name="nFailure" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.DialogRequest.1" ><?xtml-editor x=76 y=215 ?>
+          <session-request xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="dlg" action="0" cancel="1" destination="strGatewayIP" cancel-timeout="30" exit="1" exit-timeout="40" use-numbers="1" calling-number="strCallingNumber" called-number="strCalledNumber" from="" to="" media-endpoint="ep" media-server-type="strMSType" media-endpoint-type="&quot;ivr&quot;" media-allocate-new-endpoint="1" codec="strCodec" telephone-events="1" media-status="nMSReturnStatus" media-server-name="strMSName" existing-session="" final-response-message="" conference="" new-conference="0" persistent-conference="0" wideband="1" participant-mode="&quot;Full&quot;" coachee-endpoint="" max-parties="" dtmf-clamp-setting="0" max-talkers="" hysteresis="" time-constant="" active-speakers-to-report="" reporting-interval="" active-speaker-threshold="" >
+            <sip-hdrs-A-leg >
+              <P-Asserted-Identity >dlg.strPAssertedIdentity</P-Asserted-Identity>
+            </sip-hdrs-A-leg>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </session-request>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="No response from far end" link="4" stubbed="0"/>
+            <result name="Not completed in time" link="5" stubbed="0"/>
+            <result name="Canceled by requestor" link="6" stubbed="0"/>
+            <result name="Session not established" link="7" stubbed="0"/>
+            <result name="Media Resource Failure" link="8" stubbed="0"/>
+            <result name="Error" link="9" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: sip_outdialPartyToMS");
+Session.ep.LogInfo();
+Session.dlg.LogInfo();
+Server.logInfo("strCalledNumber: " + Session.strCalledNumber);
+Server.logInfo("strCallingNumber: " + Session.strCallingNumber);
+Server.logInfo("strCodec: " + Session.strCodec);
+Server.logInfo("strMSName: " + Session.strMSName);
+Server.logInfo("strMSType: " + Session.strMSType);
+Server.logInfo("nMSReturnStatus: " + Session.nMSReturnStatus);
+Server.logInfo("ABOUT TO CHECK FOR DTMF CLAMPING");
+Server.logInfo("ep.NODTMFClamp " + Session.ep.NODTMFClamp);
+Server.logInfo("PAI IS: " + Session.dlg.strPAssertedIdentity);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.ep.LogInfo();
+Session.dlg.LogInfo();
+Server.logInfo("nMSReturnStatus: " + Session.nMSReturnStatus);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO OUTDIAL PARTY TO MS, EXIT ON BRANCH: " + Result.name);
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=433 y=167 ?>
+          <!--nFailure-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nFailure"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("FAIL TO OUTDIAL PARTY TO MS");]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=448 y=277 ?>
+          <!--nSuccess-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nSuccess"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS OUTDIAL PARTY TO MS") ;]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=453 y=378 ?>
+          <!---2 No Response Called Party-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="-2"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("NO RESPONSE CALLED PARTY");]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=443 y=470 ?>
+          <!--1-Ring No Answer-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="1"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("RING NO ANSWER");]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=428 y=553 ?>
+          <!--3-Canceled by requestor-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="3"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("CANCELED BY REQUESTOR");]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=409 y=620 ?>
+          <!--2-Busy-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="2"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("SESSION NOT ESTABLISHED");]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=393 y=718 ?>
+          <!---5-Resource Unavailable-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="-5"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("RESOURCE UNAVAILABLE");]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=388 y=791 ?>
+          <!---1-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nFailure"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: FAIL TO OUTDIAL PARTY TO MS");]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="sip_outdialPartyToConference" start="4" event="" returns="i4" >
+      <parameters >
+        <parameter name="dlg" type="SipDialog" pass="byref"/>
+        <parameter name="cnf" type="Conference" pass="byref"/>
+        <parameter name="ep" type="MediaEndpoint" pass="byref"/>
+        <parameter name="strCallingNumber" type="string" pass="byref"/>
+        <parameter name="strCalledNumber" type="string" pass="byref"/>
+        <parameter name="strGatewayIP" type="string" pass="byref"/>
+        <parameter name="strMSName" type="string" pass="byref"/>
+        <parameter name="strMSType" type="string" pass="byref"/>
+        <parameter name="strCodec" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nMSReturnStatus" type="i4" >-1</var>
+        <var name="nFailure" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="4" plug-in="Pactolus.Branch.1" ><?xtml-editor x=31 y=435 ?>
+          <!--clamping?-->
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="ep.NODTMFClamp" link="5" stubbed="0" >ep.NODTMFClamp == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: sip_outdialPartyToConference");
+Session.cnf.LogInfo();
+Session.ep.LogInfo();
+Session.dlg.LogInfo();
+Server.logInfo("strCalledNumber: " + Session.strCalledNumber);
+Server.logInfo("strCallingNumber: " + Session.strCallingNumber);
+Server.logInfo("strCodec: " + Session.strCodec);
+Server.logInfo("strMSName: " + Session.strMSName);
+Server.logInfo("strMSType: " + Session.strMSType);
+Server.logInfo("nMSReturnStatus: " + Session.nMSReturnStatus);
+Server.logInfo("ABOUT TO CHECK FOR DTMF CLAMPING");
+Server.logInfo("ep.NODTMFClamp " + Session.ep.NODTMFClamp);
+Server.logInfo("PAI IS: " + Session.dlg.strPAssertedIdentity);]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=519 y=152 ?>
+          <!--nFailure-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nFailure"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("FAIL TO OUTDIAL PARTY TO MS");]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=557 y=222 ?>
+          <!--nSuccess-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nSuccess"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS OUTDIAL PARTY TO MS") ;]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Pactolus.DialogRequest.1" ><?xtml-editor x=305 y=267 ?>
+          <session-request xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="dlg" action="2" cancel="1" destination="strGatewayIP" cancel-timeout="30" exit="1" exit-timeout="40" use-numbers="1" calling-number="strCallingNumber" called-number="strCalledNumber" from="" to="" media-endpoint="ep" media-server-type="strMSType" media-endpoint-type="&quot;ivr&quot;" media-allocate-new-endpoint="1" codec="strCodec" telephone-events="1" media-status="nMSReturnStatus" media-server-name="strMSName" existing-session="" final-response-message="" conference="cnf" new-conference="0" persistent-conference="0" wideband="1" participant-mode="&quot;Full&quot;" coachee-endpoint="" max-parties="" dtmf-clamp-setting="1" max-talkers="" hysteresis="" time-constant="" active-speakers-to-report="" reporting-interval="" active-speaker-threshold="" >
+            <sip-hdrs-A-leg >
+              <P-Asserted-Identity >dlg.strPAssertedIdentity</P-Asserted-Identity>
+            </sip-hdrs-A-leg>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </session-request>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+            <result name="Success" link="2" stubbed="1"/>
+            <result name="No response from far end" link="6" stubbed="1"/>
+            <result name="Not completed in time" link="7" stubbed="1"/>
+            <result name="Canceled by requestor" link="8" stubbed="1"/>
+            <result name="Session not established" link="9" stubbed="1"/>
+            <result name="Media Resource Failure" link="10" stubbed="1"/>
+            <result name="Error" link="11" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Session.cnf.LogInfo();
+Session.ep.LogInfo();
+Session.dlg.LogInfo();
+Server.logInfo("nMSReturnStatus: " + Session.nMSReturnStatus);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO OUTDIAL PARTY TO MS, EXIT ON BRANCH: " + Result.name);
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.DialogRequest.1" ><?xtml-editor x=297 y=529 ?>
+          <session-request xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="dlg" action="2" cancel="1" destination="strGatewayIP" cancel-timeout="30" exit="1" exit-timeout="40" use-numbers="1" calling-number="strCallingNumber" called-number="strCalledNumber" from="" to="" media-endpoint="ep" media-server-type="strMSType" media-endpoint-type="&quot;ivr&quot;" media-allocate-new-endpoint="1" codec="strCodec" telephone-events="1" media-status="nMSReturnStatus" media-server-name="strMSName" existing-session="" final-response-message="" conference="cnf" new-conference="0" persistent-conference="0" wideband="1" participant-mode="&quot;Full&quot;" coachee-endpoint="" max-parties="" dtmf-clamp-setting="0" max-talkers="" hysteresis="" time-constant="" active-speakers-to-report="" reporting-interval="" active-speaker-threshold="" >
+            <sip-hdrs-A-leg >
+              <P-Asserted-Identity >dlg.strPAssertedIdentity</P-Asserted-Identity>
+            </sip-hdrs-A-leg>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher >"no preference"</session-timer-refresher>
+            </session-timer-B>
+          </session-request>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+            <result name="Success" link="2" stubbed="1"/>
+            <result name="No response from far end" link="6" stubbed="1"/>
+            <result name="Not completed in time" link="7" stubbed="1"/>
+            <result name="Canceled by requestor" link="8" stubbed="1"/>
+            <result name="Session not established" link="9" stubbed="1"/>
+            <result name="Media Resource Failure" link="10" stubbed="1"/>
+            <result name="Error" link="11" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Session.cnf.LogInfo();
+Session.ep.LogInfo();
+Session.dlg.LogInfo();
+Server.logInfo("nMSReturnStatus: " + Session.nMSReturnStatus);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO OUTDIAL PARTY TO MS, EXIT ON BRANCH: " + Result.name);
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=617 y=329 ?>
+          <!---2 No Response Called Party-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="-2"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("NO RESPONSE CALLED PARTY");]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=636 y=410 ?>
+          <!--1-Ring No Answer-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="1"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("RING NO ANSWER");]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=630 y=476 ?>
+          <!--3-Canceled by requestor-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="3"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("CANCELED BY REQUESTOR");]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=629 y=546 ?>
+          <!--2-Busy-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="2"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("SESSION NOT ESTABLISHED");]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=622 y=609 ?>
+          <!---5-Resource Unavailable-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="-5"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("RESOURCE UNAVAILABLE");]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=615 y=672 ?>
+          <!---1-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nFailure"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: FAIL TO OUTDIAL PARTY TO MS");]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="sip_playNrecordOnMS" start="2" event="" returns="i4" >
+      <parameters >
+        <parameter name="strMSName" type="string" pass="byref"/>
+        <parameter name="strMSType" type="string" pass="byref"/>
+        <parameter name="strCodec" type="string" pass="byref"/>
+        <parameter name="strLanguage" type="string" pass="byref"/>
+        <parameter name="strFileName" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="ep1" type="MediaEndpoint" ></var>
+        <var name="nReturnCode" type="i4" >-1</var>
+        <var name="ep2" type="MediaEndpoint" ></var>
+        <var name="nReasonCode" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+        <var name="nFailure" type="i4" >-1</var>
+        <var name="bReturnFailure" type="boolean" >0</var>
+        <var name="strFileToPlay" type="string" >file:/</var>
+      </local-vars>
+      <actions >
+        <action id="2" plug-in="Pactolus.CreateConnection.2" ><?xtml-editor x=67 y=38 ?>
+          <!--ep1-->
+          <crcx xmlns="urn:www.pactolus.com:xtml:media" media-endpoint="ep1" mode="inactive" remote-sdp="" codec="strCodec" packetization-period="20" local-connection-options="" capability="1" second-endpoint="" media-server-type="strMSType" media-server-name="strMSName" returns="nReturnCode" timeout="10" telephone-events="0" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </crcx>
+          <results >
+            <result name="Default" link="10" stubbed="1"/>
+            <result name="Success" link="12" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: sip_playNrecordOnMS");
+Server.logInfo("strMSName: " + Session.strMSName);
+Server.logInfo("strMSType: " + Session.strMSType);
+Server.logInfo("strCodec: " + Session.strCodec);
+Server.logInfo("strLanguage: " + Session.strLanguage);
+Server.logInfo("strFileName: " + Session.strFileName);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.ep1.LogInfo();
+Server.logInfo("CRCX RETURNS: " + Session.nReturnCode);
+Server.logInfo("REASON CODE: " + Session.nReasonCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO CREATE CONNNECTION , EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Pactolus.Record.2" ><?xtml-editor x=303 y=224 ?>
+          <!--record on ep2-->
+          <record xmlns="urn:www.pactolus.com:xtml:media" op-mode="0" media-endpoint="ep2" timeout="60" returns="nReturnCode" return-immediate="0" rid="strFileName" eik="" rlt="60" prt="" pst="" rl="" dc="" rc="" id-cleanup="0" play-beep="0" ef="&quot;PCM8M16&quot;" agc="0" agcta="" ga="" sla="" bpf="" bpa="" bpd=""/>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No Speech Detected"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strFileName="";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("RECORD PROMPT RETURNS: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO RECORD PROMPT , EXIT ON BRANCH: " + Result.name);
+	Session.ep2.LogInfo();
+}]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.Play.2" ><?xtml-editor x=69 y=217 ?>
+          <!--play file onto a specify MS blade-->
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" play-on-endpoint="1" media-endpoint="ep1" conference="" timeout="" played-length="" digits="" terminating-char="" rc="nReasonCode" returns="nReturnCode" play-offset="" language="strLanguage" retry-count="1" time-to-play="" interrupt="1" repeat="0" clear-digits="1" digit-map="" fdt="" idt="" ict="" terminating-digit="" >
+            <audio type="url" >strFileToPlay</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+            <result name="Success" link="1" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First Digit Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.strFileToPlay = Session.strFileName;
+Server.logInfo("strFileToPlay: " + Session.strFileToPlay);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("PLAY PROMPT RETURNS: " + Session.nReturnCode);
+Server.logInfo("REASON CODE: " + Session.nReasonCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY PROMPT , EXIT ON BRANCH: " + Result.name);
+	Session.ep1.LogInfo();
+}]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Pactolus.DeleteConnection.2" ><?xtml-editor x=70 y=410 ?>
+          <!--ep1-->
+          <dlcx xmlns="urn:www.pactolus.com:xtml:media" media-endpoint="ep1" returns="nReturnCode" timeout="10" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </dlcx>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("DLCX RETURNS: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO DELETE CONNECTION , EXIT ON BRANCH: " + Result.name);
+	Session.ep1.LogInfo();
+}]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Pactolus.DeleteConnection.2" ><?xtml-editor x=290 y=413 ?>
+          <!--ep2-->
+          <dlcx xmlns="urn:www.pactolus.com:xtml:media" media-endpoint="ep2" returns="nReturnCode" timeout="10" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </dlcx>
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("DLCX RETURNS: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO DELETE CONNECTION , EXIT ON BRANCH: " + Result.name);
+	Session.ep2.LogInfo();
+}]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=62 y=617 ?>
+          <!--nSuccess-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nSuccess"/>
+        </action>
+        <action id="10" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=68 y=536 ?>
+          <!--nFailure-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nFailure"/>
+        </action>
+        <action id="11" plug-in="Pactolus.Branch.1" ><?xtml-editor x=520 y=411 ?>
+          <!--return failure-->
+          <results >
+            <result name="Default" link="9" stubbed="1"/>
+            <result name="bReturnFailure" link="10" stubbed="1" >bReturnFailure == true</result>
+          </results>
+        </action>
+        <action id="12" plug-in="Pactolus.ModifyExistingDialog.1" ><?xtml-editor x=393 y=18 ?>
+          <modify-session xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="ep1.sip_dialog" action="1" media-endpoint="ep2" media-server-type="strMSType" endpoint-type="&quot;ivr&quot;" media-sdp="" sip-address="" media-allocate-new-endpoint="1" transfer-mode="0" media-status="" codec="strCodec" telephone-events="0" media-server-name="strMSName" conference="" new-conference="0" persistent-conference="0" wideband="1" participant-mode="&quot;Full&quot;" coachee-endpoint="" max-parties="" dtmf-clamp-setting="0" max-talkers="" hysteresis="" time-constant="" active-speakers-to-report="" reporting-interval="" active-speaker-threshold="" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >0</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-B>
+          </modify-session>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success"/>
+            <result name="No response"/>
+            <result name="Not completed in time"/>
+            <result name="Caller hung up"/>
+            <result name="Media resource failure"/>
+            <result name="Error"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="sip_playPromptIndexToConference" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="cnf" type="Conference" pass="byref"/>
+        <parameter name="strLanguage" type="string" pass="byref"/>
+        <parameter name="nPromptNumber" type="i4" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nReasonCode" type="i4" >-1</var>
+        <var name="nReturnCode" type="i4" >-1</var>
+        <var name="nFailure" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Play.2" ><?xtml-editor x=118 y=184 ?>
+          <collect-play xmlns="urn:www.pactolus.com:xtml:media" play-on-endpoint="0" media-endpoint="" conference="cnf" timeout="30" played-length="" digits="" terminating-char="" rc="nReasonCode" returns="nReturnCode" play-offset="" language="strLanguage" retry-count="1" time-to-play="" interrupt="0" repeat="0" clear-digits="0" digit-map="" fdt="" idt="" ict="" terminating-digit="" >
+            <audio type="silence" >0.5</audio>
+            <audio type="index" >nPromptNumber</audio>
+          </collect-play>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="No/Impossible Match"/>
+            <result name="First Digit Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: sip_playPromptIndexToConference");
+Session.cnf.LogInfo();
+Server.logInfo("nPromptNumber: " + Session.nPromptNumber);
+Server.logInfo("strLanguage: " + Session.strLanguage);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("PLAY PROMPT TO CONFERENCE RURNS: " + Session.nReturnCode);
+Server.logInfo("REASON CODE: " + Session.nReasonCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY PROMPT TO CONFERENCE, EXIT ON BRANCH: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=345 y=142 ?>
+          <!--nFailure-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nFailure"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("FAIL TO PLAY A PROMPT TO CONFERENCE");]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=360 y=287 ?>
+          <!--nSuccess-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nSuccess"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS TO PLAY A PROMPT TO CONFERENCE") ;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="sip_addToMS" start="1" event="" returns="i4" >
+      <parameters >
+        <parameter name="dlg" type="SipDialog" pass="byref"/>
+        <parameter name="ep" type="MediaEndpoint" pass="byref"/>
+        <parameter name="strMSName" type="string" pass="byref"/>
+        <parameter name="strMSType" type="string" pass="byref"/>
+        <parameter name="strCodec" type="string" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nFailure" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+        <var name="strAudioMode" type="string" ></var>
+        <var name="nReturnCode" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.ModifyExistingDialog.1" ><?xtml-editor x=62 y=73 ?>
+          <!--add to MS-->
+          <modify-session xmlns="urn:www.pactolus.com:xtml:sip-dialog" session="dlg" action="1" media-endpoint="ep" media-server-type="strMSType" endpoint-type="&quot;ivr&quot;" media-sdp="" sip-address="" media-allocate-new-endpoint="1" transfer-mode="0" media-status="nReturnCode" codec="strCodec" telephone-events="1" media-server-name="strMSName" conference="" new-conference="0" persistent-conference="1" wideband="1" participant-mode="" coachee-endpoint="" max-parties="" dtmf-clamp-setting="0" max-talkers="" hysteresis="" time-constant="" active-speakers-to-report="" reporting-interval="" active-speaker-threshold="" >
+            <sip-hdrs-A-leg/>
+            <sip-hdrs-B-leg/>
+            <session-timer-A >
+              <use-session-timer >1</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-A>
+            <session-timer-B >
+              <use-session-timer >1</use-session-timer>
+              <session-timer-interval ></session-timer-interval>
+              <session-timer-min-interval ></session-timer-min-interval>
+              <session-timer-refresher ></session-timer-refresher>
+            </session-timer-B>
+          </modify-session>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="No response"/>
+            <result name="Not completed in time"/>
+            <result name="Caller hung up"/>
+            <result name="Media resource failure"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: sip_addToMS");
+Session.dlg.LogInfo();
+Session.ep.LogInfo();
+Server.logInfo("media_server_name " + Session.strMSName);
+Server.logInfo("media_server_type " + Session.strMSType);
+Server.logInfo("codec " + Session.strCodec);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("ADD TO MS EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO ADD TO MS");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=284 y=70 ?>
+          <!--nFailure-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nFailure"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("FAIL TO ADD TO MS");]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=300 y=177 ?>
+          <!--nSuccess-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nSuccess"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS ADD TO MS") ;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="sip_coachMode" start="3" event="" returns="i4" >
+      <parameters >
+        <parameter name="cnf" type="Conference" pass="byref"/>
+        <parameter name="ep" type="MediaEndpoint" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nReturnCode" type="i4" >-1</var>
+        <var name="nSuccess" type="i4" >0</var>
+        <var name="nFailure" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="3" plug-in="Pactolus.ModifyParty.1" ><?xtml-editor x=123 y=69 ?>
+          <!--Coach mode-->
+          <modify-party xmlns="urn:www.pactolus.com:xtml:conference" action="0" conference="cnf" media-endpoint="ep" participant-mode="&quot;Coach&quot;" coachee-endpoint="" return-value="nReturnCode" timeout="5" dtmf-clamp-mode="2" gain-operation="0" gain-mode="0" gain-amount="" max-gain="" direction=""/>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="Success" link="2" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: sip_coachMode");
+Session.cnf.LogInfo();
+Session.ep.LogInfo();
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("CHANGE TO COACH MODE EXIT ON BRANCH: " + Result.name + "  WITH RETURN CODE: " + Session.nReturnCode);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO CHANGE TO COACH MODE");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=342 y=23 ?>
+          <!--nFailure-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nFailure"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("FAIL TO CHANGE TO COACH MODE WITH RETURN CODE: " + Session.nReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=360 y=168 ?>
+          <!--nSuccess-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="nSuccess"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS CHANGE TO COACH MODE") ;]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value=""/>
+    <property key="library-modules" value=""/>
+    <property key="library-path" value=""/>
+  </properties>
+</xtml>

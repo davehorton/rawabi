@@ -1,0 +1,2225 @@
+<?xml version="1.0"?>
+<xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
+  <version sce-version="6014" prev-sce-version="6014" last-mod-time="Monday, May 21, 2007 10:47:06"/>
+  <events >
+    <event name="ConnectToMusic" display="ConnectToMusic" >
+      <parameter name="strRequestedSessionId" type="string"/>
+      <parameter name="lServiceProviderId" type="i8"/>
+    </event>
+    <event name="DisconnectFromMusic" display="DisconnectFromMusic" >
+      <parameter name="nConferenceIndex" type="i4"/>
+      <parameter name="strSessionId" type="string"/>
+    </event>
+  </events>
+  <global-handlers >
+    <handler event="Standard.OnServiceLoad.1" function="OnServiceLoad" public="0" always-on="0"/>
+    <handler event="Standard.OnServiceUnload.1" function="OnServiceUnload" public="0" always-on="0"/>
+    <handler event="Standard.OnTimer.1" function="OnTimer" public="0" always-on="0"/>
+    <handler event="ConnectToMusic" function="OnConnectToMusic" public="1" always-on="1"/>
+    <handler event="DisconnectFromMusic" function="OnDisconnectFromMusic" public="0" always-on="0"/>
+  </global-handlers>
+  <global-vars >
+    <var name="g_strReturnMsg" type="string" ></var>
+    <var name="g_strLanguage" type="string" >eng</var>
+    <var name="g_bFirstServiceProvider" type="boolean" >1</var>
+    <var name="g_oParty" type="object" ></var>
+    <var name="g_nPartyIndex" type="i4" >0</var>
+    <var name="g_lCleanUpTimerId" type="i8" >0</var>
+    <var name="g_lTestTimerId" type="i8" >0</var>
+    <var name="g_strPlatformSessionId" type="string" ></var>
+    <var name="g_nNumberOfPrompts" type="i4" >0</var>
+    <var name="g_oPromptList" type="object" ></var>
+    <var name="g_nConvediaIndex" type="i4" >0</var>
+    <var name="g_strPromptType" type="string" >I</var>
+    <var name="g_nTestTime" type="i4" >3600</var>
+    <var name="g_nConferenceIndex" type="i4" >0</var>
+    <var name="g_oConference" type="object" ></var>
+    <var name="g_oConvediaMS" type="object" ></var>
+    <var name="g_oMS" type="object" ></var>
+  </global-vars>
+  <shared-vars >
+    <var name="s_strMSType" type="string" ></var>
+    <var name="s_nTIMEOUT" type="i4" >35</var>
+    <var name="s_nSUCCESS" type="i4" >0</var>
+    <var name="s_nFAILURE" type="i4" >-1</var>
+    <var name="s_strConnectToMusicRequest" type="string" >ConnectToMusicRequest</var>
+    <var name="s_strDisconnectFromMusicRequest" type="string" >DiscconectFromMusicRequest</var>
+    <var name="s_strConnectToMusicResponse" type="string" >ConnectToMusicResponse</var>
+    <var name="s_strDisconnectFromMusicResponse" type="string" >DisconnectFromMusicResponse</var>
+    <var name="s_strEmptyString" type="string" ></var>
+    <var name="s_nCLEAN_UP_TIMER" type="i4" >7200</var>
+    <var name="s_strForceDisconnect" type="string" >ForceDisconnectFromMusic</var>
+    <var name="s_nMAX_MOH_DURATION" type="i4" >3600</var>
+    <var name="s_strDBName" type="string" >pactolusdb</var>
+    <var name="s_nPacketizationPeriod" type="i4" >20</var>
+    <var name="s_nMaxMusicPrompts" type="i4" >5</var>
+    <var name="s_strCodec" type="string" ></var>
+    <var name="s_nConferenceMaxParties" type="i4" >125</var>
+    <var name="s_nConferenceMaxTalkers" type="i4" >3</var>
+  </shared-vars>
+  <functions >
+    <function name="OnServiceLoad" start="1" event="OnServiceLoad" returns="void" >
+      <parameters >
+        <parameter name="strAppName" type="string"/>
+        <parameter name="nSessionCount" type="i2"/>
+        <parameter name="nMaxIterations" type="i2"/>
+        <parameter name="nServerId" type="i2"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Pactolus.UserFunction.1" ><?xtml-editor x=162 y=280 ?>
+          <!--GET PSX IP from config-->
+          <user-function xmlns="urn:www.pactolus.com:xtml:application" process="&quot;PACTOLUS_ps_c_adaptor&quot;" function="&quot;get_property&quot;" timeout="s_nTIMEOUT" return="" async="0" >
+            <parameter >"packetization-period"</parameter>
+            <parameter >s_nPacketizationPeriod</parameter>
+            <parameter >"max-moh-duration"</parameter>
+            <parameter >s_nMAX_MOH_DURATION</parameter>
+            <parameter >"codec"</parameter>
+            <parameter >s_strCodec</parameter>
+            <parameter >"moh-media-server-type"</parameter>
+            <parameter >s_strMSType</parameter>
+            <parameter >"conference-max-parties"</parameter>
+            <parameter >s_nConferenceMaxParties</parameter>
+          </user-function>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: OnServiceLoad");]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Session.s_nPacketizationPeriod <= 0)
+{
+	Session.s_nPacketizationPeriod = 20;
+}
+if (Session.s_nMAX_MOH_DURATION <= 0)
+{
+	Session.s_nMAX_MOH_DURATION = 3600;
+}
+if (Session.s_strCodec.length <= 0)
+{
+	Session.s_strCodec = "PCMU";
+	Server.logInfo("WARNING: NO SETTING FOR CODEC.  USE DEFAULT: PCMU");
+}
+if (Session.s_nConferenceMaxParties <= 0)
+{
+	Session.s_nConferenceMaxParties = 125;
+	Server.logInfo("WARNING: NO SETTING CONFERENCE MAX PARTIES.  USE DEFAULT: 125");
+}
+if (Session.s_nConferenceMaxParties > 248)
+{
+	Session.s_nConferenceMaxParties = 248;
+	Server.logInfo("WARNING: TOO MANY MOH MAX PARTY, ONLY WANT TO CHAIN 2 EP, USE DEFAULT: 248");
+}
+if (Session.s_nConferenceMaxTalkers <= 0)
+{
+	Session.s_nConferenceMaxTalkers = 16;
+	Server.logInfo("WARNING: NO SETTING CONFERENCE MAX TALKERS.  USE DEFAULT: 16");
+}
+if (Session.s_nMAX_MOH_DURATION <= 0)
+{
+	Session.s_nMAX_MOH_DURATION = 3600;
+	Server.logInfo("WARNING: NO SETTING MAX MOH DURATION.  USE DEFAULT: 3600");
+}
+Session.s_nCLEAN_UP_TIMER = Session.s_nMAX_MOH_DURATION + 3600;
+// Session.s_nMAX_MOH_DURATION = 60;
+// Session.s_nCLEAN_UP_TIMER = 120;
+if(Session.s_strMSType.length == 0) {
+	Session.s_strMSType = "PCS";
+	Server.logError("WARNING: NO SETTING FOR MEDIA SERVER. USE DEFAULT: " + Session.s_strMSType);
+	
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=400 y=278 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+        </action>
+        <action id="3" plug-in="Standard.EndSession.1" ><?xtml-editor x=403 y=351 ?></action>
+      </actions>
+    </function>
+    <function name="OnConnectToMusic" start="14" event="OnConnectToMusic" returns="void" >
+      <parameters >
+        <parameter name="strRequestedSessionId" type="string"/>
+        <parameter name="lServiceProviderId" type="i8"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >-99</var>
+        <var name="f_nConferenceCounter" type="i4" >0</var>
+        <var name="f_bCreateNewConf" type="boolean" >0</var>
+        <var name="f_nNewConfIndex" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="14" plug-in="Pactolus.Branch.1" ><?xtml-editor x=139 y=181 ?>
+          <!--first service provider?-->
+          <results >
+            <result name="Default" link="21" stubbed="0"/>
+            <result name="g_bFirstServiceProvider==true?" link="15" stubbed="0" >g_bFirstServiceProvider == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: OnConnectToMusic");
+js_disable_event();
+Server.logInfo("RECEIVE CONNECT TO MUSIC REQUEST WITH PARAMETERS:");
+Server.logInfo("SERVICE PROVIDER Id IS: " + Session.lServiceProviderId);
+Server.logInfo("REQUESTED SESSION Id IS: " + Session.strRequestedSessionId);
+Server.logInfo("FIRST SERVICE PROVIDER FLAG IS: " + Session.g_bFirstServiceProvider);
+Session.g_strPlatformSessionId = Session._sessionId;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+
+
+if (2 == Result.id)
+{
+	// conference array
+	Session.g_oConference[Session.g_nConferenceIndex].lServiceProviderId = Session.lServiceProviderId;
+	Session.g_oConference[Session.g_nConferenceIndex].lId = Server.getUTCTime();	
+	Session.g_oConference[Session.g_nConferenceIndex].strConferenceId = "";
+	Session.g_oConference[Session.g_nConferenceIndex].strEndPoint = "";
+	Session.g_oConference[Session.g_nConferenceIndex].strContent = "";
+	Session.g_oConference[Session.g_nConferenceIndex].strConnectionId = "";
+	Session.g_oConference[Session.g_nConferenceIndex].strCallId = "";
+	Session.g_oConference[Session.g_nConferenceIndex].bMuteFlag = false;
+	Session.g_oConference[Session.g_nConferenceIndex].bDeafFlag = false;
+	Session.g_oConference[Session.g_nConferenceIndex].bCurrentlyInConf = false;
+	Session.g_oConference[Session.g_nConferenceIndex].bConfCreated = false;
+	Session.g_oConference[Session.g_nConferenceIndex].strType = Session.s_strMSType;
+	Session.g_oConference[Session.g_nConferenceIndex].bUseForMOH = true;
+	Session.g_oConference[Session.g_nConferenceIndex].strMOHType = Session.s_strMSType;
+	Session.g_oConference[Session.g_nConferenceIndex].nCurrentNbrOfParty = 0;
+	Session.g_oConference[Session.g_nConferenceIndex].nPacketizationPeriod = Session.s_nPacketizationPeriod;
+	Session.g_oConference[Session.g_nConferenceIndex].nConferenceMaxParties = Session.s_nConferenceMaxParties;
+	Session.g_oConference[Session.g_nConferenceIndex].nConferenceMaxTalkers = Session.s_nConferenceMaxTalkers;
+	Session.g_oConference[Session.g_nConferenceIndex].strCodec = Session.s_strCodec;
+	
+	
+	// mediaserver endpoint array	
+	Session.g_oMS[Session.g_nConferenceIndex].strCallId = "";
+	Session.g_oMS[Session.g_nConferenceIndex].strConnectionId = "";
+	Session.g_oMS[Session.g_nConferenceIndex].strContent = "";
+	Session.g_oMS[Session.g_nConferenceIndex].strEndPoint = "";
+	Session.g_oMS[Session.g_nConferenceIndex].strType = Session.s_strMSType;
+	Session.g_oMS[Session.g_nConferenceIndex].bUseForMOH = true;
+	Session.g_oMS[Session.g_nConferenceIndex].strMOHType = Session.s_strMSType;
+	Session.g_oMS[Session.g_nConferenceIndex].nPacketizationPeriod = Session.s_nPacketizationPeriod;
+	Session.g_oMS[Session.g_nConferenceIndex].nConferenceMaxParties = Session.s_nConferenceMaxParties
+	Session.g_oMS[Session.g_nConferenceIndex].nConferenceMaxTalkers = Session.s_nConferenceMaxTalkers
+	Session.g_oMS[Session.g_nConferenceIndex].strCodec = Session.s_strCodec;
+	Session.g_oMS[Session.g_nConferenceIndex].nCurrentNbrOfParty = 0;
+	
+	// party array
+	Session.g_oParty[Session.g_nPartyIndex].lId = 0;
+	Session.g_oParty[Session.g_nPartyIndex].strSessionId = "";
+	Session.g_oParty[Session.g_nPartyIndex].lSessionTime = 0;
+}
+
+Server.logInfo("Session.g_oConference[" +Session.g_nConferenceIndex +"].lServiceProviderId: " + Session.g_oConference[Session.g_nConferenceIndex].lServiceProviderId);
+Server.logInfo("Session.g_oConference[" +Session.g_nConferenceIndex +"].lId: " + Session.g_oConference[Session.g_nConferenceIndex].lId);
+Server.logInfo("Session.g_oConference[" +Session.g_nConferenceIndex +"].strConferenceId: " + Session.g_oConference[Session.g_nConferenceIndex].strConferenceId);
+Server.logInfo("Session.g_oConference[" +Session.g_nConferenceIndex +"].strEndPoint: " + Session.g_oConference[Session.g_nConferenceIndex].strEndPoint);
+Server.logInfo("Session.g_oConference[" +Session.g_nConferenceIndex +"].strConnectionId: " + Session.g_oConference[Session.g_nConferenceIndex].strConnectionId);
+Server.logInfo("Session.g_oConference[" +Session.g_nConferenceIndex +"].strCallId: " + Session.g_oConference[Session.g_nConferenceIndex].strCallId);
+Server.logInfo("Session.g_oConference[" +Session.g_nConferenceIndex +"].bMuteFlag: " + Session.g_oConference[Session.g_nConferenceIndex].bMuteFlag);
+Server.logInfo("Session.g_oConference[" +Session.g_nConferenceIndex +"].bDeafFlag: " + Session.g_oConference[Session.g_nConferenceIndex].bDeafFlag);
+Server.logInfo("Session.g_oConference[" +Session.g_nConferenceIndex +"].bCurrentlyInConf: " + Session.g_oConference[Session.g_nConferenceIndex].bCurrentlyInConf);
+Server.logInfo("Session.g_oConference[" +Session.g_nConferenceIndex +"].bConfCreated: " + Session.g_oConference[Session.g_nConferenceIndex].bConfCreated);
+Server.logInfo("Session.g_oConference[" +Session.g_nConferenceIndex +"].strType: " + Session.g_oConference[Session.g_nConferenceIndex].strType);
+Server.logInfo("Session.g_oConference[" +Session.g_nConferenceIndex +"].bUseForMOH: " + Session.g_oConference[Session.g_nConferenceIndex].bUseForMOH);
+Server.logInfo("Session.g_oConference[" +Session.g_nConferenceIndex +"].strMOHType: " + Session.g_oConference[Session.g_nConferenceIndex].strMOHType);
+Server.logInfo("Session.g_oConference[" +Session.g_nConferenceIndex +"].nCurrentNbrOfParty: " + Session.g_oConference[Session.g_nConferenceIndex].nCurrentNbrOfParty);
+Server.logInfo("Session.g_oConference[" +Session.g_nConferenceIndex +"].nPacketizationPeriod: " + Session.g_oConference[Session.g_nConferenceIndex].nPacketizationPeriod);
+Server.logInfo("Session.g_oConference[" +Session.g_nConferenceIndex +"].nConferenceMaxParties: " + Session.g_oConference[Session.g_nConferenceIndex].nConferenceMaxParties);
+Server.logInfo("Session.g_oConference[" +Session.g_nConferenceIndex +"].nConferenceMaxTalkers: " + Session.g_oConference[Session.g_nConferenceIndex].nConferenceMaxTalkers);
+Server.logInfo("Session.g_oConference[" +Session.g_nConferenceIndex +"].strCodec: " + Session.g_oConference[Session.g_nConferenceIndex].strCodec);
+
+
+Server.logInfo("Session.g_oMS[" +Session.g_nConferenceIndex +"].strEndPoint: " + Session.g_oMS[Session.g_nConferenceIndex].strEndPoint);
+Server.logInfo("Session.g_oMS[" +Session.g_nConferenceIndex +"].strConnectionId: " + Session.g_oMS[Session.g_nConferenceIndex].strConnectionId);
+Server.logInfo("Session.g_oMS[" +Session.g_nConferenceIndex +"].strCallId: " + Session.g_oMS[Session.g_nConferenceIndex].strCallId);
+Server.logInfo("Session.g_oMS[" +Session.g_nConferenceIndex +"].strType: " + Session.g_oMS[Session.g_nConferenceIndex].strType);
+Server.logInfo("Session.g_oMS[" +Session.g_nConferenceIndex +"].bUseForMOH: " + Session.g_oMS[Session.g_nConferenceIndex].bUseForMOH);
+Server.logInfo("Session.g_oMS[" +Session.g_nConferenceIndex +"].strMOHType: " + Session.g_oMS[Session.g_nConferenceIndex].strMOHType);
+Server.logInfo("Session.g_oMS[" +Session.g_nConferenceIndex +"].nPacketizationPeriod: " + Session.g_oMS[Session.g_nConferenceIndex].nPacketizationPeriod);
+Server.logInfo("Session.g_oMS[" +Session.g_nConferenceIndex +"].nConferenceMaxParties: " + Session.g_oMS[Session.g_nConferenceIndex].nConferenceMaxParties);
+Server.logInfo("Session.g_oMS[" +Session.g_nConferenceIndex +"].nConferenceMaxTalkers: " + Session.g_oMS[Session.g_nConferenceIndex].nConferenceMaxTalkers);
+Server.logInfo("Session.g_oMS[" +Session.g_nConferenceIndex +"].strCodec: " + Session.g_oMS[Session.g_nConferenceIndex].strCodec);
+Server.logInfo("Session.g_oMS[" +Session.g_nConferenceIndex +"].nCurrentNbrOfParty: " + Session.g_oMS[Session.g_nConferenceIndex].nCurrentNbrOfParty);]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=641 y=725 ?>
+          <!--"CreateMOHConference"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;CreateMOHConference&quot;" return="f_nReturnCode" external-function="0" library="" >
+            <parameter >g_oConference[f_nNewConfIndex]</parameter>
+            <parameter >g_oMS[f_nNewConfIndex]</parameter>
+            <parameter >f_nNewConfIndex</parameter>
+          </function>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("f_nNewConfIndex is: " + Session.f_nNewConfIndex);
+Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.f_nNewConfIndex < 0)
+{
+	Server.logError("ERROR: ARRAY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+
+
+	// conference array
+	Session.g_oConference[Session.f_nNewConfIndex].lServiceProviderId = Session.lServiceProviderId;
+	Session.g_oConference[Session.f_nNewConfIndex].lId = Server.getUTCTime();
+	Session.g_oConference[Session.f_nNewConfIndex].strConferenceId = "";
+	Session.g_oConference[Session.f_nNewConfIndex].strEndPoint = "";
+	Session.g_oConference[Session.f_nNewConfIndex].strContent = "";
+	Session.g_oConference[Session.f_nNewConfIndex].strConnectionId = "";
+	Session.g_oConference[Session.f_nNewConfIndex].strCallId = "";
+	Session.g_oConference[Session.f_nNewConfIndex].bMuteFlag = false;
+	Session.g_oConference[Session.f_nNewConfIndex].bDeafFlag = false;
+	Session.g_oConference[Session.f_nNewConfIndex].bCurrentlyInConf = false;
+	Session.g_oConference[Session.f_nNewConfIndex].bConfCreated = false;
+	Session.g_oConference[Session.f_nNewConfIndex].strType = Session.s_strMSType;
+	Session.g_oConference[Session.f_nNewConfIndex].bUseForMOH = true;
+	Session.g_oConference[Session.f_nNewConfIndex].strMOHType = Session.s_strMSType;
+	Session.g_oConference[Session.f_nNewConfIndex].nCurrentNbrOfParty = 0;
+	Session.g_oConference[Session.f_nNewConfIndex].nPacketizationPeriod = Session.s_nPacketizationPeriod;
+	Session.g_oConference[Session.f_nNewConfIndex].nConferenceMaxParties = Session.s_nConferenceMaxParties;
+	Session.g_oConference[Session.f_nNewConfIndex].nConferenceMaxTalkers = Session.s_nConferenceMaxTalkers;
+	Session.g_oConference[Session.f_nNewConfIndex].strCodec = Session.s_strCodec;
+
+
+	// party array
+	Session.g_oParty[Session.g_nPartyIndex].lId = 0;
+	Session.g_oParty[Session.g_nPartyIndex].strSessionId = "";
+	Session.g_oParty[Session.g_nPartyIndex].lSessionTime = 0;
+	
+	// mediaserver endpoint array	
+	Session.g_oMS[Session.f_nNewConfIndex].strCallId = "";
+	Session.g_oMS[Session.f_nNewConfIndex].strConnectionId = "";
+	Session.g_oMS[Session.f_nNewConfIndex].strContent = "";
+	Session.g_oMS[Session.f_nNewConfIndex].strEndPoint = "";
+	Session.g_oMS[Session.f_nNewConfIndex].strType = Session.s_strMSType;
+	Session.g_oMS[Session.f_nNewConfIndex].bUseForMOH = true;
+	Session.g_oMS[Session.f_nNewConfIndex].strMOHType = Session.s_strMSType;
+	Session.g_oMS[Session.f_nNewConfIndex].nPacketizationPeriod = Session.s_nPacketizationPeriod
+	Session.g_oMS[Session.f_nNewConfIndex].nConferenceMaxParties = Session.s_nConferenceMaxParties
+	Session.g_oMS[Session.f_nNewConfIndex].nConferenceMaxTalkers = Session.s_nConferenceMaxTalkers
+	Session.g_oMS[Session.f_nNewConfIndex].strCodec = Session.s_strCodec
+
+
+Server.logInfo("Session.g_oConference[" +Session.f_nNewConfIndex +"].lServiceProviderId: " + Session.g_oConference[Session.f_nNewConfIndex].lServiceProviderId);
+Server.logInfo("Session.g_oConference[" +Session.f_nNewConfIndex +"].lId: " + Session.g_oConference[Session.f_nNewConfIndex].lId);
+Server.logInfo("Session.g_oConference[" +Session.f_nNewConfIndex +"].strConferenceId: " + Session.g_oConference[Session.f_nNewConfIndex].strConferenceId);
+Server.logInfo("Session.g_oConference[" +Session.f_nNewConfIndex +"].strEndPoint: " + Session.g_oConference[Session.f_nNewConfIndex].strEndPoint);
+Server.logInfo("Session.g_oConference[" +Session.f_nNewConfIndex +"].strConnectionId: " + Session.g_oConference[Session.f_nNewConfIndex].strConnectionId);
+Server.logInfo("Session.g_oConference[" +Session.f_nNewConfIndex +"].strCallId: " + Session.g_oConference[Session.f_nNewConfIndex].strCallId);
+Server.logInfo("Session.g_oConference[" +Session.f_nNewConfIndex +"].bMuteFlag: " + Session.g_oConference[Session.f_nNewConfIndex].bMuteFlag);
+Server.logInfo("Session.g_oConference[" +Session.f_nNewConfIndex +"].bDeafFlag: " + Session.g_oConference[Session.f_nNewConfIndex].bDeafFlag);
+Server.logInfo("Session.g_oConference[" +Session.f_nNewConfIndex +"].bCurrentlyInConf: " + Session.g_oConference[Session.f_nNewConfIndex].bCurrentlyInConf);
+Server.logInfo("Session.g_oConference[" +Session.f_nNewConfIndex +"].bConfCreated: " + Session.g_oConference[Session.f_nNewConfIndex].bConfCreated);
+Server.logInfo("Session.g_oConference[" +Session.f_nNewConfIndex +"].strType: " + Session.g_oConference[Session.f_nNewConfIndex].strType);
+Server.logInfo("Session.g_oConference[" +Session.f_nNewConfIndex +"].bUseForMOH: " + Session.g_oConference[Session.f_nNewConfIndex].bUseForMOH);
+Server.logInfo("Session.g_oConference[" +Session.f_nNewConfIndex +"].strMOHType: " + Session.g_oConference[Session.f_nNewConfIndex].strMOHType);
+Server.logInfo("Session.g_oConference[" +Session.f_nNewConfIndex +"].nCurrentNbrOfParty: " + Session.g_oConference[Session.f_nNewConfIndex].nCurrentNbrOfParty);
+Server.logInfo("Session.g_oConference[" +Session.f_nNewConfIndex +"].nPacketizationPeriod: " + Session.g_oConference[Session.f_nNewConfIndex].nPacketizationPeriod);
+Server.logInfo("Session.g_oConference[" +Session.f_nNewConfIndex +"].nConferenceMaxParties: " + Session.g_oConference[Session.f_nNewConfIndex].nConferenceMaxParties);
+Server.logInfo("Session.g_oConference[" +Session.f_nNewConfIndex +"].nConferenceMaxTalkers: " + Session.g_oConference[Session.f_nNewConfIndex].nConferenceMaxTalkers);
+Server.logInfo("Session.g_oConference[" +Session.f_nNewConfIndex +"].strCodec: " + Session.g_oConference[Session.f_nNewConfIndex].strCodec);
+
+Server.logInfo("Session.g_oMS[" +Session.f_nNewConfIndex +"].strEndPoint: " + Session.g_oMS[Session.f_nNewConfIndex].strEndPoint);
+Server.logInfo("Session.g_oMS[" +Session.f_nNewConfIndex +"].strConnectionId: " + Session.g_oMS[Session.f_nNewConfIndex].strConnectionId);
+Server.logInfo("Session.g_oMS[" +Session.f_nNewConfIndex +"].strCallId: " + Session.g_oMS[Session.f_nNewConfIndex].strCallId);
+Server.logInfo("Session.g_oMS[" +Session.f_nNewConfIndex +"].strType: " + Session.g_oMS[Session.f_nNewConfIndex].strType);
+Server.logInfo("Session.g_oMS[" +Session.f_nNewConfIndex +"].bUseForMOH: " + Session.g_oMS[Session.f_nNewConfIndex].bUseForMOH);
+Server.logInfo("Session.g_oMS[" +Session.f_nNewConfIndex +"].strMOHType: " + Session.g_oMS[Session.f_nNewConfIndex].strMOHType);
+Server.logInfo("Session.g_oMS[" +Session.f_nNewConfIndex +"].nCurrentNbrOfParty: " + Session.g_oMS[Session.f_nNewConfIndex].nCurrentNbrOfParty);
+Server.logInfo("Session.g_oMS[" +Session.f_nNewConfIndex +"].nPacketizationPeriod: " + Session.g_oMS[Session.f_nNewConfIndex].nPacketizationPeriod);
+Server.logInfo("Session.g_oMS[" +Session.f_nNewConfIndex +"].nConferenceMaxParties: " + Session.g_oMS[Session.f_nNewConfIndex].nConferenceMaxParties);
+Server.logInfo("Session.g_oMS[" +Session.f_nNewConfIndex +"].nConferenceMaxTalkers: " + Session.g_oMS[Session.f_nNewConfIndex].nConferenceMaxTalkers);
+Server.logInfo("Session.g_oMS[" +Session.f_nNewConfIndex +"].strCodec: " + Session.g_oMS[Session.f_nNewConfIndex].strCodec);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("f_nNewConfIndex is: " + Session.f_nNewConfIndex);
+Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.f_nNewConfIndex < 0)
+{
+	Server.logError("ERROR: ARRAY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Pactolus.Branch.1" ><?xtml-editor x=870 y=722 ?>
+          <!--success?-->
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="success?" link="6" stubbed="0" >f_nReturnCode == s_nSUCCESS</result>
+          </results>
+        </action>
+        <action id="4" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=1104 y=666 ?>
+          <!--RESPONSE FAILURE-->
+          <SOAP xmlns="urn:www.pactolus.com:xtml:communication" destination-ip="" transaction="" message-name="s_strConnectToMusicResponse" destination-port="" destination-type="3" destination-session="strRequestedSessionId" waiting-session-selected="" xml-namespace="" >
+            <parameter tag="&quot;returnCode&quot;" value="s_nFAILURE"/>
+            <parameter tag="&quot;returnMsg&quot;" value="g_strReturnMsg"/>
+            <parameter tag="&quot;conference_index&quot;" value="s_nFAILURE"/>
+            <parameter tag="&quot;conference_id&quot;" value="s_strEmptyString"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strReturnMsg = "FAILURE TO CREATE CONFERENCE";
+Server.logInfo("INFO: SENDING RESPONSE TO session Id is: " + Session.strRequestedSessionId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id == 2)
+{
+	Server.logInfo("INFO: SUCCESS SEND SUCCESS RESPONSE TO session Id is: " + Session.strRequestedSessionId);
+}
+else
+{
+	Server.logError("ERROR: FAIL TO SEND SUCCESS RESPONSE, EXIT ON: " + Result.name);
+	Server.logError("ERROR: FAIL TO SEND SUCCESS RESPONSE TO session Id is: " + Session.strRequestedSessionId);
+}
+Server.logInfo("f_nNewConfIndex is: " + Session.f_nNewConfIndex);
+Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.f_nNewConfIndex < 0)
+{
+	Server.logError("ERROR: ARRAY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=917 y=507 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_enable_event();]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=1119 y=820 ?>
+          <!--RESPONSE SUCCESS-->
+          <SOAP xmlns="urn:www.pactolus.com:xtml:communication" destination-ip="" transaction="" message-name="s_strConnectToMusicResponse" destination-port="" destination-type="3" destination-session="strRequestedSessionId" waiting-session-selected="" xml-namespace="" >
+            <parameter tag="&quot;returnCode&quot;" value="s_nSUCCESS"/>
+            <parameter tag="&quot;returnMsg&quot;" value="g_strReturnMsg"/>
+            <parameter tag="&quot;conference_index&quot;" value="f_nNewConfIndex"/>
+            <parameter tag="&quot;conference_id&quot;" value="g_oConference[f_nNewConfIndex].strConferenceId"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("f_nNewConfIndex is: " + Session.f_nNewConfIndex);
+Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.f_nNewConfIndex < 0)
+{
+	Server.logError("ERROR: ARRAY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+
+Server.logInfo("INFO: RESPONSE TO CONNECT TO MUSIC REQUEST WITH: ");
+Server.logInfo("SERVICE PROVIDER Id: " + Session.g_oConference[Session.f_nNewConfIndex].lServiceProviderId);
+Server.logInfo("CONFERENCE Id: " + Session.g_oConference[Session.f_nNewConfIndex].lId);
+Server.logInfo("CONFERENCE END POINT IS: " + Session.g_oConference[Session.f_nNewConfIndex].strConferenceId);
+Server.logInfo("CURRENT NUMBER OF PARTY IN THIS CONFERENCE IS: " + Session.g_oConference[Session.f_nNewConfIndex].nCurrentNbrOfParty);
+Session.g_strReturnMsg = "CONFERENCE ALREADY CREATED, CONFERENCE Id IS: " + Session.g_oConference[Session.f_nNewConfIndex].strConferenceId;
+Server.logInfo("INFO: SENDING RESPONSE TO session Id is: " + Session.strRequestedSessionId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("f_nNewConfIndex is: " + Session.f_nNewConfIndex);
+Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.f_nNewConfIndex < 0)
+{
+	Server.logError("ERROR: ARRAY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+
+//caller will be in this conference
+Server.logInfo("BEFORE CURRENT NUMBER OF PARTY is: " + Session.g_oConference[Session.f_nNewConfIndex].nCurrentNbrOfParty);
+Session.g_oConference[Session.f_nNewConfIndex].nCurrentNbrOfParty++;
+Server.logInfo("AFTER CURRENT NUMBER OF PARTY is: " + Session.g_oConference[Session.f_nNewConfIndex].nCurrentNbrOfParty);
+
+var i = 0;
+for (i = 0; i < Session.g_nPartyIndex; i++)
+{
+	if (Session.g_oParty[i].lId == 0)
+	{
+		Server.logInfo("FOUND FIRST AVAILABLE SLOT FOR PARTY");
+		break;
+	}
+}
+
+Session.g_oParty[i].lId = Session.g_oConference[Session.f_nNewConfIndex].lId;
+Session.g_oParty[i].lSessionTime = Server.getUTCTime();
+Session.g_oParty[i].strSessionId = Session.strRequestedSessionId;
+Server.logInfo("CURRENT PARTY INDEX IS: " + Session.g_nPartyIndex);
+Server.logInfo("CURRENT i VALUE IS: " + i);
+//if use the last one, add one
+if (i == Session.g_nPartyIndex)
+{
+	Session.g_nPartyIndex++;
+	Server.logInfo("CREATE NEW SLOT FOR PARTY, PARTY INDEX NOW IS: " + Session.g_nPartyIndex);
+}
+if (Result.id == 2)
+{
+	Server.logInfo("INFO: SUCCESS SEND SUCCESS RESPONSE TO session Id is: " + Session.strRequestedSessionId);
+}
+else
+{
+	Server.logError("ERROR: FAIL TO SEND SUCCESS RESPONSE, EXIT ON: " + Result.name);
+	Server.logError("ERROR: FAIL TO SEND SUCCESS RESPONSE TO session Id is: " + Session.strRequestedSessionId);
+}
+Server.logInfo("f_nNewConfIndex is: " + Session.f_nNewConfIndex);
+Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.f_nNewConfIndex < 0)
+{
+	Server.logError("ERROR: ARRAY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=626 y=514 ?>
+          <!--RESPONSE SUCCESS-->
+          <SOAP xmlns="urn:www.pactolus.com:xtml:communication" destination-ip="" transaction="" message-name="s_strConnectToMusicResponse" destination-port="" destination-type="3" destination-session="strRequestedSessionId" waiting-session-selected="" xml-namespace="" >
+            <parameter tag="&quot;returnCode&quot;" value="s_nSUCCESS"/>
+            <parameter tag="&quot;returnMsg&quot;" value="g_strReturnMsg"/>
+            <parameter tag="&quot;conference_index&quot;" value="f_nNewConfIndex"/>
+            <parameter tag="&quot;conference_id&quot;" value="g_oConference[f_nNewConfIndex].strConferenceId"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("f_nNewConfIndex is: " + Session.f_nNewConfIndex);
+Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.f_nNewConfIndex < 0)
+{
+	Server.logError("ERROR: ARRAY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+Server.logInfo("INFO: MOH CONFERENCE FOUND, NO NEED TO CREATE CONFERENCE, RESPONSE TO CONNECT TO MUSIC REQUEST WITH: ");
+Server.logInfo("SERVICE PROVIDER Id: " + Session.g_oConference[Session.f_nNewConfIndex].lServiceProviderId);
+Server.logInfo("CONFERENCE Id: " + Session.g_oConference[Session.f_nNewConfIndex].lId);
+Server.logInfo("CONFERENCE END POINT IS: " + Session.g_oConference[Session.f_nNewConfIndex].strConferenceId);
+Server.logInfo("CURRENT NUMBER OF PARTY IN THIS CONFERENCE IS: " + Session.g_oConference[Session.f_nNewConfIndex].nCurrentNbrOfParty);
+Session.g_strReturnMsg = "CONFERENCE ALREADY CREATED, CONFERENCE Id IS: " + Session.g_oConference[Session.f_nNewConfIndex].strConferenceId;
+Server.logInfo("INFO: SENDING RESPONSE TO session Id is: " + Session.strRequestedSessionId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("f_nNewConfIndex is: " + Session.f_nNewConfIndex);
+Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.f_nNewConfIndex < 0)
+{
+	Server.logError("ERROR: ARRAY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+
+//caller will be in this conference
+Server.logInfo("BEFORE CURRENT NUMBER OF PARTY is: " + Session.g_oConference[Session.f_nNewConfIndex].nCurrentNbrOfParty);
+Session.g_oConference[Session.f_nNewConfIndex].nCurrentNbrOfParty++;
+Server.logInfo("AFTER CURRENT NUMBER OF PARTY is: " + Session.g_oConference[Session.f_nNewConfIndex].nCurrentNbrOfParty);
+
+var i = 0;
+for (i = 0; i < Session.g_nPartyIndex; i++)
+{
+	if (Session.g_oParty[i].lId == 0)
+	{
+		Server.logInfo("FOUND FIRST AVAILABLE SLOT FOR PARTY");
+		break;
+	}
+}
+Session.g_oParty[i].lId = Session.g_oConference[Session.f_nNewConfIndex].lId;
+Session.g_oParty[i].lSessionTime = Server.getUTCTime();
+Session.g_oParty[i].strSessionId = Session.strRequestedSessionId;
+//if use the last one, add one
+if (i == Session.g_nPartyIndex)
+{
+	Session.g_nPartyIndex++;
+	Server.logInfo("CREATE NEW SLOT FOR PARTY");
+}
+
+if (Result.id == 2)
+{
+	Server.logInfo("INFO: SUCCESS SEND SUCCESS RESPONSE TO session Id is: " + Session.strRequestedSessionId);
+}
+else
+{
+	Server.logError("ERROR: FAIL TO SEND SUCCESS RESPONSE, EXIT ON: " + Result.name);
+	Server.logError("ERROR: FAIL TO SEND SUCCESS RESPONSE TO session Id is: " + Session.strRequestedSessionId);
+}
+
+Server.logInfo("f_nNewConfIndex is: " + Session.f_nNewConfIndex);
+Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.f_nNewConfIndex < 0)
+{
+	Server.logError("ERROR: ARRAY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=381 y=240 ?>
+          <!--"CreateMOHConference"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;CreateMOHConference&quot;" return="f_nReturnCode" external-function="0" library="" >
+            <parameter >g_oConference[g_nConferenceIndex]</parameter>
+            <parameter >g_oMS[g_nConferenceIndex]</parameter>
+            <parameter >g_nConferenceIndex</parameter>
+          </function>
+          <results >
+            <result name="Default" link="16" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("f_nNewConfIndex is: " + Session.f_nNewConfIndex);
+Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.f_nNewConfIndex < 0)
+{
+	Server.logError("ERROR: ARRAY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+
+
+Server.logInfo("INFO: BEFORE CALL CREATE MOH CONFERENCE WITH Id: " + Session.g_oConference[Session.g_nConferenceIndex].lId);
+Server.logInfo("INFO: BEFORE CALL CREATE MOH CONFERENCE WITH SERVICE PROVIDER Id: " + Session.g_oConference[Session.g_nConferenceIndex].lServiceProviderId);
+Server.logInfo("INFO: BEFORE CALL CREATE MOH CONFERENCE WITH CONFERENCE ENDPOINT Id: " + Session.g_oConference[Session.g_nConferenceIndex].strConferenceId);
+Server.logInfo("INFO: BEFORE CALL CREATE MOH CONFERENCE WITH CURRENT NUMBER OF PARTY IS: " + Session.g_oConference[Session.g_nConferenceIndex].nCurrentNbrOfParty);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("f_nNewConfIndex is: " + Session.f_nNewConfIndex);
+Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.f_nNewConfIndex < 0)
+{
+	Server.logError("ERROR: ARRAY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+
+Server.logInfo("INFO: AFTER CALL CREATE MOH CONFERENCE WITH Id: " + Session.g_oConference[Session.g_nConferenceIndex].lId);
+Server.logInfo("INFO: AFTER CALL CREATE MOH CONFERENCE WITH CONFERENCE ENDPOINT Id: " + Session.g_oConference[Session.g_nConferenceIndex].strConferenceId);
+Server.logInfo("INFO: AFTER CALL CREATE MOH CONFERENCE WITH CURRENT NUMBER OF PARTY IS: " + Session.g_oConference[Session.g_nConferenceIndex].nCurrentNbrOfParty);]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Pactolus.Branch.1" ><?xtml-editor x=610 y=237 ?>
+          <!--success?-->
+          <results >
+            <result name="Default" link="17" stubbed="0"/>
+            <result name="success?" link="18" stubbed="0" >f_nReturnCode == s_nSUCCESS</result>
+          </results>
+        </action>
+        <action id="17" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=844 y=181 ?>
+          <!--RESPONSE FAILURE-->
+          <SOAP xmlns="urn:www.pactolus.com:xtml:communication" destination-ip="" transaction="" message-name="s_strConnectToMusicResponse" destination-port="" destination-type="3" destination-session="strRequestedSessionId" waiting-session-selected="" xml-namespace="" >
+            <parameter tag="&quot;returnCode&quot;" value="s_nFAILURE"/>
+            <parameter tag="&quot;returnMsg&quot;" value="g_strReturnMsg"/>
+            <parameter tag="&quot;conference_index&quot;" value="s_nFAILURE"/>
+            <parameter tag="&quot;conference_id&quot;" value="s_strEmptyString"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="19" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strReturnMsg = "FAILURE TO CREATE CONFERENCE";
+Server.logInfo("INFO: SENDING RESPONSE TO session Id is: " + Session.strRequestedSessionId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id == 2)
+{
+	Server.logInfo("INFO: SUCCESS SEND SUCCESS RESPONSE TO session Id is: " + Session.strRequestedSessionId);
+}
+else
+{
+	Server.logError("ERROR: FAIL TO SEND SUCCESS RESPONSE, EXIT ON: " + Result.name);
+	Server.logError("ERROR: FAIL TO SEND SUCCESS RESPONSE TO session Id is: " + Session.strRequestedSessionId);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="18" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=859 y=328 ?>
+          <!--RESPONSE SUCCESS-->
+          <SOAP xmlns="urn:www.pactolus.com:xtml:communication" destination-ip="" transaction="" message-name="s_strConnectToMusicResponse" destination-port="" destination-type="3" destination-session="strRequestedSessionId" waiting-session-selected="" xml-namespace="" >
+            <parameter tag="&quot;returnCode&quot;" value="s_nSUCCESS"/>
+            <parameter tag="&quot;returnMsg&quot;" value="g_strReturnMsg"/>
+            <parameter tag="&quot;conference_index&quot;" value="g_nConferenceIndex"/>
+            <parameter tag="&quot;conference_id&quot;" value="g_oConference[g_nConferenceIndex].strConferenceId"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="22" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strReturnMsg = "SUCCESS TO CREATE CONFERENCE, CONFERENCE Id IS: " + Session.g_oConference[Session.g_nConferenceIndex].strConferenceId;
+Server.logInfo("INFO: RESPONSE TO CONNECT TO MUSIC REQUEST WITH: ");
+Server.logInfo("INFO: CONFERENCE INDEX: " + Session.g_nConferenceIndex);
+Server.logInfo("INFO: CONFERENCE Id: " + Session.g_oConference[Session.g_nConferenceIndex].lId);
+Server.logInfo("INFO: CONFERENCE ENDPOINT Id: " + Session.g_oConference[Session.g_nConferenceIndex].strConferenceId);
+Server.logInfo("INFO: SENDING RESPONSE TO session Id is: " + Session.strRequestedSessionId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[// no longer the first call
+Session.g_bFirstServiceProvider = false;
+// caller will be in this conference
+Session.g_oConference[Session.g_nConferenceIndex].nCurrentNbrOfParty++;
+Session.g_oParty[Session.g_nPartyIndex].lId = Session.g_oConference[Session.g_nConferenceIndex].lId;
+Session.g_oParty[Session.g_nPartyIndex].lSessionTime = Server.getUTCTime();
+Session.g_oParty[Session.g_nPartyIndex].strSessionId = Session.strRequestedSessionId;
+Session.g_nPartyIndex++;
+
+//next conference
+
+if (Result.id == 2)
+{
+	Server.logInfo("INFO: SUCCESS SEND SUCCESS RESPONSE TO session Id is: " + Session.strRequestedSessionId);
+}
+else
+{
+	Server.logError("ERROR: FAIL TO SEND SUCCESS RESPONSE, EXIT ON: " + Result.name);
+	Server.logError("ERROR: FAIL TO SEND SUCCESS RESPONSE TO session Id is: " + Session.strRequestedSessionId);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="19" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1083 y=185 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_enable_event();]]></script>
+          </scripts>
+        </action>
+        <action id="21" plug-in="Pactolus.Branch.1" ><?xtml-editor x=369 y=558 ?>
+          <!--search through array of conf-->
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="f_bCreateNewConf==true" link="2" stubbed="0" >f_bCreateNewConf == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var i = 0;
+var b_foundAvailConf = false;
+var b_firstBlankElement = false;
+var intFirstBlankIndex = 0;
+
+Server.logInfo("f_nNewConfIndex is: " + Session.f_nNewConfIndex);
+Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.f_nNewConfIndex < 0)
+{
+	Server.logError("ERROR: ARRAY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+
+
+for (i = 0; i <= Session.g_nConferenceIndex; i++)
+{
+	Server.logInfo("oConference[i].nCurrentNbrOfParty is: " + Session.g_oConference[i].nCurrentNbrOfParty);
+	// if ( (Session.g_oConference[i].lServiceProviderId == Session.lServiceProviderId) && (Session.g_oConference[i].nCurrentNbrOfParty < Session.s_nConferenceMaxParties) )
+	if ( Session.g_oConference[i].lServiceProviderId == Session.lServiceProviderId )
+	{
+		Session.f_nNewConfIndex = i;
+		Server.logInfo("FOUND AVAILABLE CONFERENCE FOR SERVICE PROVIDER ID: " + Session.lServiceProviderId);
+		Server.logInfo("CONFERENCE ID IS: " + Session.g_oConference[i].strConferenceId);
+		Server.logInfo("CONFERENCE ID LENGTH IS: " + Session.g_oConference[i].strConferenceId.length);
+		Server.logInfo("CONFERENCE INDEX IS: " + Session.f_nNewConfIndex);
+		
+		if (0 == Session.g_oConference[i].strConferenceId.length)
+		{
+			Server.logError("ERROR: FOUND CONFERENCE BUT CONFERENCE ID IS BLANK");
+			b_foundAvailConf = false;
+		}
+		else
+		{
+			Server.logInfo("FOUND CONFERENCE AND CONFERENCE ID IS NOT BLANK");
+			b_foundAvailConf = true;
+		}
+		break;
+	}
+	else if ( (Session.g_oConference[i].lServiceProviderId == 0)  && (!b_firstBlankElement) )
+	{
+		intFirstBlankIndex = i;  //save the first available slot incase need to create new conference
+		b_firstBlankElement = true;
+		Server.logInfo("FOUND FIRST AVAILABLE SLOT TO CREATE NEW CONFERENCE");
+	}
+}
+if (!b_foundAvailConf)
+{
+	Session.f_bCreateNewConf = true;  //need to create new conference but where?  new array element or an existing one?
+	Server.logInfo("MOH CONFERENCE NOT FOUND, NEED TO CREATE A NEW ONE");
+		
+	if (!b_firstBlankElement)  //add new array element
+	{
+		Server.logInfo("BEFORE Conference index is: " + Session.g_nConferenceIndex);
+		Session.g_nConferenceIndex++;
+		Server.logInfo("AFTER Conference index is: " + Session.g_nConferenceIndex);
+		Session.f_nNewConfIndex = Session.g_nConferenceIndex;
+		Server.logInfo("f_nNewConfIndex is: " + Session.f_nNewConfIndex);
+		Server.logInfo("CREATE NEW CONFERENCE AT NEW ADDITIONAL INDEX");
+	}
+	else
+	{
+		Session.f_nNewConfIndex = intFirstBlankIndex;  //using existing one
+		Server.logInfo("f_nNewConfIndex is: " + Session.f_nNewConfIndex);
+		Server.logInfo("CREATE NEW CONFERENCE AT FIRST AVAILABLE SLOT");
+	}
+}
+
+Server.logInfo("f_nNewConfIndex is: " + Session.f_nNewConfIndex);
+Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.f_nNewConfIndex < 0)
+{
+	Server.logError("ERROR: ARRAY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("f_nNewConfIndex is: " + Session.f_nNewConfIndex);
+Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.f_nNewConfIndex < 0)
+{
+	Server.logError("ERROR: ARRAY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="22" plug-in="Standard.Timer.1" ><?xtml-editor x=1101 y=330 ?>
+          <!--set timer to clean up-->
+          <timer xmlns="urn:www.pactolus.com:xtml:application" start="1" id="g_lCleanUpTimerId" duration="s_nCLEAN_UP_TIMER"/>
+          <results >
+            <result name="Default" link="19" stubbed="1"/>
+          </results>
+        </action>
+        <action id="23" plug-in="Standard.Timer.1" ><?xtml-editor x=1336 y=327 ?>
+          <!--test timer-->
+          <timer xmlns="urn:www.pactolus.com:xtml:application" start="1" id="g_lTestTimerId" duration="g_nTestTime"/>
+          <results >
+            <result name="Default" link="19" stubbed="1"/>
+          </results>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="146" y-coord="32" width="371" height="53" text="start to seach through the array of conference and look for
+conference with number of party &lt; MAX" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="OnDisconnectFromMusic" start="1" event="OnDisconnectFromMusic" returns="void" >
+      <parameters >
+        <parameter name="nConferenceIndex" type="i4"/>
+        <parameter name="strSessionId" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >-99</var>
+        <var name="oMyArrayObject" type="object" ></var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=71 y=167 ?>
+          <!--last party?-->
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="nCurrentNbrOfParty&lt;=1" link="7" stubbed="0" >nConferenceIndex &gt;= 0
+AND g_oConference[nConferenceIndex].nCurrentNbrOfParty &lt;= 1
+AND g_oConference[nConferenceIndex].nCurrentNbrOfParty &gt;= 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: OnDisconnectFromMusic");
+js_disable_event();
+
+Server.logInfo("nConferenceIndex is: " + Session.nConferenceIndex);
+Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.nConferenceIndex < 0)
+{
+	Server.logError("ERROR: ARRAY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+
+
+Server.logInfo("INFO: RECEIVE DISCONNECT FROM MUSIC REQUEST WITH PARAMETERS: " );
+Server.logInfo("INFO: CONFERENCE INDEX IS: " + Session.nConferenceIndex);
+Server.logInfo("INFO: SESSION ID IS: " + Session.strSessionId);
+Server.logInfo("INFO: BEFORE NUMBER CURRENTLY IN THIS CONFERENCE IS: " + Session.g_oConference[Session.nConferenceIndex].nCurrentNbrOfParty);
+if (Session.g_oConference[Session.nConferenceIndex].nCurrentNbrOfParty > 0)
+	Session.g_oConference[Session.nConferenceIndex].nCurrentNbrOfParty--;
+else
+	Server.logInfo("WARNING: CURRENT NUMBER OF PARTY ALREADY AT ZERO");
+Server.logInfo("INFO: AFTER NUMBER CURRENTLY IN THIS CONFERENCE IS: " + Session.g_oConference[Session.nConferenceIndex].nCurrentNbrOfParty);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("nConferenceIndex is: " + Session.nConferenceIndex);
+Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.nConferenceIndex < 0)
+{
+	Server.logError("ERROR: ARRAY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=927 y=269 ?>
+          <!--delete conference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteConference&quot;" return="f_nReturnCode" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >g_oConference[nConferenceIndex]</parameter>
+          </function>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("DELETE CONFERENCE: " + Session.g_oConference[Session.nConferenceIndex].strConferenceId);]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=309 y=161 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+
+var i = 0;
+var j = 0;
+var foundParty = false;
+
+/*
+for (i = 0; i < Session.g_oParty.length; i++)
+{
+	Server.logInfo("g_oParty[" + i +"].lId IS: " + Session.g_oParty[i].lId);
+	Server.logInfo("g_oParty[" + i +"].strSessionId IS: " + Session.g_oParty[i].strSessionId);
+	Server.logInfo("g_oParty[" + i +"].lSessionTime IS: " + Session.g_oParty[i].lSessionTime);
+}
+*/
+
+for (i = 0; i < Session.g_oParty.length; i++)
+{
+	if ( (Session.g_oParty[i].lId == Session.g_oConference[Session.nConferenceIndex].lId) && !Clib.strcmp(Session.strSessionId, Session.g_oParty[i].strSessionId)   )
+	{
+		Server.logInfo("FOUND PARTY: " + Session.strSessionId + " IN PARTY ARRAY.  PARTY INDEX IS: " + i);
+		foundParty = true;
+		if (1 == Session.g_oParty.length)
+		{
+			Server.logInfo("ONLY 1 PARTY IN THE PARTY ARRAY, RESET ALL VALUES");
+			// reset party array
+			Session.g_oParty[i].lId = 0;
+			Session.g_oParty[i].strSessionId = "";
+			Session.g_oParty[i].lSessionTime = 0;
+		}
+		else
+		{
+			Server.logInfo("2 OR MORE THAN 2 PARTIES IN THE PARTY ARRAY, DELETE IT");
+			Server.logInfo("BEFORE myArray LENGTH IS: " + Session.g_oParty.length);
+			if (0 == i)
+			{
+				Server.logInfo("FOUND AT THE BEGINING OF THE ARRAY");
+				Session.g_oParty[0] = Session.g_oParty[Session.g_oParty.length - 1];
+				Session.g_oParty.length--;
+			}
+			else if (i == Session.g_oParty.length - 1)
+			{
+				Server.logInfo("FOUND AT THE END OF THE ARRAY");
+				Session.g_oParty.length--;
+			}
+			else
+			{
+				Server.logInfo("FOUND AT THE BETWEEN OF THE ARRAY");
+				Session.g_oParty[i] = Session.g_oParty[Session.g_oParty.length - 1];
+				Session.g_oParty.length--;
+			}
+			Server.logInfo("AFTER myArray LENGTH IS: " + Session.g_oParty.length);
+		}
+		Session.g_nPartyIndex--;
+		if (Session.g_nPartyIndex < 0)
+		{
+			Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+		}
+		break;
+	}
+	else
+	{
+		foundParty = false;
+	}
+}
+for (i = 0; i < Session.g_oParty.length; i++)
+{
+	Server.logInfo("g_oParty[" + i +"].lId IS: " + Session.g_oParty[i].lId);
+	Server.logInfo("g_oParty[" + i +"].strSessionId IS: " + Session.g_oParty[i].strSessionId);
+	Server.logInfo("g_oParty[" + i +"].lSessionTime IS: " + Session.g_oParty[i].lSessionTime);
+}
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+js_enable_event();]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.MGCPDelete.1" ><?xtml-editor x=709 y=390 ?>
+          <dlcx xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oConvediaMS[nConferenceIndex].strConnectionId" endpoint="g_oConvediaMS[nConferenceIndex].strEndPoint" callid="g_oConvediaMS[nConferenceIndex].strCallId" timeout="s_nTIMEOUT" returns="f_nReturnCode" ms-type="" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </dlcx>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("YOU ARE THE LAST ONE, DELETE YOUR OWN CONNECTION");
+Server.logInfo("CONVEDIA strConnectionId: " + Session.g_oConvediaMS[Session.nConferenceIndex].strEndPoint);
+Server.logInfo("CONVEDIA strConnectionId: " + Session.g_oConvediaMS[Session.nConferenceIndex].strConnectionId);
+Server.logInfo("CONVEDIA strCallId: " + Session.g_oConvediaMS[Session.nConferenceIndex].strCallId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("nConferenceIndex is: " + Session.nConferenceIndex);
+Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.nConferenceIndex < 0)
+{
+	Server.logError("ERROR: ARRAY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+
+
+Session.g_oConvediaMS[Session.nConferenceIndex].strConnectionId = "";
+Session.g_oConvediaMS[Session.nConferenceIndex].strContent = "";
+Session.g_oConvediaMS[Session.nConferenceIndex].strEndPoint = "";
+Session.g_oConvediaMS[Session.nConferenceIndex].strCallId = "";
+Session.g_oConvediaMS[Session.nConferenceIndex].lId = 0;]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.Branch.1" ><?xtml-editor x=486 y=302 ?>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="CONV ms?" link="5" stubbed="0" >s_strMSType match "CONV"</result>
+          </results>
+        </action>
+        <action id="7" plug-in="Pactolus.CNFRemoveMember.1" ><?xtml-editor x=261 y=301 ?>
+          <remove-member xmlns="urn:www.pactolus.com:xtml:conference" ci="g_oConference[nConferenceIndex].strConferenceId" endpoint="g_oMS[nConferenceIndex].strEndPoint" connection-id="g_oMS[nConferenceIndex].strConnectionId" ms-type="s_strMSType" timeout="s_nTIMEOUT" returns="f_nReturnCode"/>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("YOU ARE THE LAST ONE, REMOVE YOURSELF FROM MOH");
+Server.logInfo("strEndPoint: " + Session.g_oMS[Session.nConferenceIndex].strEndPoint);
+Server.logInfo("strConnectionId: " + Session.g_oMS[Session.nConferenceIndex].strConnectionId);
+Server.logInfo("strConferenceId: " + Session.g_oMS[Session.nConferenceIndex].strConferenceId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("REMOVE MEMBER FROM CONFERENCE RETURN CODE: " + Session.f_nReturnCode);
+if(Result.id != 2) {
+	Server.logError("Error removing member from conference, result: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=693 y=276 ?>
+          <!--"DeleteMSConnection"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteMSConnection&quot;" return="f_nReturnCode" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >g_oMS[nConferenceIndex]</parameter>
+          </function>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("DELETE MS CONNECTION");]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if(Session.f_nReturnCode != 0) {
+	Server.logError("ERROR DELETING MS CONNECTION.");
+}]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1143 y=265 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("nConferenceIndex is: " + Session.nConferenceIndex);
+Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.nConferenceIndex < 0)
+{
+	Server.logError("ERROR: ARRAY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+
+Session.g_oParty.length = 1;
+Session.g_nPartyIndex = 0;
+// reset party array
+Session.g_oParty[0].lId = 0;
+Session.g_oParty[0].strSessionId = "";
+Session.g_oParty[0].lSessionTime = 0;
+
+Server.logInfo("nConferenceIndex is: " + Session.nConferenceIndex);
+Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.nConferenceIndex < 0)
+{
+	Server.logError("ERROR: ARRAY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+
+
+// reset conference array
+Session.g_oConference[Session.nConferenceIndex].lServiceProviderId = 0;
+Session.g_oConference[Session.nConferenceIndex].lId = 0;
+Session.g_oConference[Session.nConferenceIndex].strConferenceId = "";
+Session.g_oConference[Session.nConferenceIndex].strEndPoint = "";
+Session.g_oConference[Session.nConferenceIndex].strContent = "";
+Session.g_oConference[Session.nConferenceIndex].strConnectionId = "";
+Session.g_oConference[Session.nConferenceIndex].strCallId = "";
+Session.g_oConference[Session.nConferenceIndex].bMuteFlag = false;
+Session.g_oConference[Session.nConferenceIndex].bDeafFlag = false;
+Session.g_oConference[Session.nConferenceIndex].bCurrentlyInConf = false;
+Session.g_oConference[Session.nConferenceIndex].bConfCreated = false;
+Session.g_oConference[Session.nConferenceIndex].strType = Session.s_strMSType;
+Session.g_oConference[Session.nConferenceIndex].bUseForMOH = false;
+Session.g_oConference[Session.nConferenceIndex].strMOHType = Session.s_strMSType;
+Session.g_oConference[Session.nConferenceIndex].nCurrentNbrOfParty = 0;
+
+// reset mediaserver endpoint array	
+Session.g_oMS[Session.nConferenceIndex].strCallId = "";
+Session.g_oMS[Session.nConferenceIndex].strConnectionId = "";
+Session.g_oMS[Session.nConferenceIndex].strContent = "";
+Session.g_oMS[Session.nConferenceIndex].strEndPoint = "";
+Session.g_oMS[Session.nConferenceIndex].strType = Session.s_strMSType;
+Session.g_oMS[Session.nConferenceIndex].bUseForMOH = false;
+Session.g_oMS[Session.nConferenceIndex].strMOHType = Session.s_strMSType;
+Session.g_oMS[Session.nConferenceIndex].nCurrentNbrOfParty = 0;
+
+js_enable_event();]]></script>
+          </scripts>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="180" y-coord="67" width="320" height="51" text="delete conference if only ONE left in the conference
+this is because the one left is the one that play MOH" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="OnServiceUnload" start="6" event="OnServiceUnload" returns="void" >
+      <local-vars >
+        <var name="f_bDelete" type="boolean" >0</var>
+      </local-vars>
+      <actions >
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=385 y=370 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: OnServiceUnload");]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=883 y=519 ?>
+          <!--delete conference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteConference&quot;" return="" external-function="1" library="" >
+            <parameter >g_oConference[g_nConferenceIndex]</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Session.g_nConferenceIndex--;]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.MGCPDelete.1" ><?xtml-editor x=656 y=622 ?>
+          <dlcx xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oConvediaMS[g_nConferenceIndex].strConnectionId" endpoint="g_oConvediaMS[g_nConferenceIndex].strEndPoint" callid="g_oConvediaMS[g_nConferenceIndex].strCallId" timeout="s_nTIMEOUT" returns="" ms-type="" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </dlcx>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="5" plug-in="Pactolus.Branch.1" ><?xtml-editor x=181 y=373 ?>
+          <!--conference index >= 0?-->
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="conference index &gt;=0" link="7" stubbed="0" >g_nConferenceIndex &gt;= 0</result>
+          </results>
+        </action>
+        <action id="7" plug-in="Pactolus.Branch.1" ><?xtml-editor x=402 y=521 ?>
+          <!--delete connection?-->
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="delete==true" link="4" stubbed="0" >f_bDelete == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if ( (Session.g_oConvediaMS[Session.g_nConferenceIndex].strConnectionId.length > 0) && (Session.g_oConvediaMS[Session.g_nConferenceIndex].strCallId.lenght > 0) && (Session.g_oMS[Session.g_nConferenceIndex].strEndPoint > 0) )
+{
+	Session.f_bDelete = true;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.f_bDelete = false;]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Pactolus.Branch.1" ><?xtml-editor x=643 y=520 ?>
+          <!--delete conf?-->
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="delete==true" link="2" stubbed="0" >f_bDelete == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if ( Session.g_oConference[Session.g_nConferenceIndex].strConferenceId.length > 0 )
+{
+	Session.f_bDelete = true;
+}]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.f_bDelete = false;
+if (1 == Result.id)
+{
+	Session.g_nConferenceIndex--;
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="216" y-coord="78" width="234" height="54" text="Go through every service provider
+delete every conference in the array" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="CreateMOHConference" start="10" event="CreateMOHConference" returns="i4" >
+      <parameters >
+        <parameter name="oConference" type="object" pass="byref"/>
+        <parameter name="oMS" type="object" pass="byref"/>
+        <parameter name="nIndex" type="i4"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >-99</var>
+      </local-vars>
+      <actions >
+        <action id="10" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=186 y=123 ?>
+          <!--CreateAConference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;CreateConference&quot;" return="f_nReturnCode" external-function="1" library="lib_mediaserver.xml" >
+            <parameter >oConference</parameter>
+          </function>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: CreateMOHConference");
+Server.logInfo("CreateMOHConference CONFERENCE Id: " + Session.oConference.lId);
+Server.logInfo("CreateMOHConference SERVICE PROVIDER Id: " + Session.oConference.lServiceProviderId);
+Server.logInfo("CreateMOHConference CONFERENCE ENDPOINT Id: " + Session.oConference.strConferenceId);
+Server.logInfo("CreateMOHConference CURRENT NUMBER OF PARTY IS: " + Session.oConference.nCurrentNbrOfParty);
+Session.oConference.bPersistentFlag = false;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("AFTER CreateMOHConference CONFERENCE ENDPOINT Id: " + Session.oConference.strConferenceId);]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1402 y=569 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="s_nSUCCESS"/>
+        </action>
+        <action id="2" plug-in="Pactolus.Branch.1" ><?xtml-editor x=426 y=119 ?>
+          <!--success?-->
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+            <result name="success?" link="9" stubbed="0" >f_nReturnCode == s_nSUCCESS</result>
+          </results>
+        </action>
+        <action id="3" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1163 y=566 ?>
+          <!--Play music-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oConvediaMS[nIndex].strConnectionId" endpoint="g_oConvediaMS[nIndex].strEndPoint" callid="g_oConvediaMS[nIndex].strCallId" repeat="-1" timeout="s_nTIMEOUT" ms-type="oMS.strType" returns="f_nReturnCode" start-play="1" interrupt="0" return-immediate="1" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >904</audio>
+          </play>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id == 2)
+{
+	Server.logInfo("INFO: SUCCESS PLAY MUSIC ON HOLD.");
+	Session.g_nConvediaIndex++;
+}
+else
+{
+	Server.logError("ERROR: FAIL TO PLAY MUSIC ON HOLD, EXIT ON: " + Result.name);
+	Server.logError("ERROR: End Point: " + Session.g_oConvediaMS[Session.g_nConvediaIndex].strEndPoint);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.MGCPCreate.1" ><?xtml-editor x=428 y=556 ?>
+          <!--inactive-->
+          <crcx xmlns="urn:www.pactolus.com:xtml:media" callid="g_oConvediaMS[nIndex].strCallId" remote-sdp="oMS.strContent" mode="send/receive" capability="2" returns="f_nReturnCode" endpoint="g_oConvediaMS[nIndex].strEndPoint" connection-id="g_oConvediaMS[nIndex].strConnectionId" local-sdp="g_oConvediaMS[nIndex].strContent" packetization-period="oMS.nPacketizationPeriod" codec="0" timeout="s_nTIMEOUT" local-connection-options="" second-endpoint-id="" telephone-events="0" ms-type="s_strMSType" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </crcx>
+          <results >
+            <result name="Default" link="13" stubbed="1"/>
+            <result name="Success" link="7" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oConvediaMS[Session.nIndex].strConnectionId = "";
+Session.g_oConvediaMS[Session.nIndex].strContent = "";
+Session.g_oConvediaMS[Session.nIndex].strEndPoint = "";
+Session.g_oConvediaMS[Session.nIndex].strCallId = "";
+Session.g_oConvediaMS[Session.nIndex].lId = Session.oConference.lId;
+Server.logInfo("CRCX INACTIVE");]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("ADD YOURSELF TO MOH TO PLAY MUSIC");
+Server.logInfo("strEndPoint: " + Session.g_oConvediaMS[Session.nIndex].strEndPoint);
+Server.logInfo("strConnectionId: " + Session.g_oConvediaMS[Session.nIndex].strConnectionId);
+Server.logInfo("strCallId: " + Session.g_oConvediaMS[Session.nIndex].strCallId);
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO CRCX MS CONNECTION, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE IS: " + Session.f_nReturnCode);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.Branch.1" ><?xtml-editor x=187 y=401 ?>
+          <!--CONV?-->
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+            <result name="CONV" link="5" stubbed="0" >s_strMSType match "CONV"</result>
+          </results>
+        </action>
+        <action id="7" plug-in="Pactolus.MGCPModify.1" ><?xtml-editor x=699 y=615 ?>
+          <!--modify conference MOH member to A-->
+          <mdcx xmlns="urn:www.pactolus.com:xtml:media" connection-id="oMS.strConnectionId" endpoint="oMS.strEndPoint" callid="oMS.strCallId" returns="f_nReturnCode" remote-sdp="g_oConvediaMS[nIndex].strContent" mode="conference" packetization-period="oMS.nPacketizationPeriod" codec="0" timeout="s_nTIMEOUT" local-connection-options="" second-endpoint-id="" ms-type="s_strMSType" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </mdcx>
+          <results >
+            <result name="Default" link="14" stubbed="0"/>
+            <result name="Success" link="35" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("MDCX WITH ADD MEMBER EARLIER");]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO MDCX MS CONNECTION, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE IS: " + Session.f_nReturnCode);
+}
+Server.logInfo("strEndPoint: " + Session.oMS.strEndPoint);
+Server.logInfo("strConnectionId: " + Session.oMS.strConnectionId);]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=426 y=399 ?>
+          <!--Play music-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="" endpoint="oMS.strEndPoint" callid="oMS.strCallId" repeat="-1" timeout="s_nTIMEOUT" ms-type="oMS.strType" returns="f_nReturnCode" start-play="1" interrupt="0" return-immediate="1" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >5</audio>
+            <audio type="url" >"file://4090"</audio>
+            <audio type="url" >"file://4091"</audio>
+            <audio type="url" >"file://4092"</audio>
+          </play>
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="9" plug-in="Pactolus.CNFAddMember.1" ><?xtml-editor x=667 y=222 ?>
+          <add-member xmlns="urn:www.pactolus.com:xtml:conference" endpoint="oMS.strEndPoint" ms-type="oMS.strType" ci="oConference.strConferenceId" inbound="1" returns="f_nReturnCode" timeout="s_nTIMEOUT" connection-id="oMS.strConnectionId" ms-sdp="oMS.strContent" mgcp-call-id="oMS.strCallId" ingress-gateway="" early-media="0" local="1" party-on-hold="0" packetization-period="oMS.nPacketizationPeriod" codec="0" telephone-events="0" route="" record-route="" contact="" te="1" dc="1" le="1" ig="" og="" ia="" oa="" iat="" oat="" ias="" oas="" tf="" lf="" session-expires="" min-se="" supported="" min-supported-session-timer="" refresher="" use-session-timer="0" conn-mode="conference" >
+            <attributes mp="16" mt="3" ig="0" og="0" iat="-10" ias="-40" oat="-10" oas="-40" atn="3" att="2" ia="1" oa="1" te="1" le="1" tp="0" dc="1" tc="1" ate="0" se="0"/>
+          </add-member>
+          <results >
+            <result name="Default" link="12" stubbed="0"/>
+            <result name="Success" link="6" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="Resource Unavailable"/>
+            <result name="Caller Hung up"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("ADD MEMBER TO CONFERENCE TO PLAY MOH");]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id == 2)
+{
+	Server.logInfo("SUCCESS ADD MEMBER TO CONFERENCE");
+	Session.oConference.nCurrentNbrOfParty++;
+	Session.oMS.strConferenceId = Session.oConference.strConferenceId;
+}
+else
+{
+	Server.logError("ERROR: FAIL TO ADD MEMBER, EXIT ON: " + Result.name);
+}
+Server.logInfo("ADD YOURSELF TO MOH TO PLAY MUSIC");
+Server.logInfo("strEndPoint: " + Session.oMS.strEndPoint);
+Server.logInfo("strConnectionId: " + Session.oMS.strConnectionId);
+Server.logInfo("strConferenceId: " + Session.oConference.strConferenceId);]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=651 y=110 ?>
+          <!--s_nFAILURE-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="s_nFAILURE"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: RETURN FAILURE TO CONFERENCE APP");]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=888 y=221 ?>
+          <!--delete conference-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;DeleteConference&quot;" return="" external-function="1" library="" >
+            <parameter >oConference</parameter>
+          </function>
+          <results >
+            <result name="Default" link="13" stubbed="0"/>
+          </results>
+        </action>
+        <action id="13" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1139 y=223 ?>
+          <!--s_nFAILURE-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="s_nFAILURE"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: RETURN FAILURE TO CONFERENCE APP");]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Pactolus.MGCPDelete.1" ><?xtml-editor x=930 y=607 ?>
+          <dlcx xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oConvediaMS[nIndex].strConnectionId" endpoint="g_oConvediaMS[nIndex].strEndPoint" callid="g_oConvediaMS[nIndex].strCallId" timeout="s_nTIMEOUT" returns="f_nReturnCode" ms-type="s_strMSType" >
+            <parameters >
+              <quarantine step="0" loop="0" process="0" discard="0"/>
+              <events ><![CDATA[]]></events>
+              <signals ><![CDATA[]]></signals>
+              <digit-map ><![CDATA[]]></digit-map>
+            </parameters>
+          </dlcx>
+          <results >
+            <result name="Default" link="12" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Session.g_oConvediaMS[Session.nIndex].strConnectionId = "";
+Session.g_oConvediaMS[Session.nIndex].strContent = "";
+Session.g_oConvediaMS[Session.nIndex].strEndPoint = "";
+Session.g_oConvediaMS[Session.nIndex].strCallId = "";
+Session.g_oConvediaMS[Session.nIndex].lId = 0;
+if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO DLCX MS CONNECTION, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE IS: " + Session.f_nReturnCode);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=387 y=1002 ?>
+          <!--"psAPISceGetMusicPrompts"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPISceGetMusicPrompts&quot;" return="f_nReturnCode" external-function="0" library="" >
+            <parameter >oConference.lServiceProviderId</parameter>
+          </function>
+          <results >
+            <result name="Default" link="16" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_nReturnCode = -50]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Session.f_nReturnCode != 0)
+{
+	Server.logError("ERROR: FAIL TO GET MUSIC PROMPT, RETURN CODE: " + Session.f_nReturnCode);
+}
+Server.logInfo("PROMPT LIST TYPE IS: " + Session.g_strPromptType);
+Server.logInfo("NUMBER OF PROMPTS IS: " + Session.g_nNumberOfPrompts);
+
+for (var i = 0; i < Session.s_nMaxMusicPrompts; i++)
+{
+	if (Session.g_strPromptType == "U")
+		Server.logInfo("INFO: PROMPT AT INDEX: " + i + " IS: " + Session.g_oPromptList[i].strURL);
+	else
+		Server.logInfo("INFO: PROMPT AT INDEX: " + i + " IS: " + Session.g_oPromptList[i].nIndex);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Pactolus.Branch.1" ><?xtml-editor x=610 y=1001 ?>
+          <!--success?-->
+          <results >
+            <result name="Default" link="17" stubbed="0"/>
+            <result name="success?" link="32" stubbed="0" >f_nReturnCode == s_nSUCCESS
+AND g_nNumberOfPrompts &gt; 0</result>
+          </results>
+        </action>
+        <action id="17" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=860 y=994 ?>
+          <!--Play music-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="" endpoint="oMS.strEndPoint" callid="oMS.strCallId" repeat="-1" timeout="s_nTIMEOUT" ms-type="oMS.strType" returns="f_nReturnCode" start-play="1" interrupt="0" return-immediate="1" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >5</audio>
+            <audio type="index" >904</audio>
+            <audio type="silence" >5</audio>
+          </play>
+          <results >
+            <result name="Default" link="34" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: FAIL TO GET MUSIC PROMPT, PLAY DEFAULT PROMPT 904");
+Server.logInfo("strEndPoint: " + Session.g_oConvediaMS[Session.nIndex].strEndPoint);
+Server.logInfo("strConnectionId: " + Session.g_oConvediaMS[Session.nIndex].strConnectionId);
+Server.logInfo("strCallId: " + Session.g_oConvediaMS[Session.nIndex].strCallId);
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY PROMPT, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE IS: " + Session.f_nReturnCode);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="31" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1129 y=1255 ?>
+          <!--Play music URL-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="" endpoint="oMS.strEndPoint" callid="oMS.strCallId" repeat="-1" timeout="s_nTIMEOUT" ms-type="oMS.strType" returns="f_nReturnCode" start-play="1" interrupt="0" return-immediate="1" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="url" >g_oPromptList[0].strURL</audio>
+            <audio type="url" >g_oPromptList[1].strURL</audio>
+            <audio type="url" >g_oPromptList[2].strURL</audio>
+            <audio type="url" >g_oPromptList[3].strURL</audio>
+            <audio type="url" >g_oPromptList[4].strURL</audio>
+          </play>
+          <results >
+            <result name="Default" link="34" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("PLAY MUSIC URL");
+Server.logInfo("PROMPT LIST TYPE IS: " + Session.g_strPromptType);
+Server.logInfo("NUMBER OF PROMPTS IS: " + Session.g_nNumberOfPrompts);
+
+for (var i = 0; i < Session.s_nMaxMusicPrompts; i++)
+{
+	if (Session.g_strPromptType == "U")
+		Server.logInfo("INFO: PROMPT AT INDEX: " + i + " IS: " + Session.g_oPromptList[i].strURL);
+	else
+		Server.logInfo("INFO: PROMPT AT INDEX: " + i + " IS: " + Session.g_oPromptList[i].nIndex);
+}
+Server.logInfo("strEndPoint: " + Session.g_oConvediaMS[Session.nIndex].strEndPoint);
+Server.logInfo("strConnectionId: " + Session.g_oConvediaMS[Session.nIndex].strConnectionId);
+Server.logInfo("strCallId: " + Session.g_oConvediaMS[Session.nIndex].strCallId);
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY PROMPT, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE IS: " + Session.f_nReturnCode);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="32" plug-in="Pactolus.Branch.1" ><?xtml-editor x=874 y=1196 ?>
+          <!--URL or Index-->
+          <results >
+            <result name="Default" link="33" stubbed="0"/>
+            <result name="g_strPromptType==&quot;U&quot;" link="31" stubbed="0" >g_strPromptType match "U"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[//set unuse prompt to 100 ms silence
+for (var i = Session.g_nNumberOfPrompts; i < Session.s_nMaxMusicPrompts; i++)
+{
+	Session.g_oPromptList[i].strURL = "file://99";
+	Session.g_oPromptList[i].nIndex = 99;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="33" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1127 y=1099 ?>
+          <!--Play music Index-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="" endpoint="oMS.strEndPoint" callid="oMS.strCallId" repeat="-1" timeout="s_nTIMEOUT" ms-type="oMS.strType" returns="f_nReturnCode" start-play="1" interrupt="0" return-immediate="1" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >g_oPromptList[0].nIndex</audio>
+            <audio type="index" >g_oPromptList[1].nIndex</audio>
+            <audio type="index" >g_oPromptList[2].nIndex</audio>
+            <audio type="index" >g_oPromptList[3].nIndex</audio>
+            <audio type="index" >g_oPromptList[4].nIndex</audio>
+          </play>
+          <results >
+            <result name="Default" link="34" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("PLAY MUSIC INDEX");
+Server.logInfo("PROMPT LIST TYPE IS: " + Session.g_strPromptType);
+Server.logInfo("NUMBER OF PROMPTS IS: " + Session.g_nNumberOfPrompts);
+
+for (var i = 0; i < Session.s_nMaxMusicPrompts; i++)
+{
+	if (Session.g_strPromptType == "U")
+		Server.logInfo("INFO: PROMPT AT INDEX: " + i + " IS: " + Session.g_oPromptList[i].strURL);
+	else
+		Server.logInfo("INFO: PROMPT AT INDEX: " + i + " IS: " + Session.g_oPromptList[i].nIndex);
+}
+Server.logInfo("strEndPoint: " + Session.g_oConvediaMS[Session.nIndex].strEndPoint);
+Server.logInfo("strConnectionId: " + Session.g_oConvediaMS[Session.nIndex].strConnectionId);
+Server.logInfo("strCallId: " + Session.g_oConvediaMS[Session.nIndex].strCallId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY PROMPT, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE IS: " + Session.f_nReturnCode);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="34" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1380 y=1253 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="s_nSUCCESS"/>
+        </action>
+        <action id="35" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=944 y=742 ?>
+          <!--"psAPISceGetMusicPrompts"-->
+          <function xmlns="urn:www.pactolus.com:xtml:application" name="&quot;psAPISceGetMusicPrompts&quot;" return="f_nReturnCode" external-function="0" library="" >
+            <parameter >oConference.lServiceProviderId</parameter>
+          </function>
+          <results >
+            <result name="Default" link="36" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_nReturnCode = -50
+Session.g_nConvediaIndex++;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Session.f_nReturnCode != 0)
+{
+	Server.logError("ERROR: FAIL TO GET MUSIC PROMPT, RETURN CODE: " + Session.f_nReturnCode);
+}
+
+Server.logInfo("PROMPT LIST TYPE IS: " + Session.g_strPromptType);
+Server.logInfo("NUMBER OF PROMPTS IS: " + Session.g_nNumberOfPrompts);
+
+for (var i = 0; i < Session.s_nMaxMusicPrompts; i++)
+{
+	if (Session.g_strPromptType == "U")
+		Server.logInfo("INFO: PROMPT AT INDEX: " + i + " IS: " + Session.g_oPromptList[i].strURL);
+	else
+		Server.logInfo("INFO: PROMPT AT INDEX: " + i + " IS: " + Session.g_oPromptList[i].nIndex);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="36" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1167 y=741 ?>
+          <!--success?-->
+          <results >
+            <result name="Default" link="54" stubbed="0"/>
+            <result name="success?" link="51" stubbed="0" >f_nReturnCode == s_nSUCCESS
+AND g_nNumberOfPrompts &gt; 0</result>
+          </results>
+        </action>
+        <action id="50" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1687 y=993 ?>
+          <!--Play music URL-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oConvediaMS[nIndex].strConnectionId" endpoint="g_oConvediaMS[nIndex].strEndPoint" callid="g_oConvediaMS[nIndex].strCallId" repeat="-1" timeout="s_nTIMEOUT" ms-type="oMS.strType" returns="f_nReturnCode" start-play="1" interrupt="0" return-immediate="1" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="url" >g_oPromptList[0].strURL</audio>
+            <audio type="url" >g_oPromptList[1].strURL</audio>
+            <audio type="url" >g_oPromptList[2].strURL</audio>
+            <audio type="url" >g_oPromptList[3].strURL</audio>
+            <audio type="url" >g_oPromptList[4].strURL</audio>
+          </play>
+          <results >
+            <result name="Default" link="53" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("PLAY MUSIC URL");
+Server.logInfo("PROMPT LIST TYPE IS: " + Session.g_strPromptType);
+Server.logInfo("NUMBER OF PROMPTS IS: " + Session.g_nNumberOfPrompts);
+
+for (var i = 0; i < Session.s_nMaxMusicPrompts; i++)
+{
+	if (Session.g_strPromptType == "U")
+		Server.logInfo("INFO: PROMPT AT INDEX: " + i + " IS: " + Session.g_oPromptList[i].strURL);
+	else
+		Server.logInfo("INFO: PROMPT AT INDEX: " + i + " IS: " + Session.g_oPromptList[i].nIndex);
+}
+Server.logInfo("strEndPoint: " + Session.g_oConvediaMS[Session.nIndex].strEndPoint);
+Server.logInfo("strConnectionId: " + Session.g_oConvediaMS[Session.nIndex].strConnectionId);
+Server.logInfo("strCallId: " + Session.g_oConvediaMS[Session.nIndex].strCallId);
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY PROMPT, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE IS: " + Session.f_nReturnCode);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="51" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1432 y=934 ?>
+          <!--URL or Index-->
+          <results >
+            <result name="Default" link="52" stubbed="0"/>
+            <result name="g_strPromptType==&quot;U&quot;" link="50" stubbed="0" >g_strPromptType match "U"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[//set unuse prompt to 100 ms silence
+
+for (var i = Session.g_nNumberOfPrompts; i < Session.s_nMaxMusicPrompts; i++)
+{
+	Session.g_oPromptList[i].strURL = "file://99";
+	Session.g_oPromptList[i].nIndex = 99;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="52" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1685 y=837 ?>
+          <!--Play music Index-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oConvediaMS[nIndex].strConnectionId" endpoint="g_oConvediaMS[nIndex].strEndPoint" callid="g_oConvediaMS[nIndex].strCallId" repeat="-1" timeout="s_nTIMEOUT" ms-type="oMS.strType" returns="f_nReturnCode" start-play="1" interrupt="0" return-immediate="1" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >5</audio>
+            <audio type="index" >g_oPromptList[0].nIndex</audio>
+            <audio type="index" >g_oPromptList[1].nIndex</audio>
+            <audio type="index" >g_oPromptList[2].nIndex</audio>
+            <audio type="index" >g_oPromptList[3].nIndex</audio>
+            <audio type="index" >g_oPromptList[4].nIndex</audio>
+            <audio type="silence" >5</audio>
+          </play>
+          <results >
+            <result name="Default" link="53" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("PLAY MUSIC INDEX");
+Server.logInfo("PROMPT LIST TYPE IS: " + Session.g_strPromptType);
+Server.logInfo("NUMBER OF PROMPTS IS: " + Session.g_nNumberOfPrompts);
+
+for (var i = 0; i < Session.s_nMaxMusicPrompts; i++)
+{
+	if (Session.g_strPromptType == "U")
+		Server.logInfo("INFO: PROMPT AT INDEX: " + i + " IS: " + Session.g_oPromptList[i].strURL);
+	else
+		Server.logInfo("INFO: PROMPT AT INDEX: " + i + " IS: " + Session.g_oPromptList[i].nIndex);
+}
+Server.logInfo("strEndPoint: " + Session.g_oConvediaMS[Session.nIndex].strEndPoint);
+Server.logInfo("strConnectionId: " + Session.g_oConvediaMS[Session.nIndex].strConnectionId);
+Server.logInfo("strCallId: " + Session.g_oConvediaMS[Session.nIndex].strCallId);
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY PROMPT, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE IS: " + Session.f_nReturnCode);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="53" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1939 y=996 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="s_nSUCCESS"/>
+        </action>
+        <action id="54" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1417 y=734 ?>
+          <!--Play music-->
+          <play xmlns="urn:www.pactolus.com:xtml:media" connection-id="g_oConvediaMS[nIndex].strConnectionId" endpoint="g_oConvediaMS[nIndex].strEndPoint" callid="g_oConvediaMS[nIndex].strCallId" repeat="-1" timeout="s_nTIMEOUT" ms-type="oMS.strType" returns="f_nReturnCode" start-play="1" interrupt="0" return-immediate="1" digit-map="" language="g_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="silence" >5</audio>
+            <audio type="index" >904</audio>
+            <audio type="silence" >5</audio>
+          </play>
+          <results >
+            <result name="Default" link="53" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: FAIL TO GET MUSIC PROMPT, PLAY DEFAULT PROMPT 904");
+Server.logInfo("strEndPoint: " + Session.g_oConvediaMS[Session.nIndex].strEndPoint);
+Server.logInfo("strConnectionId: " + Session.g_oConvediaMS[Session.nIndex].strConnectionId);
+Server.logInfo("strCallId: " + Session.g_oConvediaMS[Session.nIndex].strCallId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO PLAY PROMPT, EXIT ON: " + Result.name);
+	Server.logError("ERROR: RETURN CODE IS: " + Session.f_nReturnCode);
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnTimer" start="6" event="OnTimer" returns="void" >
+      <parameters >
+        <parameter name="nTimerId" type="i4" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nCounter" type="i4" >0</var>
+        <var name="f_bSendForceDisconnect" type="boolean" >0</var>
+      </local-vars>
+      <actions >
+        <action id="6" plug-in="Pactolus.Branch.1" ><?xtml-editor x=103 y=476 ?>
+          <!--what timer?-->
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+            <result name="clean up timer?" link="1" stubbed="0" >nTimerId == g_lCleanUpTimerId</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: OnTimer");
+js_disable_event();
+
+Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=350 y=466 ?>
+          <!--clean up party-->
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="force disconect == true?" link="4" stubbed="0" >f_bSendForceDisconnect == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("f_nCounter is: " + Session.f_nCounter);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+var currentTime = Server.getUTCTime();
+Server.logInfo("Session id is: " + Session.g_oParty[Session.f_nCounter].strSessionId);
+Server.logInfo("Session time is: " + Session.g_oParty[Session.f_nCounter].lSessionTime);
+Server.logInfo("currentTime is: " + currentTime);
+Server.logInfo("MAX_MOH_DURATION is: " + Session.s_nMAX_MOH_DURATION);
+
+
+if ( (Session.g_oParty[Session.f_nCounter].strSessionId.length > 0) && (currentTime - Session.g_oParty[Session.f_nCounter].lSessionTime) >= Session.s_nMAX_MOH_DURATION )
+{
+	Server.logInfo("TIME TO FORCE DISCONNECT");
+	Session.f_bSendForceDisconnect = true;
+}
+else
+{
+	Server.logInfo("NOT TIME TO FORCE DISCONNECT");
+	Session.f_bSendForceDisconnect = false;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.Timer.1" ><?xtml-editor x=1053 y=563 ?>
+          <!--set timer to clean up-->
+          <timer xmlns="urn:www.pactolus.com:xtml:application" start="1" id="g_lCleanUpTimerId" duration="s_nCLEAN_UP_TIMER"/>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("f_nCounter is: " + Session.f_nCounter);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1300 y=560 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_enable_event();]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=580 y=582 ?>
+          <!--FORCE DISCONNECT-->
+          <SOAP xmlns="urn:www.pactolus.com:xtml:communication" destination-ip="" transaction="" message-name="s_strForceDisconnect" destination-port="" destination-type="3" destination-session="g_oParty[f_nCounter].strSessionId" waiting-session-selected="" xml-namespace=""/>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("INFO: SENDING FORCE DISCONNECT TO Id is: " + Session.g_oParty[Session.f_nCounter].strSessionId);]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.Branch.1" ><?xtml-editor x=824 y=563 ?>
+          <!--more to go through?-->
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+            <result name="counter &gt;= party index?" link="2" stubbed="0" >f_nCounter &gt;= g_nPartyIndex</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_nCounter++;]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=587 y=325 ?>
+          <return xmlns="urn:www.pactolus.com:xtml:application" value=""/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_enable_event();]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.Timer.1" ><?xtml-editor x=337 y=321 ?>
+          <!--test timer-->
+          <timer xmlns="urn:www.pactolus.com:xtml:application" start="1" id="g_lTestTimerId" duration="g_nTestTime"/>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Conference index is: " + Session.g_nConferenceIndex);
+Server.logInfo("Party index is: " + Session.g_nPartyIndex);
+
+Server.logInfo("oConvediaMS length is: " + Session.g_oConvediaMS.length);
+Server.logInfo("oConference length is: " + Session.g_oConference.length);
+Server.logInfo("oMS length is: " + Session.g_oMS.length);
+Server.logInfo("oParty length is: " + Session.g_oParty.length);
+
+if (Session.g_nConferenceIndex < 0)
+{
+	Server.logError("ERROR: CONFERENCE INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+if (Session.g_nPartyIndex < 0)
+{
+	Server.logError("ERROR: PARTY INDEX SHOULD NOT BE LESS THAN ZERO");
+}
+
+var currentNbrOfConference = 0;
+var currentNbrOfParty = 0;
+for (var confIndex = 0; confIndex <= Session.g_nConferenceIndex; confIndex++)
+{
+	if (Session.g_oConference[confIndex].lId > 0)
+	{
+		Server.logInfo("CONFERENCE Id: " + Session.g_oConference[confIndex].lId);
+		Server.logInfo("SERVICE PROVIDEER Id: " + Session.g_oConference[confIndex].lServiceProviderId);
+		currentNbrOfConference++;
+	}
+}
+for (var partyIndex = 0; partyIndex < Session.g_nPartyIndex; partyIndex++)
+{
+	if (Session.g_oParty[partyIndex].lId > 0)
+	{
+		Server.logInfo("PARTY Id: " + Session.g_oParty[partyIndex].lId);
+		Server.logInfo("SESSION Id: " + Session.g_oParty[partyIndex].strSessionId);
+		currentNbrOfParty++;
+	}
+}
+Server.logInfo("CURRENT NUMBER OF CONFERENCE: " + currentNbrOfConference);
+Server.logInfo("CURRENT NUMBER OF PARTY: " + currentNbrOfParty);]]></script>
+          </scripts>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="83" y-coord="59" width="423" height="98" text="Loop through party object array,  any one with time &gt;= 2 hours, send FORCE DISCONNECT to that session.
+Expect that session to disconnect from conference and send MOH message DisconnectFromMusicRequest" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="psAPISceGetMusicPrompts" start="3" event="psAPISceGetMusicPrompts" returns="i4" >
+      <parameters >
+        <parameter name="lServiceProviderId" type="i8"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >-50</var>
+      </local-vars>
+      <actions >
+        <action id="3" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=226 y=220 ?>
+          <!--"getMusicPrompts"-->
+          <java xmlns="urn:www.pactolus.com:xtml:application" class="&quot;com.pactolus.psAPISceMisc&quot;" method="&quot;getMusicPrompts&quot;" timeout="s_nTIMEOUT" return="" method-return-var="f_nReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >g_strPlatformSessionId</parameter>
+            <parameter type="in" var-type="unknown" >s_strDBName</parameter>
+            <parameter type="in" var-type="unknown" >lServiceProviderId</parameter>
+            <parameter type="inout" var-type="unknown" >g_nNumberOfPrompts</parameter>
+            <parameter type="inout" var-type="unknown" >g_strPromptType</parameter>
+            <parameter type="inout" var-type="unknown" >g_oPromptList[0].strURL</parameter>
+            <parameter type="inout" var-type="unknown" >g_oPromptList[0].nIndex</parameter>
+            <parameter type="inout" var-type="unknown" >g_oPromptList[1].strURL</parameter>
+            <parameter type="inout" var-type="unknown" >g_oPromptList[1].nIndex</parameter>
+            <parameter type="inout" var-type="unknown" >g_oPromptList[2].strURL</parameter>
+            <parameter type="inout" var-type="unknown" >g_oPromptList[2].nIndex</parameter>
+            <parameter type="inout" var-type="unknown" >g_oPromptList[3].strURL</parameter>
+            <parameter type="inout" var-type="unknown" >g_oPromptList[3].nIndex</parameter>
+            <parameter type="inout" var-type="unknown" >g_oPromptList[4].strURL</parameter>
+            <parameter type="inout" var-type="unknown" >g_oPromptList[4].nIndex</parameter>
+          </java>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="Success" link="2" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(Session._sessionId + "     CURRENTLY IN FUNCTION: psAPISceGetMusicPrompt");
+for (var i = 0; i < Session.s_nMaxMusicPrompts; i++)
+{
+	Session.g_oPromptList[i].strURL = "file://99";
+	Session.g_oPromptList[i].nIndex = 99;
+}
+Server.logInfo("INFO: ********JAVA CALLING psAPISceMisc.getMusicPrompts *********");
+Server.logInfo(" SESSION Id: " + Session.g_strPlatformSessionId);
+Server.logInfo(" DB NAME: " + Session.s_strDBName);
+Server.logInfo(" SERVICE PROVIDER Id: " + Session.lServiceProviderId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("INFO: ********** iJavaReturnCode " + Session.f_nReturnCode);
+Server.logInfo("PROMPT LIST TYPE IS: " + Session.g_strPromptType);
+Server.logInfo("NUMBER OF PROMPTS IS: " + Session.g_nNumberOfPrompts);
+for (var i = 0; i < Session.s_nMaxMusicPrompts; i++)
+{
+	if (Session.g_strPromptType == "U")
+		Server.logInfo("INFO: PROMPT AT INDEX: " + i + " IS: " + Session.g_oPromptList[i].strURL);
+	else
+		Server.logInfo("INFO: PROMPT AT INDEX: " + i + " IS: " + Session.g_oPromptList[i].nIndex);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=481 y=178 ?>
+          <!--FAILURE-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="s_nFAILURE"/>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=497 y=362 ?>
+          <!--return code from java-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nReturnCode"/>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>]]></script>
+  <properties >
+    <property key="default" value="D:/Prompts/pactolus/english/vox/pcs_english.vox"/>
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value="../Libs"/>
+    <property key="library-modules" value="lib_callcontrol.xml; lib_mediaserver.xml;lib_utils.xml"/>
+    <property key="library-path" value="../Libs"/>
+  </properties>
+  <application-version >
+    <revision >$Id: music_on_hold.xml,v 1.49 2007/05/21 15:48:36 hlam Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

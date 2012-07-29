@@ -1,0 +1,441 @@
+<?xml version="1.0"?>
+<xtml version="1.0" >
+  <global-handlers/>
+  <functions >
+    <function name="MsgBeginRequestCSR" start="1" event="MsgBeginRequestCSR" returns="i4" >
+      <parameters >
+        <parameter name="p_oAPI" type="object" pass="byref"/>
+        <parameter name="p_oACD" type="object" pass="byref"/>
+        <parameter name="p_oSUB" type="object" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nFAILURE" type="i4" >-1</var>
+        <var name="strZeroTransactionId" type="string" >0</var>
+        <var name="strCCGeneratedPassCode" type="string" ></var>
+        <var name="nInvalidConferenceCode" type="i4" >0</var>
+        <var name="strInvalidConferenceMsg" type="string" ></var>
+        <var name="strReservationCode" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=26 y=79 ?>
+          <!--BeginRequestCSR-->
+          <SOAP destination-ip="p_oACD.strACDControllerIP" transaction="strZeroTransactionId" message-name="&quot;BeginRequestCSR&quot;" destination-port="p_oACD.nACDControllerPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;RequestId&quot;" value="p_oACD.lCSRRequestId"/>
+            <parameter tag="&quot;RequestType&quot;" value="p_oACD.nCSRRouteReasonCode"/>
+            <parameter tag="&quot;RequestTypeName&quot;" value="p_oACD.strCSRRequestTypeName"/>
+            <parameter tag="&quot;LanguageId&quot;" value="p_oACD.lCSRRequestLanguageId"/>
+            <parameter tag="&quot;Language&quot;" value="p_oACD.strCSRRequestLanguageName"/>
+            <parameter tag="&quot;OfferingId&quot;" value="p_oSUB.nPrimaryOfferingId"/>
+            <parameter tag="&quot;OfferingName&quot;" value="p_oACD.strCSRRequestOfferingName"/>
+            <parameter tag="&quot;ServiceId&quot;" value="p_oSUB.nServiceId"/>
+            <parameter tag="&quot;ServiceName&quot;" value="p_oACD.strCSRRequestServiceName"/>
+            <parameter tag="&quot;SkillId&quot;" value="p_oACD.lCSRRequestSkillId"/>
+            <parameter tag="&quot;SkillName&quot;" value="p_oACD.strCSRRequestSkillName"/>
+            <parameter tag="&quot;AccessNumber&quot;" value="p_oAPI.strAccessNumber"/>
+            <parameter tag="&quot;ConferenceEventId&quot;" value="p_oAPI.strConfEventId"/>
+            <parameter tag="&quot;ConferenceScheduleId&quot;" value="p_oAPI.strConfScheduleId"/>
+            <parameter tag="&quot;ServiceProviderId&quot;" value="p_oAPI.lServiceProviderId"/>
+            <parameter tag="&quot;ServiceProviderName&quot;" value="p_oACD.strCSRServiceProviderName"/>
+            <parameter tag="&quot;ConferenceEndPoint&quot;" value="p_oACD.strCSRRequestEndPoint"/>
+            <parameter tag="&quot;SoapAgentPort&quot;" value="p_oACD.nSoapPort"/>
+            <parameter tag="&quot;ConfModPasscode&quot;" value="p_oSUB.strModPassCode"/>
+            <parameter tag="&quot;SubscriberAccount&quot;" value="p_oSUB.strAccountNumber"/>
+            <parameter tag="&quot;SubscriberFirstName&quot;" value="p_oSUB.strCallerFirstName"/>
+            <parameter tag="&quot;SubscriberLastName&quot;" value="p_oSUB.strCallerLastName"/>
+            <parameter tag="&quot;GroupId&quot;" value="p_oACD.lCSRRequestGroupId"/>
+            <parameter tag="&quot;GroupName&quot;" value="p_oACD.strCSRRequestGroupName"/>
+            <parameter tag="&quot;SubscriberPin&quot;" value="p_oSUB.strUserPin"/>
+            <parameter tag="&quot;RequestorANI&quot;" value="p_oAPI.strOriginationNumber"/>
+            <parameter tag="&quot;AccessNumberType&quot;" value="p_oAPI.nAccessNumberType"/>
+            <parameter tag="&quot;ConferenceStartTime&quot;" value="p_oAPI.strConfStartTime"/>
+            <parameter tag="&quot;AutoAssign&quot;" value="p_oAPI.strAutoAssign"/>
+            <parameter tag="&quot;Passcode&quot;" value="strCCGeneratedPassCode"/>
+            <parameter tag="&quot;reservationCode&quot;" value="strReservationCode"/>
+            <parameter tag="&quot;invalidConferenceCode&quot;" value="nInvalidConferenceCode"/>
+            <parameter tag="&quot;invalidConferenceMessage&quot;" value="strInvalidConferenceMsg"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oACD.strTransactionId = 0;
+]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=282 y=56 ?>
+          <!--f_nFAILURE-->
+          <return value="f_nFAILURE"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: FAIL TO SEND BEGIN REQUEST CSR");
+Server.logError("ERROR: ACD CONTROLLER IP: " + Session.p_oACD.strACDControllerIP);
+Server.logError("ERROR: ACD CONTROLLER PORT: " + Session.p_oACD.nACDControllerPort);
+Server.logError("ERROR: ACD TRANSACTION Id: " + Session.p_oACD.strTransactionId);]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=298 y=226 ?>
+          <!--0-->
+          <return value="0"/>
+        </action>
+      </actions>
+    </function>
+    <function name="MsgCSREndAssignmentResponse" start="1" event="MsgCSREndAssignmentResponse" returns="i4" >
+      <parameters >
+        <parameter name="p_oACD" type="object" pass="byref"/>
+        <parameter name="p_nRETURN_CODE" type="i4"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nSUCCES" type="i4" >0</var>
+        <var name="f_nFAILURE" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=92 y=141 ?>
+          <!--CSREndAssignmentResponse-->
+          <SOAP destination-ip="p_oACD.strACDControllerIP" transaction="p_oACD.strTransactionId" message-name="&quot;CSREndAssignmentResponse&quot;" destination-port="p_oACD.nACDControllerPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;returnCode&quot;" value="f_nSUCCES"/>
+            <parameter tag="&quot;reason&quot;" value="p_oACD.nReturnReasonCode"/>
+            <parameter tag="&quot;returnMsg&quot;" value="p_oACD.strReturnMsg"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND CSREndAssignmentResponse");
+	Server.logError("ERROR: CONTROLLER IP: " + Session.p_oACD.strACDControllerIP);
+	Server.logError("ERROR: CONTROLLER PORT: " + Session.p_oACD.nACDControllerPort);
+	Server.logError("ERROR: TRANSACTION Id: " + Session.p_oACD.strTransactionId);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=372 y=134 ?>
+          <!--f_nFAILURE-->
+          <return value="f_nFAILURE"/>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=373 y=255 ?>
+          <!--0-->
+          <return value="0"/>
+        </action>
+      </actions>
+    </function>
+    <function name="MsgEndRequestCSR" start="1" event="MsgEndRequestCSR" returns="i4" >
+      <parameters >
+        <parameter name="p_oACD" type="object" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nFAILURE" type="i4" >-1</var>
+        <var name="strZeroTransactionId" type="string" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=89 y=83 ?>
+          <!--EndRequestCSR-->
+          <SOAP destination-ip="p_oACD.strACDControllerIP" transaction="strZeroTransactionId" message-name="&quot;EndRequestCSR&quot;" destination-port="p_oACD.nACDControllerPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;RequestId&quot;" value="p_oACD.lCSRRequestId"/>
+            <parameter tag="&quot;AssignmentId&quot;" value="p_oACD.lCSRAssignmentId"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=291 y=52 ?>
+          <!--f_nFAILURE-->
+          <return value="f_nFAILURE"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: FAIL TO SEND ACD END REQUEST CSR");
+Server.logError("ERROR: ACD CONTROLLER IP: " + Session.p_oACD.strACDControllerIP);
+Server.logError("ERROR: ACD CONTROLLER PORT: " + Session.p_oACD.nACDControllerPort);
+Server.logError("ERROR: ACD TRANSACTION Id: " + Session.p_oACD.strTransactionId);]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=308 y=215 ?>
+          <!--0-->
+          <return value="0"/>
+        </action>
+      </actions>
+    </function>
+    <function name="MsgConnectToMusic" start="1" event="MsgConnectToMusic" returns="i4" >
+      <parameters >
+        <parameter name="p_strMOHSessionId" type="string" pass="byref"/>
+        <parameter name="p_strSessionId" type="string"/>
+        <parameter name="p_lServiceProviderId" type="i8"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nFAILURE" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=90 y=120 ?>
+          <!--ConnectToMusic-->
+          <SOAP destination-ip="" transaction="" message-name="&quot;ConnectToMusic&quot;" destination-port="" destination-type="1" destination-session="" waiting-session-selected="p_strMOHSessionId" >
+            <parameter tag="&quot;session_id&quot;" value="p_strSessionId"/>
+            <parameter tag="&quot;service_provider_id&quot;" value="p_lServiceProviderId"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("RECEIVE TO MSG CONNECT TO MOH: ");
+Server.logInfo("MOH session id: " + Session.p_strMOHSessionId);
+Server.logInfo("Platform session id: " + Session.p_strSessionId);
+Server.logInfo("Service Provider id: " + Session.p_lServiceProviderId);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("SENT TO MSG CONNECT TO MOH APP: ");
+Server.logInfo("MOH session id: " + Session.p_strMOHSessionId);
+Server.logInfo("Platform session id: " + Session.p_strSessionId);
+Server.logInfo("Service Provider id: " + Session.p_lServiceProviderId);]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=319 y=109 ?>
+          <!--f_nFAILURE-->
+          <return value="f_nFAILURE"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: FAIL TO SEND CONNECT TO MUSIC ON HOLD");
+Server.logError("ERROR: SESSION SELECTED: " + Session.p_strMOHSessionId);]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=337 y=209 ?>
+          <!--0-->
+          <return value="0"/>
+        </action>
+      </actions>
+    </function>
+    <function name="MsgDisconnectFromMusic" start="1" event="MsgDisconnectFromMusic" returns="i4" >
+      <parameters >
+        <parameter name="p_strMOHSessionId" type="string" pass="byref"/>
+        <parameter name="p_nMOHConfIndex" type="i4"/>
+        <parameter name="p_strSessionId" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nFAILURE" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=20 y=20 ?>
+          <!--send DisconnectToMusic-->
+          <SOAP destination-ip="" transaction="" message-name="&quot;DisconnectFromMusic&quot;" destination-port="" destination-type="3" destination-session="p_strMOHSessionId" waiting-session-selected="" >
+            <parameter tag="&quot;conference_index&quot;" value="p_nMOHConfIndex"/>
+            <parameter tag="&quot;session_id&quot;" value="p_strSessionId"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=326 y=68 ?>
+          <!--f_nFAILURE-->
+          <return value="f_nFAILURE"/>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=273 y=201 ?>
+          <!--0-->
+          <return value="0"/>
+        </action>
+      </actions>
+    </function>
+    <function name="MsgCSROutdialBLegResponse" start="1" event="MsgCSROutdialBLegResponse" returns="i4" >
+      <parameters >
+        <parameter name="p_oACD" type="object"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nFAILURE" type="i4" >-1</var>
+        <var name="f_nSUCCESS" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=222 y=165 ?>
+          <!--"CSROutdialBLegResponse"-->
+          <SOAP destination-ip="p_oACD.strACDControllerIP" transaction="p_oACD.strTransactionId" message-name="&quot;CSROutdialBLegResponse&quot;" destination-port="p_oACD.nACDControllerPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;returnCode&quot;" value="p_oACD.nReturnReasonCode"/>
+            <parameter tag="&quot;returnMsg&quot;" value="p_oACD.strReturnMsg"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND CSROutdialBLegResponse");
+	Server.logError("ERROR: CONTROLLER IP: " + Session.p_oACD.strACDControllerIP);
+	Server.logError("ERROR: CONTROLLER PORT: " + Session.p_oACD.nACDControllerPort);
+	Server.logError("ERROR: TRANSACTION Id: " + Session.p_oACD.strTransactionId);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=502 y=158 ?>
+          <!---1-->
+          <return value="f_nFAILURE"/>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=517 y=278 ?>
+          <!--0-->
+          <return value="f_nSUCCESS"/>
+        </action>
+      </actions>
+    </function>
+    <function name="MsgCSRCancelOutdialBLeg" start="1" event="MsgCSRCancelOutdialBLeg" returns="i4" >
+      <parameters >
+        <parameter name="p_oACD" type="object" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nFAILURE" type="i4" >-1</var>
+        <var name="f_nSUCCESS" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=212 y=171 ?>
+          <!--"CSRCancelOutdialBLegResponse"-->
+          <SOAP destination-ip="p_oACD.strACDControllerIP" transaction="p_oACD.strTransactionId" message-name="&quot;CSRCancelOutdialToBLegResponse&quot;" destination-port="p_oACD.nACDControllerPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;returnCode&quot;" value="p_oACD.nReturnReasonCode"/>
+            <parameter tag="&quot;returnMsg&quot;" value="p_oACD.strReturnMsg"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND CSRCancelOutdialBLegResponse");
+	Server.logError("ERROR: CONTROLLER IP: " + Session.p_oACD.strACDControllerIP);
+	Server.logError("ERROR: CONTROLLER PORT: " + Session.p_oACD.nACDControllerPort);
+	Server.logError("ERROR: TRANSACTION Id: " + Session.p_oACD.strTransactionId);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=480 y=146 ?>
+          <!--f_nFAILURE-->
+          <return value="f_nFAILURE"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: FAIL TO SEND DISCONNECT TO MUSIC ON HOLD");
+Server.logError("ERROR: TO SESSION: " + Session.p_strMOHSessionId);]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=496 y=269 ?>
+          <!--f_nSUCCESS-->
+          <return value="f_nSUCCESS"/>
+        </action>
+      </actions>
+    </function>
+    <function name="MsgCSRHangupBLegResponse" start="1" event="MsgCSRHangupBLegResponse" returns="i4" >
+      <parameters >
+        <parameter name="p_oACD" type="object"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nFAILURE" type="i4" >-1</var>
+        <var name="f_nSUCCESS" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=239 y=227 ?>
+          <!--"CSRCancelOutdialBLegResponse"-->
+          <SOAP destination-ip="p_oACD.strACDControllerIP" transaction="p_oACD.strTransactionId" message-name="&quot;CSRHangupBLegResponse&quot;" destination-port="p_oACD.nACDControllerPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;returnCode&quot;" value="p_oACD.nReturnReasonCode"/>
+            <parameter tag="&quot;returnMsg&quot;" value="p_oACD.strReturnMsg"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("ERROR: FAIL TO SEND CSRHangupOutdialBLegResponse");
+	Server.logError("ERROR: CONTROLLER IP: " + Session.p_oACD.strACDControllerIP);
+	Server.logError("ERROR: CONTROLLER PORT: " + Session.p_oACD.nACDControllerPort);
+	Server.logError("ERROR: TRANSACTION Id: " + Session.p_oACD.strTransactionId);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=538 y=199 ?>
+          <!--f_nFAILURE-->
+          <return value="f_nFAILURE"/>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=554 y=322 ?>
+          <!--f_nSUCCESS-->
+          <return value="f_nSUCCESS"/>
+        </action>
+      </actions>
+    </function>
+    <function name="MsgACDAuditResponse" start="2" event="" returns="i4" >
+      <parameters >
+        <parameter name="p_oAPI" type="object" pass="byref"/>
+        <parameter name="p_oACD" type="object" pass="byref"/>
+        <parameter name="p_oSUB" type="object" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="strCCGeneratedPassCode" type="string" ></var>
+        <var name="nInvalidConferenceCode" type="i4" >0</var>
+        <var name="strInvalidConferenceMsg" type="string" ></var>
+        <var name="strZeroTransactionId" type="string" ></var>
+        <var name="nFailure" type="i4" >-1</var>
+      </local-vars>
+      <actions >
+        <action id="2" plug-in="Pactolus.SOAPMessage.1" ><?xtml-editor x=53 y=165 ?>
+          <!--ACDAuditResponse-->
+          <SOAP destination-ip="p_oACD.strACDControllerIP" transaction="strZeroTransactionId" message-name="&quot;ACDAuditResponse&quot;" destination-port="p_oACD.nACDControllerPort" destination-type="4" destination-session="" waiting-session-selected="" >
+            <parameter tag="&quot;RequestId&quot;" value="p_oACD.lCSRRequestId"/>
+            <parameter tag="&quot;RequestType&quot;" value="p_oACD.nCSRRouteReasonCode"/>
+            <parameter tag="&quot;RequestTypeName&quot;" value="p_oACD.strCSRRequestTypeName"/>
+            <parameter tag="&quot;LanguageId&quot;" value="p_oACD.lCSRRequestLanguageId"/>
+            <parameter tag="&quot;Language&quot;" value="p_oACD.strCSRRequestLanguageName"/>
+            <parameter tag="&quot;OfferingId&quot;" value="p_oSUB.nPrimaryOfferingId"/>
+            <parameter tag="&quot;OfferingName&quot;" value="p_oACD.strCSRRequestOfferingName"/>
+            <parameter tag="&quot;ServiceId&quot;" value="p_oSUB.nServiceId"/>
+            <parameter tag="&quot;ServiceName&quot;" value="p_oACD.strCSRRequestServiceName"/>
+            <parameter tag="&quot;SkillId&quot;" value="p_oACD.lCSRRequestSkillId"/>
+            <parameter tag="&quot;SkillName&quot;" value="p_oACD.strCSRRequestSkillName"/>
+            <parameter tag="&quot;AccessNumber&quot;" value="p_oAPI.strAccessNumber"/>
+            <parameter tag="&quot;ConferenceEventId&quot;" value="p_oAPI.strConfEventId"/>
+            <parameter tag="&quot;ConferenceScheduleId&quot;" value="p_oAPI.strConfScheduleId"/>
+            <parameter tag="&quot;ServiceProviderId&quot;" value="p_oAPI.lServiceProviderId"/>
+            <parameter tag="&quot;ServiceProviderName&quot;" value="p_oACD.strCSRServiceProviderName"/>
+            <parameter tag="&quot;ConferenceEndPoint&quot;" value="p_oACD.strCSRRequestEndPoint"/>
+            <parameter tag="&quot;SoapAgentPort&quot;" value="p_oACD.nSoapPort"/>
+            <parameter tag="&quot;ConfModPasscode&quot;" value="p_oSUB.strModPassCode"/>
+            <parameter tag="&quot;SubscriberAccount&quot;" value="p_oSUB.strAccountNumber"/>
+            <parameter tag="&quot;SubscriberFirstName&quot;" value="p_oSUB.strCallerFirstName"/>
+            <parameter tag="&quot;SubscriberLastName&quot;" value="p_oSUB.strCallerLastName"/>
+            <parameter tag="&quot;GroupId&quot;" value="p_oACD.lCSRRequestGroupId"/>
+            <parameter tag="&quot;GroupName&quot;" value="p_oACD.strCSRRequestGroupName"/>
+            <parameter tag="&quot;SubscriberPin&quot;" value="p_oSUB.strUserPin"/>
+            <parameter tag="&quot;RequestorANI&quot;" value="p_oAPI.strOriginationNumber"/>
+            <parameter tag="&quot;AccessNumberType&quot;" value="p_oAPI.nAccessNumberType"/>
+            <parameter tag="&quot;ConferenceStartTime&quot;" value="p_oAPI.strConfStartTime"/>
+            <parameter tag="&quot;AutoAssign&quot;" value="p_oAPI.strAutoAssign"/>
+            <parameter tag="&quot;Passcode&quot;" value="strCCGeneratedPassCode"/>
+            <parameter tag="&quot;invalidConferenceCode&quot;" value="nInvalidConferenceCode"/>
+            <parameter tag="&quot;invalidConferenceMessage&quot;" value="strInvalidConferenceMsg"/>
+          </SOAP>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success" link="4" stubbed="0"/>
+            <result name="Error"/>
+          </results>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=349 y=84 ?>
+          <!--nFailure (-1)-->
+          <return value="nFailure"/>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=338 y=289 ?>
+          <!--0-->
+          <return value="0"/>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value=""/>
+    <property key="library-modules" value=""/>
+    <property key="library-path" value=""/>
+  </properties>
+  <application-version >
+    <revision >$Id: lib_soap.xml,v 1.24 2006/05/26 17:53:22 hlam Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

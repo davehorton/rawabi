@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<xtml version="1.0" >
+  <version sce-version="422a3" prev-sce-version="422a3" last-mod-time="Monday, November 07, 2005 16:02:15"/>
+  <global-handlers >
+    <handler event="Standard.OnSessionStart.1" function="OnSessionStart" public="0" always-on="0"/>
+  </global-handlers>
+  <global-vars >
+    <var name="g_strSessionId" type="string" ></var>
+  </global-vars>
+  <functions >
+    <function name="OnSessionStart" start="1" event="OnSessionStart" returns="void" >
+      <parameters >
+        <parameter name="strSessionId" type="string" pass="byref"/>
+        <parameter name="nIteration" type="i4" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="nRc" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=74 y=181 ?>
+          <!--expireTADevices-->
+          <java class="&quot;com.pactolus.broadband.psAPISceRegister&quot;" method="&quot;expireTADevices&quot;" timeout="10" return="" method-return-var="nRc" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_strSessionId</parameter>
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+          </java>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strSessionId = Session._sessionId ;]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.EndSession.1" ><?xtml-editor x=499 y=264 ?></action>
+        <action id="3" plug-in="Pactolus.Sleep.1" ><?xtml-editor x=302 y=182 ?>
+          <sleep duration="2"/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+          </results>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="68" y-coord="33" width="419" height="72" text="Expire all old device registrations and then exit.  This app is meant to be run periodically on a scheduled basis (e.g., via cron or similar method)." font-name="Times New Roman" size="-20" red="0" green="0" blue="0" weight="400" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+  </functions>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value=""/>
+    <property key="library-modules" value=""/>
+    <property key="library-path" value=""/>
+  </properties>
+  <application-version >
+    <revision >$Id: pcs_registrar_expire.xml,v 1.5 2006/04/18 17:00:52 kfitzgerald Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

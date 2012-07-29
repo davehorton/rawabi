@@ -1,0 +1,1828 @@
+<?xml version="1.0"?>
+<xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
+  <global-handlers/>
+  <functions >
+    <function name="OutdialParty" start="14" event="OutdialParty" returns="i4" >
+      <parameters >
+        <parameter name="oCallLegA" type="object" pass="byref"/>
+        <parameter name="oCallLegB" type="object" pass="byref"/>
+        <parameter name="lTimeStart" type="i8" pass="byref"/>
+        <parameter name="lTimeAnswered" type="i8" pass="byref"/>
+        <parameter name="strSIPStatus" type="string" pass="byref"/>
+        <parameter name="strContact" type="string"/>
+        <parameter name="p_oAPI" type="object"/>
+        <parameter name="bPlayRingbackForOutdial" type="boolean"/>
+        <parameter name="oMS" type="object"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nSUCCESS" type="i4" >0</var>
+        <var name="f_nFAILURE" type="i4" >-1</var>
+        <var name="f_nBUSY" type="i4" >2</var>
+        <var name="f_nRINGNOANSWER" type="i4" >1</var>
+        <var name="f_nDTMFINTERRUPTED" type="i4" >3</var>
+        <var name="f_nCALLEDPARTYERROR" type="i4" >-2</var>
+        <var name="f_nCALLINGPARTYERROR" type="i4" >-3</var>
+        <var name="f_nOTHERERROR" type="i4" >-4</var>
+        <var name="f_nRESOURCEUNAVAIL" type="i4" >-5</var>
+        <var name="f_nReturnCode" type="i4" >0</var>
+        <var name="f_longStartTime" type="i8" >0</var>
+        <var name="f_longStopTime" type="i8" >0</var>
+        <var name="f_strCodec" type="string" ></var>
+        <var name="strCallingNumber" type="string" ></var>
+        <var name="f_nTimeout" type="i4" >30</var>
+      </local-vars>
+      <actions >
+        <action id="14" plug-in="Pactolus.Branch.1" ><?xtml-editor x=20 y=1667 ?>
+          <!--byeA, reverse from and to-->
+          <results >
+            <result name="Default" link="12" stubbed="0"/>
+            <result name="!bReverseFromTo &amp;&amp; bUac" link="15" stubbed="0" >oCallLegA.bReverseFromTo == false
+AND oCallLegA.bUac == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo(" OBJECT A LEG INFO: ");
+js_logInfoCallLeg(Session.oCallLegA);
+
+Server.logInfo(" OBJECT B LEG INFO: ");
+js_logInfoCallLeg(Session.oCallLegB);
+
+if (Session.oCallLegA.strPrviacy == undefined || 0 == Session.oCallLegA.strPrivacy.length || Session.oCallLegA.strPrivacy == "off")
+{
+	Session.strCallingNumber = Session.oCallLegA.strCallingNumber;
+}
+else if(Session.oCallLegA.strFromUriUrlUser == "Restricted")
+{
+	Session.strCallingNumber = "Anonymous";
+}
+else
+{
+	Session.strCallingNumber = "Anonymous";
+}
+
+if("T" == Session.p_oAPI.strOutdialOperatorFlag && Session.p_oAPI.nThirdPartyOutdialTimeout > 0) {
+	Session.f_nTimeout = Session.p_oAPI.nThirdPartyOutdialTimeout;
+} else {
+	Session.f_nTimeout = Session.oCallLegB.nRingNoAnswerTime;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.Outdial.1" ><?xtml-editor x=903 y=29 ?>
+          <!--outdial to party-->
+          <Outdial xmlns="urn:www.pactolus.com:xtml:sip-cc" calling-number="strCallingNumber" called-number="oCallLegB.strCalledNumber" preferred-carrier="" codec="f_strCodec" reliable-provisional-responses="1" timeout="f_nTimeout" returns="f_nReturnCode" ms-type="" calling-connect-type="0" calling-capability="0" from="oCallLegA.strFrom" via="" ingress-gateway="oCallLegA.strRequestUri" session-timer-a="0" hold-a-first="1" interrupt-on-long-pound="0" session-timer-value-a="" telephone-events="0" rtp-request-a="0" rtp-endpoint-a="" route-callingparty="oCallLegA.strRoute" record-route-callingparty="oCallLegA.strRecordRoute" contact-callingparty="strContact" egress-gateway="oCallLegB.strRequestUri" sdp-b="oCallLegB.strContent" callid-b="oCallLegB.strCallId" cseq-b="oCallLegB.strCSeq" sip-status="strSIPStatus" to-b="oCallLegB.strTo" from-b="oCallLegB.strFrom" session-timer-b="0" session-timer-value-b="" backup-ss="oCallLegB.strBackupRequestUri" route="oCallLegB.strRoute" record-route="oCallLegB.strRecordRoute" contact="oCallLegB.strContact" rtp-request-b="0" rtp-endpoint-b="" refresher="" remote-party-id="oCallLegA.strRemotePartyId" play-ringback="0" language="" ringback-prompt="" capability="1" ringback-codec="-1" packetization-period="" calling-packetization="" connection-id="" mgcp-call-id="" ms-sdp="" endpoint="" to="oCallLegA.strTo" callid-a="oCallLegA.strCallId" cseq-a="oCallLegA.strCSeq" sdp-a="oCallLegA.strContent" >
+            <additional-parameters >
+              <p-asserted-identity >oCallLegB.strPAssertedIdentity</p-asserted-identity>
+              <diversion >oCallLegB.strDiversion</diversion>
+            </additional-parameters>
+          </Outdial>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="4" stubbed="1"/>
+            <result name="Ring no answer" link="5" stubbed="1"/>
+            <result name="Busy" link="6" stubbed="1"/>
+            <result name="Caller DTMF interrupt" link="7" stubbed="1"/>
+            <result name="Called party error" link="8" stubbed="1"/>
+            <result name="Calling party error" link="9" stubbed="1"/>
+            <result name="Other error" link="10" stubbed="1"/>
+            <result name="Resource unavailable" link="11" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.lTimeStart = Server.getUTCTime();
+Session.oCallLegB.bCurrentlyDialing = true;
+Session.oCallLegB.bAttemptedToOutdial = true;
+var curTime = new Date;
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.oCallLegB.bCurrentlyDialing = false;
+var curTime = new Date;
+Session.f_longStopTime = curTime.getTime();]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1269 y=251 ?>
+          <!--nFAILURE-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nFAILURE"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: FAIL TO SEND OUTDIAL TO PARTY,  RETURN CODE IS: " + Session.f_nReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1302 y=330 ?>
+          <!--nSUCCESS-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nSUCCESS"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.lTimeAnswered = Server.getUTCTime();
+Session.oCallLegB.bConnected = true;
+Session.oCallLegB.nSetUpTime = Session.f_longStopTime - Session.f_longStartTime;
+Server.logInfo("SUCCESS OUTDIAL PARTY");
+Server.logInfo(" AFTER OUTDIAL OBJECT A LEG INFO: ");
+js_logInfoCallLeg(Session.oCallLegA);
+
+Server.logInfo(" AFTER OUTDIAL OBJECT B LEG INFO: ");
+js_logInfoCallLeg(Session.oCallLegB);]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1337 y=399 ?>
+          <!--nRINGNOANSWER-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nRINGNOANSWER"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("OUTDIAL NO ANSWER");]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1378 y=467 ?>
+          <!--nBUSY-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nBUSY"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("OUTDIAL BUSY");]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1448 y=540 ?>
+          <!--nDTMFINTERRUPTED-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nDTMFINTERRUPTED"/>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("OUTDIAL DTMF INTERRUPTED");]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1450 y=613 ?>
+          <!--nCALLEDPARTYERROR-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nCALLEDPARTYERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("OUTDIAL CALLED PARTY ERROR");]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1441 y=681 ?>
+          <!--nCALLINGPARTYERROR-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nCALLINGPARTYERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("OUTDIAL CALLING PARTY ERROR");]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1428 y=752 ?>
+          <!--nOTHERERROR-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nOTHERERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("OUTDIAL OTHER ERROR");]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1406 y=824 ?>
+          <!--nRESOURCEUNAVAIL-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nRESOURCEUNAVAIL"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("OUTDIAL RESOURCE UNAVAILABLE");]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Pactolus.Branch.1" ><?xtml-editor x=174 y=726 ?>
+          <!--session timer enable?-->
+          <results >
+            <result name="Default" link="18" stubbed="0"/>
+            <result name="strSessionTimerFlag == &quot;T&quot;" link="20" stubbed="0" >oCallLegB.strSessionTimerFlag == "T"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if(Session.p_oAPI.strPrimaryRouteCode != "" && Session.p_oAPI.strPrimaryRouteCode != undefined) {
+	Session.oCallLegB.strCalledNumber = Session.p_oAPI.strPrimaryRouteCode + "" + Session.oCallLegB.strCalledNumber;
+}
+
+if (Session.oCallLegB.strCodec != undefined)
+{
+	Session.f_strCodec = Session.oCallLegB.strCodec;
+}
+else
+{
+	Session.f_strCodec = "PCMU";
+}]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Pactolus.Outdial.1" ><?xtml-editor x=917 y=889 ?>
+          <!--outdial to party-->
+          <Outdial xmlns="urn:www.pactolus.com:xtml:sip-cc" calling-number="strCallingNumber" called-number="oCallLegB.strCalledNumber" preferred-carrier="" codec="f_strCodec" reliable-provisional-responses="1" timeout="f_nTimeout" returns="f_nReturnCode" ms-type="" calling-connect-type="0" calling-capability="0" from="oCallLegA.strFrom" via="" ingress-gateway="oCallLegA.strRequestUri" session-timer-a="1" hold-a-first="1" interrupt-on-long-pound="0" session-timer-value-a="oCallLegA.nSessionTimer" telephone-events="0" rtp-request-a="0" rtp-endpoint-a="" route-callingparty="oCallLegA.strRoute" record-route-callingparty="oCallLegA.strRecordRoute" contact-callingparty="strContact" egress-gateway="oCallLegB.strRequestUri" sdp-b="oCallLegB.strContent" callid-b="oCallLegB.strCallId" cseq-b="oCallLegB.strCSeq" sip-status="strSIPStatus" to-b="oCallLegB.strTo" from-b="oCallLegB.strFrom" session-timer-b="1" session-timer-value-b="oCallLegB.nSessionTimer" backup-ss="oCallLegB.strBackupRequestUri" route="oCallLegB.strRoute" record-route="oCallLegB.strRecordRoute" contact="oCallLegB.strContact" rtp-request-b="0" rtp-endpoint-b="" refresher="oCallLegB.strRefresher" remote-party-id="oCallLegA.strRemotePartyId" play-ringback="0" language="" ringback-prompt="" capability="1" ringback-codec="-1" packetization-period="" calling-packetization="" connection-id="" mgcp-call-id="" ms-sdp="" endpoint="" to="oCallLegA.strTo" callid-a="oCallLegA.strCallId" cseq-a="oCallLegA.strCSeq" sdp-a="oCallLegA.strContent" >
+            <additional-parameters >
+              <p-asserted-identity >oCallLegB.strPAssertedIdentity</p-asserted-identity>
+              <diversion >oCallLegB.strDiversion</diversion>
+            </additional-parameters>
+          </Outdial>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="4" stubbed="1"/>
+            <result name="Ring no answer" link="5" stubbed="1"/>
+            <result name="Busy" link="6" stubbed="1"/>
+            <result name="Caller DTMF interrupt" link="7" stubbed="1"/>
+            <result name="Called party error" link="8" stubbed="1"/>
+            <result name="Calling party error" link="9" stubbed="1"/>
+            <result name="Other error" link="10" stubbed="1"/>
+            <result name="Resource unavailable" link="11" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.lTimeStart = Server.getUTCTime();
+Session.oCallLegB.bCurrentlyDialing = true;
+Session.oCallLegB.bAttemptedToOutdial = true;
+var curTime = new Date;
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.oCallLegB.bCurrentlyDialing = false;
+var curTime = new Date;
+Session.f_longStopTime = curTime.getTime();]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Pactolus.Branch.1" ><?xtml-editor x=184 y=2594 ?>
+          <!--session timer enable?-->
+          <results >
+            <result name="Default" link="22" stubbed="0"/>
+            <result name="strSessionTimerFlag == &quot;T&quot;" link="24" stubbed="0" >oCallLegB.strSessionTimerFlag == "T"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if(Session.p_oAPI.strPrimaryRouteCode != "" && Session.p_oAPI.strPrimaryRouteCode != undefined) {
+	Session.oCallLegB.strCalledNumber = Session.p_oAPI.strPrimaryRouteCode + "" + Session.oCallLegB.strCalledNumber;
+}
+
+if (Session.oCallLegB.strCodec != undefined)
+{
+	Session.f_strCodec = Session.oCallLegB.strCodec;
+}
+else
+{
+	Session.f_strCodec = "PCMU";
+}]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Pactolus.Outdial.1" ><?xtml-editor x=931 y=1777 ?>
+          <!--outdial to party-->
+          <Outdial xmlns="urn:www.pactolus.com:xtml:sip-cc" calling-number="strCallingNumber" called-number="oCallLegB.strCalledNumber" preferred-carrier="" codec="f_strCodec" reliable-provisional-responses="1" timeout="f_nTimeout" returns="f_nReturnCode" ms-type="" calling-connect-type="0" calling-capability="0" from="oCallLegA.strTo" via="" ingress-gateway="oCallLegA.strRequestUri" session-timer-a="0" hold-a-first="1" interrupt-on-long-pound="0" session-timer-value-a="" telephone-events="0" rtp-request-a="0" rtp-endpoint-a="" route-callingparty="oCallLegA.strRoute" record-route-callingparty="oCallLegA.strRecordRoute" contact-callingparty="strContact" egress-gateway="oCallLegB.strRequestUri" sdp-b="oCallLegB.strContent" callid-b="oCallLegB.strCallId" cseq-b="oCallLegB.strCSeq" sip-status="strSIPStatus" to-b="oCallLegB.strTo" from-b="oCallLegB.strFrom" session-timer-b="0" session-timer-value-b="" backup-ss="oCallLegB.strBackupRequestUri" route="oCallLegB.strRoute" record-route="oCallLegB.strRecordRoute" contact="oCallLegB.strContact" rtp-request-b="0" rtp-endpoint-b="" refresher="" remote-party-id="oCallLegA.strRemotePartyId" play-ringback="0" language="" ringback-prompt="" capability="1" ringback-codec="-1" packetization-period="" calling-packetization="" connection-id="" mgcp-call-id="" ms-sdp="" endpoint="" to="oCallLegA.strFrom" callid-a="oCallLegA.strCallId" cseq-a="oCallLegA.strCSeq" sdp-a="oCallLegA.strContent" >
+            <additional-parameters >
+              <p-asserted-identity >oCallLegB.strPAssertedIdentity</p-asserted-identity>
+              <diversion >oCallLegB.strDiversion</diversion>
+            </additional-parameters>
+          </Outdial>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="4" stubbed="1"/>
+            <result name="Ring no answer" link="5" stubbed="1"/>
+            <result name="Busy" link="6" stubbed="1"/>
+            <result name="Caller DTMF interrupt" link="7" stubbed="1"/>
+            <result name="Called party error" link="8" stubbed="1"/>
+            <result name="Calling party error" link="9" stubbed="1"/>
+            <result name="Other error" link="10" stubbed="1"/>
+            <result name="Resource unavailable" link="11" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.lTimeStart = Server.getUTCTime();
+Session.oCallLegB.bCurrentlyDialing = true;
+Session.oCallLegB.bAttemptedToOutdial = true;
+var curTime = new Date;
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.oCallLegB.bCurrentlyDialing = false;
+var curTime = new Date;
+Session.f_longStopTime = curTime.getTime();]]></script>
+          </scripts>
+        </action>
+        <action id="17" plug-in="Pactolus.Outdial.1" ><?xtml-editor x=926 y=2650 ?>
+          <!--outdial to party-->
+          <Outdial xmlns="urn:www.pactolus.com:xtml:sip-cc" calling-number="strCallingNumber" called-number="oCallLegB.strCalledNumber" preferred-carrier="" codec="f_strCodec" reliable-provisional-responses="1" timeout="f_nTimeout" returns="f_nReturnCode" ms-type="" calling-connect-type="0" calling-capability="0" from="oCallLegA.strTo" via="" ingress-gateway="oCallLegA.strRequestUri" session-timer-a="1" hold-a-first="1" interrupt-on-long-pound="0" session-timer-value-a="oCallLegA.nSessionTimer" telephone-events="0" rtp-request-a="0" rtp-endpoint-a="" route-callingparty="oCallLegA.strRoute" record-route-callingparty="oCallLegA.strRecordRoute" contact-callingparty="strContact" egress-gateway="oCallLegB.strRequestUri" sdp-b="oCallLegB.strContent" callid-b="oCallLegB.strCallId" cseq-b="oCallLegB.strCSeq" sip-status="strSIPStatus" to-b="oCallLegB.strTo" from-b="oCallLegB.strFrom" session-timer-b="1" session-timer-value-b="oCallLegB.nSessionTimer" backup-ss="oCallLegB.strBackupRequestUri" route="oCallLegB.strRoute" record-route="oCallLegB.strRecordRoute" contact="oCallLegB.strContact" rtp-request-b="0" rtp-endpoint-b="" refresher="oCallLegB.strRefresher" remote-party-id="oCallLegA.strRemotePartyId" play-ringback="0" language="" ringback-prompt="" capability="1" ringback-codec="-1" packetization-period="" calling-packetization="" connection-id="" mgcp-call-id="" ms-sdp="" endpoint="" to="oCallLegA.strFrom" callid-a="oCallLegA.strCallId" cseq-a="oCallLegA.strCSeq" sdp-a="oCallLegA.strContent" >
+            <additional-parameters >
+              <p-asserted-identity >oCallLegB.strPAssertedIdentity</p-asserted-identity>
+              <diversion >oCallLegB.strDiversion</diversion>
+            </additional-parameters>
+          </Outdial>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="4" stubbed="1"/>
+            <result name="Ring no answer" link="5" stubbed="1"/>
+            <result name="Busy" link="6" stubbed="1"/>
+            <result name="Caller DTMF interrupt" link="7" stubbed="1"/>
+            <result name="Called party error" link="8" stubbed="1"/>
+            <result name="Calling party error" link="9" stubbed="1"/>
+            <result name="Other error" link="10" stubbed="1"/>
+            <result name="Resource unavailable" link="11" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.lTimeStart = Server.getUTCTime();
+Session.oCallLegB.bCurrentlyDialing = true;
+Session.oCallLegB.bAttemptedToOutdial = true;
+var curTime = new Date;
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.oCallLegB.bCurrentlyDialing = false;
+var curTime = new Date;
+Session.f_longStopTime = curTime.getTime();]]></script>
+          </scripts>
+        </action>
+        <action id="18" plug-in="Pactolus.Branch.1" ><?xtml-editor x=378 y=329 ?>
+          <results >
+            <result name="Default" link="40" stubbed="0"/>
+            <result name="bPlayRingbackForOutdial" link="38" stubbed="0" >bPlayRingbackForOutdial == true</result>
+          </results>
+        </action>
+        <action id="19" plug-in="Pactolus.Outdial.1" ><?xtml-editor x=911 y=451 ?>
+          <!--outdial to party-->
+          <Outdial xmlns="urn:www.pactolus.com:xtml:sip-cc" calling-number="strCallingNumber" called-number="oCallLegB.strCalledNumber" preferred-carrier="" codec="f_strCodec" reliable-provisional-responses="1" timeout="f_nTimeout" returns="f_nReturnCode" ms-type="oMS.strType" calling-connect-type="0" calling-capability="0" from="oCallLegA.strFrom" via="" ingress-gateway="oCallLegA.strRequestUri" session-timer-a="0" hold-a-first="1" interrupt-on-long-pound="0" session-timer-value-a="" telephone-events="0" rtp-request-a="0" rtp-endpoint-a="" route-callingparty="oCallLegA.strRoute" record-route-callingparty="oCallLegA.strRecordRoute" contact-callingparty="strContact" egress-gateway="oCallLegB.strRequestUri" sdp-b="oCallLegB.strContent" callid-b="oCallLegB.strCallId" cseq-b="oCallLegB.strCSeq" sip-status="strSIPStatus" to-b="oCallLegB.strTo" from-b="oCallLegB.strFrom" session-timer-b="0" session-timer-value-b="" backup-ss="oCallLegB.strBackupRequestUri" route="oCallLegB.strRoute" record-route="oCallLegB.strRecordRoute" contact="oCallLegB.strContact" rtp-request-b="0" rtp-endpoint-b="" refresher="" remote-party-id="oCallLegA.strRemotePartyId" play-ringback="1" language="p_oAPI.strLanguage" ringback-prompt="p_oAPI.nPromptRingback" capability="0" ringback-codec="-1" packetization-period="oMS.nPacketizationPeriod" calling-packetization="" connection-id="" mgcp-call-id="" ms-sdp="" endpoint="" to="oCallLegA.strTo" callid-a="oCallLegA.strCallId" cseq-a="oCallLegA.strCSeq" sdp-a="oCallLegA.strContent" >
+            <additional-parameters >
+              <p-asserted-identity >oCallLegB.strPAssertedIdentity</p-asserted-identity>
+              <diversion >oCallLegB.strDiversion</diversion>
+            </additional-parameters>
+          </Outdial>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="4" stubbed="1"/>
+            <result name="Ring no answer" link="5" stubbed="1"/>
+            <result name="Busy" link="6" stubbed="1"/>
+            <result name="Caller DTMF interrupt" link="7" stubbed="1"/>
+            <result name="Called party error" link="8" stubbed="1"/>
+            <result name="Calling party error" link="9" stubbed="1"/>
+            <result name="Other error" link="10" stubbed="1"/>
+            <result name="Resource unavailable" link="11" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.lTimeStart = Server.getUTCTime();
+Session.oCallLegB.bCurrentlyDialing = true;
+Session.oCallLegB.bAttemptedToOutdial = true;
+var curTime = new Date;
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.oCallLegB.bCurrentlyDialing = false;
+var curTime = new Date;
+Session.f_longStopTime = curTime.getTime();]]></script>
+          </scripts>
+        </action>
+        <action id="20" plug-in="Pactolus.Branch.1" ><?xtml-editor x=393 y=1222 ?>
+          <results >
+            <result name="Default" link="36" stubbed="0"/>
+            <result name="bPlayRingbackForOutdial" link="34" stubbed="0" >bPlayRingbackForOutdial == true</result>
+          </results>
+        </action>
+        <action id="21" plug-in="Pactolus.Outdial.1" ><?xtml-editor x=925 y=1345 ?>
+          <!--outdial to party-->
+          <Outdial xmlns="urn:www.pactolus.com:xtml:sip-cc" calling-number="strCallingNumber" called-number="oCallLegB.strCalledNumber" preferred-carrier="" codec="f_strCodec" reliable-provisional-responses="1" timeout="f_nTimeout" returns="f_nReturnCode" ms-type="oMS.strType" calling-connect-type="0" calling-capability="0" from="oCallLegA.strFrom" via="" ingress-gateway="oCallLegA.strRequestUri" session-timer-a="1" hold-a-first="1" interrupt-on-long-pound="0" session-timer-value-a="oCallLegA.nSessionTimer" telephone-events="0" rtp-request-a="0" rtp-endpoint-a="" route-callingparty="oCallLegA.strRoute" record-route-callingparty="oCallLegA.strRecordRoute" contact-callingparty="strContact" egress-gateway="oCallLegB.strRequestUri" sdp-b="oCallLegB.strContent" callid-b="oCallLegB.strCallId" cseq-b="oCallLegB.strCSeq" sip-status="strSIPStatus" to-b="oCallLegB.strTo" from-b="oCallLegB.strFrom" session-timer-b="1" session-timer-value-b="oCallLegB.nSessionTimer" backup-ss="oCallLegB.strBackupRequestUri" route="oCallLegB.strRoute" record-route="oCallLegB.strRecordRoute" contact="oCallLegB.strContact" rtp-request-b="0" rtp-endpoint-b="" refresher="oCallLegB.strRefresher" remote-party-id="oCallLegA.strRemotePartyId" play-ringback="1" language="p_oAPI.strLanguage" ringback-prompt="p_oAPI.nPromptRingback" capability="0" ringback-codec="-1" packetization-period="oMS.nPacketizationPeriod" calling-packetization="" connection-id="" mgcp-call-id="" ms-sdp="" endpoint="" to="oCallLegA.strTo" callid-a="oCallLegA.strCallId" cseq-a="oCallLegA.strCSeq" sdp-a="oCallLegA.strContent" >
+            <additional-parameters >
+              <p-asserted-identity >oCallLegB.strPAssertedIdentity</p-asserted-identity>
+              <diversion >oCallLegB.strDiversion</diversion>
+            </additional-parameters>
+          </Outdial>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="4" stubbed="1"/>
+            <result name="Ring no answer" link="5" stubbed="1"/>
+            <result name="Busy" link="6" stubbed="1"/>
+            <result name="Caller DTMF interrupt" link="7" stubbed="1"/>
+            <result name="Called party error" link="8" stubbed="1"/>
+            <result name="Calling party error" link="9" stubbed="1"/>
+            <result name="Other error" link="10" stubbed="1"/>
+            <result name="Resource unavailable" link="11" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.lTimeStart = Server.getUTCTime();
+Session.oCallLegB.bCurrentlyDialing = true;
+Session.oCallLegB.bAttemptedToOutdial = true;
+var curTime = new Date;
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.oCallLegB.bCurrentlyDialing = false;
+var curTime = new Date;
+Session.f_longStopTime = curTime.getTime();]]></script>
+          </scripts>
+        </action>
+        <action id="22" plug-in="Pactolus.Branch.1" ><?xtml-editor x=413 y=2103 ?>
+          <results >
+            <result name="Default" link="32" stubbed="0"/>
+            <result name="bPlayRingbackForOutdial" link="30" stubbed="0" >bPlayRingbackForOutdial == true</result>
+          </results>
+        </action>
+        <action id="23" plug-in="Pactolus.Outdial.1" ><?xtml-editor x=929 y=2212 ?>
+          <!--outdial to party-->
+          <Outdial xmlns="urn:www.pactolus.com:xtml:sip-cc" calling-number="strCallingNumber" called-number="oCallLegB.strCalledNumber" preferred-carrier="" codec="f_strCodec" reliable-provisional-responses="1" timeout="f_nTimeout" returns="f_nReturnCode" ms-type="oMS.strType" calling-connect-type="0" calling-capability="0" from="oCallLegA.strTo" via="" ingress-gateway="oCallLegA.strRequestUri" session-timer-a="0" hold-a-first="1" interrupt-on-long-pound="0" session-timer-value-a="" telephone-events="0" rtp-request-a="0" rtp-endpoint-a="" route-callingparty="oCallLegA.strRoute" record-route-callingparty="oCallLegA.strRecordRoute" contact-callingparty="strContact" egress-gateway="oCallLegB.strRequestUri" sdp-b="oCallLegB.strContent" callid-b="oCallLegB.strCallId" cseq-b="oCallLegB.strCSeq" sip-status="strSIPStatus" to-b="oCallLegB.strTo" from-b="oCallLegB.strFrom" session-timer-b="0" session-timer-value-b="" backup-ss="oCallLegB.strBackupRequestUri" route="oCallLegB.strRoute" record-route="oCallLegB.strRecordRoute" contact="oCallLegB.strContact" rtp-request-b="0" rtp-endpoint-b="" refresher="" remote-party-id="oCallLegA.strRemotePartyId" play-ringback="1" language="p_oAPI.strLanguage" ringback-prompt="p_oAPI.nPromptRingback" capability="0" ringback-codec="-1" packetization-period="oMS.nPacketizationPeriod" calling-packetization="" connection-id="" mgcp-call-id="" ms-sdp="" endpoint="" to="oCallLegA.strFrom" callid-a="oCallLegA.strCallId" cseq-a="oCallLegA.strCSeq" sdp-a="oCallLegA.strContent" >
+            <additional-parameters >
+              <p-asserted-identity >oCallLegB.strPAssertedIdentity</p-asserted-identity>
+              <diversion >oCallLegB.strDiversion</diversion>
+            </additional-parameters>
+          </Outdial>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="4" stubbed="1"/>
+            <result name="Ring no answer" link="5" stubbed="1"/>
+            <result name="Busy" link="6" stubbed="1"/>
+            <result name="Caller DTMF interrupt" link="7" stubbed="1"/>
+            <result name="Called party error" link="8" stubbed="1"/>
+            <result name="Calling party error" link="9" stubbed="1"/>
+            <result name="Other error" link="10" stubbed="1"/>
+            <result name="Resource unavailable" link="11" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.lTimeStart = Server.getUTCTime();
+Session.oCallLegB.bCurrentlyDialing = true;
+Session.oCallLegB.bAttemptedToOutdial = true;
+var curTime = new Date;
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.oCallLegB.bCurrentlyDialing = false;
+var curTime = new Date;
+Session.f_longStopTime = curTime.getTime();]]></script>
+          </scripts>
+        </action>
+        <action id="24" plug-in="Pactolus.Branch.1" ><?xtml-editor x=429 y=2953 ?>
+          <results >
+            <result name="Default" link="28" stubbed="0"/>
+            <result name="bPlayRingbackForOutdial" link="26" stubbed="0" >bPlayRingbackForOutdial == true</result>
+          </results>
+        </action>
+        <action id="25" plug-in="Pactolus.Outdial.1" ><?xtml-editor x=914 y=3085 ?>
+          <!--outdial to party-->
+          <Outdial xmlns="urn:www.pactolus.com:xtml:sip-cc" calling-number="strCallingNumber" called-number="oCallLegB.strCalledNumber" preferred-carrier="" codec="f_strCodec" reliable-provisional-responses="1" timeout="f_nTimeout" returns="f_nReturnCode" ms-type="oMS.strType" calling-connect-type="0" calling-capability="0" from="oCallLegA.strTo" via="" ingress-gateway="oCallLegA.strRequestUri" session-timer-a="1" hold-a-first="1" interrupt-on-long-pound="0" session-timer-value-a="oCallLegA.nSessionTimer" telephone-events="0" rtp-request-a="0" rtp-endpoint-a="" route-callingparty="oCallLegA.strRoute" record-route-callingparty="oCallLegA.strRecordRoute" contact-callingparty="strContact" egress-gateway="oCallLegB.strRequestUri" sdp-b="oCallLegB.strContent" callid-b="oCallLegB.strCallId" cseq-b="oCallLegB.strCSeq" sip-status="strSIPStatus" to-b="oCallLegB.strTo" from-b="oCallLegB.strFrom" session-timer-b="1" session-timer-value-b="oCallLegB.nSessionTimer" backup-ss="oCallLegB.strBackupRequestUri" route="oCallLegB.strRoute" record-route="oCallLegB.strRecordRoute" contact="oCallLegB.strContact" rtp-request-b="0" rtp-endpoint-b="" refresher="oCallLegB.strRefresher" remote-party-id="oCallLegA.strRemotePartyId" play-ringback="1" language="p_oAPI.strLanguage" ringback-prompt="p_oAPI.nPromptRingback" capability="0" ringback-codec="-1" packetization-period="oMS.nPacketizationPeriod" calling-packetization="" connection-id="" mgcp-call-id="" ms-sdp="" endpoint="" to="oCallLegA.strFrom" callid-a="oCallLegA.strCallId" cseq-a="oCallLegA.strCSeq" sdp-a="oCallLegA.strContent" >
+            <additional-parameters >
+              <p-asserted-identity >oCallLegB.strPAssertedIdentity</p-asserted-identity>
+              <diversion >oCallLegB.strDiversion</diversion>
+            </additional-parameters>
+          </Outdial>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="4" stubbed="1"/>
+            <result name="Ring no answer" link="5" stubbed="1"/>
+            <result name="Busy" link="6" stubbed="1"/>
+            <result name="Caller DTMF interrupt" link="7" stubbed="1"/>
+            <result name="Called party error" link="8" stubbed="1"/>
+            <result name="Calling party error" link="9" stubbed="1"/>
+            <result name="Other error" link="10" stubbed="1"/>
+            <result name="Resource unavailable" link="11" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.lTimeStart = Server.getUTCTime();
+Session.oCallLegB.bCurrentlyDialing = true;
+Session.oCallLegB.bAttemptedToOutdial = true;
+var curTime = new Date;
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.oCallLegB.bCurrentlyDialing = false;
+var curTime = new Date;
+Session.f_longStopTime = curTime.getTime();]]></script>
+          </scripts>
+        </action>
+        <action id="26" plug-in="Pactolus.Branch.1" ><?xtml-editor x=641 y=3162 ?>
+          <results >
+            <result name="Default" link="25" stubbed="0"/>
+            <result name="API.bSuppressOnHold" link="27" stubbed="0" >p_oAPI.bSuppressOnHold == true</result>
+          </results>
+        </action>
+        <action id="27" plug-in="Pactolus.Outdial.1" ><?xtml-editor x=914 y=3298 ?>
+          <!--outdial to party-->
+          <Outdial xmlns="urn:www.pactolus.com:xtml:sip-cc" calling-number="strCallingNumber" called-number="oCallLegB.strCalledNumber" preferred-carrier="" codec="f_strCodec" reliable-provisional-responses="1" timeout="f_nTimeout" returns="f_nReturnCode" ms-type="oMS.strType" calling-connect-type="0" calling-capability="0" from="oCallLegA.strTo" via="" ingress-gateway="oCallLegA.strRequestUri" session-timer-a="1" hold-a-first="0" interrupt-on-long-pound="0" session-timer-value-a="oCallLegA.nSessionTimer" telephone-events="0" rtp-request-a="0" rtp-endpoint-a="" route-callingparty="oCallLegA.strRoute" record-route-callingparty="oCallLegA.strRecordRoute" contact-callingparty="strContact" egress-gateway="oCallLegB.strRequestUri" sdp-b="oCallLegB.strContent" callid-b="oCallLegB.strCallId" cseq-b="oCallLegB.strCSeq" sip-status="strSIPStatus" to-b="oCallLegB.strTo" from-b="oCallLegB.strFrom" session-timer-b="1" session-timer-value-b="oCallLegB.nSessionTimer" backup-ss="oCallLegB.strBackupRequestUri" route="oCallLegB.strRoute" record-route="oCallLegB.strRecordRoute" contact="oCallLegB.strContact" rtp-request-b="0" rtp-endpoint-b="" refresher="oCallLegB.strRefresher" remote-party-id="oCallLegA.strRemotePartyId" play-ringback="1" language="p_oAPI.strLanguage" ringback-prompt="p_oAPI.nPromptRingback" capability="0" ringback-codec="-1" packetization-period="oMS.nPacketizationPeriod" calling-packetization="" connection-id="" mgcp-call-id="" ms-sdp="" endpoint="" to="oCallLegA.strFrom" callid-a="oCallLegA.strCallId" cseq-a="oCallLegA.strCSeq" sdp-a="oCallLegA.strContent" >
+            <additional-parameters >
+              <p-asserted-identity >oCallLegB.strPAssertedIdentity</p-asserted-identity>
+              <diversion >oCallLegB.strDiversion</diversion>
+            </additional-parameters>
+          </Outdial>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="4" stubbed="1"/>
+            <result name="Ring no answer" link="5" stubbed="1"/>
+            <result name="Busy" link="6" stubbed="1"/>
+            <result name="Caller DTMF interrupt" link="7" stubbed="1"/>
+            <result name="Called party error" link="8" stubbed="1"/>
+            <result name="Calling party error" link="9" stubbed="1"/>
+            <result name="Other error" link="10" stubbed="1"/>
+            <result name="Resource unavailable" link="11" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.lTimeStart = Server.getUTCTime();
+Session.oCallLegB.bCurrentlyDialing = true;
+Session.oCallLegB.bAttemptedToOutdial = true;
+var curTime = new Date;
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.oCallLegB.bCurrentlyDialing = false;
+var curTime = new Date;
+Session.f_longStopTime = curTime.getTime();]]></script>
+          </scripts>
+        </action>
+        <action id="28" plug-in="Pactolus.Branch.1" ><?xtml-editor x=634 y=2740 ?>
+          <results >
+            <result name="Default" link="17" stubbed="0"/>
+            <result name="API.bSuppressOnHold" link="29" stubbed="0" >p_oAPI.bSuppressOnHold == true</result>
+          </results>
+        </action>
+        <action id="29" plug-in="Pactolus.Outdial.1" ><?xtml-editor x=922 y=2864 ?>
+          <!--outdial to party-->
+          <Outdial xmlns="urn:www.pactolus.com:xtml:sip-cc" calling-number="strCallingNumber" called-number="oCallLegB.strCalledNumber" preferred-carrier="" codec="f_strCodec" reliable-provisional-responses="1" timeout="f_nTimeout" returns="f_nReturnCode" ms-type="" calling-connect-type="0" calling-capability="0" from="oCallLegA.strTo" via="" ingress-gateway="oCallLegA.strRequestUri" session-timer-a="1" hold-a-first="0" interrupt-on-long-pound="0" session-timer-value-a="oCallLegA.nSessionTimer" telephone-events="0" rtp-request-a="0" rtp-endpoint-a="" route-callingparty="oCallLegA.strRoute" record-route-callingparty="oCallLegA.strRecordRoute" contact-callingparty="strContact" egress-gateway="oCallLegB.strRequestUri" sdp-b="oCallLegB.strContent" callid-b="oCallLegB.strCallId" cseq-b="oCallLegB.strCSeq" sip-status="strSIPStatus" to-b="oCallLegB.strTo" from-b="oCallLegB.strFrom" session-timer-b="1" session-timer-value-b="oCallLegB.nSessionTimer" backup-ss="oCallLegB.strBackupRequestUri" route="oCallLegB.strRoute" record-route="oCallLegB.strRecordRoute" contact="oCallLegB.strContact" rtp-request-b="0" rtp-endpoint-b="" refresher="oCallLegB.strRefresher" remote-party-id="oCallLegA.strRemotePartyId" play-ringback="0" language="" ringback-prompt="" capability="1" ringback-codec="-1" packetization-period="" calling-packetization="" connection-id="" mgcp-call-id="" ms-sdp="" endpoint="" to="oCallLegA.strFrom" callid-a="oCallLegA.strCallId" cseq-a="oCallLegA.strCSeq" sdp-a="oCallLegA.strContent" >
+            <additional-parameters >
+              <p-asserted-identity >oCallLegB.strPAssertedIdentity</p-asserted-identity>
+              <diversion >oCallLegB.strDiversion</diversion>
+            </additional-parameters>
+          </Outdial>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="4" stubbed="1"/>
+            <result name="Ring no answer" link="5" stubbed="1"/>
+            <result name="Busy" link="6" stubbed="1"/>
+            <result name="Caller DTMF interrupt" link="7" stubbed="1"/>
+            <result name="Called party error" link="8" stubbed="1"/>
+            <result name="Calling party error" link="9" stubbed="1"/>
+            <result name="Other error" link="10" stubbed="1"/>
+            <result name="Resource unavailable" link="11" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.lTimeStart = Server.getUTCTime();
+Session.oCallLegB.bCurrentlyDialing = true;
+Session.oCallLegB.bAttemptedToOutdial = true;
+var curTime = new Date;
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.oCallLegB.bCurrentlyDialing = false;
+var curTime = new Date;
+Session.f_longStopTime = curTime.getTime();]]></script>
+          </scripts>
+        </action>
+        <action id="30" plug-in="Pactolus.Branch.1" ><?xtml-editor x=634 y=2331 ?>
+          <results >
+            <result name="Default" link="23" stubbed="0"/>
+            <result name="API.bSuppressOnHold" link="31" stubbed="0" >p_oAPI.bSuppressOnHold == true</result>
+          </results>
+        </action>
+        <action id="31" plug-in="Pactolus.Outdial.1" ><?xtml-editor x=932 y=2429 ?>
+          <!--outdial to party-->
+          <Outdial xmlns="urn:www.pactolus.com:xtml:sip-cc" calling-number="strCallingNumber" called-number="oCallLegB.strCalledNumber" preferred-carrier="" codec="f_strCodec" reliable-provisional-responses="1" timeout="f_nTimeout" returns="f_nReturnCode" ms-type="oMS.strType" calling-connect-type="0" calling-capability="0" from="oCallLegA.strTo" via="" ingress-gateway="oCallLegA.strRequestUri" session-timer-a="0" hold-a-first="0" interrupt-on-long-pound="0" session-timer-value-a="" telephone-events="0" rtp-request-a="0" rtp-endpoint-a="" route-callingparty="oCallLegA.strRoute" record-route-callingparty="oCallLegA.strRecordRoute" contact-callingparty="strContact" egress-gateway="oCallLegB.strRequestUri" sdp-b="oCallLegB.strContent" callid-b="oCallLegB.strCallId" cseq-b="oCallLegB.strCSeq" sip-status="strSIPStatus" to-b="oCallLegB.strTo" from-b="oCallLegB.strFrom" session-timer-b="0" session-timer-value-b="" backup-ss="oCallLegB.strBackupRequestUri" route="oCallLegB.strRoute" record-route="oCallLegB.strRecordRoute" contact="oCallLegB.strContact" rtp-request-b="0" rtp-endpoint-b="" refresher="" remote-party-id="oCallLegA.strRemotePartyId" play-ringback="1" language="p_oAPI.strLanguage" ringback-prompt="p_oAPI.nPromptRingback" capability="0" ringback-codec="-1" packetization-period="oMS.nPacketizationPeriod" calling-packetization="" connection-id="" mgcp-call-id="" ms-sdp="" endpoint="" to="oCallLegA.strFrom" callid-a="oCallLegA.strCallId" cseq-a="oCallLegA.strCSeq" sdp-a="oCallLegA.strContent" >
+            <additional-parameters >
+              <p-asserted-identity >oCallLegB.strPAssertedIdentity</p-asserted-identity>
+              <diversion >oCallLegB.strDiversion</diversion>
+            </additional-parameters>
+          </Outdial>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="4" stubbed="1"/>
+            <result name="Ring no answer" link="5" stubbed="1"/>
+            <result name="Busy" link="6" stubbed="1"/>
+            <result name="Caller DTMF interrupt" link="7" stubbed="1"/>
+            <result name="Called party error" link="8" stubbed="1"/>
+            <result name="Calling party error" link="9" stubbed="1"/>
+            <result name="Other error" link="10" stubbed="1"/>
+            <result name="Resource unavailable" link="11" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.lTimeStart = Server.getUTCTime();
+Session.oCallLegB.bCurrentlyDialing = true;
+Session.oCallLegB.bAttemptedToOutdial = true;
+var curTime = new Date;
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.oCallLegB.bCurrentlyDialing = false;
+var curTime = new Date;
+Session.f_longStopTime = curTime.getTime();]]></script>
+          </scripts>
+        </action>
+        <action id="32" plug-in="Pactolus.Branch.1" ><?xtml-editor x=614 y=1879 ?>
+          <results >
+            <result name="Default" link="16" stubbed="0"/>
+            <result name="API.bSuppressOnHold" link="33" stubbed="0" >p_oAPI.bSuppressOnHold == true</result>
+          </results>
+        </action>
+        <action id="33" plug-in="Pactolus.Outdial.1" ><?xtml-editor x=927 y=1997 ?>
+          <!--outdial to party-->
+          <Outdial xmlns="urn:www.pactolus.com:xtml:sip-cc" calling-number="strCallingNumber" called-number="oCallLegB.strCalledNumber" preferred-carrier="" codec="f_strCodec" reliable-provisional-responses="1" timeout="f_nTimeout" returns="f_nReturnCode" ms-type="" calling-connect-type="0" calling-capability="0" from="oCallLegA.strTo" via="" ingress-gateway="oCallLegA.strRequestUri" session-timer-a="0" hold-a-first="0" interrupt-on-long-pound="0" session-timer-value-a="" telephone-events="0" rtp-request-a="0" rtp-endpoint-a="" route-callingparty="oCallLegA.strRoute" record-route-callingparty="oCallLegA.strRecordRoute" contact-callingparty="strContact" egress-gateway="oCallLegB.strRequestUri" sdp-b="oCallLegB.strContent" callid-b="oCallLegB.strCallId" cseq-b="oCallLegB.strCSeq" sip-status="strSIPStatus" to-b="oCallLegB.strTo" from-b="oCallLegB.strFrom" session-timer-b="0" session-timer-value-b="" backup-ss="oCallLegB.strBackupRequestUri" route="oCallLegB.strRoute" record-route="oCallLegB.strRecordRoute" contact="oCallLegB.strContact" rtp-request-b="0" rtp-endpoint-b="" refresher="" remote-party-id="oCallLegA.strRemotePartyId" play-ringback="0" language="" ringback-prompt="" capability="1" ringback-codec="-1" packetization-period="" calling-packetization="" connection-id="" mgcp-call-id="" ms-sdp="" endpoint="" to="oCallLegA.strFrom" callid-a="oCallLegA.strCallId" cseq-a="oCallLegA.strCSeq" sdp-a="oCallLegA.strContent" >
+            <additional-parameters >
+              <p-asserted-identity >oCallLegB.strPAssertedIdentity</p-asserted-identity>
+              <diversion >oCallLegB.strDiversion</diversion>
+            </additional-parameters>
+          </Outdial>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="4" stubbed="1"/>
+            <result name="Ring no answer" link="5" stubbed="1"/>
+            <result name="Busy" link="6" stubbed="1"/>
+            <result name="Caller DTMF interrupt" link="7" stubbed="1"/>
+            <result name="Called party error" link="8" stubbed="1"/>
+            <result name="Calling party error" link="9" stubbed="1"/>
+            <result name="Other error" link="10" stubbed="1"/>
+            <result name="Resource unavailable" link="11" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.lTimeStart = Server.getUTCTime();
+Session.oCallLegB.bCurrentlyDialing = true;
+Session.oCallLegB.bAttemptedToOutdial = true;
+var curTime = new Date;
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.oCallLegB.bCurrentlyDialing = false;
+var curTime = new Date;
+Session.f_longStopTime = curTime.getTime();]]></script>
+          </scripts>
+        </action>
+        <action id="34" plug-in="Pactolus.Branch.1" ><?xtml-editor x=599 y=1493 ?>
+          <results >
+            <result name="Default" link="21" stubbed="0"/>
+            <result name="API.bSuppressOnHold" link="35" stubbed="0" >p_oAPI.bSuppressOnHold == true</result>
+          </results>
+        </action>
+        <action id="35" plug-in="Pactolus.Outdial.1" ><?xtml-editor x=922 y=1571 ?>
+          <!--outdial to party-->
+          <Outdial xmlns="urn:www.pactolus.com:xtml:sip-cc" calling-number="strCallingNumber" called-number="oCallLegB.strCalledNumber" preferred-carrier="" codec="f_strCodec" reliable-provisional-responses="1" timeout="f_nTimeout" returns="f_nReturnCode" ms-type="oMS.strType" calling-connect-type="0" calling-capability="0" from="oCallLegA.strFrom" via="" ingress-gateway="oCallLegA.strRequestUri" session-timer-a="1" hold-a-first="0" interrupt-on-long-pound="0" session-timer-value-a="oCallLegA.nSessionTimer" telephone-events="0" rtp-request-a="0" rtp-endpoint-a="" route-callingparty="oCallLegA.strRoute" record-route-callingparty="oCallLegA.strRecordRoute" contact-callingparty="strContact" egress-gateway="oCallLegB.strRequestUri" sdp-b="oCallLegB.strContent" callid-b="oCallLegB.strCallId" cseq-b="oCallLegB.strCSeq" sip-status="strSIPStatus" to-b="oCallLegB.strTo" from-b="oCallLegB.strFrom" session-timer-b="1" session-timer-value-b="oCallLegB.nSessionTimer" backup-ss="oCallLegB.strBackupRequestUri" route="oCallLegB.strRoute" record-route="oCallLegB.strRecordRoute" contact="oCallLegB.strContact" rtp-request-b="0" rtp-endpoint-b="" refresher="oCallLegB.strRefresher" remote-party-id="oCallLegA.strRemotePartyId" play-ringback="1" language="p_oAPI.strLanguage" ringback-prompt="p_oAPI.nPromptRingback" capability="0" ringback-codec="-1" packetization-period="oMS.nPacketizationPeriod" calling-packetization="" connection-id="" mgcp-call-id="" ms-sdp="" endpoint="" to="oCallLegA.strTo" callid-a="oCallLegA.strCallId" cseq-a="oCallLegA.strCSeq" sdp-a="oCallLegA.strContent" >
+            <additional-parameters >
+              <p-asserted-identity >oCallLegB.strPAssertedIdentity</p-asserted-identity>
+              <diversion >oCallLegB.strDiversion</diversion>
+            </additional-parameters>
+          </Outdial>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="4" stubbed="1"/>
+            <result name="Ring no answer" link="5" stubbed="1"/>
+            <result name="Busy" link="6" stubbed="1"/>
+            <result name="Caller DTMF interrupt" link="7" stubbed="1"/>
+            <result name="Called party error" link="8" stubbed="1"/>
+            <result name="Calling party error" link="9" stubbed="1"/>
+            <result name="Other error" link="10" stubbed="1"/>
+            <result name="Resource unavailable" link="11" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.lTimeStart = Server.getUTCTime();
+Session.oCallLegB.bCurrentlyDialing = true;
+Session.oCallLegB.bAttemptedToOutdial = true;
+var curTime = new Date;
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.oCallLegB.bCurrentlyDialing = false;
+var curTime = new Date;
+Session.f_longStopTime = curTime.getTime();]]></script>
+          </scripts>
+        </action>
+        <action id="36" plug-in="Pactolus.Branch.1" ><?xtml-editor x=598 y=960 ?>
+          <results >
+            <result name="Default" link="13" stubbed="0"/>
+            <result name="API.bSuppressOnHold" link="37" stubbed="0" >p_oAPI.bSuppressOnHold == true</result>
+          </results>
+        </action>
+        <action id="37" plug-in="Pactolus.Outdial.1" ><?xtml-editor x=926 y=1122 ?>
+          <!--outdial to party-->
+          <Outdial xmlns="urn:www.pactolus.com:xtml:sip-cc" calling-number="strCallingNumber" called-number="oCallLegB.strCalledNumber" preferred-carrier="" codec="f_strCodec" reliable-provisional-responses="1" timeout="f_nTimeout" returns="f_nReturnCode" ms-type="" calling-connect-type="0" calling-capability="0" from="oCallLegA.strFrom" via="" ingress-gateway="oCallLegA.strRequestUri" session-timer-a="1" hold-a-first="0" interrupt-on-long-pound="0" session-timer-value-a="oCallLegA.nSessionTimer" telephone-events="0" rtp-request-a="0" rtp-endpoint-a="" route-callingparty="oCallLegA.strRoute" record-route-callingparty="oCallLegA.strRecordRoute" contact-callingparty="strContact" egress-gateway="oCallLegB.strRequestUri" sdp-b="oCallLegB.strContent" callid-b="oCallLegB.strCallId" cseq-b="oCallLegB.strCSeq" sip-status="strSIPStatus" to-b="oCallLegB.strTo" from-b="oCallLegB.strFrom" session-timer-b="1" session-timer-value-b="oCallLegB.nSessionTimer" backup-ss="oCallLegB.strBackupRequestUri" route="oCallLegB.strRoute" record-route="oCallLegB.strRecordRoute" contact="oCallLegB.strContact" rtp-request-b="0" rtp-endpoint-b="" refresher="oCallLegB.strRefresher" remote-party-id="oCallLegA.strRemotePartyId" play-ringback="0" language="" ringback-prompt="" capability="1" ringback-codec="-1" packetization-period="" calling-packetization="" connection-id="" mgcp-call-id="" ms-sdp="" endpoint="" to="oCallLegA.strTo" callid-a="oCallLegA.strCallId" cseq-a="oCallLegA.strCSeq" sdp-a="oCallLegA.strContent" >
+            <additional-parameters >
+              <p-asserted-identity >oCallLegB.strPAssertedIdentity</p-asserted-identity>
+              <diversion >oCallLegB.strDiversion</diversion>
+            </additional-parameters>
+          </Outdial>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="4" stubbed="1"/>
+            <result name="Ring no answer" link="5" stubbed="1"/>
+            <result name="Busy" link="6" stubbed="1"/>
+            <result name="Caller DTMF interrupt" link="7" stubbed="1"/>
+            <result name="Called party error" link="8" stubbed="1"/>
+            <result name="Calling party error" link="9" stubbed="1"/>
+            <result name="Other error" link="10" stubbed="1"/>
+            <result name="Resource unavailable" link="11" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.lTimeStart = Server.getUTCTime();
+Session.oCallLegB.bCurrentlyDialing = true;
+Session.oCallLegB.bAttemptedToOutdial = true;
+var curTime = new Date;
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.oCallLegB.bCurrentlyDialing = false;
+var curTime = new Date;
+Session.f_longStopTime = curTime.getTime();]]></script>
+          </scripts>
+        </action>
+        <action id="38" plug-in="Pactolus.Branch.1" ><?xtml-editor x=594 y=555 ?>
+          <results >
+            <result name="Default" link="19" stubbed="0"/>
+            <result name="API.bSuppressOnHold" link="39" stubbed="0" >p_oAPI.bSuppressOnHold == true</result>
+          </results>
+        </action>
+        <action id="39" plug-in="Pactolus.Outdial.1" ><?xtml-editor x=919 y=668 ?>
+          <!--outdial to party-->
+          <Outdial xmlns="urn:www.pactolus.com:xtml:sip-cc" calling-number="strCallingNumber" called-number="oCallLegB.strCalledNumber" preferred-carrier="" codec="f_strCodec" reliable-provisional-responses="1" timeout="f_nTimeout" returns="f_nReturnCode" ms-type="oMS.strType" calling-connect-type="0" calling-capability="0" from="oCallLegA.strFrom" via="" ingress-gateway="oCallLegA.strRequestUri" session-timer-a="0" hold-a-first="0" interrupt-on-long-pound="0" session-timer-value-a="" telephone-events="0" rtp-request-a="0" rtp-endpoint-a="" route-callingparty="oCallLegA.strRoute" record-route-callingparty="oCallLegA.strRecordRoute" contact-callingparty="strContact" egress-gateway="oCallLegB.strRequestUri" sdp-b="oCallLegB.strContent" callid-b="oCallLegB.strCallId" cseq-b="oCallLegB.strCSeq" sip-status="strSIPStatus" to-b="oCallLegB.strTo" from-b="oCallLegB.strFrom" session-timer-b="0" session-timer-value-b="" backup-ss="oCallLegB.strBackupRequestUri" route="oCallLegB.strRoute" record-route="oCallLegB.strRecordRoute" contact="oCallLegB.strContact" rtp-request-b="0" rtp-endpoint-b="" refresher="" remote-party-id="oCallLegA.strRemotePartyId" play-ringback="1" language="p_oAPI.strLanguage" ringback-prompt="p_oAPI.nPromptRingback" capability="0" ringback-codec="-1" packetization-period="oMS.nPacketizationPeriod" calling-packetization="" connection-id="" mgcp-call-id="" ms-sdp="" endpoint="" to="oCallLegA.strTo" callid-a="oCallLegA.strCallId" cseq-a="oCallLegA.strCSeq" sdp-a="oCallLegA.strContent" >
+            <additional-parameters >
+              <p-asserted-identity >oCallLegB.strPAssertedIdentity</p-asserted-identity>
+              <diversion >oCallLegB.strDiversion</diversion>
+            </additional-parameters>
+          </Outdial>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="4" stubbed="1"/>
+            <result name="Ring no answer" link="5" stubbed="1"/>
+            <result name="Busy" link="6" stubbed="1"/>
+            <result name="Caller DTMF interrupt" link="7" stubbed="1"/>
+            <result name="Called party error" link="8" stubbed="1"/>
+            <result name="Calling party error" link="9" stubbed="1"/>
+            <result name="Other error" link="10" stubbed="1"/>
+            <result name="Resource unavailable" link="11" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.lTimeStart = Server.getUTCTime();
+Session.oCallLegB.bCurrentlyDialing = true;
+Session.oCallLegB.bAttemptedToOutdial = true;
+var curTime = new Date;
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.oCallLegB.bCurrentlyDialing = false;
+var curTime = new Date;
+Session.f_longStopTime = curTime.getTime();]]></script>
+          </scripts>
+        </action>
+        <action id="40" plug-in="Pactolus.Branch.1" ><?xtml-editor x=581 y=122 ?>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="API.bSuppressOnHold" link="41" stubbed="0" >p_oAPI.bSuppressOnHold == true</result>
+          </results>
+        </action>
+        <action id="41" plug-in="Pactolus.Outdial.1" ><?xtml-editor x=910 y=235 ?>
+          <!--outdial to party-->
+          <Outdial xmlns="urn:www.pactolus.com:xtml:sip-cc" calling-number="strCallingNumber" called-number="oCallLegB.strCalledNumber" preferred-carrier="" codec="f_strCodec" reliable-provisional-responses="1" timeout="f_nTimeout" returns="f_nReturnCode" ms-type="" calling-connect-type="0" calling-capability="0" from="oCallLegA.strFrom" via="" ingress-gateway="oCallLegA.strRequestUri" session-timer-a="0" hold-a-first="0" interrupt-on-long-pound="0" session-timer-value-a="" telephone-events="0" rtp-request-a="0" rtp-endpoint-a="" route-callingparty="oCallLegA.strRoute" record-route-callingparty="oCallLegA.strRecordRoute" contact-callingparty="strContact" egress-gateway="oCallLegB.strRequestUri" sdp-b="oCallLegB.strContent" callid-b="oCallLegB.strCallId" cseq-b="oCallLegB.strCSeq" sip-status="strSIPStatus" to-b="oCallLegB.strTo" from-b="oCallLegB.strFrom" session-timer-b="0" session-timer-value-b="" backup-ss="oCallLegB.strBackupRequestUri" route="oCallLegB.strRoute" record-route="oCallLegB.strRecordRoute" contact="oCallLegB.strContact" rtp-request-b="0" rtp-endpoint-b="" refresher="" remote-party-id="oCallLegA.strRemotePartyId" play-ringback="0" language="" ringback-prompt="" capability="1" ringback-codec="-1" packetization-period="" calling-packetization="" connection-id="" mgcp-call-id="" ms-sdp="" endpoint="" to="oCallLegA.strTo" callid-a="oCallLegA.strCallId" cseq-a="oCallLegA.strCSeq" sdp-a="oCallLegA.strContent" >
+            <additional-parameters >
+              <p-asserted-identity >oCallLegB.strPAssertedIdentity</p-asserted-identity>
+              <diversion >oCallLegB.strDiversion</diversion>
+            </additional-parameters>
+          </Outdial>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="4" stubbed="1"/>
+            <result name="Ring no answer" link="5" stubbed="1"/>
+            <result name="Busy" link="6" stubbed="1"/>
+            <result name="Caller DTMF interrupt" link="7" stubbed="1"/>
+            <result name="Called party error" link="8" stubbed="1"/>
+            <result name="Calling party error" link="9" stubbed="1"/>
+            <result name="Other error" link="10" stubbed="1"/>
+            <result name="Resource unavailable" link="11" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.lTimeStart = Server.getUTCTime();
+Session.oCallLegB.bCurrentlyDialing = true;
+Session.oCallLegB.bAttemptedToOutdial = true;
+var curTime = new Date;
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.oCallLegB.bCurrentlyDialing = false;
+var curTime = new Date;
+Session.f_longStopTime = curTime.getTime();]]></script>
+          </scripts>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="47" y-coord="23" width="452" height="319" text="INPUT:
+oCallLegA        object type, A leg info
+oCallLegB        object type, B leg info
+longTimeStart        long type, the time when try to outdial
+longTimeAnswered    long type, the time when called party answer
+strSIPStatus        string type, SIP status of outdial
+OUTPUT:
+returns    
+    0    success
+    1    ring no answer
+    2    busy
+    3    DTMF interrupted
+    -1    fail
+    -2    called party error
+    -3    calling party error
+    -4    other error
+    -5    resource unavailable" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="FaxOutdial" start="12" event="FaxOutdial" returns="i4" >
+      <parameters >
+        <parameter name="oCallLegA" type="object" pass="byref"/>
+        <parameter name="oCallLegB" type="object" pass="byref"/>
+        <parameter name="lTimeStart" type="i8" pass="byref"/>
+        <parameter name="lTimeAnswered" type="i8" pass="byref"/>
+        <parameter name="strSIPStatus" type="string" pass="byref"/>
+        <parameter name="strContact" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nSUCCESS" type="i4" >0</var>
+        <var name="f_nFAILURE" type="i4" >-1</var>
+        <var name="f_nBUSY" type="i4" >2</var>
+        <var name="f_nRINGNOANSWER" type="i4" >1</var>
+        <var name="f_nDTMFINTERRUPTED" type="i4" >3</var>
+        <var name="f_nCALLEDPARTYERROR" type="i4" >-2</var>
+        <var name="f_nCALLINGPARTYERROR" type="i4" >-3</var>
+        <var name="f_nOTHERERROR" type="i4" >-4</var>
+        <var name="f_nRESOURCEUNAVAIL" type="i4" >-5</var>
+        <var name="f_nReturnCode" type="i4" >0</var>
+        <var name="f_longStartTime" type="i8" >0</var>
+        <var name="f_longStopTime" type="i8" >0</var>
+      </local-vars>
+      <actions >
+        <action id="12" plug-in="Pactolus.Branch.1" ><?xtml-editor x=232 y=613 ?>
+          <!--session timer enable?-->
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="strSessionTimerFlag == &quot;T&quot;" link="13" stubbed="0" >oCallLegB.strSessionTimerFlag == "T"</result>
+          </results>
+        </action>
+        <action id="2" plug-in="Pactolus.Outdial.1" ><?xtml-editor x=468 y=473 ?>
+          <!--outdial to party-->
+          <Outdial xmlns="urn:www.pactolus.com:xtml:sip-cc" calling-number="oCallLegA.strCallingNumber" called-number="oCallLegB.strCalledNumber" preferred-carrier="" codec="0" reliable-provisional-responses="1" timeout="oCallLegB.nRingNoAnswerTime" returns="f_nReturnCode" ms-type="" calling-connect-type="0" calling-capability="0" from="oCallLegA.strFrom" via="" ingress-gateway="oCallLegA.strRequestUri" session-timer-a="0" hold-a-first="1" interrupt-on-long-pound="0" session-timer-value-a="" telephone-events="0" rtp-request-a="0" rtp-endpoint-a="" route-callingparty="oCallLegA.strRoute" record-route-callingparty="oCallLegA.strRecordRoute" contact-callingparty="strContact" egress-gateway="oCallLegB.strRequestUri" sdp-b="oCallLegB.strContent" callid-b="oCallLegB.strCallId" cseq-b="oCallLegB.strCSeq" sip-status="strSIPStatus" to-b="oCallLegB.strTo" from-b="oCallLegB.strFrom" session-timer-b="0" session-timer-value-b="" backup-ss="oCallLegB.strBackupRequestUri" route="oCallLegB.strRoute" record-route="oCallLegB.strRecordRoute" contact="oCallLegB.strContact" rtp-request-b="0" rtp-endpoint-b="" refresher="" remote-party-id="" play-ringback="0" language="" ringback-prompt="" capability="1" ringback-codec="-1" packetization-period="" calling-packetization="" connection-id="" mgcp-call-id="" ms-sdp="" endpoint="" to="oCallLegA.strTo" callid-a="oCallLegA.strCallId" cseq-a="oCallLegA.strCSeq" sdp-a="oCallLegA.strContent"/>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success" link="4" stubbed="0"/>
+            <result name="Ring no answer" link="5" stubbed="0"/>
+            <result name="Busy" link="6" stubbed="0"/>
+            <result name="Caller DTMF interrupt" link="7" stubbed="0"/>
+            <result name="Called party error" link="8" stubbed="0"/>
+            <result name="Calling party error" link="9" stubbed="0"/>
+            <result name="Other error" link="10" stubbed="0"/>
+            <result name="Resource unavailable" link="11" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.lTimeStart = Server.getUTCTime();
+Session.oCallLegB.bCurrentlyDialing = true;
+Session.oCallLegB.bAttemptedToOutdial = true;
+var curTime = new Date;
+Session.f_longStartTime = curTime.getTime();
+Server.logInfo(" OBJECT A LEG INFO: ");
+Server.logInfo(" A LEG FROM: " + Session.oCallLegA.strFrom);
+Server.logInfo(" A LEG TO: " + Session.oCallLegA.strTo);
+Server.logInfo(" A LEG CALL Id: " + Session.oCallLegA.strCallId);
+Server.logInfo(" A LEG CSEQ: " + Session.oCallLegA.strCSeq);
+Server.logInfo(" A LEG REQUEST Uri: " + Session.oCallLegA.strRequestUri);
+Server.logInfo(" A LEG CALLING NUMBER: " + Session.oCallLegA.strCallingNumber);
+
+Server.logInfo(" OBJECT B LEG INFO: ");
+Server.logInfo(" B LEG FROM: " + Session.oCallLegB.strFrom);
+Server.logInfo(" B LEG TO: " + Session.oCallLegB.strTo);
+Server.logInfo(" B LEG CALL Id: " + Session.oCallLegB.strCallId);
+Server.logInfo(" B LEG CSEQ: " + Session.oCallLegB.strCSeq);
+Server.logInfo(" B LEG CALLING NUMBER: " + Session.oCallLegB.strCalledNumber);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.oCallLegB.bCurrentlyDialing = false;
+var curTime = new Date;
+Session.f_longStopTime = curTime.getTime();]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=700 y=312 ?>
+          <!--nFAILURE-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nFAILURE"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: FAIL TO SEND OUTDIAL TO PARTY,  RETURN CODE IS: " + Session.f_nReturnCode);]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=733 y=388 ?>
+          <!--nSUCCESS-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nSUCCESS"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.lTimeAnswered = Server.getUTCTime();
+Session.oCallLegB.bConnected = true;
+Session.oCallLegB.nSetUpTime = Session.f_longStopTime - Session.f_longStartTime;
+Server.logInfo("SUCCESS OUTDIAL PARTY");]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=768 y=460 ?>
+          <!--nRINGNOANSWER-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nRINGNOANSWER"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("OUTDIAL NO ANSWER");]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=809 y=528 ?>
+          <!--nBUSY-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nBUSY"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("OUTDIAL BUSY");]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=879 y=601 ?>
+          <!--nDTMFINTERRUPTED-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nDTMFINTERRUPTED"/>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("OUTDIAL DTMF INTERRUPTED");]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=881 y=674 ?>
+          <!--nCALLEDPARTYERROR-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nCALLEDPARTYERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("OUTDIAL CALLED PARTY ERROR");]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=872 y=742 ?>
+          <!--nCALLINGPARTYERROR-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nCALLINGPARTYERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("OUTDIAL CALLING PARTY ERROR");]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=859 y=813 ?>
+          <!--nOTHERERROR-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nOTHERERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("OUTDIAL OTHER ERROR");]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=837 y=885 ?>
+          <!--nRESOURCEUNAVAIL-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nRESOURCEUNAVAIL"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("OUTDIAL RESOURCE UNAVAILABLE");]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Pactolus.Outdial.1" ><?xtml-editor x=483 y=741 ?>
+          <!--outdial to party-->
+          <Outdial xmlns="urn:www.pactolus.com:xtml:sip-cc" calling-number="oCallLegA.strCallingNumber" called-number="oCallLegB.strCalledNumber" preferred-carrier="" codec="0" reliable-provisional-responses="1" timeout="oCallLegB.nRingNoAnswerTime" returns="f_nReturnCode" ms-type="" calling-connect-type="0" calling-capability="0" from="oCallLegA.strFrom" via="" ingress-gateway="oCallLegA.strRequestUri" session-timer-a="1" hold-a-first="1" interrupt-on-long-pound="0" session-timer-value-a="oCallLegA.nSessionTimer" telephone-events="0" rtp-request-a="0" rtp-endpoint-a="" route-callingparty="oCallLegA.strRoute" record-route-callingparty="oCallLegA.strRecordRoute" contact-callingparty="strContact" egress-gateway="oCallLegB.strRequestUri" sdp-b="oCallLegB.strContent" callid-b="oCallLegB.strCallId" cseq-b="oCallLegB.strCSeq" sip-status="strSIPStatus" to-b="oCallLegB.strTo" from-b="oCallLegB.strFrom" session-timer-b="1" session-timer-value-b="oCallLegB.nSessionTimer" backup-ss="oCallLegB.strBackupRequestUri" route="oCallLegB.strRoute" record-route="oCallLegB.strRecordRoute" contact="oCallLegB.strContact" rtp-request-b="0" rtp-endpoint-b="" refresher="" remote-party-id="" play-ringback="0" language="" ringback-prompt="" capability="1" ringback-codec="-1" packetization-period="" calling-packetization="" connection-id="" mgcp-call-id="" ms-sdp="" endpoint="" to="oCallLegA.strTo" callid-a="oCallLegA.strCallId" cseq-a="oCallLegA.strCSeq" sdp-a="oCallLegA.strContent"/>
+          <results >
+            <result name="Default" link="3" stubbed="1"/>
+            <result name="Success" link="4" stubbed="1"/>
+            <result name="Ring no answer" link="5" stubbed="1"/>
+            <result name="Busy" link="6" stubbed="1"/>
+            <result name="Caller DTMF interrupt" link="7" stubbed="1"/>
+            <result name="Called party error" link="8" stubbed="1"/>
+            <result name="Calling party error" link="9" stubbed="1"/>
+            <result name="Other error" link="10" stubbed="1"/>
+            <result name="Resource unavailable" link="11" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.lTimeStart = Server.getUTCTime();
+Session.oCallLegB.bCurrentlyDialing = true;
+Session.oCallLegB.bAttemptedToOutdial = true;
+var curTime = new Date;
+Session.f_longStartTime = curTime.getTime();
+Server.logInfo(" OBJECT A LEG INFO: ");
+Server.logInfo(" A LEG FROM: " + Session.oCallLegA.strFrom);
+Server.logInfo(" A LEG TO: " + Session.oCallLegA.strTo);
+Server.logInfo(" A LEG CALL Id: " + Session.oCallLegA.strCallId);
+Server.logInfo(" A LEG CSEQ: " + Session.oCallLegA.strCSeq);
+Server.logInfo(" A LEG REQUEST Uri: " + Session.oCallLegA.strRequestUri);
+Server.logInfo(" A LEG CALLING NUMBER: " + Session.oCallLegA.strCallingNumber);
+
+Server.logInfo(" OBJECT B LEG INFO: ");
+Server.logInfo(" B LEG FROM: " + Session.oCallLegB.strFrom);
+Server.logInfo(" B LEG TO: " + Session.oCallLegB.strTo);
+Server.logInfo(" B LEG CALL Id: " + Session.oCallLegB.strCallId);
+Server.logInfo(" B LEG CSEQ: " + Session.oCallLegB.strCSeq);
+Server.logInfo(" B LEG CALLING NUMBER: " + Session.oCallLegB.strCalledNumber);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Session.oCallLegB.bCurrentlyDialing = false;
+var curTime = new Date;
+Session.f_longStopTime = curTime.getTime();]]></script>
+          </scripts>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="47" y-coord="23" width="452" height="319" text="INPUT:
+oCallLegA        object type, A leg info
+oCallLegB        object type, B leg info
+longTimeStart        long type, the time when try to outdial
+longTimeAnswered    long type, the time when called party answer
+strSIPStatus        string type, SIP status of outdial
+OUTPUT:
+returns    
+    0    success
+    1    ring no answer
+    2    busy
+    3    DTMF interrupted
+    -1    fail
+    -2    called party error
+    -3    calling party error
+    -4    other error
+    -5    resource unavailable" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="ReInviteParty" start="4" event="ReInviteParty" returns="i4" >
+      <parameters >
+        <parameter name="oCallLeg" type="object" pass="byref"/>
+        <parameter name="strContent" type="string"/>
+        <parameter name="strContentType" type="string"/>
+        <parameter name="strContact" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nTIMEOUT" type="i4" >30</var>
+        <var name="f_nSUCCESS" type="i4" >0</var>
+        <var name="f_nFAILURE" type="i4" >-1</var>
+        <var name="f_nReturnCode" type="i4" >0</var>
+        <var name="f_nFINAL_TIMEOUT" type="i4" >-2</var>
+      </local-vars>
+      <actions >
+        <action id="4" plug-in="Pactolus.Branch.1" ><?xtml-editor x=183 y=570 ?>
+          <!--session timer enable?-->
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="strSessionTimerFlag == &quot;T&quot;" link="8" stubbed="0" >oCallLeg.strSessionTimerFlag == "T"</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("**** BEFORE REINVITE PARTY ****");
+Server.logInfo("oCallLeg.strFrom: " + Session.oCallLeg.strFrom);
+Server.logInfo("oCallLeg.strTo: " + Session.oCallLeg.strTo);
+Server.logInfo("oCallLeg.strContent: " + Session.oCallLeg.strContent);
+Server.logInfo("oCallLeg.strCSeq: " + Session.oCallLeg.strCSeq);
+Server.logInfo("oCallLeg.strCallId: " + Session.oCallLeg.strCallId);
+Server.logInfo("oCallLeg.strRequestUri: " + Session.oCallLeg.strRequestUri);
+Server.logInfo("oCallLeg.strRoute: " + Session.oCallLeg.strRoute);
+Server.logInfo("oCallLeg.strRecordRoute: " + Session.oCallLeg.strRecordRoute);
+Server.logInfo("oCallLeg.strContact: " + Session.strContact);
+Server.logInfo("oCallLeg.strContentType: " + Session.strContentType);
+Server.logInfo("oCallLeg.bReverseFromTo: " + Session.bReverseFromTo);]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Pactolus.SipInvite.1" ><?xtml-editor x=699 y=1000 ?>
+          <!--"RE- INVITE A"  @ SDP B-->
+          <sip-invite xmlns="urn:www.pactolus.com:xtml:sip" add-record-route="0" add-via="1" handle-responses="1" follow-redirection="0" final-response-status="f_nReturnCode" response-content="oCallLeg.strContent" response-content-type="oCallLeg.strContentType" final-request-uri="" timeout-for-final-response="f_nTIMEOUT" timeout-for-provisional-response="" record-route="" contact="" response-to="" use-session-timer="0" session-expires="" min-supported-session-timer="" refresher="" increment-cseq-first="0" increment-cseq-last="1" >
+            <call-id >oCallLeg.strCallId</call-id>
+            <contact >strContact</contact>
+            <content >strContent</content>
+            <content-type >strContentType</content-type>
+            <cseq >oCallLeg.strCSeq</cseq>
+            <from >oCallLeg.strTo</from>
+            <record-route >oCallLeg.strRecordRoute</record-route>
+            <request-uri >oCallLeg.strRequestUri</request-uri>
+            <route >oCallLeg.strRoute</route>
+            <session-expires >oCallLeg.strSessionTimer</session-expires>
+            <supported >"100rel, timer"</supported>
+            <to >oCallLeg.strFrom</to>
+          </sip-invite>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Redirect (3xx)"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Provisional Timeout"/>
+            <result name="Final Timeout" link="10" stubbed="0"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("RE-INVITE FAILS, EXIT ON: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=957 y=975 ?>
+          <!--nFAILURE-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nFAILURE"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: FAIL TO SEND RE-INVITE TO PARTY,  RETURN CODE IS: " + Session.f_nReturnCode);
+Server.logError("CALL Id: " + Session.oCallLeg.strCallId);
+Server.logError("CSeq: " + Session.oCallLeg.strCSeq);
+
+Session.p_oCallLeg.nInviteStatus = Session.f_nReturnCode;]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=962 y=1077 ?>
+          <!--nSUCCESS-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nSUCCESS"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS SEND REINVITE");
+Server.logInfo("THE RESPONSE CONTENT IS: " + Session.oCallLeg.strContent);]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.SipInvite.1" ><?xtml-editor x=709 y=527 ?>
+          <!--"RE- INVITE A"  @ SDP B-->
+          <sip-invite xmlns="urn:www.pactolus.com:xtml:sip" add-record-route="0" add-via="1" handle-responses="1" follow-redirection="0" final-response-status="f_nReturnCode" response-content="oCallLeg.strContent" response-content-type="oCallLeg.strContentType" final-request-uri="" timeout-for-final-response="f_nTIMEOUT" timeout-for-provisional-response="" record-route="" contact="" response-to="" use-session-timer="0" session-expires="" min-supported-session-timer="" refresher="" increment-cseq-first="0" increment-cseq-last="1" >
+            <call-id >oCallLeg.strCallId</call-id>
+            <contact >strContact</contact>
+            <content >strContent</content>
+            <content-type >strContentType</content-type>
+            <cseq >oCallLeg.strCSeq</cseq>
+            <from >oCallLeg.strTo</from>
+            <record-route >oCallLeg.strRecordRoute</record-route>
+            <request-uri >oCallLeg.strRequestUri</request-uri>
+            <route >oCallLeg.strRoute</route>
+            <supported >"100rel"</supported>
+            <to >oCallLeg.strFrom</to>
+          </sip-invite>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="3" stubbed="1"/>
+            <result name="Redirect (3xx)"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Provisional Timeout"/>
+            <result name="Final Timeout" link="10" stubbed="1"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("RE-INVITE FAILS, EXIT ON: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.Branch.1" ><?xtml-editor x=430 y=399 ?>
+          <!--byeA, reverse from and to-->
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="bReverseFromTo==true" link="5" stubbed="0" >oCallLeg.bReverseFromTo == true</result>
+          </results>
+        </action>
+        <action id="7" plug-in="Pactolus.SipInvite.1" ><?xtml-editor x=692 y=276 ?>
+          <!--"RE- INVITE B"  @ SDP A-->
+          <sip-invite xmlns="urn:www.pactolus.com:xtml:sip" add-record-route="0" add-via="1" handle-responses="1" follow-redirection="0" final-response-status="f_nReturnCode" response-content="oCallLeg.strContent" response-content-type="oCallLeg.strContentType" final-request-uri="" timeout-for-final-response="f_nTIMEOUT" timeout-for-provisional-response="" record-route="" contact="" response-to="" use-session-timer="0" session-expires="" min-supported-session-timer="" refresher="" increment-cseq-first="0" increment-cseq-last="1" >
+            <call-id >oCallLeg.strCallId</call-id>
+            <contact >strContact</contact>
+            <content >strContent</content>
+            <content-type >strContentType</content-type>
+            <cseq >oCallLeg.strCSeq</cseq>
+            <from >oCallLeg.strFrom</from>
+            <record-route >oCallLeg.strRecordRoute</record-route>
+            <request-uri >oCallLeg.strRequestUri</request-uri>
+            <route >oCallLeg.strRoute</route>
+            <supported >"100rel"</supported>
+            <to >oCallLeg.strTo</to>
+          </sip-invite>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="3" stubbed="1"/>
+            <result name="Redirect (3xx)"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Provisional Timeout"/>
+            <result name="Final Timeout" link="10" stubbed="1"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("RE-INVITE FAILS, EXIT ON: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Pactolus.Branch.1" ><?xtml-editor x=447 y=887 ?>
+          <!--byeA, reverse from and to-->
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="bReverseFromTo==true" link="1" stubbed="0" >oCallLeg.bReverseFromTo == true</result>
+          </results>
+        </action>
+        <action id="9" plug-in="Pactolus.SipInvite.1" ><?xtml-editor x=684 y=771 ?>
+          <!--"RE- INVITE B"  @ SDP A-->
+          <sip-invite xmlns="urn:www.pactolus.com:xtml:sip" add-record-route="0" add-via="1" handle-responses="1" follow-redirection="0" final-response-status="f_nReturnCode" response-content="oCallLeg.strContent" response-content-type="oCallLeg.strContentType" final-request-uri="" timeout-for-final-response="f_nTIMEOUT" timeout-for-provisional-response="" record-route="" contact="" response-to="" use-session-timer="0" session-expires="" min-supported-session-timer="" refresher="" increment-cseq-first="0" increment-cseq-last="1" >
+            <call-id >oCallLeg.strCallId</call-id>
+            <contact >strContact</contact>
+            <content >strContent</content>
+            <content-type >strContentType</content-type>
+            <cseq >oCallLeg.strCSeq</cseq>
+            <from >oCallLeg.strFrom</from>
+            <record-route >oCallLeg.strRecordRoute</record-route>
+            <request-uri >oCallLeg.strRequestUri</request-uri>
+            <route >oCallLeg.strRoute</route>
+            <session-expires >oCallLeg.strSessionTimer</session-expires>
+            <supported >"100rel, timer"</supported>
+            <to >oCallLeg.strTo</to>
+          </sip-invite>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="3" stubbed="1"/>
+            <result name="Redirect (3xx)"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Provisional Timeout"/>
+            <result name="Final Timeout" link="10" stubbed="1"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("RE-INVITE FAILS, EXIT ON: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=963 y=1222 ?>
+          <!--f_nFINAL_TIMEOUT-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nFINAL_TIMEOUT"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: FAIL TO SEND RE-INVITE TO PARTY,  RETURN CODE IS: " + Session.f_nReturnCode);
+Server.logError("CALL Id: " + Session.oCallLeg.strCallId);
+Server.logError("CSeq: " + Session.oCallLeg.strCSeq);]]></script>
+          </scripts>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="94" y-coord="46" width="405" height="223" text="re-invite
+INPUT
+    oCallLege    object type    call leg info
+    strContent    string type    SDP
+    strContentType    string type    application/sdp
+    strContact    string type    contact
+OUTPUT
+returns:
+0    success
+-1    failure" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="HangUpParty" start="4" event="HangUpParty" returns="i4" >
+      <parameters >
+        <parameter name="oCallLeg" type="object" pass="byref"/>
+        <parameter name="strContact" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nTIMEOUT" type="i4" >10</var>
+        <var name="f_nSUCCESS" type="i4" >0</var>
+        <var name="f_nFAILURE" type="i4" >-1</var>
+        <var name="f_nSIPStatus" type="i4" >0</var>
+        <var name="f_longStartTime" type="i8" >0</var>
+        <var name="f_longStopTime" type="i8" >0</var>
+      </local-vars>
+      <actions >
+        <action id="4" plug-in="Pactolus.Branch.1" ><?xtml-editor x=169 y=471 ?>
+          <!--byeA, reverse from and to-->
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="bReverseFromTo==true" link="5" stubbed="0" >oCallLeg.bReverseFromTo == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("**** BEFORE HANGUP PARTY ****");
+Server.logInfo("oCallLeg.strFrom: " + Session.oCallLeg.strFrom);
+Server.logInfo("oCallLeg.strTo: " + Session.oCallLeg.strTo);
+Server.logInfo("oCallLeg.strCSeq: " + Session.oCallLeg.strCSeq);
+Server.logInfo("oCallLeg.strCallId: " + Session.oCallLeg.strCallId);
+Server.logInfo("oCallLeg.strRequestUri: " + Session.oCallLeg.strRequestUri);]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Pactolus.SipBye.1" ><?xtml-editor x=463 y=333 ?>
+          <!--send BYE to a call leg B-->
+          <sip-bye xmlns="urn:www.pactolus.com:xtml:sip" add-record-route="0" add-via="1" timeout="f_nTIMEOUT" final-response-status="f_nSIPStatus" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >oCallLeg.strCallId</call-id>
+            <contact >strContact</contact>
+            <cseq >oCallLeg.strCSeq</cseq>
+            <from >oCallLeg.strFrom</from>
+            <record-route >oCallLeg.strRecordRoute</record-route>
+            <request-uri >oCallLeg.strRequestUri</request-uri>
+            <route >oCallLeg.strRoute</route>
+            <to >oCallLeg.strTo</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var curTime = new Date();
+Session.f_longStartTime = curTime.getTime();
+Session.oCallLeg.bConnected = false;
+Session.oCallLeg.bCurrentlyDialing = false;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[var curTime = new Date();
+Session.f_longStopTime = curTime.getTime();
+if (Result.id != 2)
+{
+	Server.logError("BYE PARTY B FAILS, EXIT ON: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=684 y=332 ?>
+          <!--FAILURE-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nFAILURE"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: FAIL TO SEND BYE TO PARTY,  RETURN CODE IS: " + Session.f_nSIPStatus);
+Server.logError("CALL Id: " + Session.oCallLeg.strCallId);
+Server.logError("CSeq: " + Session.oCallLeg.strCSeq);]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=702 y=487 ?>
+          <!--SUCCESS-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nSUCCESS"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.oCallLeg.nTearDownTime = Session.f_longStopTime - Session.f_longStartTime;
+Server.logInfo("SUCCESS SEND BYE TO PARTY ");]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.SipBye.1" ><?xtml-editor x=464 y=580 ?>
+          <!--send BYE to a call leg A-->
+          <sip-bye xmlns="urn:www.pactolus.com:xtml:sip" add-record-route="0" add-via="1" timeout="f_nTIMEOUT" final-response-status="f_nSIPStatus" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >oCallLeg.strCallId</call-id>
+            <contact >strContact</contact>
+            <cseq >oCallLeg.strCSeq</cseq>
+            <from >oCallLeg.strTo</from>
+            <record-route >oCallLeg.strRecordRoute</record-route>
+            <request-uri >oCallLeg.strRequestUri</request-uri>
+            <route >oCallLeg.strRoute</route>
+            <to >oCallLeg.strFrom</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="3" stubbed="1"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var curTime = new Date();
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[var curTime = new Date();
+Session.f_longStopTime = curTime.getTime();
+if (Result.id != 2)
+{
+	Server.logError("BYE PARTY A FAILS, EXIT ON: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="81" y-coord="31" width="401" height="216" text="Hang up call leg
+INPUT
+    oCallLeg    object type    call leg info
+OUTPUT
+returns
+    0    SUCCESS
+    -1    FAILURE" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="PutPartyOnHold" start="4" event="PutPartyOnHold" returns="i4" >
+      <parameters >
+        <parameter name="oCallLeg" type="object" pass="byref"/>
+        <parameter name="strContact" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nTIMEOUT" type="i4" >30</var>
+        <var name="f_nSUCCESS" type="i4" >0</var>
+        <var name="f_nFAILURE" type="i4" >-1</var>
+        <var name="f_nStatus" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="4" plug-in="Pactolus.Branch.1" ><?xtml-editor x=149 y=418 ?>
+          <!--byeA, reverse from and to-->
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="bReverseFromTo==true" link="5" stubbed="0" >oCallLeg.bReverseFromTo == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("**** BEFORE PUT PARTY ON HOLD ****");
+Server.logInfo("oCallLeg.strFrom: " + Session.oCallLeg.strFrom);
+Server.logInfo("oCallLeg.strTo: " + Session.oCallLeg.strTo);
+Server.logInfo("oCallLeg.strVia: " + Session.oCallLeg.strVia);
+Server.logInfo("oCallLeg.strCSeq: " + Session.oCallLeg.strCSeq);
+Server.logInfo("oCallLeg.strCallId: " + Session.oCallLeg.strCallId);
+Server.logInfo("oCallLeg.strRequestUri: " + Session.oCallLeg.strRequestUri);
+Server.logInfo("oCallLeg.strContent: " + Session.oCallLeg.strContent);
+Server.logInfo("oCallLeg.strRoute: " + Session.oCallLeg.strRoute);
+Server.logInfo("oCallLeg.strRecordRoute: " + Session.oCallLeg.strRecordRoute);]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Pactolus.Hold.1" ><?xtml-editor x=424 y=304 ?>
+          <!--put call leg B on hold-->
+          <cc-hold xmlns="urn:www.pactolus.com:xtml:sip-cc" to="oCallLeg.strFrom" from="oCallLeg.strTo" ingress-gateway="oCallLeg.strRequestUri" cseq="oCallLeg.strCSeq" call-id="oCallLeg.strCallId" sdp="oCallLeg.strContent" status="f_nStatus" route="oCallLeg.strRoute" record-route="oCallLeg.strRecordRoute" contact="strContact"/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="Success" link="3" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("INVITE PARTY B ON HOLD FAILS, EXIT ON: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=668 y=290 ?>
+          <!--FAILURE-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nFAILURE"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("ERROR: FAIL TO SEND TO PUT PARTY ON HOLD,  RETURN CODE IS: " + Session.f_nStatus);
+Server.logError("CALL Id: " + Session.oCallLeg.strCallId);
+Server.logError("CSeq: " + Session.oCallLeg.strCSeq);]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=693 y=391 ?>
+          <!--SUCCESS-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nSUCCESS"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS PUT PARTY ON HOLD");
+Server.logInfo("oCallLeg.strFrom: " + Session.oCallLeg.strFrom);
+Server.logInfo("oCallLeg.strTo: " + Session.oCallLeg.strTo);
+Server.logInfo("oCallLeg.strVia: " + Session.oCallLeg.strVia);
+Server.logInfo("oCallLeg.strCSeq: " + Session.oCallLeg.strCSeq);
+Server.logInfo("oCallLeg.strCallId: " + Session.oCallLeg.strCallId);
+Server.logInfo("oCallLeg.strRequestUri: " + Session.oCallLeg.strRequestUri);
+Server.logInfo("oCallLeg.strContent: " + Session.oCallLeg.strContent);
+Server.logInfo("oCallLeg.strRoute: " + Session.oCallLeg.strRoute);
+Server.logInfo("oCallLeg.strRecordRoute: " + Session.oCallLeg.strRecordRoute);]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.Hold.1" ><?xtml-editor x=437 y=554 ?>
+          <!--put call leg A on hold-->
+          <cc-hold xmlns="urn:www.pactolus.com:xtml:sip-cc" to="oCallLeg.strTo" from="oCallLeg.strFrom" ingress-gateway="oCallLeg.strRequestUri" cseq="oCallLeg.strCSeq" call-id="oCallLeg.strCallId" sdp="oCallLeg.strContent" status="f_nStatus" route="oCallLeg.strRoute" record-route="oCallLeg.strRecordRoute" contact="strContact"/>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="Success" link="3" stubbed="1"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("INVITE PARTY A ON HOLD FAILS, EXIT ON: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="67" y-coord="36" width="313" height="226" text="Put a call leg on hold
+INPUT
+    oCallLeg    object type    call leg info
+OUTPUT
+returns
+    0    SUCCESS
+    -1    FAILURE
+
+the HOLD PAC reverse To and From
+so we do double reverse" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+    <function name="CancelParty" start="6" event="CancelParty" returns="i4" >
+      <parameters >
+        <parameter name="oCallLeg" type="object"/>
+        <parameter name="strContact" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nFAILURE" type="i4" >-1</var>
+        <var name="f_nSUCCESS" type="i4" >0</var>
+        <var name="f_nTIMEOUT" type="i4" >5</var>
+        <var name="f_nReturnCode" type="i4" >0</var>
+        <var name="f_bIsValidDest" type="boolean" >0</var>
+        <var name="f_strCSeq" type="string" >0</var>
+        <var name="f_bSendMoreCancel" type="boolean" >0</var>
+      </local-vars>
+      <actions >
+        <action id="6" plug-in="Pactolus.Branch.1" ><?xtml-editor x=13 y=28 ?>
+          <!--valid destination?-->
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="f_bIsValidDest == true" link="1" stubbed="0" >f_bIsValidDest == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("**** BEFORE CANCEL PARTY ****");
+Server.logInfo("oCallLeg.strFrom: " + Session.oCallLeg.strFrom);
+Server.logInfo("oCallLeg.strTo: " + Session.oCallLeg.strTo);
+Server.logInfo("oCallLeg.strCSeq: " + Session.oCallLeg.strCSeq);
+Server.logInfo("oCallLeg.strCallId: " + Session.oCallLeg.strCallId);
+Server.logInfo("oCallLeg.strRequestUri: " + Session.oCallLeg.strRequestUri);
+if (Session.oCallLeg.strFrom.length > 0 && Session.oCallLeg.strTo.length > 0 && Session.oCallLeg.strCSeq.length > 0 && Session.oCallLeg.strCallId.length > 0 && Session.oCallLeg.strRequestUri.length > 0)
+{
+	Session.f_bIsValidDest = true;
+}
+else
+{
+	Session.f_bIsValidDest = false;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=139 y=174 ?>
+          <!--byeA, reverse from and to-->
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="bReverseFromTo==true" link="3" stubbed="0" >oCallLeg.bReverseFromTo == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_strCSeq = Session.oCallLeg.strCSeq;
+Server.logInfo("CSEQ BEFORE CANCEL: " + Session.f_strCSeq);]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.SipCancel.1" ><?xtml-editor x=349 y=96 ?>
+          <!--B Leg-->
+          <sip-bye xmlns="urn:www.pactolus.com:xtml:sip" add-record-route="0" add-via="1" timeout="f_nTIMEOUT" final-response-status="f_nReturnCode" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >oCallLeg.strCallId</call-id>
+            <contact >strContact</contact>
+            <cseq >f_strCSeq</cseq>
+            <from >oCallLeg.strFrom</from>
+            <record-route >oCallLeg.strRecordRoute</record-route>
+            <request-uri >oCallLeg.strRequestUri</request-uri>
+            <route >oCallLeg.strRoute</route>
+            <to >oCallLeg.strTo</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.oCallLeg.bConnected = false;
+Session.oCallLeg.bCurrentlyDialing = false;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("CANCEL PARTY B FAILS, EXIT ON: " + Result.name);
+	Server.logInfo("FAIL TO SEND CANCEL");
+	Server.logError("CALL Id: " + Session.oCallLeg.strCallId);
+	Server.logError("CSeq: " + Session.f_strCSeq);	
+}
+]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Pactolus.SipCancel.1" ><?xtml-editor x=353 y=342 ?>
+          <!--A Leg-->
+          <sip-bye xmlns="urn:www.pactolus.com:xtml:sip" add-record-route="0" add-via="1" timeout="f_nTIMEOUT" final-response-status="f_nReturnCode" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >oCallLeg.strCallId</call-id>
+            <contact >strContact</contact>
+            <cseq >oCallLeg.strCSeq</cseq>
+            <from >oCallLeg.strTo</from>
+            <record-route >oCallLeg.strRecordRoute</record-route>
+            <request-uri >oCallLeg.strRequestUri</request-uri>
+            <route >oCallLeg.strRoute</route>
+            <to >oCallLeg.strFrom</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="Success" link="5" stubbed="1"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 2)
+{
+	Server.logError("CANCEL PARTY A FAILS, EXIT ON: " + Result.name);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=787 y=223 ?>
+          <!--f_nSUCCESS-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nSUCCESS"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS TO SEND CANCEL");]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Pactolus.Branch.1" ><?xtml-editor x=559 y=174 ?>
+          <!--send more cancel?-->
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="f_bSendMoreCancel" link="2" stubbed="1" >f_bSendMoreCancel == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var myCSeq = new SipCSeq(Session.f_strCSeq);
+if (myCSeq.value > 1100)
+{
+	myCSeq.value--;
+	Session.f_strCSeq = myCSeq.encode();
+	Session.f_bSendMoreCancel = true;
+	Server.logInfo("MORE CANCEL TO SEND, CSEQ: " + Session.f_strCSeq);
+}
+else
+{
+	//don't want to try to send another CANCEL
+	Session.f_bSendMoreCancel = false;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=586 y=369 ?>
+          <!--f_nFAILURE-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nFAILURE"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("FAIL TO SEND CANCEL");
+Server.logError("CALL Id: " + Session.oCallLeg.strCallId);
+Server.logError("CSeq: " + Session.oCallLeg.strCSeq);]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="Hangup2Parties" start="1" event="Hangup2Parties" returns="i4" >
+      <parameters >
+        <parameter name="oCallLegOne" type="object" pass="byref"/>
+        <parameter name="oCallLegTwo" type="object" pass="byref"/>
+        <parameter name="strContact" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nFAILURE" type="i4" >-1</var>
+        <var name="f_nSUCCESS" type="i4" >0</var>
+        <var name="f_nSIPStatus" type="i4" >0</var>
+        <var name="f_nTIMEOUT" type="i4" >10</var>
+        <var name="f_nReturnCode" type="i4" >-1</var>
+        <var name="f_longStartTime" type="i8" >0</var>
+        <var name="f_longStopTime" type="i8" >0</var>
+        <var name="f_bEnoughInfo" type="boolean" >0</var>
+      </local-vars>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=164 y=469 ?>
+          <!--byeA, reverse from and to-->
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="bReverseFromTo==true" link="10" stubbed="0" >oCallLegOne.bReverseFromTo == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("**** BEFORE HANGUP 2 PARTIES ****");
+Server.logInfo("oCallLegOne.strFrom: " + Session.oCallLegOne.strFrom);
+Server.logInfo("oCallLegOne.strTo: " + Session.oCallLegOne.strTo);
+Server.logInfo("oCallLegOne.strCSeq: " + Session.oCallLegOne.strCSeq);
+Server.logInfo("oCallLegOne.strCallId: " + Session.oCallLegOne.strCallId);
+Server.logInfo("oCallLegOne.strRequestUri: " + Session.oCallLegOne.strRequestUri);
+Server.logInfo("oCallLegTwo.strFrom: " + Session.oCallLegTwo.strFrom);
+Server.logInfo("oCallLegTwo.strTo: " + Session.oCallLegTwo.strTo);
+Server.logInfo("oCallLegTwo.strCSeq: " + Session.oCallLegTwo.strCSeq);
+Server.logInfo("oCallLegTwo.strCallId: " + Session.oCallLegTwo.strCallId);
+Server.logInfo("oCallLegTwo.strRequestUri: " + Session.oCallLegTwo.strRequestUri);]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Pactolus.SipBye.1" ><?xtml-editor x=657 y=348 ?>
+          <!--send BYE to a call leg B-->
+          <sip-bye xmlns="urn:www.pactolus.com:xtml:sip" add-record-route="0" add-via="1" timeout="f_nTIMEOUT" final-response-status="f_nSIPStatus" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >oCallLegOne.strCallId</call-id>
+            <contact >strContact</contact>
+            <cseq >oCallLegOne.strCSeq</cseq>
+            <from >oCallLegOne.strFrom</from>
+            <record-route >oCallLegOne.strRecordRoute</record-route>
+            <request-uri >oCallLegOne.strRequestUri</request-uri>
+            <route >oCallLegOne.strRoute</route>
+            <to >oCallLegOne.strTo</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var curTime = new Date();
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[var curTime = new Date();
+Session.f_longStopTime = curTime.getTime();
+if (Result.id == 2)
+{
+	Server.logInfo("SUCCESS SEND BYE TO PARTY B");
+	Session.oCallLegOne.bConnected = false;
+	Session.oCallLegOne.bCurrentlyDialing = false;
+	Session.oCallLegOne.nTearDownTime = Session.f_longStopTime - Session.f_longStartTime;
+}
+else
+{
+	Server.logError("ERROR: FAIL TO SEND BYE TO PARTY B,  RETURN CODE IS: " + Session.f_nSIPStatus);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1338 y=344 ?>
+          <!--SUCCESS-->
+          <return xmlns="urn:www.pactolus.com:xtml:application" value="f_nSUCCESS"/>
+        </action>
+        <action id="5" plug-in="Pactolus.SipBye.1" ><?xtml-editor x=682 y=614 ?>
+          <!--send BYE to a call leg A-->
+          <sip-bye xmlns="urn:www.pactolus.com:xtml:sip" add-record-route="0" add-via="1" timeout="f_nTIMEOUT" final-response-status="f_nSIPStatus" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >oCallLegOne.strCallId</call-id>
+            <contact >strContact</contact>
+            <cseq >oCallLegOne.strCSeq</cseq>
+            <from >oCallLegOne.strTo</from>
+            <record-route >oCallLegOne.strRecordRoute</record-route>
+            <request-uri >oCallLegOne.strRequestUri</request-uri>
+            <route >oCallLegOne.strRoute</route>
+            <to >oCallLegOne.strFrom</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var curTime = new Date();
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[var curTime = new Date();
+Session.f_longStopTime = curTime.getTime();
+if (Result.id == 2)
+{
+	Server.logInfo("SUCCESS SEND BYE TO PARTY A");
+	Session.oCallLegOne.nTearDownTime = Session.f_longStopTime - Session.f_longStartTime;
+}
+else
+{
+	Server.logError("ERROR: FAIL TO SEND BYE TO PARTY A,  RETURN CODE IS: " + Session.f_nSIPStatus);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.SipBye.1" ><?xtml-editor x=1159 y=602 ?>
+          <!--send BYE to a call leg B-->
+          <sip-bye xmlns="urn:www.pactolus.com:xtml:sip" add-record-route="0" add-via="1" timeout="f_nTIMEOUT" final-response-status="f_nSIPStatus" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >oCallLegTwo.strCallId</call-id>
+            <contact >strContact</contact>
+            <cseq >oCallLegTwo.strCSeq</cseq>
+            <from >oCallLegTwo.strFrom</from>
+            <record-route >oCallLegTwo.strRecordRoute</record-route>
+            <request-uri >oCallLegTwo.strRequestUri</request-uri>
+            <route >oCallLegTwo.strRoute</route>
+            <to >oCallLegTwo.strTo</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var curTime = new Date();
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[var curTime = new Date();
+Session.f_longStopTime = curTime.getTime();
+if (Result.id == 2)
+{
+	Server.logInfo("SUCCESS SEND BYE TO PARTY B");
+	Session.oCallLegTwo.bConnected = false;
+	Session.oCallLegTwo.bCurrentlyDialing = false;
+	Session.oCallLegTwo.nTearDownTime = Session.f_longStopTime - Session.f_longStartTime;
+}
+else
+{
+	Server.logError("ERROR: FAIL TO SEND BYE TO PARTY B,  RETURN CODE IS: " + Session.f_nSIPStatus);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Pactolus.SipBye.1" ><?xtml-editor x=1115 y=342 ?>
+          <!--send BYE to a call leg A-->
+          <sip-bye xmlns="urn:www.pactolus.com:xtml:sip" add-record-route="0" add-via="1" timeout="f_nTIMEOUT" final-response-status="f_nSIPStatus" handle-responses="1" increment-cseq-first="0" increment-cseq-last="0" >
+            <call-id >oCallLegTwo.strCallId</call-id>
+            <contact >strContact</contact>
+            <cseq >oCallLegTwo.strCSeq</cseq>
+            <from >oCallLegTwo.strTo</from>
+            <record-route >oCallLegTwo.strRecordRoute</record-route>
+            <request-uri >oCallLegTwo.strRequestUri</request-uri>
+            <route >oCallLegTwo.strRoute</route>
+            <to >oCallLegTwo.strFrom</to>
+          </sip-bye>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Client error (4xx)"/>
+            <result name="Server error (5xx)"/>
+            <result name="Global error (6xx)"/>
+            <result name="Timeout"/>
+            <result name="Error"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var curTime = new Date();
+Session.f_longStartTime = curTime.getTime();]]></script>
+            <script language="javascript" timing="last" ><![CDATA[var curTime = new Date();
+Session.f_longStopTime = curTime.getTime();
+if (Result.id == 2)
+{
+	Server.logInfo("SUCCESS SEND BYE TO PARTY A");
+	Session.oCallLegTwo.nTearDownTime = Session.f_longStopTime - Session.f_longStartTime;
+}
+else
+{
+	Server.logError("ERROR: FAIL TO SEND BYE TO PARTY A,  RETURN CODE IS: " + Session.f_nSIPStatus);
+}]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Pactolus.Branch.1" ><?xtml-editor x=424 y=351 ?>
+          <!--enough info?-->
+          <results >
+            <result name="Default" link="9" stubbed="1"/>
+            <result name="f_bEnoughInfo" link="2" stubbed="0" >f_bEnoughInfo == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if (0 == Session.oCallLegOne.strRequestUri.length || 0 == Session.oCallLegOne.strCallId.length || 0 == Session.oCallLegOne.strCSeq)
+{
+	Session.f_bEnoughInfo = false;
+}
+else
+{
+	Session.f_bEnoughInfo = true;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Pactolus.Branch.1" ><?xtml-editor x=881 y=343 ?>
+          <!--enough info?-->
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="f_bEnoughInfo" link="7" stubbed="0" >f_bEnoughInfo == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if (0 == Session.oCallLegTwo.strRequestUri.length || 0 == Session.oCallLegTwo.strCallId.length || 0 == Session.oCallLegTwo.strCSeq)
+{
+	Session.f_bEnoughInfo = false;
+}
+else
+{
+	Session.f_bEnoughInfo = true;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Pactolus.Branch.1" ><?xtml-editor x=442 y=615 ?>
+          <!--enough info?-->
+          <results >
+            <result name="Default" link="11" stubbed="1"/>
+            <result name="f_bEnoughInfo" link="5" stubbed="0" >f_bEnoughInfo == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if (0 == Session.oCallLegOne.strRequestUri.length || 0 == Session.oCallLegOne.strCallId.length || 0 == Session.oCallLegOne.strCSeq)
+{
+	Session.f_bEnoughInfo = false;
+}
+else
+{
+	Session.f_bEnoughInfo = true;
+}]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Pactolus.Branch.1" ><?xtml-editor x=919 y=609 ?>
+          <!--enough info?-->
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+            <result name="f_bEnoughInfo" link="6" stubbed="0" >f_bEnoughInfo == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if (0 == Session.oCallLegTwo.strRequestUri.length || 0 == Session.oCallLegTwo.strCallId.length || 0 == Session.oCallLegTwo.strCSeq)
+{
+	Session.f_bEnoughInfo = false;
+}
+else
+{
+	Session.f_bEnoughInfo = true;
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+      <text-objects >
+        <text-object x-coord="148" y-coord="44" width="402" height="115" text="if oCallLegOne.bReverseFromTo == true
+oCallLegOne is A leg,  oCallLegTwo is B leg
+else
+oCallLegOne is B leg, oCallLegTwo is A leg" font-name="Times New Roman" size="-16" red="0" green="0" blue="0" weight="0" underline="0" strikeout="0" point-size="12" italic="0"/>
+      </text-objects>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>]]></script>
+  <properties >
+    <property key="disable-logging" value="0"/>
+    <property key="js-include-path" value="../Libs"/>
+    <property key="library-modules" value="lib_mediaserver.xml;lib_acd.xml"/>
+    <property key="library-path" value="../Libs"/>
+  </properties>
+  <application-version >
+    <revision >$Id: lib_callcontrol.xml,v 1.60.20.1 2009/08/28 08:29:27 egaudette Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

@@ -1,0 +1,146 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Jul 24, 2012 12:30:10 PM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.rawabi.model.AccessNumber" table="ACCESS_NUMBER" schema="PCSPROD">
+        <comment>Telephone Number used to access the system.</comment>
+        <id name="accessNumberId" type="big_decimal">
+            <column name="ACCESS_NUMBER_ID" precision="22" scale="0" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="languageRef" class="com.rawabi.model.LanguageRef" fetch="select">
+            <column name="LANGUAGE_ID" precision="22" scale="0" not-null="true" />
+        </many-to-one>
+        <many-to-one name="serviceProvider" class="com.rawabi.model.ServiceProvider" fetch="select">
+            <column name="SERVICE_PROVIDER_ID" precision="22" scale="0">
+                <comment>Service Provider OID</comment>
+            </column>
+        </many-to-one>
+        <property name="accessNumber" type="string">
+            <column name="ACCESS_NUMBER" length="40" not-null="true" unique="true">
+                <comment>Telephone Number used to access the system. (e.g. 1-800-XXX-XXXX)</comment>
+            </column>
+        </property>
+        <property name="dialingPlanId" type="big_decimal">
+            <column name="DIALING_PLAN_ID" precision="22" scale="0" not-null="true">
+                <comment>The dialing plan associated with the access number. Used for</comment>
+            </column>
+        </property>
+        <property name="status" type="big_decimal">
+            <column name="STATUS" precision="22" scale="0" not-null="true">
+                <comment>status of access_number - Active (0) Inactive (1)</comment>
+            </column>
+        </property>
+        <property name="countryId" type="big_decimal">
+            <column name="COUNTRY_ID" precision="22" scale="0" not-null="true" />
+        </property>
+        <property name="domIntlFlag" type="char">
+            <column name="DOM_INTL_FLAG" length="1" not-null="true">
+                <comment>Is the access number a domestic or international originating access number. Used for determining whether to rate A leg as international or domestic.
+                I=International, D=Domestic, U=Unspecified. 'U' will trigger rating to use ANI for international origination detection. See admin guide for full details.</comment>
+            </column>
+        </property>
+        <property name="acdEnabled" type="char">
+            <column name="ACD_ENABLED" length="1" not-null="true">
+                <comment>Is ACD Enabled for this access number 'T'=true, 'F'=false</comment>
+            </column>
+        </property>
+        <property name="acdCsrGreet" type="char">
+            <column name="ACD_CSR_GREET" length="1" not-null="true">
+                <comment>For ACD. When a caller calls into this access number, if 'T'automatically route them to a CSR to collect their pin or passcode.</comment>
+            </column>
+        </property>
+        <property name="acdCsrOnMaxLogins" type="char">
+            <column name="ACD_CSR_ON_MAX_LOGINS" length="1" not-null="true">
+                <comment>For ACD. If a participant exceeds the maximum number of login attempts, route the caller to a CSR</comment>
+            </column>
+        </property>
+        <property name="musicHoldFlag" type="char">
+            <column name="MUSIC_HOLD_FLAG" length="1" not-null="true" />
+        </property>
+        <property name="thirdPartyAcdAvailable" type="char">
+            <column name="THIRD_PARTY_ACD_AVAILABLE" length="1" not-null="true">
+                <comment>Is third party service available</comment>
+            </column>
+        </property>
+        <property name="applyPayphoneSurcharges" type="char">
+            <column name="APPLY_PAYPHONE_SURCHARGES" length="1" not-null="true">
+                <comment>T/F flag indicating whether or not payphone surcharges will be applied for calls to this access number. If F, payphone surcharges will be excluded. If T
+                and call originates from a payphone, payphone surcharge rates will apply.</comment>
+            </column>
+        </property>
+        <property name="payphoneSwipeFlag" type="char">
+            <column name="PAYPHONE_SWIPE_FLAG" length="1" not-null="true">
+                <comment>T/F flag indicating that the access number is used for payphone swipe access. This triggers a different callflow.</comment>
+            </column>
+        </property>
+        <property name="callbackFlag" type="char">
+            <column name="CALLBACK_FLAG" length="1" not-null="true">
+                <comment>Indicates whether this access number is provisioned such that callers calling into it will be dialed back by the system instead of answering the
+                INVITE.</comment>
+            </column>
+        </property>
+        <property name="applicationType" type="char">
+            <column name="APPLICATION_TYPE" length="1" not-null="true">
+                <comment>Use to determine prepaid vs postpaid for combined callflow applications 0 = n/a 1 = prepaid 3 = postpaid</comment>
+            </column>
+        </property>
+        <property name="collectPinFlag" type="char">
+            <column name="COLLECT_PIN_FLAG" length="1" not-null="true">
+                <comment>For unauthorized ANI, collect pin from subscriber</comment>
+            </column>
+        </property>
+        <property name="ivrChargeNcCallsFlag" type="char">
+            <column name="IVR_CHARGE_NC_CALLS_FLAG" length="1" not-null="true">
+                <comment>Charge subscriber for time spent on IVR for non-completed calls.</comment>
+            </column>
+        </property>
+        <property name="directCallFlag" type="char">
+            <column name="DIRECT_CALL_FLAG" length="1" not-null="true">
+                <comment>Indicates whether the access number is a direct call access number where the caller is prompted for a direct call ID.</comment>
+            </column>
+        </property>
+        <property name="mainMenuFlag" type="java.lang.Character">
+            <column name="MAIN_MENU_FLAG" length="1">
+                <comment>T - allow IVR main menu access. F - do not allow.</comment>
+            </column>
+        </property>
+        <property name="tollNumberFlag" type="java.lang.Character">
+            <column name="TOLL_NUMBER_FLAG" length="1">
+                <comment>Flag that specifies whether this is a toll free number (T) or a local access number (F).</comment>
+            </column>
+        </property>
+        <property name="eventFlag" type="java.lang.Character">
+            <column name="EVENT_FLAG" length="1">
+                <comment>Specifies whether this access number identifies event conferences.</comment>
+            </column>
+        </property>
+        <property name="prepaidPinLength" type="big_decimal">
+            <column name="PREPAID_PIN_LENGTH" precision="22" scale="0">
+                <comment>number of digits to collect for prepaid PIN from IVR</comment>
+            </column>
+        </property>
+        <property name="conferencePasscodeLength" type="big_decimal">
+            <column name="CONFERENCE_PASSCODE_LENGTH" precision="22" scale="0" />
+        </property>
+        <property name="thirdPartyOutdialDuration" type="big_decimal">
+            <column name="THIRD_PARTY_OUTDIAL_DURATION" precision="22" scale="0">
+                <comment>Minutes before hang up</comment>
+            </column>
+        </property>
+        <property name="languageMenuId" type="big_decimal">
+            <column name="LANGUAGE_MENU_ID" precision="22" scale="0">
+                <comment>Nullable column identifying the optional language menu to play when a caller calls this access number.</comment>
+            </column>
+        </property>
+        <property name="thirdPartyOutdialNumber" type="string">
+            <column name="THIRD_PARTY_OUTDIAL_NUMBER" length="40">
+                <comment>Service Number</comment>
+            </column>
+        </property>
+        <property name="description" type="string">
+            <column name="DESCRIPTION" length="120" />
+        </property>
+    </class>
+</hibernate-mapping>

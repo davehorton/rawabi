@@ -1,0 +1,219 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Jul 24, 2012 12:30:10 PM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.rawabi.model.ProductOffering" table="PRODUCT_OFFERING" schema="PCSPROD">
+        <comment>Container class for bundling services and associating rated billing events to. A product offering has associated accounts. A product offering is essentially what
+        is available for customers to purchase from the service provider.</comment>
+        <id name="offeringId" type="big_decimal">
+            <column name="OFFERING_ID" precision="22" scale="0" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="serviceProvider" class="com.rawabi.model.ServiceProvider" fetch="select">
+            <column name="SERVICE_PROVIDER_ID" precision="22" scale="0" not-null="true">
+                <comment>Object ID for Service Provider</comment>
+            </column>
+        </many-to-one>
+        <property name="currencyId" type="big_decimal">
+            <column name="CURRENCY_ID" precision="22" scale="0" not-null="true" />
+        </property>
+        <property name="languageId" type="big_decimal">
+            <column name="LANGUAGE_ID" precision="22" scale="0" not-null="true" />
+        </property>
+        <property name="pinLength" type="big_decimal">
+            <column name="PIN_LENGTH" precision="22" scale="0" not-null="true" />
+        </property>
+        <property name="expirationType" type="big_decimal">
+            <column name="EXPIRATION_TYPE" precision="22" scale="0" not-null="true" />
+        </property>
+        <property name="balXferFlag" type="char">
+            <column name="BAL_XFER_FLAG" length="1" not-null="true" />
+        </property>
+        <property name="ccRechargeFlag" type="char">
+            <column name="CC_RECHARGE_FLAG" length="1" not-null="true" />
+        </property>
+        <property name="balanceSweepFlag" type="char">
+            <column name="BALANCE_SWEEP_FLAG" length="1" not-null="true" />
+        </property>
+        <property name="creditCardReqFlag" type="char">
+            <column name="CREDIT_CARD_REQ_FLAG" length="1" not-null="true" />
+        </property>
+        <property name="emailFlag" type="char">
+            <column name="EMAIL_FLAG" length="1" not-null="true">
+                <comment>T = Email notification sent upon active status</comment>
+            </column>
+        </property>
+        <property name="subSignupStatus" type="big_decimal">
+            <column name="SUB_SIGNUP_STATUS" precision="22" scale="0" not-null="true" />
+        </property>
+        <property name="creditCardValidFlag" type="char">
+            <column name="CREDIT_CARD_VALID_FLAG" length="1" not-null="true">
+                <comment>T = Credit Card must be validated when a subscriber signs up</comment>
+            </column>
+        </property>
+        <property name="allowCorpAcctFlag" type="char">
+            <column name="ALLOW_CORP_ACCT_FLAG" length="1" not-null="true" />
+        </property>
+        <property name="aniAuthFlag" type="char">
+            <column name="ANI_AUTH_FLAG" length="1" not-null="true" />
+        </property>
+        <property name="requireAniAuthFlag" type="char">
+            <column name="REQUIRE_ANI_AUTH_FLAG" length="1" not-null="true">
+                <comment>T/F indicates whether postpaid calling subscriber can be validated via DTMF (F) or only by ANI lookup</comment>
+            </column>
+        </property>
+        <property name="deletedFlag" type="char">
+            <column name="DELETED_FLAG" length="1" not-null="true">
+                <comment>Used to mark a product offering record as delete so it does not show up in the GUIs</comment>
+            </column>
+        </property>
+        <property name="popdRateCallsFlag" type="char">
+            <column name="POPD_RATE_CALLS_FLAG" length="1" not-null="true">
+                <comment>if T, apply rates to postpaid calls</comment>
+            </column>
+        </property>
+        <property name="popdCreditLimitFlag" type="char">
+            <column name="POPD_CREDIT_LIMIT_FLAG" length="1" not-null="true">
+                <comment>if T, apply credit limits</comment>
+            </column>
+        </property>
+        <property name="accessNumOfferingRequired" type="char">
+            <column name="ACCESS_NUM_OFFERING_REQUIRED" length="1" not-null="true">
+                <comment>make sure access number is linked to sub's offering or pin/passcode/account number. If access number is not associated and this flag is set to T, block
+                call</comment>
+            </column>
+        </property>
+        <property name="customRatesFlag" type="char">
+            <column name="CUSTOM_RATES_FLAG" length="1" not-null="true" />
+        </property>
+        <property name="balXferDisableSub" type="char">
+            <column name="BAL_XFER_DISABLE_SUB" length="1" not-null="true">
+                <comment>Flag indicating whether or not we disable a pin after transferring the balance from it. T = disable pin, F = do not disable pin.</comment>
+            </column>
+        </property>
+        <property name="ivrAcctBalUnitsFlag" type="char">
+            <column name="IVR_ACCT_BAL_UNITS_FLAG" length="1" not-null="true">
+                <comment>If T, account balance stated in units instead of currency when in IVR.</comment>
+            </column>
+        </property>
+        <property name="firmCreditLimitFlag" type="char">
+            <column name="FIRM_CREDIT_LIMIT_FLAG" length="1" not-null="true">
+                <comment>If T, apply firm credit limits instead of hard credit limits.</comment>
+            </column>
+        </property>
+        <property name="primaryFlag" type="java.lang.Character">
+            <column name="PRIMARY_FLAG" length="1" />
+        </property>
+        <property name="expirationDate" type="date">
+            <column name="EXPIRATION_DATE" length="7" />
+        </property>
+        <property name="numExpirationDays" type="big_decimal">
+            <column name="NUM_EXPIRATION_DAYS" precision="22" scale="0" />
+        </property>
+        <property name="ppMinBalance" type="big_decimal">
+            <column name="PP_MIN_BALANCE" precision="22" scale="0">
+                <comment>minimum prepaid balance required to place a call</comment>
+            </column>
+        </property>
+        <property name="ppMaxBalance" type="big_decimal">
+            <column name="PP_MAX_BALANCE" precision="22" scale="0">
+                <comment>number, maximum prepaid balance allowed on the system</comment>
+            </column>
+        </property>
+        <property name="minRecharge" type="big_decimal">
+            <column name="MIN_RECHARGE" precision="22" scale="0">
+                <comment>minimum cc recharge amount</comment>
+            </column>
+        </property>
+        <property name="maxRecharge" type="big_decimal">
+            <column name="MAX_RECHARGE" precision="22" scale="0">
+                <comment>maximum cc recharge amount</comment>
+            </column>
+        </property>
+        <property name="billingType" type="big_decimal">
+            <column name="BILLING_TYPE" precision="22" scale="0">
+                <comment>1= Prepaid Product Offering; 2=Postpaid Product Offering</comment>
+            </column>
+        </property>
+        <property name="ccMaxSubweek" type="big_decimal">
+            <column name="CC_MAX_SUBWEEK" precision="22" scale="0">
+                <comment>maximum total recharge per sub per week</comment>
+            </column>
+        </property>
+        <property name="ccMaxSubmonth" type="big_decimal">
+            <column name="CC_MAX_SUBMONTH" precision="22" scale="0">
+                <comment>maximum total recharge per sub per month</comment>
+            </column>
+        </property>
+        <property name="ccMaxCardweek" type="big_decimal">
+            <column name="CC_MAX_CARDWEEK" precision="22" scale="0">
+                <comment>maximum total recharge per cc per week</comment>
+            </column>
+        </property>
+        <property name="ccMaxCardmonth" type="big_decimal">
+            <column name="CC_MAX_CARDMONTH" precision="22" scale="0">
+                <comment>maximum total recharge per cc per month</comment>
+            </column>
+        </property>
+        <property name="ccRechargeAmount1" type="big_decimal">
+            <column name="CC_RECHARGE_AMOUNT1" precision="22" scale="0" />
+        </property>
+        <property name="ccRechargeAmount2" type="big_decimal">
+            <column name="CC_RECHARGE_AMOUNT2" precision="22" scale="0" />
+        </property>
+        <property name="ccRechargeAmount3" type="big_decimal">
+            <column name="CC_RECHARGE_AMOUNT3" precision="22" scale="0" />
+        </property>
+        <property name="ccRechargeAmount4" type="big_decimal">
+            <column name="CC_RECHARGE_AMOUNT4" precision="22" scale="0" />
+        </property>
+        <property name="popdCreditLimit" type="big_decimal">
+            <column name="POPD_CREDIT_LIMIT" precision="22" scale="0">
+                <comment>max currency amount sub is allowed to use per period</comment>
+            </column>
+        </property>
+        <property name="clmBalResetDay" type="big_decimal">
+            <column name="CLM_BAL_RESET_DAY" precision="22" scale="0">
+                <comment>day of month on which credit limits will reset</comment>
+            </column>
+        </property>
+        <property name="dialingPlanId" type="big_decimal">
+            <column name="DIALING_PLAN_ID" precision="22" scale="0">
+                <comment>Specifies the dialing plan to use for calls made by subscribers associated with this product offering. If not specified, the dialing plan at the access
+                number dictates dialing plan. If not specified for a broadband calling service, north American dialing plan is assumed.</comment>
+            </column>
+        </property>
+        <property name="ccRechargeAmount5" type="big_decimal">
+            <column name="CC_RECHARGE_AMOUNT5" precision="22" scale="0">
+                <comment>Credit card recharge option 5</comment>
+            </column>
+        </property>
+        <property name="ccRechargeAmount6" type="big_decimal">
+            <column name="CC_RECHARGE_AMOUNT6" precision="22" scale="0">
+                <comment>Credit card recharge option 6</comment>
+            </column>
+        </property>
+        <property name="creditLimitWarning" type="big_decimal">
+            <column name="CREDIT_LIMIT_WARNING" precision="22" scale="0">
+                <comment>If this percentage of a subscriber credit limit is reached an email notification is sent out</comment>
+            </column>
+        </property>
+        <property name="name" type="string">
+            <column name="NAME" length="120">
+                <comment>Name of offering provided by Service Provider</comment>
+            </column>
+        </property>
+        <property name="description" type="string">
+            <column name="DESCRIPTION" length="300">
+                <comment>Offering description provided by Service Provider</comment>
+            </column>
+        </property>
+        <set name="accountActivities" table="ACCOUNT_ACTIVITY" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="OFFERING_ID" precision="22" scale="0" />
+            </key>
+            <one-to-many class="com.rawabi.model.AccountActivity" />
+        </set>
+    </class>
+</hibernate-mapping>

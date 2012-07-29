@@ -1,0 +1,233 @@
+<?xml version="1.0"?>
+<xtml version="1.0" >
+  <events >
+    <event name="ConnectToMusicResponse" display="ConnectToMusicReponse" >
+      <parameter name="nReplyCode" type="i4"/>
+      <parameter name="strReplyMsg" type="string"/>
+      <parameter name="nConferenceIndex" type="i4"/>
+      <parameter name="strConferenceId" type="string"/>
+    </event>
+  </events>
+  <global-handlers/>
+  <functions >
+    <function name="ConnectToMOH" start="11" event="ConnectToMOH" returns="i4" >
+      <parameters >
+        <parameter name="p_oMS_MOH" type="object" pass="byref"/>
+        <parameter name="p_oAPIObject" type="object" pass="byref"/>
+        <parameter name="p_strContact" type="string"/>
+        <parameter name="p_oCallLeg" type="object" pass="byref"/>
+        <parameter name="p_strMOHSessionId" type="string" pass="byref"/>
+        <parameter name="p_nConfIndex" type="i4"/>
+        <parameter name="p_strConfId" type="string"/>
+        <parameter name="p_strLanguage" type="string"/>
+      </parameters>
+      <local-vars >
+        <var name="f_nReturnCode" type="i4" >0</var>
+        <var name="f_nFAILURE" type="i4" >-1</var>
+        <var name="f_strReplyMsg" type="string" ></var>
+        <var name="f_nSUCCESS" type="i4" >0</var>
+        <var name="f_nCALLERHUNGUP" type="i4" >-2</var>
+      </local-vars>
+      <actions >
+        <action id="11" plug-in="Pactolus.Branch.1" ><?xtml-editor x=20 y=122 ?>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="bSuppressOnHold" link="3" stubbed="0" >p_oAPIObject.bSuppressOnHold == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_enable_event();]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=227 y=53 ?>
+          <!--put caller on hold-->
+          <function name="&quot;PutPartyOnHold&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+            <result name="SUCCESS" link="3" stubbed="0" >f_nReturnCode == f_nSUCCESS</result>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=112 y=600 ?>
+          <!--f_nFAILURE-->
+          <return value="f_nFAILURE"/>
+        </action>
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=446 y=141 ?>
+          <!--MsgConnectToMusic-->
+          <function name="&quot;MsgConnectToMusic&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_strMOHSessionId</parameter>
+            <parameter >p_oAPIObject.strPlatformSessionId</parameter>
+            <parameter >p_oAPIObject.lServiceProviderId</parameter>
+          </function>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="f_nReturnCode = 0" link="4" stubbed="0" >f_nReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SEND TO MSG CONNECT TO MOH: ");
+Server.logInfo("MOH session id: " + Session.p_strMOHSessionId);
+Server.logInfo("Platform session id: " + Session.p_oAPIObject.strPlatformSessionId);
+Server.logInfo("Service Provider id: " + Session.p_oAPIObject.lServiceProviderId);
+Session.p_oMS_MOH.bUseForMOH = true;
+Server.logInfo("p_oMS_MOH.bUseForMOH: " + Session.p_oMS_MOH.bUseForMOH);
+Server.logInfo("p_oMS_MOH.strMOHType: " + Session.p_oMS_MOH.strMOHType);]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.WaitEvent.1" ><?xtml-editor x=648 y=122 ?>
+          <!--ConnectToMusicResponse-->
+          <wait timeout="20" recv-name="" >
+            <msg name="ConnectToMusicResponse" >
+              <parameter >f_nReturnCode</parameter>
+              <parameter >f_strReplyMsg</parameter>
+              <parameter >p_nConfIndex</parameter>
+              <parameter >p_strConfId</parameter>
+            </msg>
+          </wait>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="f_nReturnCode = 0" link="5" stubbed="0" >f_nReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_nReturnCode = -1;]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=873 y=121 ?>
+          <!--AddMemberToConference-->
+          <function name="&quot;AddMemberToConference&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oMS_MOH</parameter>
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+            <result name="FAILURE" link="7" stubbed="0" >f_nReturnCode == f_nFAILURE</result>
+            <result name="CALLERHUNGUP" link="2" stubbed="1" >f_nReturnCode == f_nCALLERHUNGUP</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oMS_MOH.strConferenceId = Session.p_strConfId;]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=111 y=527 ?>
+          <!--0-->
+          <return value="0"/>
+        </action>
+        <action id="7" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1102 y=115 ?>
+          <!--MsgDisconnectFromMusic-->
+          <function name="&quot;MsgDisconnectFromMusic&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_strMOHSessionId</parameter>
+            <parameter >p_nConfIndex</parameter>
+            <parameter >p_oAPIObject.strSessionId</parameter>
+          </function>
+          <results >
+            <result name="Default" link="8" stubbed="1"/>
+          </results>
+        </action>
+        <action id="8" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=95 y=268 ?>
+          <!--"MSOutdialParty"-->
+          <function name="&quot;MSOutdialParty&quot;" return="f_nReturnCode" external-function="1" library="" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_oMS_MOH</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+            <result name="SUCCESS" link="9" stubbed="0" >f_nReturnCode == f_nSUCCESS</result>
+          </results>
+        </action>
+        <action id="9" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=315 y=400 ?>
+          <!--please hold-->
+          <play connection-id="p_oMS_MOH.strConnectionId" endpoint="p_oMS_MOH.strEndPoint" callid="p_oMS_MOH.strCallId" repeat="1" timeout="10" ms-type="p_oMS_MOH.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="p_strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >898</audio>
+          </play>
+          <results >
+            <result name="Default" link="6" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="10" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=326 y=260 ?>
+          <!--Hang up caller-->
+          <function name="&quot;HangUpParty&quot;" return="" external-function="1" library="lib_callcontrol.xml" >
+            <parameter >p_oCallLeg</parameter>
+            <parameter >p_strContact</parameter>
+          </function>
+          <results >
+            <result name="Default" link="2" stubbed="1"/>
+          </results>
+        </action>
+      </actions>
+    </function>
+    <function name="DisconnectFromMOH" start="1" event="DisconnectFromMOH" returns="i4" >
+      <parameters >
+        <parameter name="p_oMS_MOH" type="object" pass="byref"/>
+        <parameter name="p_strMOHSessionId" type="string" pass="byref"/>
+        <parameter name="p_nMOHConfIndex" type="i4"/>
+        <parameter name="p_strSessionId" type="string"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=46 y=67 ?>
+          <!--Temp Conf?-->
+          <results >
+            <result name="Default" link="5" stubbed="1"/>
+            <result name="In MOH Conf" link="3" stubbed="0" >p_oMS_MOH.bCurrentlyInConf == true</result>
+            <result name="connected" link="2" stubbed="0" >p_oMS_MOH.bCurrentlyConnected == true</result>
+          </results>
+        </action>
+        <action id="2" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=301 y=198 ?>
+          <!--DeleteMSConnection-->
+          <function name="&quot;DeleteMSConnection&quot;" return="" external-function="1" library="" >
+            <parameter >p_oMS_MOH</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="1"/>
+          </results>
+        </action>
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=285 y=56 ?>
+          <!--Remove Member From Conference-->
+          <function name="&quot;RemoveMemberFromConference&quot;" return="" external-function="1" library="" >
+            <parameter >p_oMS_MOH</parameter>
+          </function>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+          </results>
+        </action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=527 y=56 ?>
+          <!--MsgDisconnectFromMusic-->
+          <function name="&quot;MsgDisconnectFromMusic&quot;" return="" external-function="1" library="" >
+            <parameter >p_strMOHSessionId</parameter>
+            <parameter >p_nMOHConfIndex</parameter>
+            <parameter >p_strSessionId</parameter>
+          </function>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+          </results>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=755 y=51 ?>
+          <!--0-->
+          <return value="0"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.p_oMS_MOH.bUseForMOH = false;
+Server.logInfo("p_oMS_MOH.bUseForMOH: " + Session.p_oMS_MOH.bUseForMOH);
+Server.logInfo("p_oMS_MOH.strMOHType: " + Session.p_oMS_MOH.strMOHType);]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>]]></script>
+  <properties >
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value="../Libs"/>
+    <property key="library-modules" value="lib_callcontrol.xml; lib_mediaserver.xml; lib_3WayCalling.xml;lib_APISce.xml;lib_acd.xml;lib_soap.xml;lib_speeddial.xml;lib_utils.xml;lib_moh.xml;javascript_utils.jsh"/>
+    <property key="library-path" value="../Libs"/>
+  </properties>
+  <application-version >
+    <revision >$Id: lib_moh.xml,v 1.12 2006/04/14 19:00:37 sbhatt Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>

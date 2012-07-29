@@ -1,0 +1,1906 @@
+<?xml version="1.0"?>
+<xtml version="1.0" >
+  <global-handlers >
+    <handler event="Standard.OnSessionStart.1" function="OnSessionStart" public="0" always-on="0"/>
+    <handler event="Standard.OnSessionEnd.1" function="OnSessionEnd" public="0" always-on="0"/>
+  </global-handlers>
+  <global-vars >
+    <var name="g_lOfferingID" type="i8" >20</var>
+    <var name="g_iVoipServiceID" type="i4" >40</var>
+    <var name="g_iVoicemailServiceID" type="i4" >30</var>
+    <var name="g_sVOIPPhoneNumber" type="string" ></var>
+    <var name="g_iJavaReturnCode" type="i4" >0</var>
+    <var name="g_oAPI" type="object" ></var>
+    <var name="g_oAccessLine" type="object" ></var>
+    <var name="g_oVoipService" type="object" ></var>
+    <var name="g_iFunctionRetCode" type="i4" >-99</var>
+    <var name="g_oCallLegs" type="object" ></var>
+    <var name="g_iSecsToRegister" type="i4" >1800</var>
+    <var name="strResponse" type="string" ></var>
+    <var name="g_oPager" type="object" ></var>
+    <var name="g_oMessage" type="object" ></var>
+    <var name="g_oEmail" type="object" ></var>
+    <var name="g_iMaxMessages" type="i4" >0</var>
+    <var name="g_iMaxMessageLength" type="i4" >0</var>
+    <var name="g_strVMailPin" type="string" ></var>
+    <var name="g_strFirstCall" type="string" ></var>
+    <var name="g_iMaxSaveFor" type="i4" >0</var>
+    <var name="g_iMaxGreetingLength" type="i4" >0</var>
+    <var name="strLocalHost" type="string" ></var>
+    <var name="strCustomerCode" type="string" ></var>
+    <var name="intDomMinConnectTime" type="i4" >0</var>
+    <var name="intIntlMinConnectTime" type="i4" >0</var>
+    <var name="iVoicemailPinLength" type="i4" >0</var>
+    <var name="g_oSub" type="object" ></var>
+    <var name="g_strVMailDomain" type="string" ></var>
+    <var name="g_strMailServerIpAddress" type="string" ></var>
+    <var name="g_strEmailFromHeader" type="string" ></var>
+    <var name="g_strEmailSubject" type="string" ></var>
+    <var name="g_strEmailBody" type="string" ></var>
+    <var name="g_strPagerSubject" type="string" ></var>
+    <var name="g_strPagerBody" type="string" ></var>
+    <var name="g_strProcDBName" type="string" ></var>
+    <var name="g_strDestCallingCode" type="string" ></var>
+    <var name="g_strDestAreaCode" type="string" ></var>
+    <var name="g_iDestCountryID" type="i4" >0</var>
+    <var name="g_strContact" type="string" ></var>
+    <var name="g_strRecordRoute" type="string" ></var>
+    <var name="g_strHasVMFlag" type="string" ></var>
+    <var name="g_strMailboxAcct" type="string" ></var>
+    <var name="g_strLanguageCode" type="string" ></var>
+    <var name="g_iGMTOffset" type="i4" >0</var>
+    <var name="g_strRemindMeSched" type="string" ></var>
+    <var name="g_lVoipSchedCallID" type="i8" >0</var>
+    <var name="g_oRemindMeQueue" type="object" ></var>
+    <var name="g_oCC" type="object" ></var>
+    <var name="g_oSUB" type="object" ></var>
+    <var name="g_oBALXFER" type="object" ></var>
+    <var name="g_lServiceProviderID" type="i8" >1</var>
+    <var name="g_iSessionType" type="i4" >0</var>
+    <var name="g_lSubscriberID" type="i8" >0</var>
+    <var name="g_lVoiceMailAccountId" type="i8" >20</var>
+    <var name="g_lAccessLineId" type="i8" >0</var>
+    <var name="g_iTimezoneId" type="i4" >3</var>
+    <var name="g_strMWIOffFlag" type="string" ></var>
+    <var name="g_lDeptId" type="i8" >0</var>
+  </global-vars>
+  <shared-vars >
+    <var name="SUCCESS" type="i4" >0</var>
+    <var name="ERROR" type="i4" >-1</var>
+    <var name="S_DBNAME" type="string" >pactolusdb</var>
+    <var name="s_intRING_NO_ANSWER_TIME" type="i4" >45</var>
+    <var name="s_intSessionTimerInterval" type="i4" >120</var>
+    <var name="s_strBackupPSX" type="string" ></var>
+    <var name="s_strCodec" type="string" ></var>
+    <var name="s_strPrimaryPSX" type="string" ></var>
+    <var name="s_strSessionTimerFlag" type="string" ></var>
+    <var name="s_intDomMinConnectTime" type="i4" >0</var>
+    <var name="s_intIntlMinConnectTime" type="i4" >0</var>
+    <var name="s_strCustomerCode" type="string" ></var>
+    <var name="s_strLocalHost" type="string" ></var>
+    <var name="s_nRING_NO_ANSWER_TIME" type="i4" >0</var>
+    <var name="nRingNoAnswerTime" type="i4" >0</var>
+    <var name="s_nSessionTimerInterval" type="i4" >0</var>
+    <var name="nSessionTimer" type="i4" >0</var>
+    <var name="s_nDomMinConnectTime" type="i4" >0</var>
+    <var name="nDomMinConnectTime" type="i4" >0</var>
+    <var name="s_nIntlMinConnectTime" type="i4" >0</var>
+    <var name="nIntlMinConnectTime" type="i4" >0</var>
+  </shared-vars>
+  <functions >
+    <function name="OnSessionStart" start="1" event="OnSessionStart" returns="void" >
+      <parameters >
+        <parameter name="strSessionId" type="string" pass="byref"/>
+        <parameter name="nIteration" type="i4" pass="byref"/>
+      </parameters>
+      <actions >
+        <action id="1" plug-in="Pactolus.Branch.1" ><?xtml-editor x=36 y=16 ?>
+          <!--setup variables-->
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[/* save the sip call information */
+
+js_initVoipCallLeg( Session.g_oCallLegs[0] ); 
+
+js_initVoipCallLeg( Session.g_oCallLegs[1] ); 
+
+js_initVoipAccessLine( Session.g_oAccessLine ) ;
+
+js_initVoipService( Session.g_oVoipService ) ;
+
+js_initAPI( Session.g_oAPI ) ;
+
+js_initCC(Session.g_oCC);
+
+js_initSUB(Session.g_oSUB);
+
+js_initBALXFER(Session.g_oBALXFER);
+
+Session.g_oAPI.strPlatformSessionId = Session._sessionId;
+
+Session.g_oAPI.lPlatformSessionStartTime = Server.getUTCTime();
+
+
+
+//call legs
+
+Session.g_oCallLegs[0].strCallId = "callIDA";
+
+Session.g_oCallLegs[0].strFrom = "fromA";
+
+Session.g_oCallLegs[0].strRemoteSignalingAddress = "gwIPIngress";
+
+Session.g_oCallLegs[0].nRemoteSignalingPort = 5060;
+
+Session.g_oCallLegs[0].strInfoDigits = "32";
+
+Session.g_oCallLegs[0].strCallingNumber = "6173333456";
+
+
+
+//call legs
+
+Session.g_oCallLegs[1].strCallId = "callIDB";
+
+Session.g_oCallLegs[1].strTo = "toB";
+
+Session.g_oCallLegs[1].strStatus = "200";
+
+Session.g_oCallLegs[1].nTerminationReason = 1;
+
+Session.g_oCallLegs[1].strRemoteSignalingAddress = "gwIPEgress";
+
+Session.g_oCallLegs[1].nRemoteSignalingPort = 5060;
+
+Session.g_oCallLegs[1].strInfoDigits = "32";
+
+Session.g_oCallLegs[1].strEnteredDestNbr = "7813334567";
+
+
+
+// access line
+
+Session.g_oAccessLine.strRealm = "fwd.pactolus.com";
+
+Session.g_oAccessLine.strUri = "<sip:66.51.79.7>";
+
+Session.g_oAccessLine.strNonce = "936f1d23696a8882a0471543d1c55334";
+
+Session.g_oAccessLine.strResponse = "65da1f0068b289a02291fdab75baa60a";
+
+Session.g_oAccessLine.strDeviceAddress = "192.168.1.100:5060";
+
+Session.g_oAccessLine.strMACAddress = "192.168.1.100:5060";
+
+Session.g_oAccessLine.strContact = "sip:6178899944@151.204.227.41:15061;transport=udp;user=phone";
+
+Session.g_oAPI.strApplicationName = "VOIP_TEST.xml";
+
+
+
+
+
+
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=40 y=139 ?>
+          <!--call create sub-->
+          <function name="&quot;createSub&quot;" return="g_iFunctionRetCode" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="ERROR" link="3" stubbed="0" >g_iFunctionRetCode != 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 1){
+
+	Server.logError("ERROR from CreateSub function, shutting down");
+
+}else{
+
+	Server.logInfo("SUCCESS from CreateSub function");
+
+	Session.g_oAccessLine.strUserName = Session.g_sVOIPPhoneNumber;
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.EndSession.1" ><?xtml-editor x=336 y=57 ?></action>
+        <action id="4" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=34 y=306 ?>
+          <!--call register-->
+          <function name="&quot;registerPhone&quot;" return="g_iFunctionRetCode" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="ERROR" link="3" stubbed="0" >g_iFunctionRetCode != 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_iFunctionRetCode = -99;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 1){
+
+	Server.logError("ERROR from RegisterPhone function, shutting down");
+
+}else{
+
+	Server.logInfo("SUCCESS from RegisterPhone function");
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=39 y=450 ?>
+          <!--call testOrig-->
+          <function name="&quot;testOrigination&quot;" return="g_iFunctionRetCode" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+            <result name="ERROR" link="3" stubbed="0" >g_iFunctionRetCode != 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_iFunctionRetCode = -99;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 1){
+
+	Server.logError("ERROR from testOrigination function, shutting down");
+
+}else{
+
+	Server.logInfo("SUCCESS from testOrigination function");
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=617 y=312 ?>
+          <!--call testTermination-->
+          <function name="&quot;testTermination&quot;" return="g_iFunctionRetCode" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="ERROR" link="3" stubbed="0" >g_iFunctionRetCode != 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_iFunctionRetCode = -99;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 1){
+
+	Server.logError("ERROR from testTermination function, shutting down");
+
+}else{
+
+	Server.logInfo("SUCCESS from testTermination function");
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=611 y=129 ?>
+          <!--callTestVoicemail-->
+          <function name="&quot;testVoicmail&quot;" return="g_iFunctionRetCode" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="ERROR" link="3" stubbed="0" >g_iFunctionRetCode != 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_iFunctionRetCode = -99;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 1){
+
+	Server.logError("ERROR from testVoicemail function, shutting down");
+
+}else{
+
+	Server.logInfo("SUCCESS from testVoicemail function");
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=620 y=464 ?>
+          <!--testPrepaidIVR-->
+          <function name="&quot;testPrepaidIVR&quot;" return="g_iFunctionRetCode" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="ERROR" link="3" stubbed="0" >g_iFunctionRetCode != 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_iFunctionRetCode = -99;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 1){
+
+	Server.logError("ERROR from testPrepaidIVR function, shutting down");
+
+}else{
+
+	Server.logInfo("SUCCESS from testPrepaidIVR function");
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=281 y=538 ?>
+          <!--call testRemindMe-->
+          <function name="&quot;testRemindMe&quot;" return="g_iFunctionRetCode" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="ERROR" link="3" stubbed="0" >g_iFunctionRetCode != 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_iFunctionRetCode = -99;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id != 1){
+
+	Server.logError("ERROR from testRemindMe function, shutting down");
+
+}else{
+
+	Server.logInfo("SUCCESS from testRemindMe function");
+
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="createSub" start="3" event="createSub" returns="i4" >
+      <actions >
+        <action id="3" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=21 y=15 ?>
+          <!--create voip sub-->
+          <java class="&quot;com.pactolus.psAPILoadTest&quot;" method="&quot;createVoipSub&quot;" timeout="20" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="unknown" >g_lServiceProviderID</parameter>
+            <parameter type="in" var-type="unknown" >g_lOfferingID</parameter>
+            <parameter type="inout" var-type="unknown" >g_sVOIPPhoneNumber</parameter>
+          </java>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="SUCCESS" link="7" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("CALLING JAVA:  CreateSub");
+
+Session.g_iJavaReturnCode = -99;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Session.g_iJavaReturnCode != 0){
+
+	Server.logError("ERROR from JAVA CreateSub:  " + Session.g_iJavaReturnCode);
+
+}else{
+
+	Server.logInfo("SUCCESS from JAVA CreateSub:  ");
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=290 y=370 ?>
+          <return value="SUCCESS"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS from CalcMD5Response, returned response = " + Session.g_oAccessLine.strResponse);]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=287 y=207 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("JAVA CreateSub or CalcMD5Response exited on non-success branch OR returned ERROR from java");]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=24 y=266 ?>
+          <!--calc response-->
+          <java class="&quot;com.pactolus.Utilities&quot;" method="&quot;calcMD5Response&quot;" timeout="20" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_oAccessLine.strUserName</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strRealm</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strUserName</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strNonce</parameter>
+            <parameter type="in" var-type="string" >"INVITE"</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strUri</parameter>
+            <parameter type="inout" var-type="string" >g_oAccessLine.strResponse</parameter>
+          </java>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="SUCCESS" link="2" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS from CreateSub, returned voip phone number = " + Session.g_sVOIPPhoneNumber);
+
+Session.g_oAccessLine.strUserName = Session.g_sVOIPPhoneNumber;
+
+Server.logInfo("CALLING JAVA:  CalcMD5Response");
+
+Session.g_iJavaReturnCode = -99;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Session.g_iJavaReturnCode != 0){
+
+	Server.logError("ERROR from JAVA CalcMD5Response:  " + Session.g_iJavaReturnCode);
+
+}else{
+
+	Server.logInfo("SUCCESS from JAVA CalcMD5Response: ");
+
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="registerPhone" start="11" event="registerPhone" returns="i4" >
+      <actions >
+        <action id="11" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=45 y=56 ?>
+          <!--register TA device-->
+          <java class="&quot;com.pactolus.broadband.psAPISceRegister&quot;" method="&quot;registerTADevice&quot;" timeout="20" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strUserName</parameter>
+            <parameter type="in" var-type="string" >"recordRoute"</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strRealm</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strDeviceAddress</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strDeviceAddress</parameter>
+            <parameter type="in" var-type="string" >"INVITE"</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strUri</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strNonce</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strResponse</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strMACAddress</parameter>
+            <parameter type="in" var-type="string" >"1963113897@192.168.1.100"</parameter>
+            <parameter type="in" var-type="string" >"14284 REGISTER"</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strContact</parameter>
+            <parameter type="in" var-type="i4" >g_iSecsToRegister</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strUserAgent</parameter>
+            <parameter type="inout" var-type="i8" >g_oAccessLine.lAccessLineId</parameter>
+            <parameter type="inout" var-type="i8" >g_oAccessLine.oSub.lSubscriberId</parameter>
+            <parameter type="inout" var-type="i8" >g_oAccessLine.oSub.lSPId</parameter>
+            <parameter type="inout" var-type="i4" >g_oVoipService.iSvcId</parameter>
+            <parameter type="inout" var-type="i4" >g_oVoipService.iVmailSvcId</parameter>
+          </java>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="SUCCESS" link="12" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("CALLING JAVA:  RegisterPhone");
+
+Session.g_iJavaReturnCode = -99;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id == 1){
+
+	Server.logError("ERROR from JAVA RegisterPhone:  " + Result.name);
+
+}else{
+
+	Server.logInfo("Result from JAVA RegisterPhone:  " + Result.name);
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=348 y=52 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("JAVA RegisterPhone exited on non-success branch OR returned ERROR from java");]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=350 y=418 ?>
+          <return value="SUCCESS"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS from RegisterPhone");]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=50 y=314 ?>
+          <!--getSipAddress-->
+          <java class="&quot;com.pactolus.broadband.psAPISceRegister&quot;" method="&quot;getSipAddress&quot;" timeout="20" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strUserName</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strRealm</parameter>
+            <parameter type="in" var-type="i8" >g_lVoiceMailAccountId</parameter>
+            <parameter type="in" var-type="i8" >g_lAccessLineId</parameter>
+            <parameter type="in" var-type="i4" >g_iTimezoneId</parameter>
+            <parameter type="inout" var-type="string" >g_strContact</parameter>
+            <parameter type="inout" var-type="string" >g_strRecordRoute</parameter>
+            <parameter type="inout" var-type="string" >g_strMWIOffFlag</parameter>
+          </java>
+          <results >
+            <result name="Default" link="13" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="SUCCESS" link="7" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("CALLING JAVA:  getSipAddress");
+
+Session.g_iJavaReturnCode = -99;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id == 1)
+
+{
+
+	Server.logError("ERROR from JAVA getSipAddress:  " + Result.name);
+
+}
+
+else
+
+{
+
+	Server.logInfo("Result from JAVA getSipAddress:  " + Result.name);
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=349 y=309 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("JAVA getSipAddress exited on non-success branch OR returned ERROR from java");]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="testOrigination" start="3" event="testOrigination" returns="i4" >
+      <actions >
+        <action id="3" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=20 y=20 ?>
+          <!--VoipAuthenticateOrigination-->
+          <function name="&quot;VoipAuthenticateOrigination&quot;" return="g_iJavaReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >g_oAPI</parameter>
+            <parameter >g_oAccessLine</parameter>
+            <parameter >g_oVoipService</parameter>
+            <parameter >strResponse</parameter>
+            <parameter >g_oSub</parameter>
+          </function>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+            <result name="success" link="5" stubbed="0" >g_iJavaReturnCode == 0
+
+OR g_iJavaReturnCode == -13</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("CALLING JAVA:  AuthOrig");
+
+Session.g_iJavaReturnCode = -99;
+
+Session.g_oAPI.strDestReceived = "6173333456";
+
+Session.g_oAPI.strAniReceived = Session.g_oAccessLine.strUserName;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("Call Type: " + Session.g_oAPI.strCallType) ;
+
+Server.logInfo("AuthOrig returned = " + Session.g_iJavaReturnCode);
+
+Server.logInfo("nOrigCountryId = " + Session.g_oAPI.nOrigCountryId);
+
+Session.g_oCallLegs[0].nOrigCountryId = Session.g_oAPI.nOrigCountryId ;
+
+Session.g_oCallLegs[0].strOrigCallingCode = Session.g_oAPI.strOrigCallingCode ;
+
+Session.g_oCallLegs[0].strOrigAreaCode = Session.g_oAPI.strOrigAreaCode ;
+
+Session.g_oCallLegs[1].strDestAreaCode = Session.g_oAPI.strDestAreaCode ;
+
+Session.g_oCallLegs[1].strDestCallingCode = Session.g_oAPI.strDestCallingCode ;
+
+Session.g_oCallLegs[1].nDestCountryId = Session.g_oAPI.nDestCountryId ;
+
+Session.g_oCallLegs[0].strOrigRouteType = "1";
+
+Session.g_oCallLegs[1].strDestRouteType = "1";
+
+
+
+
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="2" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=249 y=19 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("NON-SUCCESS from AuthOrig JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=261 y=628 ?>
+          <return value="SUCCESS"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS from CallCompletion");]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=22 y=173 ?>
+          <!--VoipProcCallCompletion-->
+          <function name="&quot;VoipProcCallCompletion&quot;" return="g_iJavaReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >g_oAPI</parameter>
+            <parameter >g_oAccessLine</parameter>
+            <parameter >g_oVoipService</parameter>
+            <parameter >g_oCallLegs[0]</parameter>
+            <parameter >g_oCallLegs[1]</parameter>
+          </function>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success" link="7" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS FROM AuthOrig");
+
+Server.logInfo("CALLING JAVA:  procCallCompletion");
+
+Session.g_iJavaReturnCode = -99;
+
+Session.g_oCallLegs[0].strOrigFlag = "T";
+
+Session.g_oCallLegs[1].lTimeStart = Server.getUTCTime() ;
+
+Session.g_oCallLegs[1].lTimeAnswered = Session.g_oCallLegs[1].lTimeStart + 5;
+
+Session.g_oCallLegs[1].lTimeEnded = Session.g_oCallLegs[1].lTimeAnswered + 120;
+
+Session.g_oCallLegs[0].strOrigRouteType = "1999";
+
+Session.g_oCallLegs[1].strDestRouteType = "1";
+
+
+
+Server.logInfo("in testOrigination g_oCallLegs[0].strOrigRouteType = " + Session.g_oCallLegs[0].strOrigRouteType);
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=261 y=174 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("NON-SUCCESS from CallCompletion JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=27 y=323 ?>
+          <!--"getDestCallingInfo"-->
+          <java class="&quot;com.pactolus.broadband.psAPISceBroadbandAuth&quot;" method="&quot;getDestCallingInfo&quot;" timeout="20" return="g_iJavaReturnCode" method-return-var="" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strDestReceived</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strAniReceived</parameter>
+            <parameter type="in" var-type="i8" >g_oAccessLine.lAccessLineId</parameter>
+            <parameter type="in" var-type="i8" >g_oVoipService.iSvcId</parameter>
+            <parameter type="in" var-type="i4" >g_oVoipService.iVmailSvcId</parameter>
+            <parameter type="inout" var-type="string" >g_oAPI.strDestToSend</parameter>
+            <parameter type="inout" var-type="string" >g_strDestCallingCode</parameter>
+            <parameter type="inout" var-type="string" >g_strDestAreaCode</parameter>
+            <parameter type="inout" var-type="i4" >g_iDestCountryID</parameter>
+          </java>
+          <results >
+            <result name="Default" link="8" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="SUCCESS" link="9" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id == 1)
+
+{
+
+	Server.logError("ERROR from JAVA getDestCallingInfo:  " + Result.name);
+
+}
+
+else
+
+{
+
+	Server.logInfo("Result from JAVA getDestCallingInfo:  " + Result.name);
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=260 y=326 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("NON-SUCCESS from getDestCallingInfo JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=31 y=524 ?>
+          <!--"activateAccessLine"-->
+          <java class="&quot;com.pactolus.broadband.psAPISceBroadbandAuth&quot;" method="&quot;activateAccessLine&quot;" timeout="20" return="g_iJavaReturnCode" method-return-var="" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+            <parameter type="in" var-type="i8" >g_oAccessLine.lAccessLineId</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strActivationPin</parameter>
+          </java>
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="SUCCESS" link="4" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (Result.id == 1)
+
+{
+
+	Server.logError("ERROR from JAVA activateAccessLine:  " + Result.name);
+
+}
+
+else
+
+{
+
+	Server.logInfo("Result from JAVA activateAccessLine:  " + Result.name);
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=254 y=525 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("NON-SUCCESS from activateAccessLine JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="testTermination" start="7" event="testTermination" returns="i4" >
+      <local-vars >
+        <var name="strRequestUri" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="7" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=20 y=20 ?>
+          <!--VoipAuthenticateTermination-->
+          <function name="&quot;VoipAuthenticateTermination&quot;" return="g_iJavaReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >g_oAPI</parameter>
+            <parameter >g_oAccessLine</parameter>
+            <parameter >g_oVoipService</parameter>
+            <parameter >strResponse</parameter>
+            <parameter >strRequestUri</parameter>
+          </function>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="success" link="8" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("CALLING JAVA:  AuthTermination");
+
+Session.g_iJavaReturnCode = -99;
+
+Session.g_oAPI.strDestReceived = Session.g_oAccessLine.strUserName;
+
+Session.g_oAPI.strAniReceived = "6173333456";]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("Call Type: " + Session.g_oAPI.strCallType) ;
+
+Server.logInfo("AuthTermination returned = " + Session.g_iJavaReturnCode);
+
+Server.logInfo("nOrigCountryId = " + Session.g_oAPI.nOrigCountryId);
+
+Session.g_oCallLegs[0].nOrigCountryId = Session.g_oAPI.nOrigCountryId ;
+
+Session.g_oCallLegs[0].strOrigCallingCode = Session.g_oAPI.strOrigCallingCode ;
+
+Session.g_oCallLegs[0].strOrigAreaCode = Session.g_oAPI.strOrigAreaCode ;
+
+Session.g_oCallLegs[1].strDestAreaCode = Session.g_oAPI.strDestAreaCode ;
+
+Session.g_oCallLegs[1].strDestCallingCode = Session.g_oAPI.strDestCallingCode ;
+
+Session.g_oCallLegs[1].nDestCountryId = Session.g_oAPI.nDestCountryId ;
+
+Session.g_oCallLegs[0].strOrigRouteType = "1";
+
+Session.g_oCallLegs[1].strDestRouteType = "1";
+
+
+
+
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=101 y=210 ?>
+          <!--VoipProcCallCompletion-->
+          <function name="&quot;VoipProcCallCompletion&quot;" return="g_iJavaReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >g_oAPI</parameter>
+            <parameter >g_oAccessLine</parameter>
+            <parameter >g_oVoipService</parameter>
+            <parameter >g_oCallLegs[0]</parameter>
+            <parameter >g_oCallLegs[1]</parameter>
+          </function>
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+            <result name="Success" link="11" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS FROM AuthTermination");
+
+Server.logInfo("CALLING JAVA:  AuthTermination");
+
+Session.g_iJavaReturnCode = -99;
+
+Session.g_oCallLegs[0].strOrigFlag = "T";
+
+Session.g_oCallLegs[1].lTimeStart = Server.getUTCTime() ;
+
+Session.g_oCallLegs[1].lTimeAnswered = Session.g_oCallLegs[1].lTimeStart + 5;
+
+Session.g_oCallLegs[1].lTimeEnded = Session.g_oCallLegs[1].lTimeAnswered + 120;
+
+Session.g_oCallLegs[0].strOrigRouteType = "1999";
+
+Session.g_oCallLegs[1].strDestRouteType = "1";
+
+
+
+Server.logInfo("in testOrigination g_oCallLegs[0].strOrigRouteType = " + Session.g_oCallLegs[0].strOrigRouteType);
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=355 y=61 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("NON-SUCCESS from AuthTermination JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=350 y=118 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("NON-SUCCESS from CallCompletion JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=389 y=206 ?>
+          <return value="SUCCESS"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS from CallCompletion");]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="testVoicmail" start="10" event="testVoicmail" returns="i4" >
+      <local-vars >
+        <var name="g_strAccessNumber" type="string" ></var>
+        <var name="strLanguageCode" type="string" ></var>
+        <var name="strSuppliedPin" type="string" >5678</var>
+        <var name="strSipRealm" type="string" >fwd.pactolus.com</var>
+      </local-vars>
+      <actions >
+        <action id="10" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=21 y=38 ?>
+          <!--authVoicemailDeposit-->
+          <java class="&quot;com.pactolus.broadband.psAPISceVoicemailAuth&quot;" method="&quot;authVoicemailDeposit&quot;" timeout="20" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strUserName</parameter>
+            <parameter type="in" var-type="i8" >g_lVoiceMailAccountId</parameter>
+            <parameter type="inout" var-type="i4" >g_iMaxMessages</parameter>
+            <parameter type="inout" var-type="i4" >g_iMaxMessageLength</parameter>
+            <parameter type="inout" var-type="string" >g_oEmail.strNotification</parameter>
+            <parameter type="inout" var-type="string" >g_oPager.strNotification</parameter>
+            <parameter type="inout" var-type="string" >g_oEmail.strAttachment</parameter>
+            <parameter type="inout" var-type="string" >g_oEmail.strAddress</parameter>
+            <parameter type="inout" var-type="string" >g_oEmail.strFrom</parameter>
+            <parameter type="inout" var-type="string" >g_oEmail.strSubject</parameter>
+            <parameter type="inout" var-type="string" >g_oEmail.strBody</parameter>
+            <parameter type="inout" var-type="string" >g_oPager.strSubject</parameter>
+            <parameter type="inout" var-type="string" >g_oPager.strBody</parameter>
+            <parameter type="inout" var-type="string" >g_oPager.strNumber</parameter>
+            <parameter type="inout" var-type="string" >g_oMessage.strAcctNumber</parameter>
+            <parameter type="inout" var-type="string" >g_oMessage.strAcctPassword</parameter>
+            <parameter type="inout" var-type="string" >g_oEmail.strGreeting</parameter>
+            <parameter type="inout" var-type="string" >g_oAccessLine.strRealm</parameter>
+            <parameter type="inout" var-type="string" >strLanguageCode</parameter>
+            <parameter type="inout" var-type="i8" >g_oAPI.lVMAcctId</parameter>
+            <parameter type="inout" var-type="i8" >g_oAPI.lAccessLineId</parameter>
+            <parameter type="inout" var-type="i4" >g_oAPI.iVMServiceId</parameter>
+            <parameter type="inout" var-type="i4" >g_oAPI.iTimezoneID</parameter>
+          </java>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success" ><?xtml-editor visible=no?></result>
+            <result name="Error" ><?xtml-editor visible=no?></result>
+            <result name="Timeout" ><?xtml-editor visible=no?></result>
+            <result name="SUCCESS" link="12" stubbed="0" >'Result'  == 'Success'
+
+AND g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("CALLING JAVA:  authVoicemailDeposit");
+
+Session.g_oEmail.strNotification = "";
+
+Session.g_oPager.strNotification = "";
+
+Session.g_oEmail.strAttachment = "";
+
+Session.g_oEmail.strAddress = "";
+
+Session.g_oEmail.strFrom = "";
+
+Session.g_oEmail.strSubject = "";
+
+Session.g_oEmail.strBody = "";
+
+Session.g_oEmail.strGreeting = "";
+
+Session.g_oPager.strSubject = "";
+
+Session.g_oPager.strBody = "";
+
+Session.g_oPager.strNumber = "";
+
+Session.g_oMessage.strAcctNumber = "";
+
+Session.g_iJavaReturnCode = -99;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("authVoicemailDeposit returns: " + Session.g_iJavaReturnCode ) ;
+
+if (Session.g_iJavaReturnCode == 0){
+
+	Server.logInfo("SUCCESS From authVoicemailDeposit");
+
+}else{
+
+	Server.logError("ERROR From authVoicemailDeposit, return code = " + Session.g_iJavaReturnCode);
+
+}
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="6" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=253 y=43 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("JAVA authVoicemailDeposit exited on non-success branch OR returned ERROR from java");]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=723 y=420 ?>
+          <return value="SUCCESS"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS from testVoicemail");]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=12 y=211 ?>
+          <!--authVoicemailRetrieval-->
+          <java class="&quot;com.pactolus.broadband.psAPISceVoicemailAuth&quot;" method="&quot;authVoicemailRetrieval&quot;" timeout="20" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >strSipRealm</parameter>
+            <parameter type="in" var-type="string" >strSuppliedPin</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strUserName</parameter>
+            <parameter type="in" var-type="string" >g_strAccessNumber</parameter>
+            <parameter type="in" var-type="i8" >g_lVoiceMailAccountId</parameter>
+            <parameter type="inout" var-type="string" >g_strFirstCall</parameter>
+            <parameter type="inout" var-type="string" >g_oMessage.strAcctNumber</parameter>
+            <parameter type="inout" var-type="string" >g_oMessage.strAcctPassword</parameter>
+            <parameter type="inout" var-type="i4" >g_iMaxMessages</parameter>
+            <parameter type="inout" var-type="i4" >g_iMaxSaveFor</parameter>
+            <parameter type="inout" var-type="i4" >g_iMaxGreetingLength</parameter>
+            <parameter type="inout" var-type="i8" >g_oAPI.lVMAcctId</parameter>
+            <parameter type="inout" var-type="i8" >g_oAPI.lAccessLineId</parameter>
+            <parameter type="inout" var-type="i8" >g_oAPI.lSubscriberId</parameter>
+            <parameter type="inout" var-type="i8" >g_oAPI.lSvcProviderId</parameter>
+            <parameter type="inout" var-type="i4" >g_oAPI.iVMServiceId</parameter>
+            <parameter type="inout" var-type="string" >g_oAPI.strRealm</parameter>
+            <parameter type="inout" var-type="string" >g_oAPI.strUserName</parameter>
+            <parameter type="inout" var-type="string" >g_oEmail.strGreeting</parameter>
+            <parameter type="inout" var-type="string" >g_oAPI.strCallReturnFlag</parameter>
+            <parameter type="inout" var-type="i4" >g_oAPI.iTimezoneID</parameter>
+            <parameter type="inout" var-type="i4" >iVoicemailPinLength</parameter>
+            <parameter type="inout" var-type="i8" >g_lDeptId</parameter>
+          </java>
+          <results >
+            <result name="Default" link="13" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="0 Success" link="14" stubbed="0" >'Result'  == 'Success'
+
+AND g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("CALLING JAVA:  authVoicemailRetrieve");
+
+Session.g_oEmail.strNotification = "";
+
+Session.g_oPager.strNotification = "";
+
+Session.g_oEmail.strAttachment = "";
+
+Session.g_oEmail.strAddress = "";
+
+Session.g_oEmail.strFrom = "";
+
+Session.g_oEmail.strSubject = "";
+
+Session.g_oEmail.strBody = "";
+
+Session.g_oPager.strSubject = "";
+
+Session.g_oPager.strBody = "";
+
+Session.g_oPager.strNumber = "";
+
+Session.g_oMessage.strAcctNumber = "";
+
+Session.strLanguageCode = "";
+
+Session.g_iJavaReturnCode = -99;
+
+
+
+
+
+
+
+
+
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("authVoicemailRetrieve returns: " + Session.g_iJavaReturnCode ) ;
+
+if (Session.g_iJavaReturnCode == 0){
+
+	Server.logInfo("SUCCESS From authVoicemailRetrieve");
+
+}else{
+
+	Server.logError("ERROR From authVoicemailRetrieve, return code = " + Session.g_iJavaReturnCode);
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=247 y=212 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("JAVA authVoicemailRetrieve exited on non-success branch OR returned ERROR from java");]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=33 y=383 ?>
+          <!--"getVoicemailServiceInfo"-->
+          <java class="&quot;com.pactolus.broadband.psAPISceVoicemailAuth&quot;" method="&quot;getVoicemailServiceInfo&quot;" timeout="20" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="i4" >g_oAPI.iVMServiceId</parameter>
+            <parameter type="inout" var-type="i4" >g_iMaxMessages</parameter>
+            <parameter type="inout" var-type="i4" >g_iMaxSaveFor</parameter>
+            <parameter type="inout" var-type="i4" >g_iMaxMessageLength</parameter>
+            <parameter type="inout" var-type="string" >g_strVMailDomain</parameter>
+            <parameter type="inout" var-type="string" >g_strMailServerIpAddress</parameter>
+            <parameter type="inout" var-type="i4" >g_iMaxGreetingLength</parameter>
+            <parameter type="inout" var-type="string" >g_strEmailFromHeader</parameter>
+            <parameter type="inout" var-type="string" >g_strEmailSubject</parameter>
+            <parameter type="inout" var-type="string" >g_strEmailBody</parameter>
+            <parameter type="inout" var-type="string" >g_strPagerSubject</parameter>
+            <parameter type="inout" var-type="string" >g_strPagerBody</parameter>
+            <parameter type="inout" var-type="string" >g_strProcDBName</parameter>
+          </java>
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="SUCCESS" link="23" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("getVoicemailServiceInfo returns: " + Session.g_iJavaReturnCode ) ;
+
+if (Session.g_iJavaReturnCode == 0)
+
+{
+
+	Server.logInfo("SUCCESS From getVoicemailServiceInfo");
+
+}
+
+else
+
+{
+
+	Server.logError("ERROR From getVoicemailServiceInfo, return code = " + Session.g_iJavaReturnCode);
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="15" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=260 y=437 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("JAVA getVoicemailServiceInfo exited on non-success branch OR returned ERROR from java");]]></script>
+          </scripts>
+        </action>
+        <action id="16" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=531 y=43 ?>
+          <!--"updateVoicemailPin"-->
+          <java class="&quot;com.pactolus.broadband.psAPISceVoicemailAuth&quot;" method="&quot;updateVoicemailPin&quot;" timeout="20" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_strProcDBName</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="i8" >g_oAPI.lVMAcctId</parameter>
+            <parameter type="in" var-type="string" >strSuppliedPin</parameter>
+          </java>
+          <results >
+            <result name="Default" link="17" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="SUCCESS" link="18" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("updateVoicemailPin returns: " + Session.g_iJavaReturnCode ) ;
+
+if (Session.g_iJavaReturnCode == 0)
+
+{
+
+	Server.logInfo("SUCCESS From updateVoicemailPin");
+
+}
+
+else
+
+{
+
+	Server.logError("ERROR From updateVoicemailPin, return code = " + Session.g_iJavaReturnCode);
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="17" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=722 y=42 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("JAVA updateVoicemailPin exited on non-success branch OR returned ERROR from java");]]></script>
+          </scripts>
+        </action>
+        <action id="18" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=537 y=254 ?>
+          <!--updateVoicemailGreeting-->
+          <java class="&quot;com.pactolus.broadband.psAPISceVoicemailAuth&quot;" method="&quot;updateVoicemailGreeting&quot;" timeout="20" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_strProcDBName</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="i8" >g_oAPI.lVMAcctId</parameter>
+            <parameter type="in" var-type="string" >"Primary"</parameter>
+          </java>
+          <results >
+            <result name="Default" link="19" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="SUCCESS" link="7" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("updateVoicemailGreeting returns: " + Session.g_iJavaReturnCode ) ;
+
+if (Session.g_iJavaReturnCode == 0)
+
+{
+
+	Server.logInfo("SUCCESS From updateVoicemailGreeting");
+
+}
+
+else
+
+{
+
+	Server.logError("ERROR From updateVoicemailGreeting, return code = " + Session.g_iJavaReturnCode);
+
+}]]></script>
+          </scripts>
+        </action>
+        <action id="19" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=721 y=256 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("JAVA updateVoicemailPin exited on non-success branch OR returned ERROR from java");]]></script>
+          </scripts>
+        </action>
+        <action id="22" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=330 y=611 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("JAVA lookupLanguageCodeForVM exited on non-success branch OR returned ERROR from java");]]></script>
+          </scripts>
+        </action>
+        <action id="23" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=106 y=602 ?>
+          <!--"lookupLanguageCodeForVM"-->
+          <java class="&quot;com.pactolus.broadband.psAPISceVoicemailAuth&quot;" method="&quot;lookupLanguageCodeForVM&quot;" timeout="20" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strUserName</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strUserName</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strRealm</parameter>
+            <parameter type="in" var-type="i8" >g_lVoiceMailAccountId</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strAccessNumber</parameter>
+            <parameter type="inout" var-type="string" >g_strLanguageCode</parameter>
+          </java>
+          <results >
+            <result name="Default" link="22" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="SUCCESS" link="16" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_strLanguageCode = "";
+
+Session.g_iJavaReturnCode = -99;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("lookupLanguageCodeForVM returns: " + Session.g_iJavaReturnCode ) ;
+
+if (Session.g_iJavaReturnCode == 0)
+
+{
+
+	Server.logInfo("SUCCESS From lookupLanguageCodeForVM");
+
+}
+
+else
+
+{
+
+	Server.logError("ERROR From lookupLanguageCodeForVM, return code = " + Session.g_iJavaReturnCode);
+
+}]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="OnSessionEnd" start="8" event="OnSessionEnd" returns="void" >
+      <parameters >
+        <parameter name="nSessionEndReason" type="i2" pass="byref"/>
+      </parameters>
+      <local-vars >
+        <var name="strIpAddress" type="string" ></var>
+      </local-vars>
+      <actions >
+        <action id="8" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=49 y=175 ?>
+          <!--"removeOriginationsByIpAddress"-->
+          <java class="&quot;com.pactolus.broadband.psAPISceBroadbandAuth&quot;" method="&quot;removeOriginationsByIpAddress&quot;" timeout="20" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+            <parameter type="in" var-type="string" >strIpAddress</parameter>
+          </java>
+          <results >
+            <result name="Default" link="6" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_iJavaReturnCode = -50;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Session.g_iJavaReturnCode >= 0)
+
+{
+
+	Server.logInfo("SUCCESS from removeOriginationsByIpAddress");
+
+}
+
+else
+
+{
+
+	Server.logError("NON-SUCCESS from removeOriginationsByIpAddress JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+}
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="3" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=258 y=45 ?>
+          <return value=""/>
+        </action>
+        <action id="6" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=265 y=175 ?>
+          <!--expireTADevices-->
+          <java class="&quot;com.pactolus.broadband.psAPISceRegister&quot;" method="&quot;expireTADevices&quot;" timeout="20" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+          </java>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_iJavaReturnCode = -50;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Session.g_iJavaReturnCode >= 0)
+
+{
+
+	Server.logInfo("SUCCESS from expireTADevices");
+
+}
+
+else
+
+{
+
+	Server.logError("NON-SUCCESS from expireTADevices JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+}
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=475 y=175 ?>
+          <!--"expireSubscriptions"-->
+          <java class="&quot;com.pactolus.broadband.psAPISceSubscribe&quot;" method="&quot;expireSubscriptions&quot;" timeout="20" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+          </java>
+          <results >
+            <result name="Default" link="3" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_iJavaReturnCode = -50;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Session.g_iJavaReturnCode >= 0)
+
+{
+
+	Server.logInfo("SUCCESS from expireSubscriptions");
+
+}
+
+else
+
+{
+
+	Server.logError("NON-SUCCESS from expireSubscriptions JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+}
+
+]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="testPrepaidIVR" start="12" event="" returns="i4" >
+      <local-vars >
+        <var name="fMinimumCharge" type="float" >0</var>
+        <var name="fMaxCharge" type="float" >0</var>
+        <var name="fSubMaxPerWeek" type="float" >0</var>
+        <var name="fSubMaxPerMonth" type="float" >0</var>
+        <var name="fCCMaxPerWeek" type="float" >0</var>
+        <var name="fCCMaxPerMonth" type="float" >0</var>
+        <var name="fMaxPPBalance" type="float" >0</var>
+        <var name="fMinPPBalance" type="float" >0</var>
+        <var name="strCCRechargeFlag" type="string" ></var>
+        <var name="strBalXFerFlag" type="string" ></var>
+        <var name="iCreditCardID" type="i4" >0</var>
+        <var name="strCCNum" type="string" ></var>
+        <var name="strExpDate" type="string" ></var>
+        <var name="fRechargeFee" type="float" >0</var>
+        <var name="fRechargeAmount" type="float" >0</var>
+        <var name="fPrepaidBalance" type="float" >0</var>
+        <var name="iExpirationType" type="i4" >0</var>
+        <var name="lCurrencyID" type="i8" >0</var>
+      </local-vars>
+      <actions >
+        <action id="12" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=68 y=67 ?>
+          <!--getRechargeSettings()-->
+          <java class="&quot;com.pactolus.psAPICommonRecharge&quot;" method="&quot;getRechargeSettings&quot;" timeout="20" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="i4" >g_iSessionType</parameter>
+            <parameter type="in" var-type="i8" >g_oAccessLine.oSub.lSPId</parameter>
+            <parameter type="in" var-type="i4" >g_lOfferingID</parameter>
+            <parameter type="in" var-type="i8" >g_oAccessLine.oSub.lSubscriberId</parameter>
+            <parameter type="inout" var-type="float" >fMinimumCharge</parameter>
+            <parameter type="inout" var-type="float" >fMaxCharge</parameter>
+            <parameter type="inout" var-type="float" >fSubMaxPerWeek</parameter>
+            <parameter type="inout" var-type="float" >fSubMaxPerMonth</parameter>
+            <parameter type="inout" var-type="float" >fCCMaxPerWeek</parameter>
+            <parameter type="inout" var-type="float" >fCCMaxPerMonth</parameter>
+            <parameter type="inout" var-type="float" >fMaxPPBalance</parameter>
+            <parameter type="inout" var-type="float" >fMinPPBalance</parameter>
+            <parameter type="inout" var-type="string" >strCCRechargeFlag</parameter>
+            <parameter type="inout" var-type="string" >strBalXFerFlag</parameter>
+          </java>
+          <results >
+            <result name="Default" link="5" stubbed="0"/>
+            <result name="Success" ><?xtml-editor visible=no?></result>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="Java Success" link="13" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_iJavaReturnCode = -50;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Session.g_iJavaReturnCode >= 0)
+
+{
+
+	Server.logInfo("SUCCESS from getRechargeSettings");
+
+}
+
+else
+
+{
+
+	Server.logError("NON-SUCCESS from getRechargeSettings JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=274 y=566 ?>
+          <return value="SUCCESS"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS from testPrepaidIVR");]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=273 y=77 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("NON-SUCCESS from PrepaidAPIGetRechargeSettings JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=270 y=227 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("NON-SUCCESS from PrepaidAPIGetActiveCC JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=276 y=454 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("NON-SUCCESS from PrepaidAPIDoCCRecharge JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=67 y=256 ?>
+          <!--getActiveCC()-->
+          <java class="&quot;com.pactolus.psAPICommonRecharge&quot;" method="&quot;getActiveCreditCardInfo&quot;" timeout="" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+            <parameter type="in" var-type="i4" >g_iSessionType</parameter>
+            <parameter type="in" var-type="i8" >g_oAccessLine.oSub.lSPId</parameter>
+            <parameter type="in" var-type="i8" >g_oAccessLine.oSub.lSubscriberId</parameter>
+            <parameter type="in" var-type="i4" >g_lOfferingID</parameter>
+            <parameter type="inout" var-type="i4" >iCreditCardID</parameter>
+            <parameter type="inout" var-type="string" >strCCNum</parameter>
+            <parameter type="inout" var-type="string" >strExpDate</parameter>
+            <parameter type="inout" var-type="float" >fRechargeFee</parameter>
+          </java>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="Success" ><?xtml-editor visible=no?></result>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="Java Success" link="1" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_iJavaReturnCode = -50;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Session.g_iJavaReturnCode >= 0)
+
+{
+
+	Server.logInfo("SUCCESS from getActiveCC");
+
+}
+
+else
+
+{
+
+	Server.logError("NON-SUCCESS from getActiveCC JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=66 y=435 ?>
+          <!--doCCRecharge()-->
+          <java class="&quot;com.pactolus.psAPICommonRecharge&quot;" method="&quot;doCCRecharge&quot;" timeout="45" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="i4" >g_iSessionType</parameter>
+            <parameter type="in" var-type="i8" >g_lServiceProviderID</parameter>
+            <parameter type="in" var-type="i8" >g_lSubscriberID</parameter>
+            <parameter type="in" var-type="i4" >iCreditCardID</parameter>
+            <parameter type="in" var-type="i4" >lCurrencyID</parameter>
+            <parameter type="in" var-type="i4" >g_lOfferingID</parameter>
+            <parameter type="in" var-type="float" >fSubMaxPerWeek</parameter>
+            <parameter type="in" var-type="float" >fSubMaxPerMonth</parameter>
+            <parameter type="in" var-type="float" >fCCMaxPerWeek</parameter>
+            <parameter type="in" var-type="float" >fCCMaxPerMonth</parameter>
+            <parameter type="in" var-type="float" >fMaxPPBalance</parameter>
+            <parameter type="in" var-type="float" >fRechargeAmount</parameter>
+            <parameter type="in" var-type="float" >fPrepaidBalance</parameter>
+            <parameter type="in" var-type="unknown" >0</parameter>
+            <parameter type="in" var-type="i4" >iExpirationType</parameter>
+            <parameter type="inout" var-type="float" >fPrepaidBalance</parameter>
+          </java>
+          <results >
+            <result name="Default" link="10" stubbed="0"/>
+            <result name="Success" ><?xtml-editor visible=no?></result>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="Java Success" link="1" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_iJavaReturnCode = -50;
+
+Session.g_oCC.fRechargeAmount = Session.g_oCC.fMinRechargeAmount ;
+
+if (Session.g_oCC.fRechargeAmount == 0)
+
+{
+
+	Session.g_oCC.fRechargeAmount = 3;
+
+}
+
+Session.fRechargeAmount = Session.g_oCC.fRechargeAmount;
+
+Server.logInfo("*********JAVA START doCCRecharge *********");
+
+Server.logInfo("Recharge Amount " + Session.fRechargeAmount);
+
+Server.logInfo("Balance prior to recharge "  + Session.fPrepaidBalance);
+
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Session.g_iJavaReturnCode >= 0)
+
+{
+
+	Server.logInfo("SUCCESS from doRecharge");
+
+}
+
+else
+
+{
+
+	Server.logError("NON-SUCCESS from doRecharge JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+}
+
+Server.logInfo("*********ENDING doRecharge JAVA RETURN *********");
+
+Server.logInfo("Balance after recharge "  + Session.fPrepaidBalance);
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+    <function name="testRemindMe" start="2" event="" returns="i4" >
+      <actions >
+        <action id="2" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=40 y=186 ?>
+          <!--authScheduleRemindMe-->
+          <java class="&quot;com.pactolus.broadband.psAPISceBroadbandRemindMe&quot;" method="&quot;authScheduleRemindMe&quot;" timeout="20" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strRealm</parameter>
+            <parameter type="in" var-type="string" >g_oAccessLine.strUserName</parameter>
+            <parameter type="in" var-type="string" >g_sVOIPPhoneNumber</parameter>
+            <parameter type="inout" var-type="string" >g_strHasVMFlag</parameter>
+            <parameter type="inout" var-type="string" >g_strMailboxAcct</parameter>
+            <parameter type="inout" var-type="i4" >g_iMaxMessageLength</parameter>
+            <parameter type="inout" var-type="string" >g_strLanguageCode</parameter>
+            <parameter type="inout" var-type="i4" >g_iGMTOffset</parameter>
+            <parameter type="inout" var-type="string" >g_strRemindMeSched</parameter>
+            <parameter type="inout" var-type="i8" >g_lVoipSchedCallID</parameter>
+            <parameter type="inout" var-type="i8" >g_oAPI.lAccessLineId</parameter>
+          </java>
+          <results >
+            <result name="Default" link="4" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="SUCCESS" link="5" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_iJavaReturnCode = -50;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Session.g_iJavaReturnCode >= 0)
+
+{
+
+	Server.logInfo("SUCCESS from authScheduleRemindMe");
+
+}
+
+else
+
+{
+
+	Server.logError("NON-SUCCESS from authScheduleRemindMe JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+}
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="1" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=503 y=605 ?>
+          <return value="SUCCESS"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("SUCCESS from testRemindMe");]]></script>
+          </scripts>
+        </action>
+        <action id="4" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=243 y=194 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("NON-SUCCESS from authScheduleRemindMe JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="5" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=41 y=392 ?>
+          <!--setRemindMe-->
+          <java class="&quot;com.pactolus.broadband.psAPISceBroadbandRemindMe&quot;" method="&quot;setRemindMe&quot;" timeout="20" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="i8" >g_oAPI.lAccessLineId</parameter>
+            <parameter type="in" var-type="string" >g_strRemindMeSched</parameter>
+            <parameter type="in" var-type="string" >"2319"</parameter>
+            <parameter type="in" var-type="i4" >0</parameter>
+          </java>
+          <results >
+            <result name="Default" link="7" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="SUCCESS" link="10" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_iJavaReturnCode = -50;
+
+Session.g_strRemindMeSched = "03/25/2005 07:00:00";
+
+
+
+]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Session.g_iJavaReturnCode >= 0)
+
+{
+
+	Server.logInfo("SUCCESS from setRemindMe");
+
+}
+
+else
+
+{
+
+	Server.logError("NON-SUCCESS from setRemindMe JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+}
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="7" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=242 y=394 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("NON-SUCCESS from setRemindMe JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=495 y=180 ?>
+          <!--updateRemindMe-->
+          <java class="&quot;com.pactolus.broadband.psAPISceBroadbandRemindMe&quot;" method="&quot;updateRemindMe&quot;" timeout="20" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="i8" >g_oRemindMeQueue[0].lVoipSchedCallID</parameter>
+            <parameter type="in" var-type="i4" >0</parameter>
+            <parameter type="in" var-type="string" >g_strRemindMeSched</parameter>
+          </java>
+          <results >
+            <result name="Default" link="11" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="SUCCESS" link="9" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_iJavaReturnCode = -50;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Session.g_iJavaReturnCode >= 0)
+
+{
+
+	Server.logInfo("SUCCESS from updateRemindMe");
+
+}
+
+else
+
+{
+
+	Server.logError("NON-SUCCESS from updateRemindMe JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+}
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="9" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=499 y=396 ?>
+          <!--deleteRemindMe-->
+          <java class="&quot;com.pactolus.broadband.psAPISceBroadbandRemindMe&quot;" method="&quot;deleteRemindMe&quot;" timeout="20" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="i8" >g_oRemindMeQueue[0].lVoipSchedCallID</parameter>
+          </java>
+          <results >
+            <result name="Default" link="12" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="SUCCESS" link="1" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_iJavaReturnCode = -50;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Session.g_iJavaReturnCode >= 0)
+
+{
+
+	Server.logInfo("SUCCESS from deleteRemindMe");
+
+}
+
+else
+
+{
+
+	Server.logError("NON-SUCCESS from deleteRemindMe JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+}
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="10" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=42 y=609 ?>
+          <!--getCurrentRemindMeQueue-->
+          <java class="&quot;com.pactolus.broadband.psAPISceBroadbandRemindMe&quot;" method="&quot;getCurrentRemindMeQueue&quot;" timeout="20" return="" method-return-var="g_iJavaReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >"pactolusdb"</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="inout" var-type="string" >g_strHasVMFlag</parameter>
+            <parameter type="inout" var-type="i8" >g_oRemindMeQueue[0].lVoipSchedCallID</parameter>
+            <parameter type="inout" var-type="i8" >g_oRemindMeQueue[0].lAccessLineID</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[0].strPrompt</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[0].strTimeSched</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[0].strDestPhone</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[0].strMailboxAcct</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[0].strLanguage</parameter>
+            <parameter type="inout" var-type="i8" >g_oRemindMeQueue[1].lVoipSchedCallID</parameter>
+            <parameter type="inout" var-type="i8" >g_oRemindMeQueue[1].lAccessLineID</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[1].strPrompt</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[1].strTimeSched</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[1].strDestPhone</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[1].strMailboxAcct</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[1].strLanguage</parameter>
+            <parameter type="inout" var-type="i8" >g_oRemindMeQueue[2].lVoipSchedCallID</parameter>
+            <parameter type="inout" var-type="i8" >g_oRemindMeQueue[2].lAccessLineID</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[2].strPrompt</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[2].strTimeSched</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[2].strDestPhone</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[2].strMailboxAcct</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[2].strLanguage</parameter>
+            <parameter type="inout" var-type="i8" >g_oRemindMeQueue[3].lVoipSchedCallID</parameter>
+            <parameter type="inout" var-type="i8" >g_oRemindMeQueue[3].lAccessLineID</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[3].strPrompt</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[3].strTimeSched</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[3].strDestPhone</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[3].strMailboxAcct</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[3].strLanguage</parameter>
+            <parameter type="inout" var-type="i8" >g_oRemindMeQueue[4].lVoipSchedCallID</parameter>
+            <parameter type="inout" var-type="i8" >g_oRemindMeQueue[4].lAccessLineID</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[4].strPrompt</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[4].strTimeSched</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[4].strDestPhone</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[4].strMailboxAcct</parameter>
+            <parameter type="inout" var-type="string" >g_oRemindMeQueue[4].strLanguage</parameter>
+          </java>
+          <results >
+            <result name="Default" link="13" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="SUCCESS" link="8" stubbed="0" >g_iJavaReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_iJavaReturnCode = -50;]]></script>
+            <script language="javascript" timing="last" ><![CDATA[if (Session.g_iJavaReturnCode >= 0)
+
+{
+
+	Server.logInfo("SUCCESS from getCurrentRemindMeQueue");
+
+}
+
+else
+
+{
+
+	Server.logError("NON-SUCCESS from getCurrentRemindMeQueue JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+}
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="11" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=666 y=188 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("NON-SUCCESS from updateRemindMe JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="12" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=663 y=399 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("NON-SUCCESS from deleteRemindMe JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="13" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=236 y=605 ?>
+          <return value="ERROR"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logError("NON-SUCCESS from getCurrentRemindMeQueue JAVA, java returned = " + Session.g_iJavaReturnCode);
+
+]]></script>
+          </scripts>
+        </action>
+      </actions>
+    </function>
+  </functions>
+  <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>
+
+#include <dialing_plan_utils.jsh>]]></script>
+  <properties >
+    <property key="default" value="C:/eclipse/workspace/Applications/InternalProduct/pcs_english.vox"/>
+    <property key="disable-logging" value=""/>
+    <property key="js-include-path" value="C:/eclipse/workspace/Applications/InternalProduct/SceXMLScripts/Libs"/>
+    <property key="library-modules" value="lib_APISce.xml"/>
+    <property key="library-path" value="C:/eclipse/workspace/Applications/InternalProduct/SceXMLScripts/Libs"/>
+  </properties>
+  <application-version >
+    <revision >$Id: voip_test.xml,v 1.36 2006/08/14 13:51:52 klew Exp $</revision>
+    <label >$Name: PCS-A-4-1-1-1-4-c6 $</label>
+  </application-version>
+</xtml>
