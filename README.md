@@ -12,7 +12,7 @@ $ mv install
 ##Install
 
 ### Callflow
-The callflow changes for this feature have been made to callingcard_411.xml, which is checked in under the `xtml-apps/apps` folder.  Simply copy that version into `$PS_ROOT/apps` of the application server(s).  
+The callflow changes for this feature have been made to callingcard_411.xml, which is checked in under the `xtml-apps/apps` folder.  Simply copy that file into `$PS_ROOT/apps` of the application server(s).  
 
 ### Drop to Java
 
