@@ -1,6 +1,6 @@
 package com.rawabi.model;
 
-// Generated Jul 24, 2012 12:30:09 PM by Hibernate Tools 3.4.0.CR1
+// Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -14,6 +14,9 @@ public class AccountActivity implements java.io.Serializable {
 	private Subscriber subscriber;
 	private ServiceProvider serviceProvider;
 	private ProductOffering productOffering;
+	private String billingId;
+	private BigDecimal postActivityBalance;
+	private BigDecimal subBucketRateId;
 	private BigDecimal eventTypeId;
 	private BigDecimal totalAmount;
 	private BigDecimal currencyId;
@@ -64,6 +67,7 @@ public class AccountActivity implements java.io.Serializable {
 	private BigDecimal custRateAmt2;
 	private BigDecimal custRateAmt3;
 	private BigDecimal custRateAmt4;
+	private BigDecimal freeDuration;
 
 	public AccountActivity() {
 	}
@@ -84,29 +88,34 @@ public class AccountActivity implements java.io.Serializable {
 
 	public AccountActivity(String activityId, Subscriber subscriber,
 			ServiceProvider serviceProvider, ProductOffering productOffering,
-			BigDecimal eventTypeId, BigDecimal totalAmount,
-			BigDecimal currencyId, String eventId, char reversableFlag,
-			BigDecimal serviceId, Date timeDateStamp, BigDecimal eventAmount,
-			String origNbr, String destNbr, BigDecimal duration,
-			BigDecimal reversedActivityId, Character removeFlag,
-			BigDecimal rateId1, BigDecimal rateAmt1, BigDecimal rateId2,
-			BigDecimal rateAmt2, BigDecimal rateId3, BigDecimal rateAmt3,
-			BigDecimal rateId4, BigDecimal rateAmt4, BigDecimal rateId5,
-			BigDecimal rateAmt5, BigDecimal rateId6, BigDecimal rateAmt6,
-			BigDecimal rateId7, BigDecimal rateAmt7, BigDecimal rateId8,
-			BigDecimal rateAmt8, BigDecimal rateId9, BigDecimal rateAmt9,
-			BigDecimal rateId10, BigDecimal rateAmt10, BigDecimal rateId11,
-			BigDecimal rateAmt11, BigDecimal rateId12, BigDecimal rateAmt12,
-			BigDecimal callConnectionFee, BigDecimal tier1Amt,
-			BigDecimal tier2Amt, BigDecimal tier3Amt, BigDecimal totalBongAmt,
-			BigDecimal custRateId1, BigDecimal custRateId2,
-			BigDecimal custRateId3, BigDecimal custRateId4,
-			BigDecimal custRateAmt1, BigDecimal custRateAmt2,
-			BigDecimal custRateAmt3, BigDecimal custRateAmt4) {
+			String billingId, BigDecimal postActivityBalance,
+			BigDecimal subBucketRateId, BigDecimal eventTypeId,
+			BigDecimal totalAmount, BigDecimal currencyId, String eventId,
+			char reversableFlag, BigDecimal serviceId, Date timeDateStamp,
+			BigDecimal eventAmount, String origNbr, String destNbr,
+			BigDecimal duration, BigDecimal reversedActivityId,
+			Character removeFlag, BigDecimal rateId1, BigDecimal rateAmt1,
+			BigDecimal rateId2, BigDecimal rateAmt2, BigDecimal rateId3,
+			BigDecimal rateAmt3, BigDecimal rateId4, BigDecimal rateAmt4,
+			BigDecimal rateId5, BigDecimal rateAmt5, BigDecimal rateId6,
+			BigDecimal rateAmt6, BigDecimal rateId7, BigDecimal rateAmt7,
+			BigDecimal rateId8, BigDecimal rateAmt8, BigDecimal rateId9,
+			BigDecimal rateAmt9, BigDecimal rateId10, BigDecimal rateAmt10,
+			BigDecimal rateId11, BigDecimal rateAmt11, BigDecimal rateId12,
+			BigDecimal rateAmt12, BigDecimal callConnectionFee,
+			BigDecimal tier1Amt, BigDecimal tier2Amt, BigDecimal tier3Amt,
+			BigDecimal totalBongAmt, BigDecimal custRateId1,
+			BigDecimal custRateId2, BigDecimal custRateId3,
+			BigDecimal custRateId4, BigDecimal custRateAmt1,
+			BigDecimal custRateAmt2, BigDecimal custRateAmt3,
+			BigDecimal custRateAmt4, BigDecimal freeDuration) {
 		this.activityId = activityId;
 		this.subscriber = subscriber;
 		this.serviceProvider = serviceProvider;
 		this.productOffering = productOffering;
+		this.billingId = billingId;
+		this.postActivityBalance = postActivityBalance;
+		this.subBucketRateId = subBucketRateId;
 		this.eventTypeId = eventTypeId;
 		this.totalAmount = totalAmount;
 		this.currencyId = currencyId;
@@ -157,6 +166,7 @@ public class AccountActivity implements java.io.Serializable {
 		this.custRateAmt2 = custRateAmt2;
 		this.custRateAmt3 = custRateAmt3;
 		this.custRateAmt4 = custRateAmt4;
+		this.freeDuration = freeDuration;
 	}
 
 	public String getActivityId() {
@@ -189,6 +199,30 @@ public class AccountActivity implements java.io.Serializable {
 
 	public void setProductOffering(ProductOffering productOffering) {
 		this.productOffering = productOffering;
+	}
+
+	public String getBillingId() {
+		return this.billingId;
+	}
+
+	public void setBillingId(String billingId) {
+		this.billingId = billingId;
+	}
+
+	public BigDecimal getPostActivityBalance() {
+		return this.postActivityBalance;
+	}
+
+	public void setPostActivityBalance(BigDecimal postActivityBalance) {
+		this.postActivityBalance = postActivityBalance;
+	}
+
+	public BigDecimal getSubBucketRateId() {
+		return this.subBucketRateId;
+	}
+
+	public void setSubBucketRateId(BigDecimal subBucketRateId) {
+		this.subBucketRateId = subBucketRateId;
 	}
 
 	public BigDecimal getEventTypeId() {
@@ -589,6 +623,14 @@ public class AccountActivity implements java.io.Serializable {
 
 	public void setCustRateAmt4(BigDecimal custRateAmt4) {
 		this.custRateAmt4 = custRateAmt4;
+	}
+
+	public BigDecimal getFreeDuration() {
+		return this.freeDuration;
+	}
+
+	public void setFreeDuration(BigDecimal freeDuration) {
+		this.freeDuration = freeDuration;
 	}
 
 }

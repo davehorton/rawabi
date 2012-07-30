@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.rawabi.model.OfferingServiceXref" table="OFFERING_SERVICE_XREF" schema="PCSPROD_411">
+        <composite-id name="id" class="com.rawabi.model.OfferingServiceXrefId">
+            <key-property name="offeringId" type="big_decimal">
+                <column name="OFFERING_ID" precision="22" scale="0" />
+            </key-property>
+            <key-property name="serviceId" type="big_decimal">
+                <column name="SERVICE_ID" precision="22" scale="0" />
+            </key-property>
+        </composite-id>
+        <many-to-one name="productOffering" class="com.rawabi.model.ProductOffering" update="false" insert="false" fetch="select">
+            <column name="OFFERING_ID" precision="22" scale="0" not-null="true" />
+        </many-to-one>
+    </class>
+</hibernate-mapping>

@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.rawabi.model.Lot" table="LOT" schema="PCSPROD_411">
+        <comment>The lot table will hold the information on the lot (group of pins), such as the lot information required to create a pin, product offering ID and initial dollar
+        value of prepaid cards.</comment>
+        <id name="lotId" type="big_decimal">
+            <column name="LOT_ID" precision="22" scale="0" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="serviceProvider" class="com.rawabi.model.ServiceProvider" fetch="select">
+            <column name="SERVICE_PROVIDER_ID" precision="22" scale="0" not-null="true" />
+        </many-to-one>
+        <many-to-one name="productOffering" class="com.rawabi.model.ProductOffering" fetch="select">
+            <column name="OFFERING_ID" precision="22" scale="0" not-null="true" />
+        </many-to-one>
+        <property name="createdDate" type="date">
+            <column name="CREATED_DATE" length="7" not-null="true" />
+        </property>
+        <property name="scheduledLotSize" type="big_decimal">
+            <column name="SCHEDULED_LOT_SIZE" precision="22" scale="0" not-null="true">
+                <comment>The number of pins scheduled to be created</comment>
+            </column>
+        </property>
+        <property name="lotStatus" type="big_decimal">
+            <column name="LOT_STATUS" precision="22" scale="0" not-null="true" />
+        </property>
+        <property name="initialBalance" type="big_decimal">
+            <column name="INITIAL_BALANCE" precision="22" scale="0" not-null="true">
+                <comment>The initial balance on the prepaid cards</comment>
+            </column>
+        </property>
+        <property name="activationDate" type="date">
+            <column name="ACTIVATION_DATE" length="7" />
+        </property>
+        <property name="processBeginDate" type="date">
+            <column name="PROCESS_BEGIN_DATE" length="7" />
+        </property>
+        <property name="processEndDate" type="date">
+            <column name="PROCESS_END_DATE" length="7" />
+        </property>
+        <property name="scheduledDate" type="date">
+            <column name="SCHEDULED_DATE" length="7">
+                <comment>date to create lot</comment>
+            </column>
+        </property>
+        <property name="actualLotSize" type="big_decimal">
+            <column name="ACTUAL_LOT_SIZE" precision="22" scale="0">
+                <comment>The number of pins successfully created</comment>
+            </column>
+        </property>
+        <property name="expirationType" type="big_decimal">
+            <column name="EXPIRATION_TYPE" precision="22" scale="0" />
+        </property>
+        <property name="expirationDate" type="date">
+            <column name="EXPIRATION_DATE" length="7" />
+        </property>
+        <property name="numExpirationDays" type="big_decimal">
+            <column name="NUM_EXPIRATION_DAYS" precision="22" scale="0" />
+        </property>
+        <property name="spLotNumber" type="string">
+            <column name="SP_LOT_NUMBER" length="40" />
+        </property>
+        <property name="batchId" type="string">
+            <column name="BATCH_ID" length="120" />
+        </property>
+        <property name="lotDescription" type="string">
+            <column name="LOT_DESCRIPTION" length="40" />
+        </property>
+        <property name="lotControlNumber" type="string">
+            <column name="LOT_CONTROL_NUMBER" length="40" unique="true">
+                <comment>lot control tracking number, this is used as the prefix for pin serial numbers</comment>
+            </column>
+        </property>
+        <property name="unusedExpirationType" type="big_decimal">
+            <column name="UNUSED_EXPIRATION_TYPE" precision="22" scale="0">
+                <comment>0 = no expiration, 2 = fixed date, 4 = days from activation</comment>
+            </column>
+        </property>
+        <property name="unusedExpDays" type="big_decimal">
+            <column name="UNUSED_EXP_DAYS" precision="22" scale="0">
+                <comment>number of days from activation to expire unused pins</comment>
+            </column>
+        </property>
+        <property name="unusedExpDate" type="date">
+            <column name="UNUSED_EXP_DATE" length="7">
+                <comment>fixed expiration date for unused pins</comment>
+            </column>
+        </property>
+        <property name="purgeDate" type="date">
+            <column name="PURGE_DATE" length="7">
+                <comment>Date on which unused pins for this range were purged.</comment>
+            </column>
+        </property>
+        <property name="numPinsPurged" type="big_decimal">
+            <column name="NUM_PINS_PURGED" precision="22" scale="0">
+                <comment>Number of pins purged.</comment>
+            </column>
+        </property>
+        <property name="pinPrefix" type="string">
+            <column name="PIN_PREFIX" length="4">
+                <comment>Numeric digits used to prepend all pins generated for the lot.</comment>
+            </column>
+        </property>
+        <property name="custSerialnumFlag" type="char">
+            <column name="CUST_SERIALNUM_FLAG" length="1" not-null="true">
+                <comment>flag indicating whether the lot contains pins with imported customer serial numbes (T) instead of pactolus generated serial numbers (F). Used by ACE to
+                prevent some actions that will not work with imported serial numbers.</comment>
+            </column>
+        </property>
+        <property name="allowPinOnlyLoginFlag" type="char">
+            <column name="ALLOW_PIN_ONLY_LOGIN_FLAG" length="1" not-null="true">
+                <comment>Allow pin only login for subscribers associated with a specific lot.</comment>
+            </column>
+        </property>
+        <set name="preActivatedSubscriberses" table="PRE_ACTIVATED_SUBSCRIBERS" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="LOT_ID" precision="22" scale="0" not-null="true">
+                    <comment>The lot_status (1-new, 2-processed, 3-activated, 4-cancelled, 5-error)</comment>
+                </column>
+            </key>
+            <one-to-many class="com.rawabi.model.PreActivatedSubscribers" />
+        </set>
+    </class>
+</hibernate-mapping>

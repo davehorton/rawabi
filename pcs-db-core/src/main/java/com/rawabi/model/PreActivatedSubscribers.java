@@ -1,6 +1,6 @@
 package com.rawabi.model;
 
-// Generated Jul 24, 2012 12:30:09 PM by Hibernate Tools 3.4.0.CR1
+// Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -12,56 +12,55 @@ public class PreActivatedSubscribers implements java.io.Serializable {
 
 	private BigDecimal subscriberId;
 	private ServiceProvider serviceProvider;
-	private BigDecimal lotId;
+	private Lot lot;
 	private String pin;
 	private String pinPassword;
 	private BigDecimal lotSeqNumber;
-	private Character disabledFlag;
 	private Character activationFlag;
 	private Character allowPinOnlyLoginFlag;
+	private Character disabledFlag;
 	private Date activationDate;
-	private String activationId;
 	private String confReslessModPasscode;
 	private String confReslessPasscode;
 	private String lotControlNumber;
 	private String posEventId;
+	private String activationId;
 
 	public PreActivatedSubscribers() {
 	}
 
 	public PreActivatedSubscribers(BigDecimal subscriberId,
-			ServiceProvider serviceProvider, BigDecimal lotId, String pin,
+			ServiceProvider serviceProvider, Lot lot, String pin,
 			String pinPassword) {
 		this.subscriberId = subscriberId;
 		this.serviceProvider = serviceProvider;
-		this.lotId = lotId;
+		this.lot = lot;
 		this.pin = pin;
 		this.pinPassword = pinPassword;
 	}
 
 	public PreActivatedSubscribers(BigDecimal subscriberId,
-			ServiceProvider serviceProvider, BigDecimal lotId, String pin,
+			ServiceProvider serviceProvider, Lot lot, String pin,
 			String pinPassword, BigDecimal lotSeqNumber,
-			Character disabledFlag, Character activationFlag,
-			Character allowPinOnlyLoginFlag, Date activationDate,
-			String activationId, String confReslessModPasscode,
-			String confReslessPasscode, String lotControlNumber,
-			String posEventId) {
+			Character activationFlag, Character allowPinOnlyLoginFlag,
+			Character disabledFlag, Date activationDate,
+			String confReslessModPasscode, String confReslessPasscode,
+			String lotControlNumber, String posEventId, String activationId) {
 		this.subscriberId = subscriberId;
 		this.serviceProvider = serviceProvider;
-		this.lotId = lotId;
+		this.lot = lot;
 		this.pin = pin;
 		this.pinPassword = pinPassword;
 		this.lotSeqNumber = lotSeqNumber;
-		this.disabledFlag = disabledFlag;
 		this.activationFlag = activationFlag;
 		this.allowPinOnlyLoginFlag = allowPinOnlyLoginFlag;
+		this.disabledFlag = disabledFlag;
 		this.activationDate = activationDate;
-		this.activationId = activationId;
 		this.confReslessModPasscode = confReslessModPasscode;
 		this.confReslessPasscode = confReslessPasscode;
 		this.lotControlNumber = lotControlNumber;
 		this.posEventId = posEventId;
+		this.activationId = activationId;
 	}
 
 	public BigDecimal getSubscriberId() {
@@ -80,12 +79,12 @@ public class PreActivatedSubscribers implements java.io.Serializable {
 		this.serviceProvider = serviceProvider;
 	}
 
-	public BigDecimal getLotId() {
-		return this.lotId;
+	public Lot getLot() {
+		return this.lot;
 	}
 
-	public void setLotId(BigDecimal lotId) {
-		this.lotId = lotId;
+	public void setLot(Lot lot) {
+		this.lot = lot;
 	}
 
 	public String getPin() {
@@ -112,14 +111,6 @@ public class PreActivatedSubscribers implements java.io.Serializable {
 		this.lotSeqNumber = lotSeqNumber;
 	}
 
-	public Character getDisabledFlag() {
-		return this.disabledFlag;
-	}
-
-	public void setDisabledFlag(Character disabledFlag) {
-		this.disabledFlag = disabledFlag;
-	}
-
 	public Character getActivationFlag() {
 		return this.activationFlag;
 	}
@@ -136,20 +127,20 @@ public class PreActivatedSubscribers implements java.io.Serializable {
 		this.allowPinOnlyLoginFlag = allowPinOnlyLoginFlag;
 	}
 
+	public Character getDisabledFlag() {
+		return this.disabledFlag;
+	}
+
+	public void setDisabledFlag(Character disabledFlag) {
+		this.disabledFlag = disabledFlag;
+	}
+
 	public Date getActivationDate() {
 		return this.activationDate;
 	}
 
 	public void setActivationDate(Date activationDate) {
 		this.activationDate = activationDate;
-	}
-
-	public String getActivationId() {
-		return this.activationId;
-	}
-
-	public void setActivationId(String activationId) {
-		this.activationId = activationId;
 	}
 
 	public String getConfReslessModPasscode() {
@@ -182,6 +173,14 @@ public class PreActivatedSubscribers implements java.io.Serializable {
 
 	public void setPosEventId(String posEventId) {
 		this.posEventId = posEventId;
+	}
+
+	public String getActivationId() {
+		return this.activationId;
+	}
+
+	public void setActivationId(String activationId) {
+		this.activationId = activationId;
 	}
 
 }

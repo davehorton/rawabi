@@ -5,9 +5,9 @@
 <hibernate-configuration>
     <session-factory>
       	<property name="hibernate.connection.driver_class">oracle.jdbc.driver.OracleDriver</property>
-  		<property name="hibernate.connection.password">pcsprod</property>
+  		<property name="hibernate.connection.password">pcsprod_411</property>
   		<property name="hibernate.connection.url">jdbc:oracle:thin:@77.92.180.10:1521:psprd1</property>
-  		<property name="hibernate.connection.username">pcsprod</property>
+  		<property name="hibernate.connection.username">pcsprod_411</property>
   		<property name="hibernate.dialect">org.hibernate.dialect.Oracle10gDialect</property>
     </session-factory>
 </hibernate-configuration>

@@ -12,10 +12,10 @@
                                 <value>jdbc:oracle:thin:@77.92.180.10:1521:psprd1</value> 
                         </property>
                         <property name="username">
-                                <value>pcsprod</value>
+                                <value>pcsprod_411</value>
                         </property>
                         <property name="password">
-                                <value>pcsprod</value>
+                                <value>pcsprod_411</value>
                         </property>
                         <property name="logger">
                                 <ref bean="logger"/>
@@ -66,6 +66,8 @@
         		<value>com/rawabi/model/EvtBalanceTransfer.hbm.xml</value>
         		<value>com/rawabi/model/LanguageRef.hbm.xml</value>
         		<value>com/rawabi/model/LockedPins.hbm.xml</value>
+       			<value>com/rawabi/model/Lot.hbm.xml</value>
+        		<value>com/rawabi/model/OfferingServiceXref.hbm.xml</value>
         		<value>com/rawabi/model/PreActivatedSubscribers.hbm.xml</value>
         		<value>com/rawabi/model/ProductOffering.hbm.xml</value>
        			<value>com/rawabi/model/ServiceProvider.hbm.xml</value>
@@ -73,6 +75,7 @@
         		<value>com/rawabi/model/SubAuthAni.hbm.xml</value>
         		<value>com/rawabi/model/Subscriber.hbm.xml</value>
         		<value>com/rawabi/model/SvcPrepaidCalling.hbm.xml</value>
+        		<value>com/rawabi/model/SubOfferingXref.hbm.xml</value>
         	</list>
     	</property>
 		

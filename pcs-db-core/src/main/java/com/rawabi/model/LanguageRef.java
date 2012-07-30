@@ -1,6 +1,6 @@
 package com.rawabi.model;
 
-// Generated Jul 24, 2012 12:30:09 PM by Hibernate Tools 3.4.0.CR1
+// Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1
 
 import java.math.BigDecimal;
 import java.util.HashSet;

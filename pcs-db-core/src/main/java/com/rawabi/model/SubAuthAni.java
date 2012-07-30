@@ -1,6 +1,6 @@
 package com.rawabi.model;
 
-// Generated Jul 24, 2012 12:30:09 PM by Hibernate Tools 3.4.0.CR1
+// Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1
 
 import java.math.BigDecimal;
 
@@ -9,38 +9,41 @@ import java.math.BigDecimal;
  */
 public class SubAuthAni implements java.io.Serializable {
 
-	private BigDecimal authAniId;
+	private Long authAniId;
 	private Subscriber subscriber;
 	private ServiceProvider serviceProvider;
+	private String status;
 	private String phoneNumber;
 	private BigDecimal pinId;
 
 	public SubAuthAni() {
 	}
 
-	public SubAuthAni(BigDecimal authAniId, Subscriber subscriber,
-			ServiceProvider serviceProvider, String phoneNumber) {
+	public SubAuthAni(Long authAniId, Subscriber subscriber,
+			ServiceProvider serviceProvider, String status, String phoneNumber) {
 		this.authAniId = authAniId;
 		this.subscriber = subscriber;
 		this.serviceProvider = serviceProvider;
+		this.status = status;
 		this.phoneNumber = phoneNumber;
 	}
 
-	public SubAuthAni(BigDecimal authAniId, Subscriber subscriber,
-			ServiceProvider serviceProvider, String phoneNumber,
+	public SubAuthAni(Long authAniId, Subscriber subscriber,
+			ServiceProvider serviceProvider, String status, String phoneNumber,
 			BigDecimal pinId) {
 		this.authAniId = authAniId;
 		this.subscriber = subscriber;
 		this.serviceProvider = serviceProvider;
+		this.status = status;
 		this.phoneNumber = phoneNumber;
 		this.pinId = pinId;
 	}
 
-	public BigDecimal getAuthAniId() {
+	public Long getAuthAniId() {
 		return this.authAniId;
 	}
 
-	public void setAuthAniId(BigDecimal authAniId) {
+	public void setAuthAniId(Long authAniId) {
 		this.authAniId = authAniId;
 	}
 
@@ -58,6 +61,14 @@ public class SubAuthAni implements java.io.Serializable {
 
 	public void setServiceProvider(ServiceProvider serviceProvider) {
 		this.serviceProvider = serviceProvider;
+	}
+
+	public String getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	public String getPhoneNumber() {

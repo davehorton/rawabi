@@ -1,6 +1,6 @@
 package com.rawabi.model;
 
-// Generated Jul 24, 2012 12:30:09 PM by Hibernate Tools 3.4.0.CR1
+// Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -14,16 +14,19 @@ public class ProductOffering implements java.io.Serializable {
 
 	private BigDecimal offeringId;
 	private ServiceProvider serviceProvider;
+	private char sweepTierFlag;
+	private char firstBilledAsFirstUseFlag;
+	private char ivrAniRegFlag;
 	private BigDecimal currencyId;
 	private BigDecimal languageId;
 	private BigDecimal pinLength;
 	private BigDecimal expirationType;
+	private BigDecimal subSignupStatus;
 	private char balXferFlag;
 	private char ccRechargeFlag;
 	private char balanceSweepFlag;
 	private char creditCardReqFlag;
 	private char emailFlag;
-	private BigDecimal subSignupStatus;
 	private char creditCardValidFlag;
 	private char allowCorpAcctFlag;
 	private char aniAuthFlag;
@@ -36,6 +39,11 @@ public class ProductOffering implements java.io.Serializable {
 	private char balXferDisableSub;
 	private char ivrAcctBalUnitsFlag;
 	private char firmCreditLimitFlag;
+	private char immediateThresholdPayFlag;
+	private char restrictAuthAniFlag;
+	private char startLotSeqZeroFlag;
+	private char autoPayFlag;
+	private char sharedUseFlag;
 	private Character primaryFlag;
 	private Date expirationDate;
 	private BigDecimal numExpirationDays;
@@ -58,37 +66,58 @@ public class ProductOffering implements java.io.Serializable {
 	private BigDecimal ccRechargeAmount5;
 	private BigDecimal ccRechargeAmount6;
 	private BigDecimal creditLimitWarning;
+	private BigDecimal minimumInitialBalance;
+	private BigDecimal immediateThresholdPayPct;
+	private BigDecimal maxAuthAniAllowed;
+	private BigDecimal autoPayThresholdPct;
+	private BigDecimal creditThreshold;
+	private BigDecimal maxExtensions;
+	private BigDecimal maxDid;
+	private BigDecimal countryId;
+	private BigDecimal billingLevel;
+	private BigDecimal timeReserveAmount;
+	private BigDecimal currencyReserveAmount;
+	private String carrierCode;
 	private String name;
 	private String description;
+	private Set<SubOfferingXref> subOfferingXrefs = new HashSet<SubOfferingXref>(
+			0);
 	private Set<AccountActivity> accountActivities = new HashSet<AccountActivity>(
+			0);
+	private Set<Lot> lots = new HashSet<Lot>(0);
+	private Set<OfferingServiceXref> offeringServiceXrefs = new HashSet<OfferingServiceXref>(
 			0);
 
 	public ProductOffering() {
 	}
 
-	public ProductOffering(BigDecimal offeringId,
-			ServiceProvider serviceProvider, BigDecimal currencyId,
-			BigDecimal languageId, BigDecimal pinLength,
-			BigDecimal expirationType, char balXferFlag, char ccRechargeFlag,
-			char balanceSweepFlag, char creditCardReqFlag, char emailFlag,
-			BigDecimal subSignupStatus, char creditCardValidFlag,
+	public ProductOffering(BigDecimal offeringId, char sweepTierFlag,
+			char firstBilledAsFirstUseFlag, char ivrAniRegFlag,
+			BigDecimal currencyId, BigDecimal languageId, BigDecimal pinLength,
+			BigDecimal expirationType, BigDecimal subSignupStatus,
+			char balXferFlag, char ccRechargeFlag, char balanceSweepFlag,
+			char creditCardReqFlag, char emailFlag, char creditCardValidFlag,
 			char allowCorpAcctFlag, char aniAuthFlag, char requireAniAuthFlag,
 			char deletedFlag, char popdRateCallsFlag, char popdCreditLimitFlag,
 			char accessNumOfferingRequired, char customRatesFlag,
 			char balXferDisableSub, char ivrAcctBalUnitsFlag,
-			char firmCreditLimitFlag) {
+			char firmCreditLimitFlag, char immediateThresholdPayFlag,
+			char restrictAuthAniFlag, char startLotSeqZeroFlag,
+			char autoPayFlag, char sharedUseFlag) {
 		this.offeringId = offeringId;
-		this.serviceProvider = serviceProvider;
+		this.sweepTierFlag = sweepTierFlag;
+		this.firstBilledAsFirstUseFlag = firstBilledAsFirstUseFlag;
+		this.ivrAniRegFlag = ivrAniRegFlag;
 		this.currencyId = currencyId;
 		this.languageId = languageId;
 		this.pinLength = pinLength;
 		this.expirationType = expirationType;
+		this.subSignupStatus = subSignupStatus;
 		this.balXferFlag = balXferFlag;
 		this.ccRechargeFlag = ccRechargeFlag;
 		this.balanceSweepFlag = balanceSweepFlag;
 		this.creditCardReqFlag = creditCardReqFlag;
 		this.emailFlag = emailFlag;
-		this.subSignupStatus = subSignupStatus;
 		this.creditCardValidFlag = creditCardValidFlag;
 		this.allowCorpAcctFlag = allowCorpAcctFlag;
 		this.aniAuthFlag = aniAuthFlag;
@@ -101,19 +130,27 @@ public class ProductOffering implements java.io.Serializable {
 		this.balXferDisableSub = balXferDisableSub;
 		this.ivrAcctBalUnitsFlag = ivrAcctBalUnitsFlag;
 		this.firmCreditLimitFlag = firmCreditLimitFlag;
+		this.immediateThresholdPayFlag = immediateThresholdPayFlag;
+		this.restrictAuthAniFlag = restrictAuthAniFlag;
+		this.startLotSeqZeroFlag = startLotSeqZeroFlag;
+		this.autoPayFlag = autoPayFlag;
+		this.sharedUseFlag = sharedUseFlag;
 	}
 
 	public ProductOffering(BigDecimal offeringId,
-			ServiceProvider serviceProvider, BigDecimal currencyId,
-			BigDecimal languageId, BigDecimal pinLength,
-			BigDecimal expirationType, char balXferFlag, char ccRechargeFlag,
-			char balanceSweepFlag, char creditCardReqFlag, char emailFlag,
-			BigDecimal subSignupStatus, char creditCardValidFlag,
+			ServiceProvider serviceProvider, char sweepTierFlag,
+			char firstBilledAsFirstUseFlag, char ivrAniRegFlag,
+			BigDecimal currencyId, BigDecimal languageId, BigDecimal pinLength,
+			BigDecimal expirationType, BigDecimal subSignupStatus,
+			char balXferFlag, char ccRechargeFlag, char balanceSweepFlag,
+			char creditCardReqFlag, char emailFlag, char creditCardValidFlag,
 			char allowCorpAcctFlag, char aniAuthFlag, char requireAniAuthFlag,
 			char deletedFlag, char popdRateCallsFlag, char popdCreditLimitFlag,
 			char accessNumOfferingRequired, char customRatesFlag,
 			char balXferDisableSub, char ivrAcctBalUnitsFlag,
-			char firmCreditLimitFlag, Character primaryFlag,
+			char firmCreditLimitFlag, char immediateThresholdPayFlag,
+			char restrictAuthAniFlag, char startLotSeqZeroFlag,
+			char autoPayFlag, char sharedUseFlag, Character primaryFlag,
 			Date expirationDate, BigDecimal numExpirationDays,
 			BigDecimal ppMinBalance, BigDecimal ppMaxBalance,
 			BigDecimal minRecharge, BigDecimal maxRecharge,
@@ -124,20 +161,30 @@ public class ProductOffering implements java.io.Serializable {
 			BigDecimal ccRechargeAmount4, BigDecimal popdCreditLimit,
 			BigDecimal clmBalResetDay, BigDecimal dialingPlanId,
 			BigDecimal ccRechargeAmount5, BigDecimal ccRechargeAmount6,
-			BigDecimal creditLimitWarning, String name, String description,
-			Set<AccountActivity> accountActivities) {
+			BigDecimal creditLimitWarning, BigDecimal minimumInitialBalance,
+			BigDecimal immediateThresholdPayPct, BigDecimal maxAuthAniAllowed,
+			BigDecimal autoPayThresholdPct, BigDecimal creditThreshold,
+			BigDecimal maxExtensions, BigDecimal maxDid, BigDecimal countryId,
+			BigDecimal billingLevel, BigDecimal timeReserveAmount,
+			BigDecimal currencyReserveAmount, String carrierCode, String name,
+			String description, Set<SubOfferingXref> subOfferingXrefs,
+			Set<AccountActivity> accountActivities, Set<Lot> lots,
+			Set<OfferingServiceXref> offeringServiceXrefs) {
 		this.offeringId = offeringId;
 		this.serviceProvider = serviceProvider;
+		this.sweepTierFlag = sweepTierFlag;
+		this.firstBilledAsFirstUseFlag = firstBilledAsFirstUseFlag;
+		this.ivrAniRegFlag = ivrAniRegFlag;
 		this.currencyId = currencyId;
 		this.languageId = languageId;
 		this.pinLength = pinLength;
 		this.expirationType = expirationType;
+		this.subSignupStatus = subSignupStatus;
 		this.balXferFlag = balXferFlag;
 		this.ccRechargeFlag = ccRechargeFlag;
 		this.balanceSweepFlag = balanceSweepFlag;
 		this.creditCardReqFlag = creditCardReqFlag;
 		this.emailFlag = emailFlag;
-		this.subSignupStatus = subSignupStatus;
 		this.creditCardValidFlag = creditCardValidFlag;
 		this.allowCorpAcctFlag = allowCorpAcctFlag;
 		this.aniAuthFlag = aniAuthFlag;
@@ -150,6 +197,11 @@ public class ProductOffering implements java.io.Serializable {
 		this.balXferDisableSub = balXferDisableSub;
 		this.ivrAcctBalUnitsFlag = ivrAcctBalUnitsFlag;
 		this.firmCreditLimitFlag = firmCreditLimitFlag;
+		this.immediateThresholdPayFlag = immediateThresholdPayFlag;
+		this.restrictAuthAniFlag = restrictAuthAniFlag;
+		this.startLotSeqZeroFlag = startLotSeqZeroFlag;
+		this.autoPayFlag = autoPayFlag;
+		this.sharedUseFlag = sharedUseFlag;
 		this.primaryFlag = primaryFlag;
 		this.expirationDate = expirationDate;
 		this.numExpirationDays = numExpirationDays;
@@ -172,9 +224,24 @@ public class ProductOffering implements java.io.Serializable {
 		this.ccRechargeAmount5 = ccRechargeAmount5;
 		this.ccRechargeAmount6 = ccRechargeAmount6;
 		this.creditLimitWarning = creditLimitWarning;
+		this.minimumInitialBalance = minimumInitialBalance;
+		this.immediateThresholdPayPct = immediateThresholdPayPct;
+		this.maxAuthAniAllowed = maxAuthAniAllowed;
+		this.autoPayThresholdPct = autoPayThresholdPct;
+		this.creditThreshold = creditThreshold;
+		this.maxExtensions = maxExtensions;
+		this.maxDid = maxDid;
+		this.countryId = countryId;
+		this.billingLevel = billingLevel;
+		this.timeReserveAmount = timeReserveAmount;
+		this.currencyReserveAmount = currencyReserveAmount;
+		this.carrierCode = carrierCode;
 		this.name = name;
 		this.description = description;
+		this.subOfferingXrefs = subOfferingXrefs;
 		this.accountActivities = accountActivities;
+		this.lots = lots;
+		this.offeringServiceXrefs = offeringServiceXrefs;
 	}
 
 	public BigDecimal getOfferingId() {
@@ -191,6 +258,30 @@ public class ProductOffering implements java.io.Serializable {
 
 	public void setServiceProvider(ServiceProvider serviceProvider) {
 		this.serviceProvider = serviceProvider;
+	}
+
+	public char getSweepTierFlag() {
+		return this.sweepTierFlag;
+	}
+
+	public void setSweepTierFlag(char sweepTierFlag) {
+		this.sweepTierFlag = sweepTierFlag;
+	}
+
+	public char getFirstBilledAsFirstUseFlag() {
+		return this.firstBilledAsFirstUseFlag;
+	}
+
+	public void setFirstBilledAsFirstUseFlag(char firstBilledAsFirstUseFlag) {
+		this.firstBilledAsFirstUseFlag = firstBilledAsFirstUseFlag;
+	}
+
+	public char getIvrAniRegFlag() {
+		return this.ivrAniRegFlag;
+	}
+
+	public void setIvrAniRegFlag(char ivrAniRegFlag) {
+		this.ivrAniRegFlag = ivrAniRegFlag;
 	}
 
 	public BigDecimal getCurrencyId() {
@@ -223,6 +314,14 @@ public class ProductOffering implements java.io.Serializable {
 
 	public void setExpirationType(BigDecimal expirationType) {
 		this.expirationType = expirationType;
+	}
+
+	public BigDecimal getSubSignupStatus() {
+		return this.subSignupStatus;
+	}
+
+	public void setSubSignupStatus(BigDecimal subSignupStatus) {
+		this.subSignupStatus = subSignupStatus;
 	}
 
 	public char getBalXferFlag() {
@@ -263,14 +362,6 @@ public class ProductOffering implements java.io.Serializable {
 
 	public void setEmailFlag(char emailFlag) {
 		this.emailFlag = emailFlag;
-	}
-
-	public BigDecimal getSubSignupStatus() {
-		return this.subSignupStatus;
-	}
-
-	public void setSubSignupStatus(BigDecimal subSignupStatus) {
-		this.subSignupStatus = subSignupStatus;
 	}
 
 	public char getCreditCardValidFlag() {
@@ -367,6 +458,46 @@ public class ProductOffering implements java.io.Serializable {
 
 	public void setFirmCreditLimitFlag(char firmCreditLimitFlag) {
 		this.firmCreditLimitFlag = firmCreditLimitFlag;
+	}
+
+	public char getImmediateThresholdPayFlag() {
+		return this.immediateThresholdPayFlag;
+	}
+
+	public void setImmediateThresholdPayFlag(char immediateThresholdPayFlag) {
+		this.immediateThresholdPayFlag = immediateThresholdPayFlag;
+	}
+
+	public char getRestrictAuthAniFlag() {
+		return this.restrictAuthAniFlag;
+	}
+
+	public void setRestrictAuthAniFlag(char restrictAuthAniFlag) {
+		this.restrictAuthAniFlag = restrictAuthAniFlag;
+	}
+
+	public char getStartLotSeqZeroFlag() {
+		return this.startLotSeqZeroFlag;
+	}
+
+	public void setStartLotSeqZeroFlag(char startLotSeqZeroFlag) {
+		this.startLotSeqZeroFlag = startLotSeqZeroFlag;
+	}
+
+	public char getAutoPayFlag() {
+		return this.autoPayFlag;
+	}
+
+	public void setAutoPayFlag(char autoPayFlag) {
+		this.autoPayFlag = autoPayFlag;
+	}
+
+	public char getSharedUseFlag() {
+		return this.sharedUseFlag;
+	}
+
+	public void setSharedUseFlag(char sharedUseFlag) {
+		this.sharedUseFlag = sharedUseFlag;
 	}
 
 	public Character getPrimaryFlag() {
@@ -545,6 +676,102 @@ public class ProductOffering implements java.io.Serializable {
 		this.creditLimitWarning = creditLimitWarning;
 	}
 
+	public BigDecimal getMinimumInitialBalance() {
+		return this.minimumInitialBalance;
+	}
+
+	public void setMinimumInitialBalance(BigDecimal minimumInitialBalance) {
+		this.minimumInitialBalance = minimumInitialBalance;
+	}
+
+	public BigDecimal getImmediateThresholdPayPct() {
+		return this.immediateThresholdPayPct;
+	}
+
+	public void setImmediateThresholdPayPct(BigDecimal immediateThresholdPayPct) {
+		this.immediateThresholdPayPct = immediateThresholdPayPct;
+	}
+
+	public BigDecimal getMaxAuthAniAllowed() {
+		return this.maxAuthAniAllowed;
+	}
+
+	public void setMaxAuthAniAllowed(BigDecimal maxAuthAniAllowed) {
+		this.maxAuthAniAllowed = maxAuthAniAllowed;
+	}
+
+	public BigDecimal getAutoPayThresholdPct() {
+		return this.autoPayThresholdPct;
+	}
+
+	public void setAutoPayThresholdPct(BigDecimal autoPayThresholdPct) {
+		this.autoPayThresholdPct = autoPayThresholdPct;
+	}
+
+	public BigDecimal getCreditThreshold() {
+		return this.creditThreshold;
+	}
+
+	public void setCreditThreshold(BigDecimal creditThreshold) {
+		this.creditThreshold = creditThreshold;
+	}
+
+	public BigDecimal getMaxExtensions() {
+		return this.maxExtensions;
+	}
+
+	public void setMaxExtensions(BigDecimal maxExtensions) {
+		this.maxExtensions = maxExtensions;
+	}
+
+	public BigDecimal getMaxDid() {
+		return this.maxDid;
+	}
+
+	public void setMaxDid(BigDecimal maxDid) {
+		this.maxDid = maxDid;
+	}
+
+	public BigDecimal getCountryId() {
+		return this.countryId;
+	}
+
+	public void setCountryId(BigDecimal countryId) {
+		this.countryId = countryId;
+	}
+
+	public BigDecimal getBillingLevel() {
+		return this.billingLevel;
+	}
+
+	public void setBillingLevel(BigDecimal billingLevel) {
+		this.billingLevel = billingLevel;
+	}
+
+	public BigDecimal getTimeReserveAmount() {
+		return this.timeReserveAmount;
+	}
+
+	public void setTimeReserveAmount(BigDecimal timeReserveAmount) {
+		this.timeReserveAmount = timeReserveAmount;
+	}
+
+	public BigDecimal getCurrencyReserveAmount() {
+		return this.currencyReserveAmount;
+	}
+
+	public void setCurrencyReserveAmount(BigDecimal currencyReserveAmount) {
+		this.currencyReserveAmount = currencyReserveAmount;
+	}
+
+	public String getCarrierCode() {
+		return this.carrierCode;
+	}
+
+	public void setCarrierCode(String carrierCode) {
+		this.carrierCode = carrierCode;
+	}
+
 	public String getName() {
 		return this.name;
 	}
@@ -561,12 +788,37 @@ public class ProductOffering implements java.io.Serializable {
 		this.description = description;
 	}
 
+	public Set<SubOfferingXref> getSubOfferingXrefs() {
+		return this.subOfferingXrefs;
+	}
+
+	public void setSubOfferingXrefs(Set<SubOfferingXref> subOfferingXrefs) {
+		this.subOfferingXrefs = subOfferingXrefs;
+	}
+
 	public Set<AccountActivity> getAccountActivities() {
 		return this.accountActivities;
 	}
 
 	public void setAccountActivities(Set<AccountActivity> accountActivities) {
 		this.accountActivities = accountActivities;
+	}
+
+	public Set<Lot> getLots() {
+		return this.lots;
+	}
+
+	public void setLots(Set<Lot> lots) {
+		this.lots = lots;
+	}
+
+	public Set<OfferingServiceXref> getOfferingServiceXrefs() {
+		return this.offeringServiceXrefs;
+	}
+
+	public void setOfferingServiceXrefs(
+			Set<OfferingServiceXref> offeringServiceXrefs) {
+		this.offeringServiceXrefs = offeringServiceXrefs;
 	}
 
 }

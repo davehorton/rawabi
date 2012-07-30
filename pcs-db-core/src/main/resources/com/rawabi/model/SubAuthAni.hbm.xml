@@ -1,14 +1,16 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-<!-- Generated Jul 24, 2012 12:30:10 PM by Hibernate Tools 3.4.0.CR1 -->
+<!-- Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1 -->
 <hibernate-mapping>
-    <class name="com.rawabi.model.SubAuthAni" table="SUB_AUTH_ANI" schema="PCSPROD">
+    <class name="com.rawabi.model.SubAuthAni" table="SUB_AUTH_ANI" schema="PCSPROD_411">
         <comment>This table is used to associate origination numbers (ANIs) with subscribers so that they don't have to enter a pin through the IVR if they call from one of these
         numbers.</comment>
-        <id name="authAniId" type="big_decimal">
+        <id name="authAniId" type="long">
             <column name="AUTH_ANI_ID" precision="22" scale="0" />
-            <generator class="assigned" />
+            <generator class="sequence">
+            	<param name="sequence">sub_auth_ani_seq</param>
+            </generator>
         </id>
         <many-to-one name="subscriber" class="com.rawabi.model.Subscriber" fetch="select">
             <column name="SUBSCRIBER_ID" precision="22" scale="0" not-null="true" />
@@ -16,6 +18,11 @@
         <many-to-one name="serviceProvider" class="com.rawabi.model.ServiceProvider" fetch="select">
             <column name="SERVICE_PROVIDER_ID" precision="22" scale="0" not-null="true" />
         </many-to-one>
+        <property name="status" type="string">
+            <column name="STATUS" length="3" not-null="true">
+                <comment>The calling status of the authorized ANI. 0 means Active, 2 means Inactive.</comment>
+            </column>
+        </property>
         <property name="phoneNumber" type="string">
             <column name="PHONE_NUMBER" length="20" not-null="true" />
         </property>

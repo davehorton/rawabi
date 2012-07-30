@@ -1,26 +1,63 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-<!-- Generated Jul 24, 2012 12:30:10 PM by Hibernate Tools 3.4.0.CR1 -->
+<!-- Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1 -->
 <hibernate-mapping>
-    <class name="com.rawabi.model.Subscriber" table="SUBSCRIBER" schema="PCSPROD">
-        <id name="subscriberId" type="big_decimal">
+    <class name="com.rawabi.model.Subscriber" table="SUBSCRIBER" schema="PCSPROD_411" dynamic-insert="true">
+        <id name="subscriberId" type="long">
             <column name="SUBSCRIBER_ID" precision="22" scale="0" />
-            <generator class="assigned" />
+            <generator class="sequence">
+            	<param name="sequence">subscriber_seq</param>
+            </generator>
         </id>
-        <many-to-one name="currencyRef" class="com.rawabi.model.CurrencyRef" fetch="select">
-            <column name="CURRENCY_ID" precision="22" scale="0" not-null="true" />
-        </many-to-one>
-        <many-to-one name="serviceProvider" class="com.rawabi.model.ServiceProvider" fetch="select">
-            <column name="SERVICE_PROVIDER_ID" precision="22" scale="0" not-null="true" />
-        </many-to-one>
+        <property name="offplanAlertPlayed" type="big_decimal">
+            <column name="OFFPLAN_ALERT_PLAYED" precision="22" scale="0" not-null="true">
+                <comment>Number of times the off-plan alert prompt has been played for this subscriber.</comment>
+            </column>
+        </property>
+        <property name="firstBillcyclePlayed" type="char">
+            <column name="FIRST_BILLCYCLE_PLAYED" length="1" not-null="true">
+                <comment>If T, the first call of the billing cycle prompt has been played.</comment>
+            </column>
+        </property>
+        <property name="onplanAlertPlayed" type="big_decimal">
+            <column name="ONPLAN_ALERT_PLAYED" precision="22" scale="0" not-null="true">
+                <comment>Number of times the on-plan per-minute rating alert has been played for this subscriber.</comment>
+            </column>
+        </property>
+        <property name="nextMaintFee2Date" type="date">
+            <column name="NEXT_MAINT_FEE2_DATE" length="7">
+                <comment>Next maint fee 2 date</comment>
+            </column>
+        </property>
+        <property name="nextMaintFee3Date" type="date">
+            <column name="NEXT_MAINT_FEE3_DATE" length="7">
+                <comment>Next maint fee 3 date</comment>
+            </column>
+        </property>
+        <property name="nextMonthlyBillingDate" type="date">
+            <column name="NEXT_MONTHLY_BILLING_DATE" length="7">
+                <comment>Next monthly billing date, used by billing cycle logic.</comment>
+            </column>
+        </property>
+        <property name="billedSequence" type="big_decimal">
+            <column name="BILLED_SEQUENCE" precision="22" scale="0" not-null="true">
+                <comment>The nth billed call that the subscriber has made (Null treated as 0th)</comment>
+            </column>
+        </property>
         <property name="initialBalance" type="big_decimal">
             <column name="INITIAL_BALANCE" precision="22" scale="0" not-null="true">
                 <comment>subscriber starting balance for prepaid</comment>
             </column>
         </property>
+        <property name="serviceProviderId" type="big_decimal">
+            <column name="SERVICE_PROVIDER_ID" precision="22" scale="0" not-null="true" />
+        </property>
         <property name="expirationType" type="big_decimal">
             <column name="EXPIRATION_TYPE" precision="22" scale="0" not-null="true" />
+        </property>
+        <property name="currencyId" type="big_decimal">
+            <column name="CURRENCY_ID" precision="22" scale="0" not-null="true" />
         </property>
         <property name="languageId" type="big_decimal">
             <column name="LANGUAGE_ID" precision="22" scale="0" not-null="true" />
@@ -43,6 +80,33 @@
         <property name="directCallFlag" type="char">
             <column name="DIRECT_CALL_FLAG" length="1" not-null="true">
                 <comment>Indicates whether the subscriber has the direct call feature enabled.</comment>
+            </column>
+        </property>
+        <property name="bucketRefillWarningFlag" type="char">
+            <column name="BUCKET_REFILL_WARNING_FLAG" length="1" not-null="true">
+                <comment>Flag to indicate if the bucket refill warning prompt has been played during this period.</comment>
+            </column>
+        </property>
+        <property name="bucketExhaustWarningFlag" type="char">
+            <column name="BUCKET_EXHAUST_WARNING_FLAG" length="1" not-null="true">
+                <comment>Flag to indicate if the bucket exhaust warning prompt has been played during this period.</comment>
+            </column>
+        </property>
+        <property name="autoPayFlag" type="char">
+            <column name="AUTO_PAY_FLAG" length="1" not-null="true" />
+        </property>
+        <property name="receiveBillingEmailFlag" type="char">
+            <column name="RECEIVE_BILLING_EMAIL_FLAG" length="1" not-null="true" />
+        </property>
+        <property name="overrideDeptE911Address" type="char">
+            <column name="OVERRIDE_DEPT_E911_ADDRESS" length="1" not-null="true">
+                <comment>Only applicable to business subscribers. Determines whether the subscriber''s E911 address is the same as the department''s E911 address. F means that the
+                addresses are the same. T indicates that the subscriber wants to use his/her contact address as the E911 address.</comment>
+            </column>
+        </property>
+        <property name="agreedTo911TermsFlag" type="char">
+            <column name="AGREED_TO_911_TERMS_FLAG" length="1" not-null="true">
+                <comment>Only applicable to broadband subscribers. Determines whether the subscriber has agreed to E911 terms and conditions.</comment>
             </column>
         </property>
         <property name="requireAniAuthFlag" type="java.lang.Character">
@@ -124,6 +188,11 @@
         <property name="reactivationDate" type="date">
             <column name="REACTIVATION_DATE" length="7" />
         </property>
+        <property name="nextSubscriptionFeeDate" type="date">
+            <column name="NEXT_SUBSCRIPTION_FEE_DATE" length="7">
+                <comment>The date on which the subscriber will be charged for his subscription fee.</comment>
+            </column>
+        </property>
         <property name="callingSvcId" type="big_decimal">
             <column name="CALLING_SVC_ID" precision="22" scale="0" />
         </property>
@@ -145,57 +214,6 @@
         </property>
         <property name="primaryOfferingId" type="big_decimal">
             <column name="PRIMARY_OFFERING_ID" precision="22" scale="0" />
-        </property>
-        <property name="pin" type="string">
-            <column name="PIN" length="20">
-                <comment>A pin is the unique number (for a given service provider not across the entire platform) that is given to the subscriber to access the system.</comment>
-            </column>
-        </property>
-        <property name="loginUserId" type="string">
-            <column name="LOGIN_USER_ID" length="20">
-                <comment>web user ID</comment>
-            </column>
-        </property>
-        <property name="billingId" type="string">
-            <column name="BILLING_ID" length="20" />
-        </property>
-        <property name="lotControlNumber" type="string">
-            <column name="LOT_CONTROL_NUMBER" length="40">
-                <comment>lot control tracking number, this is used as the prefix for pin serial numbers</comment>
-            </column>
-        </property>
-        <property name="popdAccountNumber" type="string">
-            <column name="POPD_ACCOUNT_NUMBER" length="20">
-                <comment>postpaid account number</comment>
-            </column>
-        </property>
-        <property name="outboundCli" type="string">
-            <column name="OUTBOUND_CLI" length="40">
-                <comment>CLI to be used for all conference outdials for this subscriber</comment>
-            </column>
-        </property>
-        <property name="title" type="string">
-            <column name="TITLE" length="10" />
-        </property>
-        <property name="firstName" type="string">
-            <column name="FIRST_NAME" length="20" />
-        </property>
-        <property name="middleName" type="string">
-            <column name="MIDDLE_NAME" length="20" />
-        </property>
-        <property name="lastName" type="string">
-            <column name="LAST_NAME" length="30" />
-        </property>
-        <property name="lastNameIndexed" type="string">
-            <column name="LAST_NAME_INDEXED" length="30">
-                <comment>upper case version of last name for fast searches.</comment>
-            </column>
-        </property>
-        <property name="nameSuffix" type="string">
-            <column name="NAME_SUFFIX" length="10" />
-        </property>
-        <property name="securityKey" type="string">
-            <column name="SECURITY_KEY" length="10" />
         </property>
         <property name="guiDisplayLanguageId" type="big_decimal">
             <column name="GUI_DISPLAY_LANGUAGE_ID" precision="22" scale="0" />
@@ -220,16 +238,16 @@
                 <comment>FK to corporate account</comment>
             </column>
         </property>
-        <property name="corpDeptId" type="big_decimal">
-            <column name="CORP_DEPT_ID" precision="22" scale="0">
-                <comment>FK to indicate corporate account department this subscriber belongs to</comment>
-            </column>
-        </property>
         <property name="rejectedReasonCode" type="big_decimal">
             <column name="REJECTED_REASON_CODE" precision="22" scale="0">
                 <comment>Used for postpaid accounts. When a subscriber signs up they can be set to a 'pending authorization' status. Administrators can accept or reject a
                 subscriber's request for services. This field contains the reason codes. The reason codes are service provider specific and come from
                 cust_code_reference.</comment>
+            </column>
+        </property>
+        <property name="corpDeptId" type="big_decimal">
+            <column name="CORP_DEPT_ID" precision="22" scale="0">
+                <comment>FK to indicate corporate account department this subscriber belongs to</comment>
             </column>
         </property>
         <property name="timezoneId" type="big_decimal">
@@ -267,19 +285,78 @@
         <property name="popdCallingSvcId" type="big_decimal">
             <column name="POPD_CALLING_SVC_ID" precision="22" scale="0" />
         </property>
-        <property name="companyName" type="string">
-            <column name="COMPANY_NAME" length="40">
-                <comment>Company name</comment>
+        <property name="billingCycleDate" type="big_decimal">
+            <column name="BILLING_CYCLE_DATE" precision="22" scale="0">
+                <comment>The date that the monthly billing cycle begins. Only applicable with bucket of minute rate plans.</comment>
             </column>
+        </property>
+        <property name="secondsBalance" type="big_decimal">
+            <column name="SECONDS_BALANCE" precision="22" scale="0">
+                <comment>The current minute balance for the subscriber. Only applicable with bucket of minute rate plans.</comment>
+            </column>
+        </property>
+        <property name="secondsUsed" type="big_decimal">
+            <column name="SECONDS_USED" precision="22" scale="0">
+                <comment>The amount of minutes used for the current billing cycle. Only applicable with bucket of minute rate plans.</comment>
+            </column>
+        </property>
+        <property name="dailySecondsUsed" type="big_decimal">
+            <column name="DAILY_SECONDS_USED" precision="22" scale="0">
+                <comment>The daily amount of minutes used for the current billing cycle. Only applicable with bucket of minute rate plans.</comment>
+            </column>
+        </property>
+        <property name="balanceNotifyThreshold" type="big_decimal">
+            <column name="BALANCE_NOTIFY_THRESHOLD" precision="22" scale="0">
+                <comment>Associated with prepaid calling card services or postpaid offerings that allow credit limits. Indicates the balance threshold (credit_usage or
+                curr_prepaid_balance) at which a notification is written to sub_notification. 0 = Notifications are disabled.</comment>
+            </column>
+        </property>
+        <property name="creditRiskScore" type="big_decimal">
+            <column name="CREDIT_RISK_SCORE" precision="22" scale="0">
+                <comment>This is the credit risk score from an external credit risk check</comment>
+            </column>
+        </property>
+        <property name="title" type="string">
+            <column name="TITLE" length="10" />
+        </property>
+        <property name="nameSuffix" type="string">
+            <column name="NAME_SUFFIX" length="10" />
+        </property>
+        <property name="securityKey" type="string">
+            <column name="SECURITY_KEY" length="10" />
+        </property>
+        <property name="loginUserId" type="string">
+            <column name="LOGIN_USER_ID" length="200">
+                <comment>web user ID</comment>
+            </column>
+        </property>
+        <property name="pin" type="string">
+            <column name="PIN" length="20">
+                <comment>A pin is the unique number (for a given service provider not across the entire platform) that is given to the subscriber to access the system.</comment>
+            </column>
+        </property>
+        <property name="billingId" type="string">
+            <column name="BILLING_ID" length="40" />
+        </property>
+        <property name="popdAccountNumber" type="string">
+            <column name="POPD_ACCOUNT_NUMBER" length="20">
+                <comment>postpaid account number</comment>
+            </column>
+        </property>
+        <property name="firstName" type="string">
+            <column name="FIRST_NAME" length="20" />
+        </property>
+        <property name="middleName" type="string">
+            <column name="MIDDLE_NAME" length="20" />
         </property>
         <property name="marketId" type="string">
             <column name="MARKET_ID" length="20">
                 <comment>Market_id</comment>
             </column>
         </property>
-        <property name="callbackNbr" type="string">
-            <column name="CALLBACK_NBR" length="40">
-                <comment>This will hold the default click to dial phone number.</comment>
+        <property name="dtmfName" type="string">
+            <column name="DTMF_NAME" length="20">
+                <comment>For business broadband subscribers, the subscriber name as spelled through the digits on the phone.</comment>
             </column>
         </property>
         <property name="prpdAccountNumber" type="string">
@@ -287,9 +364,37 @@
                 <comment>The prepaid account number for the subscriber.</comment>
             </column>
         </property>
-        <property name="dtmfName" type="string">
-            <column name="DTMF_NAME" length="20">
-                <comment>For business broadband subscribers, the subscriber name as spelled through the digits on the phone.</comment>
+        <property name="lastName" type="string">
+            <column name="LAST_NAME" length="30" />
+        </property>
+        <property name="lastNameIndexed" type="string">
+            <column name="LAST_NAME_INDEXED" length="30">
+                <comment>upper case version of last name for fast searches.</comment>
+            </column>
+        </property>
+        <property name="lotControlNumber" type="string">
+            <column name="LOT_CONTROL_NUMBER" length="40">
+                <comment>lot control tracking number, this is used as the prefix for pin serial numbers</comment>
+            </column>
+        </property>
+        <property name="outboundCli" type="string">
+            <column name="OUTBOUND_CLI" length="40">
+                <comment>CLI to be used for all conference outdials for this subscriber</comment>
+            </column>
+        </property>
+        <property name="companyName" type="string">
+            <column name="COMPANY_NAME" length="40">
+                <comment>Company name</comment>
+            </column>
+        </property>
+        <property name="callbackNbr" type="string">
+            <column name="CALLBACK_NBR" length="40">
+                <comment>This will hold the default click to dial phone number.</comment>
+            </column>
+        </property>
+        <property name="creditRiskCompany" type="string">
+            <column name="CREDIT_RISK_COMPANY" length="80">
+                <comment>This is the company that performed the credit risk check.</comment>
             </column>
         </property>
         <property name="loginPassword" type="string">
@@ -307,10 +412,9 @@
                 <comment>Not used.</comment>
             </column>
         </property>
-        <property name="balanceNotifyThreshold" type="big_decimal">
-            <column name="BALANCE_NOTIFY_THRESHOLD" precision="22" scale="0">
-                <comment>Associated with prepaid calling card services or postpaid offerings that allow credit limits. Indicates the balance threshold (credit_usage or
-                curr_prepaid_balance) at which a notification is written to sub_notification. 0 = Notifications are disabled.</comment>
+        <property name="firstUseFeeState" type="big_decimal">
+            <column name="FIRST_USE_FEE_STATE" precision="22" scale="0" not-null="true">
+                <comment>First use fee state. 0 = uncollected; 1 = never collect; 2 = collected</comment>
             </column>
         </property>
         <set name="accountActivities" table="ACCOUNT_ACTIVITY" inverse="true" lazy="true" fetch="select">
@@ -329,6 +433,12 @@
                 </column>
             </key>
             <one-to-many class="com.rawabi.model.EvtBalanceTransfer" />
+        </set>
+        <set name="subOfferingXrefs" table="SUB_OFFERING_XREF" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="SUBSCRIBER_ID" precision="22" scale="0" not-null="true" />
+            </key>
+            <one-to-many class="com.rawabi.model.SubOfferingXref" />
         </set>
         <set name="subAuthAnis" table="SUB_AUTH_ANI" inverse="true" lazy="true" fetch="select">
             <key>

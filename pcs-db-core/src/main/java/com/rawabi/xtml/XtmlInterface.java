@@ -1,12 +1,20 @@
 package com.rawabi.xtml;
 
+import java.math.BigDecimal;
 import java.util.Properties;
 
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.apache.log4j.Logger;
+
+import com.rawabi.constants.PactolusConstants;
+import com.rawabi.model.*;
 
 public class XtmlInterface {
 	
@@ -16,16 +24,21 @@ public class XtmlInterface {
 	protected static final int PIN_ALREADY_ACTIVE = -2 ;
 	protected static final int ANI_ALREADY_ASSIGNED = -3 ;
 	protected static final int INVALID_OFFERING = -4 ;
+	protected static final int INVALID_SP_ID = -5 ;
+	protected static final int PIN_SP_NOMATCH = -6 ;
+	protected static final int LOT_INVALID_STATE = -7 ;
+	
+	
 	
     private static Logger logger = Logger.getLogger(XtmlInterface.class);
 	
     static protected ApplicationContext applicationContext = new ClassPathXmlApplicationContext("beans.xml");
-    
+    static protected SessionFactory sessionFactory = (SessionFactory) applicationContext.getBean("sessionFactory");       
+   
     
     static public int Init() {
         
         Session session = null ;
-        SessionFactory sessionFactory = null ;
         int rc = DB_ERROR ;
 
         try {
@@ -36,7 +49,6 @@ public class XtmlInterface {
                 logger.info("--------------   XTMLApi.Init   --  Starting  ------------------");
 
                  ;
-                sessionFactory = (SessionFactory) applicationContext.getBean("sessionFactory");       
                 session = sessionFactory.openSession() ;
                 rc = SUCCESS ;
 
@@ -50,7 +62,7 @@ public class XtmlInterface {
         }                       
 
         return rc ;
-}
+    }
 
 	
 	static public int RegisterPrepaidAuthAni(
@@ -60,17 +72,161 @@ public class XtmlInterface {
 			long serviceProviderId
 			) {
 		
-		int rc = SUCCESS ;
+		int rc = DB_ERROR ;
 		
-		SessionFactory sessionFactory = null ;
 		Session session = null ;
+		Transaction transaction = null ;
 		
-        sessionFactory = (SessionFactory) applicationContext.getBean("sessionFactory");       
-        session = sessionFactory.openSession() ;
+		try {
+			
+			logger.info("RegisterPrepaidAuthAni----starting------") ;
+			logger.info("xtmlSessionId:     " + xtmlSessionId) ;
+			logger.info("pin:               " + pin ) ;
+			logger.info("ani:               " + ani ) ;
+			logger.info("serviceProviderId: " + serviceProviderId) ;
 		
+			session = sessionFactory.openSession() ;	
+			
+			ServiceProvider sp = (ServiceProvider) session.load(ServiceProvider.class, BigDecimal.valueOf(serviceProviderId) ) ;
+			if( null == sp ) {
+				logger.error("Invalid service provider id: " + serviceProviderId ) ;
+				return INVALID_SP_ID ;
+			}
+			
+			PreActivatedSubscribers pre = (PreActivatedSubscribers)  session.createCriteria(PreActivatedSubscribers.class)
+					.add(Restrictions.eq("pin", pin))
+					.uniqueResult() ;
+			if( null == pre ) {
+				
+				Subscriber sub = (Subscriber) session.createCriteria(Subscriber.class)
+						.add(Restrictions.eq("pin", pin))
+						.uniqueResult() ;
+				if( null != sub ) {
+					logger.error("Pin provided has already been activated: " + pin ) ;
+					return PIN_ALREADY_ACTIVE ;
+					
+				}
+				logger.error("Invalid/Unknown pin: " + pin) ;
+				return PIN_NOT_FOUND ;
+				
+			}
+			
+			if( 0 != pre.getServiceProvider().getServiceProviderId().compareTo( sp.getServiceProviderId() ) ) {
+				logger.error("Pin belongs to different service provider than access number; pin belongs to " + pre.getServiceProvider().getName() + 
+						" while access number belongs to service provider " + sp.getName() ) ;
+				return PIN_SP_NOMATCH ;
+			}
+			
+			/* retrieve the lot */
+			Lot lot = pre.getLot() ; 
+			if( null == lot ) {
+				logger.error("lot not found for preactivated subscriber with pin: " + pre.getPin() ) ;
+				return DB_ERROR ;
+			}
+			
+			/* verify the lot is in a proper state to vend us a pin for use */
+			Integer lotStatus = lot.getLotStatus().intValue() ;
+			if( PactolusConstants.LOT_PROCESSED != lotStatus && PactolusConstants.LOT_ACTIVATED != lotStatus ) {
+				logger.error("lot status is not valid for pin activation: " + lotStatus ) ;
+				return LOT_INVALID_STATE ;
+			}
+			
+			/* make sure the phone number isn't already in the database for someone else */
+			SubAuthAni authAni = (SubAuthAni) session.createCriteria(SubAuthAni.class)
+					.add(Restrictions.eq("phoneNumber", ani))
+					.createCriteria("serviceProvider")
+						.add(Restrictions.eq("serviceProviderId", sp.getServiceProviderId()))
+					.uniqueResult() ;
+			if( null != authAni ) {
+				logger.error("phone number " + ani + " is already in use for subscriber with pin: " + authAni.getSubscriber().getPin() ) ;
+				return ANI_ALREADY_ASSIGNED ;				
+			}
+			
+			ProductOffering offering = lot.getProductOffering() ;
+			
+			Query q = session.createSQLQuery("SELECT osx.service_id " +
+					"FROM offering_service_xref osx, svc_prepaid_calling spc " +
+					"WHERE osx.offering_id = ? " +
+					"AND osx.service_id = spc.service_id ") ;
+			q.setBigDecimal(0, offering.getOfferingId() ) ;
+			BigDecimal svcId = (BigDecimal) q.uniqueResult() ;
+
+			transaction = session.beginTransaction() ;
+			
+			/* now create an entry in the subscriber table */
+			Subscriber sub = new Subscriber() ;
+			sub.setSubscriberId( pre.getSubscriberId().longValue() ) ;
+			sub.setCurrPrepaidBalance( lot.getInitialBalance() ) ;
+			sub.setInitialBalance( lot.getInitialBalance() ) ;
+			sub.setFirstCallDate(null) ;
+			sub.setFirstUseDate(null) ;
+			sub.setLotId(lot.getLotId() ) ;
+			sub.setPin( pre.getPin() ) ;
+			sub.setPinPassword( pre.getPinPassword() ) ;
+			sub.setServiceProviderId( sp.getServiceProviderId() ) ;
+			sub.setCurrencyId( offering.getCurrencyId() ) ;
+			sub.setCallingSvcId( svcId ) ;
+			sub.setActivationDate( pre.getActivationDate() ) ;
+			sub.setExpirationDate( lot.getExpirationDate() ) ; 
+			sub.setDisabledFlag('F') ;
+			sub.setBillingType( BigDecimal.valueOf(1) ) ;	//1=prepaid,2=postpaid,3=broadband
+			sub.setLotControlNumber( pre.getLotControlNumber() );
+			sub.setLotSeqNumber(pre.getLotSeqNumber()) ;
+			if( null != lot.getExpirationType() )
+				sub.setExpirationType( lot.getExpirationType() ) ;
+			else 
+				sub.setExpirationType( lot.getProductOffering().getExpirationType() ) ;
+			sub.setLanguageId( lot.getProductOffering().getLanguageId() ) ;
+			sub.setConfOperatorAssistType(BigDecimal.valueOf(0)); 
+			sub.setDirectCallFlag('F') ;
+			sub.setOffplanAlertPlayed(BigDecimal.ZERO) ;
+			sub.setFirstBillcyclePlayed('F') ;
+			sub.setOnplanAlertPlayed(BigDecimal.ZERO) ;
+			sub.setBilledSequence(BigDecimal.ZERO) ;
+			sub.setConfOperatorAssistType(BigDecimal.ZERO) ;
+			sub.setBucketRefillWarningFlag('F') ;
+			sub.setBucketExhaustWarningFlag('F') ;
+			sub.setAutoPayFlag('F') ;
+			sub.setReceiveBillingEmailFlag('F') ;
+			sub.setOverrideDeptE911Address('F') ;
+			sub.setAgreedTo911TermsFlag('F') ;
+			sub.setFirstUseFeeState(BigDecimal.ZERO) ;
+						
+			session.save( sub ) ;
+			
+			/* add the authorized ani */
+			
+			authAni = new SubAuthAni() ;
+			authAni.setPhoneNumber(ani) ;
+			authAni.setSubscriber(sub) ;
+			authAni.setServiceProvider( sp ) ;
+			authAni.setStatus("0") ;
+			
+			session.save( authAni ) ;
+			session.delete( pre ) ;		
+			
+			/* last thing,tie subscriber to offering */
+			SubOfferingXref sxo = new SubOfferingXref() ;
+			sxo.setId( new SubOfferingXrefId( BigDecimal.valueOf( sub.getSubscriberId() ), offering.getOfferingId() ) ) ;
+			sxo.setPrimaryFlag('T') ;
+			session.save( sxo ) ;
+									
+			transaction.commit() ;
+			
+			logger.info("pin was successfully activated") ;
+			
+			rc = SUCCESS ;
 		
+		} catch( HibernateException e ) {
+			if( null != transaction ) transaction.rollback() ;
+			logger.error("Hibernate error", e) ;
+		}
+		finally {
+			if( null != session ) session.close() ;
+		}
 		
 		return rc ;
 	}
+	
 
 }

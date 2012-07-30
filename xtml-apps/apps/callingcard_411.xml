@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
-  <version sce-version="422a4" prev-sce-version="422a4" last-mod-time="Sunday, July 29, 2012 17:36:20"/>
+  <version sce-version="422a4" prev-sce-version="422a4" last-mod-time="Monday, July 30, 2012 12:55:11"/>
   <events >
     <event name="CSRBeginAssignment" display="CSRBeginAssignment" >
       <parameter name="strACDControllerIP" type="string"/>
@@ -10032,7 +10032,7 @@ if( Session.strAutoAniList.length > 0 ) {
 ]]></script>
           </scripts>
         </action>
-        <action id="11" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=902 y=73 ?>
+        <action id="11" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1178 y=101 ?>
           <return xmlns="www.pactolus.com:xtml:application" value=""/>
         </action>
         <action id="16" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=458 y=64 ?>
@@ -10073,7 +10073,7 @@ Server.unlockSharedVariables();]]></script>
             <result name="Default" link="19" stubbed="0"/>
           </results>
         </action>
-        <action id="19" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=886 y=190 ?>
+        <action id="19" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=911 y=102 ?>
           <!--Init-->
           <java xmlns="www.pactolus.com:xtml:application" class="s_strJavaClass" method="&quot;Init&quot;" timeout="" return="" method-return-var="nReturn" method-return-type="0"/>
           <results >
@@ -19212,20 +19212,22 @@ Session.g_nNumRetry++;]]></script>
       <local-vars >
         <var name="strPin" type="string" ></var>
         <var name="bGotPin" type="boolean" >0</var>
+        <var name="nReturnCode" type="i4" >-99</var>
+        <var name="nRetries" type="i4" >0</var>
       </local-vars>
       <actions >
-        <action id="1" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=95 y=110 ?>
+        <action id="1" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=100 y=122 ?>
           <!--collect pin-->
           <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(xxxxxxxxxxxxxxxx|x.T|x.#)&quot;" language="g_oAPI.strLanguage" digits="strPin" retry-count="g_sMaxLoginAttempts" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
             <audio type="index" >501</audio>
             <timeout-prompt type="index" >552</timeout-prompt>
           </play>
           <results >
-            <result name="Default" link="3" stubbed="0"/>
+            <result name="Default" link="9" stubbed="0"/>
             <result name="Success"/>
             <result name="Error"/>
             <result name="Timeout"/>
-            <result name="collected pin" link="2" stubbed="0" >bGotPin == true</result>
+            <result name="collected pin" link="4" stubbed="0" >bGotPin == true</result>
           </results>
           <scripts >
             <script language="javascript" timing="first" ><![CDATA[Session.strPin = "" ;
@@ -19237,15 +19239,77 @@ Session.bGotPin = false ;
 }]]></script>
           </scripts>
         </action>
-        <action id="2" plug-in="Standard.EndSession.1" ><?xtml-editor x=446 y=268 ?>
+        <action id="2" plug-in="Standard.EndSession.1" ><?xtml-editor x=734 y=261 ?></action>
+        <action id="4" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=299 y=291 ?>
+          <!--RegisterPrepaidAuthAni-->
+          <java xmlns="www.pactolus.com:xtml:application" class="s_strJavaClass" method="&quot;RegisterPrepaidAuthAni&quot;" timeout="15" return="" method-return-var="nReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="string" >strPin</parameter>
+            <parameter type="in" var-type="string" >g_oAPI.strOriginationNumber</parameter>
+            <parameter type="in" var-type="i8" >g_oAPI.lServiceProviderId</parameter>
+          </java>
+          <results >
+            <result name="Default" link="9" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="successfully activated" link="5" stubbed="0" >'Result'  == 'Success'
+AND nReturnCode == 0</result>
+            <result name="pin previously activated" link="6" stubbed="0" >nReturnCode == -2</result>
+            <result name="pin not found" link="8" stubbed="0" >nReturnCode == -1
+</result>
+          </results>
           <scripts >
-            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Collected pin for auth ani validation: " + Session.strPin ) ;]]></script>
+            <script language="javascript" timing="first" ><![CDATA[Session.nReturnCode = -99 ;]]></script>
           </scripts>
         </action>
-        <action id="3" plug-in="Standard.EndSession.1" ><?xtml-editor x=436 y=109 ?>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=788 y=369 ?>
+          <return xmlns="www.pactolus.com:xtml:application" value="g_nCurrentState"/>
           <scripts >
-            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Did not collect pin for auth ani") ;]]></script>
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oSUB.strUserPin = Session.strPin ;
+Session.g_nCurrentState = Session.s_nSTATE_AUTH_PRPD_OR_POPD;]]></script>
           </scripts>
+        </action>
+        <action id="6" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=527 y=413 ?>
+          <!--account already active-->
+          <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_oAPI.strLanguage" digits="" retry-count="0" clear-digits="0" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >338</audio>
+          </play>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+            <result name="Success" ><?xtml-editor visible=no?></result>
+            <result name="Error" ><?xtml-editor visible=no?></result>
+            <result name="Timeout" ><?xtml-editor visible=no?></result>
+          </results>
+        </action>
+        <action id="7" plug-in="Pactolus.Branch.1" ><?xtml-editor x=566 y=131 ?>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="retries exceeded" link="9" stubbed="0" >nRetries &gt;= 3
+</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.nRetries++ ;]]></script>
+          </scripts>
+        </action>
+        <action id="8" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=533 y=498 ?>
+          <!--pin not found-->
+          <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_oAPI.strLanguage" digits="" retry-count="0" clear-digits="0" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >502</audio>
+          </play>
+          <results >
+            <result name="Default" link="7" stubbed="1"/>
+            <result name="Success" ><?xtml-editor visible=no?></result>
+            <result name="Error" ><?xtml-editor visible=no?></result>
+            <result name="Timeout" ><?xtml-editor visible=no?></result>
+          </results>
+        </action>
+        <action id="9" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=526 y=277 ?>
+          <!--PlayPromptAndHangup-->
+          <function xmlns="www.pactolus.com:xtml:application" name="&quot;PlayPromptAndHangup&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="2" stubbed="0"/>
+          </results>
         </action>
       </actions>
     </function>

@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-<!-- Generated Jul 24, 2012 12:30:10 PM by Hibernate Tools 3.4.0.CR1 -->
+<!-- Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1 -->
 <hibernate-mapping>
-    <class name="com.rawabi.model.CurrencyRef" table="CURRENCY_REF" schema="PCSPROD">
+    <class name="com.rawabi.model.CurrencyRef" table="CURRENCY_REF" schema="PCSPROD_411">
         <id name="currencyId" type="big_decimal">
             <column name="CURRENCY_ID" precision="22" scale="0" />
             <generator class="assigned" />
@@ -23,11 +23,5 @@
         <property name="isoLanguageCode" type="string">
             <column name="ISO_LANGUAGE_CODE" length="2" />
         </property>
-        <set name="subscribers" table="SUBSCRIBER" inverse="true" lazy="true" fetch="select">
-            <key>
-                <column name="CURRENCY_ID" precision="22" scale="0" not-null="true" />
-            </key>
-            <one-to-many class="com.rawabi.model.Subscriber" />
-        </set>
     </class>
 </hibernate-mapping>

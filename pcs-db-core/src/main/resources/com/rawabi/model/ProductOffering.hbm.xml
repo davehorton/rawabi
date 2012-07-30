@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-<!-- Generated Jul 24, 2012 12:30:10 PM by Hibernate Tools 3.4.0.CR1 -->
+<!-- Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1 -->
 <hibernate-mapping>
-    <class name="com.rawabi.model.ProductOffering" table="PRODUCT_OFFERING" schema="PCSPROD">
+    <class name="com.rawabi.model.ProductOffering" table="PRODUCT_OFFERING" schema="PCSPROD_411">
         <comment>Container class for bundling services and associating rated billing events to. A product offering has associated accounts. A product offering is essentially what
         is available for customers to purchase from the service provider.</comment>
         <id name="offeringId" type="big_decimal">
@@ -11,10 +11,25 @@
             <generator class="assigned" />
         </id>
         <many-to-one name="serviceProvider" class="com.rawabi.model.ServiceProvider" fetch="select">
-            <column name="SERVICE_PROVIDER_ID" precision="22" scale="0" not-null="true">
+            <column name="SERVICE_PROVIDER_ID" precision="22" scale="0">
                 <comment>Object ID for Service Provider</comment>
             </column>
         </many-to-one>
+        <property name="sweepTierFlag" type="char">
+            <column name="SWEEP_TIER_FLAG" length="1" not-null="true">
+                <comment>T to enable sweep tiers for this offering</comment>
+            </column>
+        </property>
+        <property name="firstBilledAsFirstUseFlag" type="char">
+            <column name="FIRST_BILLED_AS_FIRST_USE_FLAG" length="1" not-null="true">
+                <comment>T to use first billed call as the first use event</comment>
+            </column>
+        </property>
+        <property name="ivrAniRegFlag" type="char">
+            <column name="IVR_ANI_REG_FLAG" length="1" not-null="true">
+                <comment>&#192;T&#192; to allow ANI self registration via IVR</comment>
+            </column>
+        </property>
         <property name="currencyId" type="big_decimal">
             <column name="CURRENCY_ID" precision="22" scale="0" not-null="true" />
         </property>
@@ -26,6 +41,9 @@
         </property>
         <property name="expirationType" type="big_decimal">
             <column name="EXPIRATION_TYPE" precision="22" scale="0" not-null="true" />
+        </property>
+        <property name="subSignupStatus" type="big_decimal">
+            <column name="SUB_SIGNUP_STATUS" precision="22" scale="0" not-null="true" />
         </property>
         <property name="balXferFlag" type="char">
             <column name="BAL_XFER_FLAG" length="1" not-null="true" />
@@ -43,9 +61,6 @@
             <column name="EMAIL_FLAG" length="1" not-null="true">
                 <comment>T = Email notification sent upon active status</comment>
             </column>
-        </property>
-        <property name="subSignupStatus" type="big_decimal">
-            <column name="SUB_SIGNUP_STATUS" precision="22" scale="0" not-null="true" />
         </property>
         <property name="creditCardValidFlag" type="char">
             <column name="CREDIT_CARD_VALID_FLAG" length="1" not-null="true">
@@ -100,6 +115,32 @@
         <property name="firmCreditLimitFlag" type="char">
             <column name="FIRM_CREDIT_LIMIT_FLAG" length="1" not-null="true">
                 <comment>If T, apply firm credit limits instead of hard credit limits.</comment>
+            </column>
+        </property>
+        <property name="immediateThresholdPayFlag" type="char">
+            <column name="IMMEDIATE_THRESHOLD_PAY_FLAG" length="1" not-null="true">
+                <comment>Indicates whether the offering supports immediate threshold payments.</comment>
+            </column>
+        </property>
+        <property name="restrictAuthAniFlag" type="char">
+            <column name="RESTRICT_AUTH_ANI_FLAG" length="1" not-null="true">
+                <comment>This indicates whether the offering is restricting the number of ANIs allowed for this offering. Default value is F</comment>
+            </column>
+        </property>
+        <property name="startLotSeqZeroFlag" type="char">
+            <column name="START_LOT_SEQ_ZERO_FLAG" length="1" not-null="true">
+                <comment>Indicates if the first lot serial number should start with a 0 or 1.</comment>
+            </column>
+        </property>
+        <property name="autoPayFlag" type="char">
+            <column name="AUTO_PAY_FLAG" length="1" not-null="true">
+                <comment>T - offers the subscriber the option of having his credit usage paid off automatically by charging the active credit card when the credit limit is
+                reached. F - This feature is not available.</comment>
+            </column>
+        </property>
+        <property name="sharedUseFlag" type="char">
+            <column name="SHARED_USE_FLAG" length="1" not-null="true">
+                <comment>Flag to indicate whether shared use billing is available for this offering. T - shared use billing allowed F - single use billing only.</comment>
             </column>
         </property>
         <property name="primaryFlag" type="java.lang.Character">
@@ -199,6 +240,66 @@
                 <comment>If this percentage of a subscriber credit limit is reached an email notification is sent out</comment>
             </column>
         </property>
+        <property name="minimumInitialBalance" type="big_decimal">
+            <column name="MINIMUM_INITIAL_BALANCE" precision="22" scale="0">
+                <comment>Description: the minimum balance that a subscriber must have when signing up for an offering.</comment>
+            </column>
+        </property>
+        <property name="immediateThresholdPayPct" type="big_decimal">
+            <column name="IMMEDIATE_THRESHOLD_PAY_PCT" precision="22" scale="0">
+                <comment>The percentage of the credit limit that needs to be exceeded for the immediate payment to occur.</comment>
+            </column>
+        </property>
+        <property name="maxAuthAniAllowed" type="big_decimal">
+            <column name="MAX_AUTH_ANI_ALLOWED" precision="22" scale="0">
+                <comment>This indicates the number of authorized ANIs allowed per subscriber associated with this offering. Value can be 0 or greater.</comment>
+            </column>
+        </property>
+        <property name="autoPayThresholdPct" type="big_decimal">
+            <column name="AUTO_PAY_THRESHOLD_PCT" precision="22" scale="0">
+                <comment>The percent threshold of the subscriber's credit limit which triggers an automatic full payment of the subscriber's credit usage.</comment>
+            </column>
+        </property>
+        <property name="creditThreshold" type="big_decimal">
+            <column name="CREDIT_THRESHOLD" precision="22" scale="0">
+                <comment>The threshold required to activate a subscriber after a credit check.</comment>
+            </column>
+        </property>
+        <property name="maxExtensions" type="big_decimal">
+            <column name="MAX_EXTENSIONS" precision="22" scale="0">
+                <comment>The maximum number of broadband extensions a company can have.</comment>
+            </column>
+        </property>
+        <property name="maxDid" type="big_decimal">
+            <column name="MAX_DID" precision="22" scale="0">
+                <comment>The maximum number of DIDs (i.e., outside lines) a company can have.</comment>
+            </column>
+        </property>
+        <property name="countryId" type="big_decimal">
+            <column name="COUNTRY_ID" precision="22" scale="0">
+                <comment>An optional country the product offering is limited to.</comment>
+            </column>
+        </property>
+        <property name="billingLevel" type="big_decimal">
+            <column name="BILLING_LEVEL" precision="22" scale="0">
+                <comment>The billing level for this offering: 1 - subscriber billing 2 - corporate.</comment>
+            </column>
+        </property>
+        <property name="timeReserveAmount" type="big_decimal">
+            <column name="TIME_RESERVE_AMOUNT" precision="22" scale="0">
+                <comment>Amount of currency to reserve in shared-used billing scenarios.</comment>
+            </column>
+        </property>
+        <property name="currencyReserveAmount" type="big_decimal">
+            <column name="CURRENCY_RESERVE_AMOUNT" precision="22" scale="0">
+                <comment>Amount of currency to reserve in shared-used billing scenarios.</comment>
+            </column>
+        </property>
+        <property name="carrierCode" type="string">
+            <column name="CARRIER_CODE" length="20">
+                <comment>Yes Used by application to distinguish calls generated by prepaid subscriber from calls generated by postpaid subscribers.</comment>
+            </column>
+        </property>
         <property name="name" type="string">
             <column name="NAME" length="120">
                 <comment>Name of offering provided by Service Provider</comment>
@@ -209,11 +310,29 @@
                 <comment>Offering description provided by Service Provider</comment>
             </column>
         </property>
+        <set name="subOfferingXrefs" table="SUB_OFFERING_XREF" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="OFFERING_ID" precision="22" scale="0" not-null="true" />
+            </key>
+            <one-to-many class="com.rawabi.model.SubOfferingXref" />
+        </set>
         <set name="accountActivities" table="ACCOUNT_ACTIVITY" inverse="true" lazy="true" fetch="select">
             <key>
                 <column name="OFFERING_ID" precision="22" scale="0" />
             </key>
             <one-to-many class="com.rawabi.model.AccountActivity" />
+        </set>
+        <set name="lots" table="LOT" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="OFFERING_ID" precision="22" scale="0" not-null="true" />
+            </key>
+            <one-to-many class="com.rawabi.model.Lot" />
+        </set>
+        <set name="offeringServiceXrefs" table="OFFERING_SERVICE_XREF" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="OFFERING_ID" precision="22" scale="0" not-null="true" />
+            </key>
+            <one-to-many class="com.rawabi.model.OfferingServiceXref" />
         </set>
     </class>
 </hibernate-mapping>

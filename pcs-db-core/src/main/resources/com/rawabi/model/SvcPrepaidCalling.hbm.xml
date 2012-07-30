@@ -1,13 +1,23 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-<!-- Generated Jul 24, 2012 12:30:10 PM by Hibernate Tools 3.4.0.CR1 -->
+<!-- Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1 -->
 <hibernate-mapping>
-    <class name="com.rawabi.model.SvcPrepaidCalling" table="SVC_PREPAID_CALLING" schema="PCSPROD">
+    <class name="com.rawabi.model.SvcPrepaidCalling" table="SVC_PREPAID_CALLING" schema="PCSPROD_411">
         <id name="serviceId" type="big_decimal">
             <column name="SERVICE_ID" precision="22" scale="0" />
             <generator class="assigned" />
         </id>
+        <property name="useAccessNumberGroups" type="char">
+            <column name="USE_ACCESS_NUMBER_GROUPS" length="1" not-null="true">
+                <comment>Access number rate uses groups flag. "T" to use group. "F" to use single AN.</comment>
+            </column>
+        </property>
+        <property name="sequenceRatingFlag" type="java.lang.Character">
+            <column name="SEQUENCE_RATING_FLAG" length="1">
+                <comment>T/F Flag, if T then the service is rated by sequence. Null treated as F</comment>
+            </column>
+        </property>
         <property name="longCallInterval" type="big_decimal">
             <column name="LONG_CALL_INTERVAL" precision="22" scale="0" not-null="true">
                 <comment>The interval in minutes that calls should be interrupted for manual extension. Default should be 0.</comment>
@@ -132,6 +142,11 @@
         </property>
         <property name="directCallIdLength" type="big_decimal">
             <column name="DIRECT_CALL_ID_LENGTH" precision="22" scale="0" />
+        </property>
+        <property name="warningAsToneFlag" type="char">
+            <column name="WARNING_AS_TONE_FLAG" length="1" not-null="true">
+                <comment>Flag to play the threshold prompt as a tone instead of a prompt.</comment>
+            </column>
         </property>
     </class>
 </hibernate-mapping>

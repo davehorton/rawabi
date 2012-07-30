@@ -1,6 +1,6 @@
 package com.rawabi.model;
 
-// Generated Jul 24, 2012 12:30:09 PM by Hibernate Tools 3.4.0.CR1
+// Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -17,41 +17,41 @@ public class ServiceProvider implements java.io.Serializable {
 	private char disabledFlag;
 	private char enableMaxSessions;
 	private char enableMaxCalls;
-	private char pinGenLimitFlag;
-	private Character voicemailFlag;
-	private Character pstnEgressFlag;
+	private Character allowPhoneNumberMaintenance;
 	private Character enableMaxSessForParent;
 	private Character enableMaxCallsForParent;
-	private Character allowPhoneNumberMaintenance;
-	private Character creditLimitFlag;
-	private Character creditWarningMethod;
+	private Character voicemailFlag;
+	private Character pstnEgressFlag;
+	private String serviceProviderCode;
+	private String name;
+	private String description;
 	private BigDecimal maxSimultaneousCalls;
 	private BigDecimal maxCurrentCalls;
 	private BigDecimal maxSimultaneousSessions;
 	private BigDecimal availableSessions;
 	private BigDecimal availableCalls;
-	private BigDecimal creditLimit;
-	private BigDecimal creditUsed;
-	private BigDecimal creditWarningThresholdPct;
-	private BigDecimal creditWarningThresholdAmt;
-	private BigDecimal pinGenLimit;
-	private BigDecimal pinGenAvailable;
-	private BigDecimal pinGenSelfNotification;
-	private BigDecimal pinGenParentNotification;
-	private String serviceProviderCode;
 	private String ecrcNumber;
 	private String forwardingNbr1;
 	private String forwardingNbr2;
 	private String forwardingNbr3;
-	private String name;
 	private String psap1;
 	private String psap2;
-	private String reportingPassword;
 	private String sipRealm;
-	private String description;
+	private String reportingPassword;
 	private String primarySoftswitchIp;
 	private String backupSoftswitchIp;
 	private String proxyServer;
+	private Character creditLimitFlag;
+	private Character creditWarningMethod;
+	private BigDecimal creditLimit;
+	private BigDecimal creditUsed;
+	private BigDecimal creditWarningThresholdPct;
+	private BigDecimal creditWarningThresholdAmt;
+	private char pinGenLimitFlag;
+	private BigDecimal pinGenLimit;
+	private BigDecimal pinGenAvailable;
+	private BigDecimal pinGenSelfNotification;
+	private BigDecimal pinGenParentNotification;
 	private Set<SubAuthAni> subAuthAnis = new HashSet<SubAuthAni>(0);
 	private Set<PreActivatedSubscribers> preActivatedSubscriberses = new HashSet<PreActivatedSubscribers>(
 			0);
@@ -62,7 +62,7 @@ public class ServiceProvider implements java.io.Serializable {
 	private Set<AccountActivity> accountActivities = new HashSet<AccountActivity>(
 			0);
 	private Set<AccessNumber> accessNumbers = new HashSet<AccessNumber>(0);
-	private Set<Subscriber> subscribers = new HashSet<Subscriber>(0);
+	private Set<Lot> lots = new HashSet<Lot>(0);
 
 	public ServiceProvider() {
 	}
@@ -81,76 +81,77 @@ public class ServiceProvider implements java.io.Serializable {
 
 	public ServiceProvider(BigDecimal serviceProviderId, String logonKey,
 			char deletedFlag, char disabledFlag, char enableMaxSessions,
-			char enableMaxCalls, char pinGenLimitFlag, Character voicemailFlag,
-			Character pstnEgressFlag, Character enableMaxSessForParent,
-			Character enableMaxCallsForParent,
-			Character allowPhoneNumberMaintenance, Character creditLimitFlag,
-			Character creditWarningMethod, BigDecimal maxSimultaneousCalls,
+			char enableMaxCalls, Character allowPhoneNumberMaintenance,
+			Character enableMaxSessForParent,
+			Character enableMaxCallsForParent, Character voicemailFlag,
+			Character pstnEgressFlag, String serviceProviderCode, String name,
+			String description, BigDecimal maxSimultaneousCalls,
 			BigDecimal maxCurrentCalls, BigDecimal maxSimultaneousSessions,
 			BigDecimal availableSessions, BigDecimal availableCalls,
+			String ecrcNumber, String forwardingNbr1, String forwardingNbr2,
+			String forwardingNbr3, String psap1, String psap2, String sipRealm,
+			String reportingPassword, String primarySoftswitchIp,
+			String backupSoftswitchIp, String proxyServer,
+			Character creditLimitFlag, Character creditWarningMethod,
 			BigDecimal creditLimit, BigDecimal creditUsed,
 			BigDecimal creditWarningThresholdPct,
-			BigDecimal creditWarningThresholdAmt, BigDecimal pinGenLimit,
-			BigDecimal pinGenAvailable, BigDecimal pinGenSelfNotification,
-			BigDecimal pinGenParentNotification, String serviceProviderCode,
-			String ecrcNumber, String forwardingNbr1, String forwardingNbr2,
-			String forwardingNbr3, String name, String psap1, String psap2,
-			String reportingPassword, String sipRealm, String description,
-			String primarySoftswitchIp, String backupSoftswitchIp,
-			String proxyServer, Set<SubAuthAni> subAuthAnis,
+			BigDecimal creditWarningThresholdAmt, char pinGenLimitFlag,
+			BigDecimal pinGenLimit, BigDecimal pinGenAvailable,
+			BigDecimal pinGenSelfNotification,
+			BigDecimal pinGenParentNotification, Set<SubAuthAni> subAuthAnis,
 			Set<PreActivatedSubscribers> preActivatedSubscriberses,
 			Set<ProductOffering> productOfferings,
 			Set<ServiceProviderSettings> serviceProviderSettingses,
 			Set<AccountActivity> accountActivities,
-			Set<AccessNumber> accessNumbers, Set<Subscriber> subscribers) {
+			Set<AccessNumber> accessNumbers, Set<Lot> lots) {
 		this.serviceProviderId = serviceProviderId;
 		this.logonKey = logonKey;
 		this.deletedFlag = deletedFlag;
 		this.disabledFlag = disabledFlag;
 		this.enableMaxSessions = enableMaxSessions;
 		this.enableMaxCalls = enableMaxCalls;
-		this.pinGenLimitFlag = pinGenLimitFlag;
-		this.voicemailFlag = voicemailFlag;
-		this.pstnEgressFlag = pstnEgressFlag;
+		this.allowPhoneNumberMaintenance = allowPhoneNumberMaintenance;
 		this.enableMaxSessForParent = enableMaxSessForParent;
 		this.enableMaxCallsForParent = enableMaxCallsForParent;
-		this.allowPhoneNumberMaintenance = allowPhoneNumberMaintenance;
-		this.creditLimitFlag = creditLimitFlag;
-		this.creditWarningMethod = creditWarningMethod;
+		this.voicemailFlag = voicemailFlag;
+		this.pstnEgressFlag = pstnEgressFlag;
+		this.serviceProviderCode = serviceProviderCode;
+		this.name = name;
+		this.description = description;
 		this.maxSimultaneousCalls = maxSimultaneousCalls;
 		this.maxCurrentCalls = maxCurrentCalls;
 		this.maxSimultaneousSessions = maxSimultaneousSessions;
 		this.availableSessions = availableSessions;
 		this.availableCalls = availableCalls;
-		this.creditLimit = creditLimit;
-		this.creditUsed = creditUsed;
-		this.creditWarningThresholdPct = creditWarningThresholdPct;
-		this.creditWarningThresholdAmt = creditWarningThresholdAmt;
-		this.pinGenLimit = pinGenLimit;
-		this.pinGenAvailable = pinGenAvailable;
-		this.pinGenSelfNotification = pinGenSelfNotification;
-		this.pinGenParentNotification = pinGenParentNotification;
-		this.serviceProviderCode = serviceProviderCode;
 		this.ecrcNumber = ecrcNumber;
 		this.forwardingNbr1 = forwardingNbr1;
 		this.forwardingNbr2 = forwardingNbr2;
 		this.forwardingNbr3 = forwardingNbr3;
-		this.name = name;
 		this.psap1 = psap1;
 		this.psap2 = psap2;
-		this.reportingPassword = reportingPassword;
 		this.sipRealm = sipRealm;
-		this.description = description;
+		this.reportingPassword = reportingPassword;
 		this.primarySoftswitchIp = primarySoftswitchIp;
 		this.backupSoftswitchIp = backupSoftswitchIp;
 		this.proxyServer = proxyServer;
+		this.creditLimitFlag = creditLimitFlag;
+		this.creditWarningMethod = creditWarningMethod;
+		this.creditLimit = creditLimit;
+		this.creditUsed = creditUsed;
+		this.creditWarningThresholdPct = creditWarningThresholdPct;
+		this.creditWarningThresholdAmt = creditWarningThresholdAmt;
+		this.pinGenLimitFlag = pinGenLimitFlag;
+		this.pinGenLimit = pinGenLimit;
+		this.pinGenAvailable = pinGenAvailable;
+		this.pinGenSelfNotification = pinGenSelfNotification;
+		this.pinGenParentNotification = pinGenParentNotification;
 		this.subAuthAnis = subAuthAnis;
 		this.preActivatedSubscriberses = preActivatedSubscriberses;
 		this.productOfferings = productOfferings;
 		this.serviceProviderSettingses = serviceProviderSettingses;
 		this.accountActivities = accountActivities;
 		this.accessNumbers = accessNumbers;
-		this.subscribers = subscribers;
+		this.lots = lots;
 	}
 
 	public BigDecimal getServiceProviderId() {
@@ -201,28 +202,13 @@ public class ServiceProvider implements java.io.Serializable {
 		this.enableMaxCalls = enableMaxCalls;
 	}
 
-	public char getPinGenLimitFlag() {
-		return this.pinGenLimitFlag;
+	public Character getAllowPhoneNumberMaintenance() {
+		return this.allowPhoneNumberMaintenance;
 	}
 
-	public void setPinGenLimitFlag(char pinGenLimitFlag) {
-		this.pinGenLimitFlag = pinGenLimitFlag;
-	}
-
-	public Character getVoicemailFlag() {
-		return this.voicemailFlag;
-	}
-
-	public void setVoicemailFlag(Character voicemailFlag) {
-		this.voicemailFlag = voicemailFlag;
-	}
-
-	public Character getPstnEgressFlag() {
-		return this.pstnEgressFlag;
-	}
-
-	public void setPstnEgressFlag(Character pstnEgressFlag) {
-		this.pstnEgressFlag = pstnEgressFlag;
+	public void setAllowPhoneNumberMaintenance(
+			Character allowPhoneNumberMaintenance) {
+		this.allowPhoneNumberMaintenance = allowPhoneNumberMaintenance;
 	}
 
 	public Character getEnableMaxSessForParent() {
@@ -241,29 +227,44 @@ public class ServiceProvider implements java.io.Serializable {
 		this.enableMaxCallsForParent = enableMaxCallsForParent;
 	}
 
-	public Character getAllowPhoneNumberMaintenance() {
-		return this.allowPhoneNumberMaintenance;
+	public Character getVoicemailFlag() {
+		return this.voicemailFlag;
 	}
 
-	public void setAllowPhoneNumberMaintenance(
-			Character allowPhoneNumberMaintenance) {
-		this.allowPhoneNumberMaintenance = allowPhoneNumberMaintenance;
+	public void setVoicemailFlag(Character voicemailFlag) {
+		this.voicemailFlag = voicemailFlag;
 	}
 
-	public Character getCreditLimitFlag() {
-		return this.creditLimitFlag;
+	public Character getPstnEgressFlag() {
+		return this.pstnEgressFlag;
 	}
 
-	public void setCreditLimitFlag(Character creditLimitFlag) {
-		this.creditLimitFlag = creditLimitFlag;
+	public void setPstnEgressFlag(Character pstnEgressFlag) {
+		this.pstnEgressFlag = pstnEgressFlag;
 	}
 
-	public Character getCreditWarningMethod() {
-		return this.creditWarningMethod;
+	public String getServiceProviderCode() {
+		return this.serviceProviderCode;
 	}
 
-	public void setCreditWarningMethod(Character creditWarningMethod) {
-		this.creditWarningMethod = creditWarningMethod;
+	public void setServiceProviderCode(String serviceProviderCode) {
+		this.serviceProviderCode = serviceProviderCode;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getDescription() {
+		return this.description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public BigDecimal getMaxSimultaneousCalls() {
@@ -306,6 +307,110 @@ public class ServiceProvider implements java.io.Serializable {
 		this.availableCalls = availableCalls;
 	}
 
+	public String getEcrcNumber() {
+		return this.ecrcNumber;
+	}
+
+	public void setEcrcNumber(String ecrcNumber) {
+		this.ecrcNumber = ecrcNumber;
+	}
+
+	public String getForwardingNbr1() {
+		return this.forwardingNbr1;
+	}
+
+	public void setForwardingNbr1(String forwardingNbr1) {
+		this.forwardingNbr1 = forwardingNbr1;
+	}
+
+	public String getForwardingNbr2() {
+		return this.forwardingNbr2;
+	}
+
+	public void setForwardingNbr2(String forwardingNbr2) {
+		this.forwardingNbr2 = forwardingNbr2;
+	}
+
+	public String getForwardingNbr3() {
+		return this.forwardingNbr3;
+	}
+
+	public void setForwardingNbr3(String forwardingNbr3) {
+		this.forwardingNbr3 = forwardingNbr3;
+	}
+
+	public String getPsap1() {
+		return this.psap1;
+	}
+
+	public void setPsap1(String psap1) {
+		this.psap1 = psap1;
+	}
+
+	public String getPsap2() {
+		return this.psap2;
+	}
+
+	public void setPsap2(String psap2) {
+		this.psap2 = psap2;
+	}
+
+	public String getSipRealm() {
+		return this.sipRealm;
+	}
+
+	public void setSipRealm(String sipRealm) {
+		this.sipRealm = sipRealm;
+	}
+
+	public String getReportingPassword() {
+		return this.reportingPassword;
+	}
+
+	public void setReportingPassword(String reportingPassword) {
+		this.reportingPassword = reportingPassword;
+	}
+
+	public String getPrimarySoftswitchIp() {
+		return this.primarySoftswitchIp;
+	}
+
+	public void setPrimarySoftswitchIp(String primarySoftswitchIp) {
+		this.primarySoftswitchIp = primarySoftswitchIp;
+	}
+
+	public String getBackupSoftswitchIp() {
+		return this.backupSoftswitchIp;
+	}
+
+	public void setBackupSoftswitchIp(String backupSoftswitchIp) {
+		this.backupSoftswitchIp = backupSoftswitchIp;
+	}
+
+	public String getProxyServer() {
+		return this.proxyServer;
+	}
+
+	public void setProxyServer(String proxyServer) {
+		this.proxyServer = proxyServer;
+	}
+
+	public Character getCreditLimitFlag() {
+		return this.creditLimitFlag;
+	}
+
+	public void setCreditLimitFlag(Character creditLimitFlag) {
+		this.creditLimitFlag = creditLimitFlag;
+	}
+
+	public Character getCreditWarningMethod() {
+		return this.creditWarningMethod;
+	}
+
+	public void setCreditWarningMethod(Character creditWarningMethod) {
+		this.creditWarningMethod = creditWarningMethod;
+	}
+
 	public BigDecimal getCreditLimit() {
 		return this.creditLimit;
 	}
@@ -340,6 +445,14 @@ public class ServiceProvider implements java.io.Serializable {
 		this.creditWarningThresholdAmt = creditWarningThresholdAmt;
 	}
 
+	public char getPinGenLimitFlag() {
+		return this.pinGenLimitFlag;
+	}
+
+	public void setPinGenLimitFlag(char pinGenLimitFlag) {
+		this.pinGenLimitFlag = pinGenLimitFlag;
+	}
+
 	public BigDecimal getPinGenLimit() {
 		return this.pinGenLimit;
 	}
@@ -370,118 +483,6 @@ public class ServiceProvider implements java.io.Serializable {
 
 	public void setPinGenParentNotification(BigDecimal pinGenParentNotification) {
 		this.pinGenParentNotification = pinGenParentNotification;
-	}
-
-	public String getServiceProviderCode() {
-		return this.serviceProviderCode;
-	}
-
-	public void setServiceProviderCode(String serviceProviderCode) {
-		this.serviceProviderCode = serviceProviderCode;
-	}
-
-	public String getEcrcNumber() {
-		return this.ecrcNumber;
-	}
-
-	public void setEcrcNumber(String ecrcNumber) {
-		this.ecrcNumber = ecrcNumber;
-	}
-
-	public String getForwardingNbr1() {
-		return this.forwardingNbr1;
-	}
-
-	public void setForwardingNbr1(String forwardingNbr1) {
-		this.forwardingNbr1 = forwardingNbr1;
-	}
-
-	public String getForwardingNbr2() {
-		return this.forwardingNbr2;
-	}
-
-	public void setForwardingNbr2(String forwardingNbr2) {
-		this.forwardingNbr2 = forwardingNbr2;
-	}
-
-	public String getForwardingNbr3() {
-		return this.forwardingNbr3;
-	}
-
-	public void setForwardingNbr3(String forwardingNbr3) {
-		this.forwardingNbr3 = forwardingNbr3;
-	}
-
-	public String getName() {
-		return this.name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getPsap1() {
-		return this.psap1;
-	}
-
-	public void setPsap1(String psap1) {
-		this.psap1 = psap1;
-	}
-
-	public String getPsap2() {
-		return this.psap2;
-	}
-
-	public void setPsap2(String psap2) {
-		this.psap2 = psap2;
-	}
-
-	public String getReportingPassword() {
-		return this.reportingPassword;
-	}
-
-	public void setReportingPassword(String reportingPassword) {
-		this.reportingPassword = reportingPassword;
-	}
-
-	public String getSipRealm() {
-		return this.sipRealm;
-	}
-
-	public void setSipRealm(String sipRealm) {
-		this.sipRealm = sipRealm;
-	}
-
-	public String getDescription() {
-		return this.description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getPrimarySoftswitchIp() {
-		return this.primarySoftswitchIp;
-	}
-
-	public void setPrimarySoftswitchIp(String primarySoftswitchIp) {
-		this.primarySoftswitchIp = primarySoftswitchIp;
-	}
-
-	public String getBackupSoftswitchIp() {
-		return this.backupSoftswitchIp;
-	}
-
-	public void setBackupSoftswitchIp(String backupSoftswitchIp) {
-		this.backupSoftswitchIp = backupSoftswitchIp;
-	}
-
-	public String getProxyServer() {
-		return this.proxyServer;
-	}
-
-	public void setProxyServer(String proxyServer) {
-		this.proxyServer = proxyServer;
 	}
 
 	public Set<SubAuthAni> getSubAuthAnis() {
@@ -534,12 +535,12 @@ public class ServiceProvider implements java.io.Serializable {
 		this.accessNumbers = accessNumbers;
 	}
 
-	public Set<Subscriber> getSubscribers() {
-		return this.subscribers;
+	public Set<Lot> getLots() {
+		return this.lots;
 	}
 
-	public void setSubscribers(Set<Subscriber> subscribers) {
-		this.subscribers = subscribers;
+	public void setLots(Set<Lot> lots) {
+		this.lots = lots;
 	}
 
 }

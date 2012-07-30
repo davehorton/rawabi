@@ -1,6 +1,6 @@
 package com.rawabi.model;
 
-// Generated Jul 24, 2012 12:30:09 PM by Hibernate Tools 3.4.0.CR1
+// Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1
 
 import java.math.BigDecimal;
 
@@ -12,6 +12,7 @@ public class AccessNumber implements java.io.Serializable {
 	private BigDecimal accessNumberId;
 	private LanguageRef languageRef;
 	private ServiceProvider serviceProvider;
+	private BigDecimal accessNumberGroupId;
 	private String accessNumber;
 	private BigDecimal dialingPlanId;
 	private BigDecimal status;
@@ -36,8 +37,11 @@ public class AccessNumber implements java.io.Serializable {
 	private BigDecimal conferencePasscodeLength;
 	private BigDecimal thirdPartyOutdialDuration;
 	private BigDecimal languageMenuId;
+	private String dialedNumber;
 	private String thirdPartyOutdialNumber;
 	private String description;
+	private BigDecimal prepaidCardNumberLength;
+	private BigDecimal postpaidAcctNumberLength;
 
 	public AccessNumber() {
 	}
@@ -71,10 +75,10 @@ public class AccessNumber implements java.io.Serializable {
 	}
 
 	public AccessNumber(BigDecimal accessNumberId, LanguageRef languageRef,
-			ServiceProvider serviceProvider, String accessNumber,
-			BigDecimal dialingPlanId, BigDecimal status, BigDecimal countryId,
-			char domIntlFlag, char acdEnabled, char acdCsrGreet,
-			char acdCsrOnMaxLogins, char musicHoldFlag,
+			ServiceProvider serviceProvider, BigDecimal accessNumberGroupId,
+			String accessNumber, BigDecimal dialingPlanId, BigDecimal status,
+			BigDecimal countryId, char domIntlFlag, char acdEnabled,
+			char acdCsrGreet, char acdCsrOnMaxLogins, char musicHoldFlag,
 			char thirdPartyAcdAvailable, char applyPayphoneSurcharges,
 			char payphoneSwipeFlag, char callbackFlag, char applicationType,
 			char collectPinFlag, char ivrChargeNcCallsFlag,
@@ -82,10 +86,13 @@ public class AccessNumber implements java.io.Serializable {
 			Character tollNumberFlag, Character eventFlag,
 			BigDecimal prepaidPinLength, BigDecimal conferencePasscodeLength,
 			BigDecimal thirdPartyOutdialDuration, BigDecimal languageMenuId,
-			String thirdPartyOutdialNumber, String description) {
+			String dialedNumber, String thirdPartyOutdialNumber,
+			String description, BigDecimal prepaidCardNumberLength,
+			BigDecimal postpaidAcctNumberLength) {
 		this.accessNumberId = accessNumberId;
 		this.languageRef = languageRef;
 		this.serviceProvider = serviceProvider;
+		this.accessNumberGroupId = accessNumberGroupId;
 		this.accessNumber = accessNumber;
 		this.dialingPlanId = dialingPlanId;
 		this.status = status;
@@ -110,8 +117,11 @@ public class AccessNumber implements java.io.Serializable {
 		this.conferencePasscodeLength = conferencePasscodeLength;
 		this.thirdPartyOutdialDuration = thirdPartyOutdialDuration;
 		this.languageMenuId = languageMenuId;
+		this.dialedNumber = dialedNumber;
 		this.thirdPartyOutdialNumber = thirdPartyOutdialNumber;
 		this.description = description;
+		this.prepaidCardNumberLength = prepaidCardNumberLength;
+		this.postpaidAcctNumberLength = postpaidAcctNumberLength;
 	}
 
 	public BigDecimal getAccessNumberId() {
@@ -136,6 +146,14 @@ public class AccessNumber implements java.io.Serializable {
 
 	public void setServiceProvider(ServiceProvider serviceProvider) {
 		this.serviceProvider = serviceProvider;
+	}
+
+	public BigDecimal getAccessNumberGroupId() {
+		return this.accessNumberGroupId;
+	}
+
+	public void setAccessNumberGroupId(BigDecimal accessNumberGroupId) {
+		this.accessNumberGroupId = accessNumberGroupId;
 	}
 
 	public String getAccessNumber() {
@@ -331,6 +349,14 @@ public class AccessNumber implements java.io.Serializable {
 		this.languageMenuId = languageMenuId;
 	}
 
+	public String getDialedNumber() {
+		return this.dialedNumber;
+	}
+
+	public void setDialedNumber(String dialedNumber) {
+		this.dialedNumber = dialedNumber;
+	}
+
 	public String getThirdPartyOutdialNumber() {
 		return this.thirdPartyOutdialNumber;
 	}
@@ -345,6 +371,22 @@ public class AccessNumber implements java.io.Serializable {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public BigDecimal getPrepaidCardNumberLength() {
+		return this.prepaidCardNumberLength;
+	}
+
+	public void setPrepaidCardNumberLength(BigDecimal prepaidCardNumberLength) {
+		this.prepaidCardNumberLength = prepaidCardNumberLength;
+	}
+
+	public BigDecimal getPostpaidAcctNumberLength() {
+		return this.postpaidAcctNumberLength;
+	}
+
+	public void setPostpaidAcctNumberLength(BigDecimal postpaidAcctNumberLength) {
+		this.postpaidAcctNumberLength = postpaidAcctNumberLength;
 	}
 
 }

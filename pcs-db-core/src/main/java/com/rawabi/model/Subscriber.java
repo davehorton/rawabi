@@ -1,6 +1,6 @@
 package com.rawabi.model;
 
-// Generated Jul 24, 2012 12:30:09 PM by Hibernate Tools 3.4.0.CR1
+// Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -12,16 +12,29 @@ import java.util.Set;
  */
 public class Subscriber implements java.io.Serializable {
 
-	private BigDecimal subscriberId;
-	private CurrencyRef currencyRef;
-	private ServiceProvider serviceProvider;
+	private Long subscriberId;
+	private BigDecimal offplanAlertPlayed;
+	private char firstBillcyclePlayed;
+	private BigDecimal onplanAlertPlayed;
+	private Date nextMaintFee2Date;
+	private Date nextMaintFee3Date;
+	private Date nextMonthlyBillingDate;
+	private BigDecimal billedSequence;
 	private BigDecimal initialBalance;
+	private BigDecimal serviceProviderId;
 	private BigDecimal expirationType;
+	private BigDecimal currencyId;
 	private BigDecimal languageId;
 	private BigDecimal billingType;
 	private BigDecimal confOperatorAssistType;
 	private char disabledFlag;
 	private char directCallFlag;
+	private char bucketRefillWarningFlag;
+	private char bucketExhaustWarningFlag;
+	private char autoPayFlag;
+	private char receiveBillingEmailFlag;
+	private char overrideDeptE911Address;
+	private char agreedTo911TermsFlag;
 	private Character requireAniAuthFlag;
 	private Character corpAcctMgrFlag;
 	private Character allowPinOnlyLoginFlag;
@@ -39,31 +52,19 @@ public class Subscriber implements java.io.Serializable {
 	private Date lastClmResetDate;
 	private Date deactivationDate;
 	private Date reactivationDate;
+	private Date nextSubscriptionFeeDate;
 	private BigDecimal callingSvcId;
 	private BigDecimal lotId;
 	private BigDecimal lotSeqNumber;
 	private BigDecimal currPrepaidBalance;
 	private BigDecimal primaryOfferingId;
-	private String pin;
-	private String loginUserId;
-	private String billingId;
-	private String lotControlNumber;
-	private String popdAccountNumber;
-	private String outboundCli;
-	private String title;
-	private String firstName;
-	private String middleName;
-	private String lastName;
-	private String lastNameIndexed;
-	private String nameSuffix;
-	private String securityKey;
 	private BigDecimal guiDisplayLanguageId;
 	private BigDecimal numExpirationDays;
 	private BigDecimal disabledReasonCode;
 	private BigDecimal confSvcId;
 	private BigDecimal corpAcctNbr;
-	private BigDecimal corpDeptId;
 	private BigDecimal rejectedReasonCode;
+	private BigDecimal corpDeptId;
 	private BigDecimal timezoneId;
 	private BigDecimal homeCountryId;
 	private BigDecimal creditLimit;
@@ -72,85 +73,146 @@ public class Subscriber implements java.io.Serializable {
 	private BigDecimal voipServiceId;
 	private BigDecimal voicemailServiceId;
 	private BigDecimal popdCallingSvcId;
-	private String companyName;
+	private BigDecimal billingCycleDate;
+	private BigDecimal secondsBalance;
+	private BigDecimal secondsUsed;
+	private BigDecimal dailySecondsUsed;
+	private BigDecimal balanceNotifyThreshold;
+	private BigDecimal creditRiskScore;
+	private String title;
+	private String nameSuffix;
+	private String securityKey;
+	private String loginUserId;
+	private String pin;
+	private String billingId;
+	private String popdAccountNumber;
+	private String firstName;
+	private String middleName;
 	private String marketId;
-	private String callbackNbr;
-	private String prpdAccountNumber;
 	private String dtmfName;
+	private String prpdAccountNumber;
+	private String lastName;
+	private String lastNameIndexed;
+	private String lotControlNumber;
+	private String outboundCli;
+	private String companyName;
+	private String callbackNbr;
+	private String creditRiskCompany;
 	private String loginPassword;
 	private String pinPassword;
 	private String orgName;
-	private BigDecimal balanceNotifyThreshold;
+	private BigDecimal firstUseFeeState;
 	private Set<AccountActivity> accountActivities = new HashSet<AccountActivity>(
 			0);
 	private LockedPins lockedPins;
 	private Set<EvtBalanceTransfer> evtBalanceTransfers = new HashSet<EvtBalanceTransfer>(
+			0);
+	private Set<SubOfferingXref> subOfferingXrefs = new HashSet<SubOfferingXref>(
 			0);
 	private Set<SubAuthAni> subAuthAnis = new HashSet<SubAuthAni>(0);
 
 	public Subscriber() {
 	}
 
-	public Subscriber(BigDecimal subscriberId, CurrencyRef currencyRef,
-			ServiceProvider serviceProvider, BigDecimal initialBalance,
-			BigDecimal expirationType, BigDecimal languageId,
+	public Subscriber(Long subscriberId, BigDecimal offplanAlertPlayed,
+			char firstBillcyclePlayed, BigDecimal onplanAlertPlayed,
+			BigDecimal billedSequence, BigDecimal initialBalance,
+			BigDecimal serviceProviderId, BigDecimal expirationType,
+			BigDecimal currencyId, BigDecimal languageId,
 			BigDecimal billingType, BigDecimal confOperatorAssistType,
-			char disabledFlag, char directCallFlag) {
+			char disabledFlag, char directCallFlag,
+			char bucketRefillWarningFlag, char bucketExhaustWarningFlag,
+			char autoPayFlag, char receiveBillingEmailFlag,
+			char overrideDeptE911Address, char agreedTo911TermsFlag,
+			BigDecimal firstUseFeeState) {
 		this.subscriberId = subscriberId;
-		this.currencyRef = currencyRef;
-		this.serviceProvider = serviceProvider;
+		this.offplanAlertPlayed = offplanAlertPlayed;
+		this.firstBillcyclePlayed = firstBillcyclePlayed;
+		this.onplanAlertPlayed = onplanAlertPlayed;
+		this.billedSequence = billedSequence;
 		this.initialBalance = initialBalance;
+		this.serviceProviderId = serviceProviderId;
 		this.expirationType = expirationType;
+		this.currencyId = currencyId;
 		this.languageId = languageId;
 		this.billingType = billingType;
 		this.confOperatorAssistType = confOperatorAssistType;
 		this.disabledFlag = disabledFlag;
 		this.directCallFlag = directCallFlag;
+		this.bucketRefillWarningFlag = bucketRefillWarningFlag;
+		this.bucketExhaustWarningFlag = bucketExhaustWarningFlag;
+		this.autoPayFlag = autoPayFlag;
+		this.receiveBillingEmailFlag = receiveBillingEmailFlag;
+		this.overrideDeptE911Address = overrideDeptE911Address;
+		this.agreedTo911TermsFlag = agreedTo911TermsFlag;
+		this.firstUseFeeState = firstUseFeeState;
 	}
 
-	public Subscriber(BigDecimal subscriberId, CurrencyRef currencyRef,
-			ServiceProvider serviceProvider, BigDecimal initialBalance,
-			BigDecimal expirationType, BigDecimal languageId,
-			BigDecimal billingType, BigDecimal confOperatorAssistType,
-			char disabledFlag, char directCallFlag,
-			Character requireAniAuthFlag, Character corpAcctMgrFlag,
-			Character allowPinOnlyLoginFlag, Character callbackNbrFlag,
-			Character includeInCompanyDirFlag, Date signupDate,
-			Date activationDate, Date firstCallDate, Date firstUseDate,
-			Date lastUseDate, Date nextMaintFeeDate, Date expirationDate,
-			Date zeroBalanceDate, Date dateOfBirth, Date lastClmResetDate,
-			Date deactivationDate, Date reactivationDate,
+	public Subscriber(Long subscriberId, BigDecimal offplanAlertPlayed,
+			char firstBillcyclePlayed, BigDecimal onplanAlertPlayed,
+			Date nextMaintFee2Date, Date nextMaintFee3Date,
+			Date nextMonthlyBillingDate, BigDecimal billedSequence,
+			BigDecimal initialBalance, BigDecimal serviceProviderId,
+			BigDecimal expirationType, BigDecimal currencyId,
+			BigDecimal languageId, BigDecimal billingType,
+			BigDecimal confOperatorAssistType, char disabledFlag,
+			char directCallFlag, char bucketRefillWarningFlag,
+			char bucketExhaustWarningFlag, char autoPayFlag,
+			char receiveBillingEmailFlag, char overrideDeptE911Address,
+			char agreedTo911TermsFlag, Character requireAniAuthFlag,
+			Character corpAcctMgrFlag, Character allowPinOnlyLoginFlag,
+			Character callbackNbrFlag, Character includeInCompanyDirFlag,
+			Date signupDate, Date activationDate, Date firstCallDate,
+			Date firstUseDate, Date lastUseDate, Date nextMaintFeeDate,
+			Date expirationDate, Date zeroBalanceDate, Date dateOfBirth,
+			Date lastClmResetDate, Date deactivationDate,
+			Date reactivationDate, Date nextSubscriptionFeeDate,
 			BigDecimal callingSvcId, BigDecimal lotId, BigDecimal lotSeqNumber,
 			BigDecimal currPrepaidBalance, BigDecimal primaryOfferingId,
-			String pin, String loginUserId, String billingId,
-			String lotControlNumber, String popdAccountNumber,
-			String outboundCli, String title, String firstName,
-			String middleName, String lastName, String lastNameIndexed,
-			String nameSuffix, String securityKey,
 			BigDecimal guiDisplayLanguageId, BigDecimal numExpirationDays,
 			BigDecimal disabledReasonCode, BigDecimal confSvcId,
-			BigDecimal corpAcctNbr, BigDecimal corpDeptId,
-			BigDecimal rejectedReasonCode, BigDecimal timezoneId,
+			BigDecimal corpAcctNbr, BigDecimal rejectedReasonCode,
+			BigDecimal corpDeptId, BigDecimal timezoneId,
 			BigDecimal homeCountryId, BigDecimal creditLimit,
 			BigDecimal creditUsed, BigDecimal simulCallsPerPin,
 			BigDecimal voipServiceId, BigDecimal voicemailServiceId,
-			BigDecimal popdCallingSvcId, String companyName, String marketId,
-			String callbackNbr, String prpdAccountNumber, String dtmfName,
-			String loginPassword, String pinPassword, String orgName,
-			BigDecimal balanceNotifyThreshold,
+			BigDecimal popdCallingSvcId, BigDecimal billingCycleDate,
+			BigDecimal secondsBalance, BigDecimal secondsUsed,
+			BigDecimal dailySecondsUsed, BigDecimal balanceNotifyThreshold,
+			BigDecimal creditRiskScore, String title, String nameSuffix,
+			String securityKey, String loginUserId, String pin,
+			String billingId, String popdAccountNumber, String firstName,
+			String middleName, String marketId, String dtmfName,
+			String prpdAccountNumber, String lastName, String lastNameIndexed,
+			String lotControlNumber, String outboundCli, String companyName,
+			String callbackNbr, String creditRiskCompany, String loginPassword,
+			String pinPassword, String orgName, BigDecimal firstUseFeeState,
 			Set<AccountActivity> accountActivities, LockedPins lockedPins,
 			Set<EvtBalanceTransfer> evtBalanceTransfers,
-			Set<SubAuthAni> subAuthAnis) {
+			Set<SubOfferingXref> subOfferingXrefs, Set<SubAuthAni> subAuthAnis) {
 		this.subscriberId = subscriberId;
-		this.currencyRef = currencyRef;
-		this.serviceProvider = serviceProvider;
+		this.offplanAlertPlayed = offplanAlertPlayed;
+		this.firstBillcyclePlayed = firstBillcyclePlayed;
+		this.onplanAlertPlayed = onplanAlertPlayed;
+		this.nextMaintFee2Date = nextMaintFee2Date;
+		this.nextMaintFee3Date = nextMaintFee3Date;
+		this.nextMonthlyBillingDate = nextMonthlyBillingDate;
+		this.billedSequence = billedSequence;
 		this.initialBalance = initialBalance;
+		this.serviceProviderId = serviceProviderId;
 		this.expirationType = expirationType;
+		this.currencyId = currencyId;
 		this.languageId = languageId;
 		this.billingType = billingType;
 		this.confOperatorAssistType = confOperatorAssistType;
 		this.disabledFlag = disabledFlag;
 		this.directCallFlag = directCallFlag;
+		this.bucketRefillWarningFlag = bucketRefillWarningFlag;
+		this.bucketExhaustWarningFlag = bucketExhaustWarningFlag;
+		this.autoPayFlag = autoPayFlag;
+		this.receiveBillingEmailFlag = receiveBillingEmailFlag;
+		this.overrideDeptE911Address = overrideDeptE911Address;
+		this.agreedTo911TermsFlag = agreedTo911TermsFlag;
 		this.requireAniAuthFlag = requireAniAuthFlag;
 		this.corpAcctMgrFlag = corpAcctMgrFlag;
 		this.allowPinOnlyLoginFlag = allowPinOnlyLoginFlag;
@@ -168,31 +230,19 @@ public class Subscriber implements java.io.Serializable {
 		this.lastClmResetDate = lastClmResetDate;
 		this.deactivationDate = deactivationDate;
 		this.reactivationDate = reactivationDate;
+		this.nextSubscriptionFeeDate = nextSubscriptionFeeDate;
 		this.callingSvcId = callingSvcId;
 		this.lotId = lotId;
 		this.lotSeqNumber = lotSeqNumber;
 		this.currPrepaidBalance = currPrepaidBalance;
 		this.primaryOfferingId = primaryOfferingId;
-		this.pin = pin;
-		this.loginUserId = loginUserId;
-		this.billingId = billingId;
-		this.lotControlNumber = lotControlNumber;
-		this.popdAccountNumber = popdAccountNumber;
-		this.outboundCli = outboundCli;
-		this.title = title;
-		this.firstName = firstName;
-		this.middleName = middleName;
-		this.lastName = lastName;
-		this.lastNameIndexed = lastNameIndexed;
-		this.nameSuffix = nameSuffix;
-		this.securityKey = securityKey;
 		this.guiDisplayLanguageId = guiDisplayLanguageId;
 		this.numExpirationDays = numExpirationDays;
 		this.disabledReasonCode = disabledReasonCode;
 		this.confSvcId = confSvcId;
 		this.corpAcctNbr = corpAcctNbr;
-		this.corpDeptId = corpDeptId;
 		this.rejectedReasonCode = rejectedReasonCode;
+		this.corpDeptId = corpDeptId;
 		this.timezoneId = timezoneId;
 		this.homeCountryId = homeCountryId;
 		this.creditLimit = creditLimit;
@@ -201,43 +251,104 @@ public class Subscriber implements java.io.Serializable {
 		this.voipServiceId = voipServiceId;
 		this.voicemailServiceId = voicemailServiceId;
 		this.popdCallingSvcId = popdCallingSvcId;
-		this.companyName = companyName;
+		this.billingCycleDate = billingCycleDate;
+		this.secondsBalance = secondsBalance;
+		this.secondsUsed = secondsUsed;
+		this.dailySecondsUsed = dailySecondsUsed;
+		this.balanceNotifyThreshold = balanceNotifyThreshold;
+		this.creditRiskScore = creditRiskScore;
+		this.title = title;
+		this.nameSuffix = nameSuffix;
+		this.securityKey = securityKey;
+		this.loginUserId = loginUserId;
+		this.pin = pin;
+		this.billingId = billingId;
+		this.popdAccountNumber = popdAccountNumber;
+		this.firstName = firstName;
+		this.middleName = middleName;
 		this.marketId = marketId;
-		this.callbackNbr = callbackNbr;
-		this.prpdAccountNumber = prpdAccountNumber;
 		this.dtmfName = dtmfName;
+		this.prpdAccountNumber = prpdAccountNumber;
+		this.lastName = lastName;
+		this.lastNameIndexed = lastNameIndexed;
+		this.lotControlNumber = lotControlNumber;
+		this.outboundCli = outboundCli;
+		this.companyName = companyName;
+		this.callbackNbr = callbackNbr;
+		this.creditRiskCompany = creditRiskCompany;
 		this.loginPassword = loginPassword;
 		this.pinPassword = pinPassword;
 		this.orgName = orgName;
-		this.balanceNotifyThreshold = balanceNotifyThreshold;
+		this.firstUseFeeState = firstUseFeeState;
 		this.accountActivities = accountActivities;
 		this.lockedPins = lockedPins;
 		this.evtBalanceTransfers = evtBalanceTransfers;
+		this.subOfferingXrefs = subOfferingXrefs;
 		this.subAuthAnis = subAuthAnis;
 	}
 
-	public BigDecimal getSubscriberId() {
+	public Long getSubscriberId() {
 		return this.subscriberId;
 	}
 
-	public void setSubscriberId(BigDecimal subscriberId) {
+	public void setSubscriberId(Long subscriberId) {
 		this.subscriberId = subscriberId;
 	}
 
-	public CurrencyRef getCurrencyRef() {
-		return this.currencyRef;
+	public BigDecimal getOffplanAlertPlayed() {
+		return this.offplanAlertPlayed;
 	}
 
-	public void setCurrencyRef(CurrencyRef currencyRef) {
-		this.currencyRef = currencyRef;
+	public void setOffplanAlertPlayed(BigDecimal offplanAlertPlayed) {
+		this.offplanAlertPlayed = offplanAlertPlayed;
 	}
 
-	public ServiceProvider getServiceProvider() {
-		return this.serviceProvider;
+	public char getFirstBillcyclePlayed() {
+		return this.firstBillcyclePlayed;
 	}
 
-	public void setServiceProvider(ServiceProvider serviceProvider) {
-		this.serviceProvider = serviceProvider;
+	public void setFirstBillcyclePlayed(char firstBillcyclePlayed) {
+		this.firstBillcyclePlayed = firstBillcyclePlayed;
+	}
+
+	public BigDecimal getOnplanAlertPlayed() {
+		return this.onplanAlertPlayed;
+	}
+
+	public void setOnplanAlertPlayed(BigDecimal onplanAlertPlayed) {
+		this.onplanAlertPlayed = onplanAlertPlayed;
+	}
+
+	public Date getNextMaintFee2Date() {
+		return this.nextMaintFee2Date;
+	}
+
+	public void setNextMaintFee2Date(Date nextMaintFee2Date) {
+		this.nextMaintFee2Date = nextMaintFee2Date;
+	}
+
+	public Date getNextMaintFee3Date() {
+		return this.nextMaintFee3Date;
+	}
+
+	public void setNextMaintFee3Date(Date nextMaintFee3Date) {
+		this.nextMaintFee3Date = nextMaintFee3Date;
+	}
+
+	public Date getNextMonthlyBillingDate() {
+		return this.nextMonthlyBillingDate;
+	}
+
+	public void setNextMonthlyBillingDate(Date nextMonthlyBillingDate) {
+		this.nextMonthlyBillingDate = nextMonthlyBillingDate;
+	}
+
+	public BigDecimal getBilledSequence() {
+		return this.billedSequence;
+	}
+
+	public void setBilledSequence(BigDecimal billedSequence) {
+		this.billedSequence = billedSequence;
 	}
 
 	public BigDecimal getInitialBalance() {
@@ -248,12 +359,28 @@ public class Subscriber implements java.io.Serializable {
 		this.initialBalance = initialBalance;
 	}
 
+	public BigDecimal getServiceProviderId() {
+		return this.serviceProviderId;
+	}
+
+	public void setServiceProviderId(BigDecimal serviceProviderId) {
+		this.serviceProviderId = serviceProviderId;
+	}
+
 	public BigDecimal getExpirationType() {
 		return this.expirationType;
 	}
 
 	public void setExpirationType(BigDecimal expirationType) {
 		this.expirationType = expirationType;
+	}
+
+	public BigDecimal getCurrencyId() {
+		return this.currencyId;
+	}
+
+	public void setCurrencyId(BigDecimal currencyId) {
+		this.currencyId = currencyId;
 	}
 
 	public BigDecimal getLanguageId() {
@@ -294,6 +421,54 @@ public class Subscriber implements java.io.Serializable {
 
 	public void setDirectCallFlag(char directCallFlag) {
 		this.directCallFlag = directCallFlag;
+	}
+
+	public char getBucketRefillWarningFlag() {
+		return this.bucketRefillWarningFlag;
+	}
+
+	public void setBucketRefillWarningFlag(char bucketRefillWarningFlag) {
+		this.bucketRefillWarningFlag = bucketRefillWarningFlag;
+	}
+
+	public char getBucketExhaustWarningFlag() {
+		return this.bucketExhaustWarningFlag;
+	}
+
+	public void setBucketExhaustWarningFlag(char bucketExhaustWarningFlag) {
+		this.bucketExhaustWarningFlag = bucketExhaustWarningFlag;
+	}
+
+	public char getAutoPayFlag() {
+		return this.autoPayFlag;
+	}
+
+	public void setAutoPayFlag(char autoPayFlag) {
+		this.autoPayFlag = autoPayFlag;
+	}
+
+	public char getReceiveBillingEmailFlag() {
+		return this.receiveBillingEmailFlag;
+	}
+
+	public void setReceiveBillingEmailFlag(char receiveBillingEmailFlag) {
+		this.receiveBillingEmailFlag = receiveBillingEmailFlag;
+	}
+
+	public char getOverrideDeptE911Address() {
+		return this.overrideDeptE911Address;
+	}
+
+	public void setOverrideDeptE911Address(char overrideDeptE911Address) {
+		this.overrideDeptE911Address = overrideDeptE911Address;
+	}
+
+	public char getAgreedTo911TermsFlag() {
+		return this.agreedTo911TermsFlag;
+	}
+
+	public void setAgreedTo911TermsFlag(char agreedTo911TermsFlag) {
+		this.agreedTo911TermsFlag = agreedTo911TermsFlag;
 	}
 
 	public Character getRequireAniAuthFlag() {
@@ -432,6 +607,14 @@ public class Subscriber implements java.io.Serializable {
 		this.reactivationDate = reactivationDate;
 	}
 
+	public Date getNextSubscriptionFeeDate() {
+		return this.nextSubscriptionFeeDate;
+	}
+
+	public void setNextSubscriptionFeeDate(Date nextSubscriptionFeeDate) {
+		this.nextSubscriptionFeeDate = nextSubscriptionFeeDate;
+	}
+
 	public BigDecimal getCallingSvcId() {
 		return this.callingSvcId;
 	}
@@ -470,110 +653,6 @@ public class Subscriber implements java.io.Serializable {
 
 	public void setPrimaryOfferingId(BigDecimal primaryOfferingId) {
 		this.primaryOfferingId = primaryOfferingId;
-	}
-
-	public String getPin() {
-		return this.pin;
-	}
-
-	public void setPin(String pin) {
-		this.pin = pin;
-	}
-
-	public String getLoginUserId() {
-		return this.loginUserId;
-	}
-
-	public void setLoginUserId(String loginUserId) {
-		this.loginUserId = loginUserId;
-	}
-
-	public String getBillingId() {
-		return this.billingId;
-	}
-
-	public void setBillingId(String billingId) {
-		this.billingId = billingId;
-	}
-
-	public String getLotControlNumber() {
-		return this.lotControlNumber;
-	}
-
-	public void setLotControlNumber(String lotControlNumber) {
-		this.lotControlNumber = lotControlNumber;
-	}
-
-	public String getPopdAccountNumber() {
-		return this.popdAccountNumber;
-	}
-
-	public void setPopdAccountNumber(String popdAccountNumber) {
-		this.popdAccountNumber = popdAccountNumber;
-	}
-
-	public String getOutboundCli() {
-		return this.outboundCli;
-	}
-
-	public void setOutboundCli(String outboundCli) {
-		this.outboundCli = outboundCli;
-	}
-
-	public String getTitle() {
-		return this.title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
-	public String getFirstName() {
-		return this.firstName;
-	}
-
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	public String getMiddleName() {
-		return this.middleName;
-	}
-
-	public void setMiddleName(String middleName) {
-		this.middleName = middleName;
-	}
-
-	public String getLastName() {
-		return this.lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
-
-	public String getLastNameIndexed() {
-		return this.lastNameIndexed;
-	}
-
-	public void setLastNameIndexed(String lastNameIndexed) {
-		this.lastNameIndexed = lastNameIndexed;
-	}
-
-	public String getNameSuffix() {
-		return this.nameSuffix;
-	}
-
-	public void setNameSuffix(String nameSuffix) {
-		this.nameSuffix = nameSuffix;
-	}
-
-	public String getSecurityKey() {
-		return this.securityKey;
-	}
-
-	public void setSecurityKey(String securityKey) {
-		this.securityKey = securityKey;
 	}
 
 	public BigDecimal getGuiDisplayLanguageId() {
@@ -616,20 +695,20 @@ public class Subscriber implements java.io.Serializable {
 		this.corpAcctNbr = corpAcctNbr;
 	}
 
-	public BigDecimal getCorpDeptId() {
-		return this.corpDeptId;
-	}
-
-	public void setCorpDeptId(BigDecimal corpDeptId) {
-		this.corpDeptId = corpDeptId;
-	}
-
 	public BigDecimal getRejectedReasonCode() {
 		return this.rejectedReasonCode;
 	}
 
 	public void setRejectedReasonCode(BigDecimal rejectedReasonCode) {
 		this.rejectedReasonCode = rejectedReasonCode;
+	}
+
+	public BigDecimal getCorpDeptId() {
+		return this.corpDeptId;
+	}
+
+	public void setCorpDeptId(BigDecimal corpDeptId) {
+		this.corpDeptId = corpDeptId;
 	}
 
 	public BigDecimal getTimezoneId() {
@@ -696,12 +775,124 @@ public class Subscriber implements java.io.Serializable {
 		this.popdCallingSvcId = popdCallingSvcId;
 	}
 
-	public String getCompanyName() {
-		return this.companyName;
+	public BigDecimal getBillingCycleDate() {
+		return this.billingCycleDate;
 	}
 
-	public void setCompanyName(String companyName) {
-		this.companyName = companyName;
+	public void setBillingCycleDate(BigDecimal billingCycleDate) {
+		this.billingCycleDate = billingCycleDate;
+	}
+
+	public BigDecimal getSecondsBalance() {
+		return this.secondsBalance;
+	}
+
+	public void setSecondsBalance(BigDecimal secondsBalance) {
+		this.secondsBalance = secondsBalance;
+	}
+
+	public BigDecimal getSecondsUsed() {
+		return this.secondsUsed;
+	}
+
+	public void setSecondsUsed(BigDecimal secondsUsed) {
+		this.secondsUsed = secondsUsed;
+	}
+
+	public BigDecimal getDailySecondsUsed() {
+		return this.dailySecondsUsed;
+	}
+
+	public void setDailySecondsUsed(BigDecimal dailySecondsUsed) {
+		this.dailySecondsUsed = dailySecondsUsed;
+	}
+
+	public BigDecimal getBalanceNotifyThreshold() {
+		return this.balanceNotifyThreshold;
+	}
+
+	public void setBalanceNotifyThreshold(BigDecimal balanceNotifyThreshold) {
+		this.balanceNotifyThreshold = balanceNotifyThreshold;
+	}
+
+	public BigDecimal getCreditRiskScore() {
+		return this.creditRiskScore;
+	}
+
+	public void setCreditRiskScore(BigDecimal creditRiskScore) {
+		this.creditRiskScore = creditRiskScore;
+	}
+
+	public String getTitle() {
+		return this.title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getNameSuffix() {
+		return this.nameSuffix;
+	}
+
+	public void setNameSuffix(String nameSuffix) {
+		this.nameSuffix = nameSuffix;
+	}
+
+	public String getSecurityKey() {
+		return this.securityKey;
+	}
+
+	public void setSecurityKey(String securityKey) {
+		this.securityKey = securityKey;
+	}
+
+	public String getLoginUserId() {
+		return this.loginUserId;
+	}
+
+	public void setLoginUserId(String loginUserId) {
+		this.loginUserId = loginUserId;
+	}
+
+	public String getPin() {
+		return this.pin;
+	}
+
+	public void setPin(String pin) {
+		this.pin = pin;
+	}
+
+	public String getBillingId() {
+		return this.billingId;
+	}
+
+	public void setBillingId(String billingId) {
+		this.billingId = billingId;
+	}
+
+	public String getPopdAccountNumber() {
+		return this.popdAccountNumber;
+	}
+
+	public void setPopdAccountNumber(String popdAccountNumber) {
+		this.popdAccountNumber = popdAccountNumber;
+	}
+
+	public String getFirstName() {
+		return this.firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getMiddleName() {
+		return this.middleName;
+	}
+
+	public void setMiddleName(String middleName) {
+		this.middleName = middleName;
 	}
 
 	public String getMarketId() {
@@ -712,12 +903,12 @@ public class Subscriber implements java.io.Serializable {
 		this.marketId = marketId;
 	}
 
-	public String getCallbackNbr() {
-		return this.callbackNbr;
+	public String getDtmfName() {
+		return this.dtmfName;
 	}
 
-	public void setCallbackNbr(String callbackNbr) {
-		this.callbackNbr = callbackNbr;
+	public void setDtmfName(String dtmfName) {
+		this.dtmfName = dtmfName;
 	}
 
 	public String getPrpdAccountNumber() {
@@ -728,12 +919,60 @@ public class Subscriber implements java.io.Serializable {
 		this.prpdAccountNumber = prpdAccountNumber;
 	}
 
-	public String getDtmfName() {
-		return this.dtmfName;
+	public String getLastName() {
+		return this.lastName;
 	}
 
-	public void setDtmfName(String dtmfName) {
-		this.dtmfName = dtmfName;
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public String getLastNameIndexed() {
+		return this.lastNameIndexed;
+	}
+
+	public void setLastNameIndexed(String lastNameIndexed) {
+		this.lastNameIndexed = lastNameIndexed;
+	}
+
+	public String getLotControlNumber() {
+		return this.lotControlNumber;
+	}
+
+	public void setLotControlNumber(String lotControlNumber) {
+		this.lotControlNumber = lotControlNumber;
+	}
+
+	public String getOutboundCli() {
+		return this.outboundCli;
+	}
+
+	public void setOutboundCli(String outboundCli) {
+		this.outboundCli = outboundCli;
+	}
+
+	public String getCompanyName() {
+		return this.companyName;
+	}
+
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
+	}
+
+	public String getCallbackNbr() {
+		return this.callbackNbr;
+	}
+
+	public void setCallbackNbr(String callbackNbr) {
+		this.callbackNbr = callbackNbr;
+	}
+
+	public String getCreditRiskCompany() {
+		return this.creditRiskCompany;
+	}
+
+	public void setCreditRiskCompany(String creditRiskCompany) {
+		this.creditRiskCompany = creditRiskCompany;
 	}
 
 	public String getLoginPassword() {
@@ -760,12 +999,12 @@ public class Subscriber implements java.io.Serializable {
 		this.orgName = orgName;
 	}
 
-	public BigDecimal getBalanceNotifyThreshold() {
-		return this.balanceNotifyThreshold;
+	public BigDecimal getFirstUseFeeState() {
+		return this.firstUseFeeState;
 	}
 
-	public void setBalanceNotifyThreshold(BigDecimal balanceNotifyThreshold) {
-		this.balanceNotifyThreshold = balanceNotifyThreshold;
+	public void setFirstUseFeeState(BigDecimal firstUseFeeState) {
+		this.firstUseFeeState = firstUseFeeState;
 	}
 
 	public Set<AccountActivity> getAccountActivities() {
@@ -791,6 +1030,14 @@ public class Subscriber implements java.io.Serializable {
 	public void setEvtBalanceTransfers(
 			Set<EvtBalanceTransfer> evtBalanceTransfers) {
 		this.evtBalanceTransfers = evtBalanceTransfers;
+	}
+
+	public Set<SubOfferingXref> getSubOfferingXrefs() {
+		return this.subOfferingXrefs;
+	}
+
+	public void setSubOfferingXrefs(Set<SubOfferingXref> subOfferingXrefs) {
+		this.subOfferingXrefs = subOfferingXrefs;
 	}
 
 	public Set<SubAuthAni> getSubAuthAnis() {

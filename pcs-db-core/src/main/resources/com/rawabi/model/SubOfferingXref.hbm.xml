@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.rawabi.model.SubOfferingXref" table="SUB_OFFERING_XREF" schema="PCSPROD_411">
+        <composite-id name="id" class="com.rawabi.model.SubOfferingXrefId">
+            <key-property name="subscriberId" type="big_decimal">
+                <column name="SUBSCRIBER_ID" precision="22" scale="0" />
+            </key-property>
+            <key-property name="offeringId" type="big_decimal">
+                <column name="OFFERING_ID" precision="22" scale="0" />
+            </key-property>
+        </composite-id>
+        <many-to-one name="subscriber" class="com.rawabi.model.Subscriber" update="false" insert="false" fetch="select">
+            <column name="SUBSCRIBER_ID" precision="22" scale="0" not-null="true" />
+        </many-to-one>
+        <many-to-one name="productOffering" class="com.rawabi.model.ProductOffering" update="false" insert="false" fetch="select">
+            <column name="OFFERING_ID" precision="22" scale="0" not-null="true" />
+        </many-to-one>
+        <property name="primaryFlag" type="java.lang.Character">
+            <column name="PRIMARY_FLAG" length="1" />
+        </property>
+    </class>
+</hibernate-mapping>

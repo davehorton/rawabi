@@ -1,6 +1,6 @@
 package com.rawabi.model;
 
-// Generated Jul 24, 2012 12:30:09 PM by Hibernate Tools 3.4.0.CR1
+// Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1
 
 import java.math.BigDecimal;
 
@@ -10,6 +10,8 @@ import java.math.BigDecimal;
 public class SvcPrepaidCalling implements java.io.Serializable {
 
 	private BigDecimal serviceId;
+	private char useAccessNumberGroups;
+	private Character sequenceRatingFlag;
 	private BigDecimal longCallInterval;
 	private BigDecimal maxRedialsAllowed;
 	private char playBalanceFlag;
@@ -37,20 +39,23 @@ public class SvcPrepaidCalling implements java.io.Serializable {
 	private BigDecimal roundingSeconds;
 	private BigDecimal roundingThreshold;
 	private BigDecimal directCallIdLength;
+	private char warningAsToneFlag;
 
 	public SvcPrepaidCalling() {
 	}
 
-	public SvcPrepaidCalling(BigDecimal serviceId, BigDecimal longCallInterval,
-			BigDecimal maxRedialsAllowed, char playBalanceFlag,
-			char playTimeFlag, char allowMultipartyCalling,
-			char accessNumRatingFlag, char precallRoundingFlag,
-			char partialBongChargeFlag, char clickToDialFlag,
-			char twoStageDialFlag, char singleStageDialFlag,
-			char msgInitiatedCallbackFlag, char accessNbrInitCallbackFlag,
-			char ivrInitiatedCallbackFlag, char lastCallRedialFlag,
-			char directCallFlag, char allowZeroCostFlag) {
+	public SvcPrepaidCalling(BigDecimal serviceId, char useAccessNumberGroups,
+			BigDecimal longCallInterval, BigDecimal maxRedialsAllowed,
+			char playBalanceFlag, char playTimeFlag,
+			char allowMultipartyCalling, char accessNumRatingFlag,
+			char precallRoundingFlag, char partialBongChargeFlag,
+			char clickToDialFlag, char twoStageDialFlag,
+			char singleStageDialFlag, char msgInitiatedCallbackFlag,
+			char accessNbrInitCallbackFlag, char ivrInitiatedCallbackFlag,
+			char lastCallRedialFlag, char directCallFlag,
+			char allowZeroCostFlag, char warningAsToneFlag) {
 		this.serviceId = serviceId;
+		this.useAccessNumberGroups = useAccessNumberGroups;
 		this.longCallInterval = longCallInterval;
 		this.maxRedialsAllowed = maxRedialsAllowed;
 		this.playBalanceFlag = playBalanceFlag;
@@ -68,9 +73,11 @@ public class SvcPrepaidCalling implements java.io.Serializable {
 		this.lastCallRedialFlag = lastCallRedialFlag;
 		this.directCallFlag = directCallFlag;
 		this.allowZeroCostFlag = allowZeroCostFlag;
+		this.warningAsToneFlag = warningAsToneFlag;
 	}
 
-	public SvcPrepaidCalling(BigDecimal serviceId, BigDecimal longCallInterval,
+	public SvcPrepaidCalling(BigDecimal serviceId, char useAccessNumberGroups,
+			Character sequenceRatingFlag, BigDecimal longCallInterval,
 			BigDecimal maxRedialsAllowed, char playBalanceFlag,
 			char playTimeFlag, char allowMultipartyCalling,
 			char accessNumRatingFlag, char precallRoundingFlag,
@@ -83,8 +90,11 @@ public class SvcPrepaidCalling implements java.io.Serializable {
 			BigDecimal callMarkupPercent, BigDecimal warningThreshold1,
 			BigDecimal warningThreshold2, BigDecimal warningThreshold3,
 			BigDecimal minBillingSeconds, BigDecimal roundingSeconds,
-			BigDecimal roundingThreshold, BigDecimal directCallIdLength) {
+			BigDecimal roundingThreshold, BigDecimal directCallIdLength,
+			char warningAsToneFlag) {
 		this.serviceId = serviceId;
+		this.useAccessNumberGroups = useAccessNumberGroups;
+		this.sequenceRatingFlag = sequenceRatingFlag;
 		this.longCallInterval = longCallInterval;
 		this.maxRedialsAllowed = maxRedialsAllowed;
 		this.playBalanceFlag = playBalanceFlag;
@@ -112,6 +122,7 @@ public class SvcPrepaidCalling implements java.io.Serializable {
 		this.roundingSeconds = roundingSeconds;
 		this.roundingThreshold = roundingThreshold;
 		this.directCallIdLength = directCallIdLength;
+		this.warningAsToneFlag = warningAsToneFlag;
 	}
 
 	public BigDecimal getServiceId() {
@@ -120,6 +131,22 @@ public class SvcPrepaidCalling implements java.io.Serializable {
 
 	public void setServiceId(BigDecimal serviceId) {
 		this.serviceId = serviceId;
+	}
+
+	public char getUseAccessNumberGroups() {
+		return this.useAccessNumberGroups;
+	}
+
+	public void setUseAccessNumberGroups(char useAccessNumberGroups) {
+		this.useAccessNumberGroups = useAccessNumberGroups;
+	}
+
+	public Character getSequenceRatingFlag() {
+		return this.sequenceRatingFlag;
+	}
+
+	public void setSequenceRatingFlag(Character sequenceRatingFlag) {
+		this.sequenceRatingFlag = sequenceRatingFlag;
 	}
 
 	public BigDecimal getLongCallInterval() {
@@ -336,6 +363,14 @@ public class SvcPrepaidCalling implements java.io.Serializable {
 
 	public void setDirectCallIdLength(BigDecimal directCallIdLength) {
 		this.directCallIdLength = directCallIdLength;
+	}
+
+	public char getWarningAsToneFlag() {
+		return this.warningAsToneFlag;
+	}
+
+	public void setWarningAsToneFlag(char warningAsToneFlag) {
+		this.warningAsToneFlag = warningAsToneFlag;
 	}
 
 }
