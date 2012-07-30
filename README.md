@@ -49,6 +49,14 @@ do
 export CLASSPATH=${CLASSPATH}:$f
 done
 ```
+###Application properties
+The callflow (i.e., callingcard_411.xml) relies on an application property to specify which access numbers are "Auto ANI registration" numbers.  The application property "auto-ani-list" is used to provide a comma-separated list of access numbers, as in the example below:
+
+```xml
+        <auto-ani-list>8009999999, 8000227711</auto-ani-list>
+```
+
+Please note that these access numbers must also be configured in ACE as prepaid access numbers. 
 
 
 
