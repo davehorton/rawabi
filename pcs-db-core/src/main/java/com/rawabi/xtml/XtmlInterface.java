@@ -93,42 +93,35 @@ public class XtmlInterface {
 				return INVALID_SP_ID ;
 			}
 			
+			Boolean bNewSubscriber = true ;
+			BigDecimal subServiceProviderId ;
+			Subscriber sub = null ;
 			PreActivatedSubscribers pre = (PreActivatedSubscribers)  session.createCriteria(PreActivatedSubscribers.class)
 					.add(Restrictions.eq("pin", pin))
 					.uniqueResult() ;
 			if( null == pre ) {
 				
-				Subscriber sub = (Subscriber) session.createCriteria(Subscriber.class)
+				sub = (Subscriber) session.createCriteria(Subscriber.class)
 						.add(Restrictions.eq("pin", pin))
 						.uniqueResult() ;
 				if( null != sub ) {
-					logger.error("Pin provided has already been activated: " + pin ) ;
-					return PIN_ALREADY_ACTIVE ;
-					
+					bNewSubscriber = false ;
+					subServiceProviderId = sub.getServiceProviderId() ;
+					logger.error("Pin provided has already been activated: " + pin ) ;					
 				}
-				logger.error("Invalid/Unknown pin: " + pin) ;
-				return PIN_NOT_FOUND ;
-				
+				else {
+					logger.error("Invalid/Unknown pin: " + pin) ;
+					return PIN_NOT_FOUND ;
+				}
+			}
+			else {
+				subServiceProviderId = pre.getServiceProvider().getServiceProviderId() ;
 			}
 			
-			if( 0 != pre.getServiceProvider().getServiceProviderId().compareTo( sp.getServiceProviderId() ) ) {
+			if( 0 != subServiceProviderId.compareTo( sp.getServiceProviderId() ) ) {
 				logger.error("Pin belongs to different service provider than access number; pin belongs to " + pre.getServiceProvider().getName() + 
 						" while access number belongs to service provider " + sp.getName() ) ;
 				return PIN_SP_NOMATCH ;
-			}
-			
-			/* retrieve the lot */
-			Lot lot = pre.getLot() ; 
-			if( null == lot ) {
-				logger.error("lot not found for preactivated subscriber with pin: " + pre.getPin() ) ;
-				return DB_ERROR ;
-			}
-			
-			/* verify the lot is in a proper state to vend us a pin for use */
-			Integer lotStatus = lot.getLotStatus().intValue() ;
-			if( PactolusConstants.LOT_PROCESSED != lotStatus && PactolusConstants.LOT_ACTIVATED != lotStatus ) {
-				logger.error("lot status is not valid for pin activation: " + lotStatus ) ;
-				return LOT_INVALID_STATE ;
 			}
 			
 			/* make sure the phone number isn't already in the database for someone else */
@@ -141,58 +134,83 @@ public class XtmlInterface {
 				logger.error("phone number " + ani + " is already in use for subscriber with pin: " + authAni.getSubscriber().getPin() ) ;
 				return ANI_ALREADY_ASSIGNED ;				
 			}
-			
-			ProductOffering offering = lot.getProductOffering() ;
-			
-			Query q = session.createSQLQuery("SELECT osx.service_id " +
-					"FROM offering_service_xref osx, svc_prepaid_calling spc " +
-					"WHERE osx.offering_id = ? " +
-					"AND osx.service_id = spc.service_id ") ;
-			q.setBigDecimal(0, offering.getOfferingId() ) ;
-			BigDecimal svcId = (BigDecimal) q.uniqueResult() ;
 
-			transaction = session.beginTransaction() ;
-			
-			/* now create an entry in the subscriber table */
-			Subscriber sub = new Subscriber() ;
-			sub.setSubscriberId( pre.getSubscriberId().longValue() ) ;
-			sub.setCurrPrepaidBalance( lot.getInitialBalance() ) ;
-			sub.setInitialBalance( lot.getInitialBalance() ) ;
-			sub.setFirstCallDate(null) ;
-			sub.setFirstUseDate(null) ;
-			sub.setLotId(lot.getLotId() ) ;
-			sub.setPin( pre.getPin() ) ;
-			sub.setPinPassword( pre.getPinPassword() ) ;
-			sub.setServiceProviderId( sp.getServiceProviderId() ) ;
-			sub.setCurrencyId( offering.getCurrencyId() ) ;
-			sub.setCallingSvcId( svcId ) ;
-			sub.setActivationDate( pre.getActivationDate() ) ;
-			sub.setExpirationDate( lot.getExpirationDate() ) ; 
-			sub.setDisabledFlag('F') ;
-			sub.setBillingType( BigDecimal.valueOf(1) ) ;	//1=prepaid,2=postpaid,3=broadband
-			sub.setLotControlNumber( pre.getLotControlNumber() );
-			sub.setLotSeqNumber(pre.getLotSeqNumber()) ;
-			if( null != lot.getExpirationType() )
-				sub.setExpirationType( lot.getExpirationType() ) ;
-			else 
-				sub.setExpirationType( lot.getProductOffering().getExpirationType() ) ;
-			sub.setLanguageId( lot.getProductOffering().getLanguageId() ) ;
-			sub.setConfOperatorAssistType(BigDecimal.valueOf(0)); 
-			sub.setDirectCallFlag('F') ;
-			sub.setOffplanAlertPlayed(BigDecimal.ZERO) ;
-			sub.setFirstBillcyclePlayed('F') ;
-			sub.setOnplanAlertPlayed(BigDecimal.ZERO) ;
-			sub.setBilledSequence(BigDecimal.ZERO) ;
-			sub.setConfOperatorAssistType(BigDecimal.ZERO) ;
-			sub.setBucketRefillWarningFlag('F') ;
-			sub.setBucketExhaustWarningFlag('F') ;
-			sub.setAutoPayFlag('F') ;
-			sub.setReceiveBillingEmailFlag('F') ;
-			sub.setOverrideDeptE911Address('F') ;
-			sub.setAgreedTo911TermsFlag('F') ;
-			sub.setFirstUseFeeState(BigDecimal.ZERO) ;
+			if( bNewSubscriber ) {
+				
+				/* retrieve the lot */
+				Lot lot = pre.getLot() ; 
+				if( null == lot ) {
+					logger.error("lot not found for preactivated subscriber with pin: " + pre.getPin() ) ;
+					return DB_ERROR ;
+				}
+				
+				/* verify the lot is in a proper state to vend us a pin for use */
+				Integer lotStatus = lot.getLotStatus().intValue() ;
+				if( PactolusConstants.LOT_PROCESSED != lotStatus && PactolusConstants.LOT_ACTIVATED != lotStatus ) {
+					logger.error("lot status is not valid for pin activation: " + lotStatus ) ;
+					return LOT_INVALID_STATE ;
+				}
 						
-			session.save( sub ) ;
+				ProductOffering offering = lot.getProductOffering() ;
+				
+				Query q = session.createSQLQuery("SELECT osx.service_id " +
+						"FROM offering_service_xref osx, svc_prepaid_calling spc " +
+						"WHERE osx.offering_id = ? " +
+						"AND osx.service_id = spc.service_id ") ;
+				q.setBigDecimal(0, offering.getOfferingId() ) ;
+				BigDecimal svcId = (BigDecimal) q.uniqueResult() ;
+	
+				transaction = session.beginTransaction() ;
+				
+				/* now create an entry in the subscriber table */
+				sub = new Subscriber() ;
+				sub.setSubscriberId( pre.getSubscriberId().longValue() ) ;
+				sub.setCurrPrepaidBalance( lot.getInitialBalance() ) ;
+				sub.setInitialBalance( lot.getInitialBalance() ) ;
+				sub.setFirstCallDate(null) ;
+				sub.setFirstUseDate(null) ;
+				sub.setLotId(lot.getLotId() ) ;
+				sub.setPin( pre.getPin() ) ;
+				sub.setPinPassword( pre.getPinPassword() ) ;
+				sub.setServiceProviderId( sp.getServiceProviderId() ) ;
+				sub.setCurrencyId( offering.getCurrencyId() ) ;
+				sub.setCallingSvcId( svcId ) ;
+				sub.setActivationDate( pre.getActivationDate() ) ;
+				sub.setExpirationDate( lot.getExpirationDate() ) ; 
+				sub.setDisabledFlag('F') ;
+				sub.setBillingType( BigDecimal.valueOf(1) ) ;	//1=prepaid,2=postpaid,3=broadband
+				sub.setLotControlNumber( pre.getLotControlNumber() );
+				sub.setLotSeqNumber(pre.getLotSeqNumber()) ;
+				if( null != lot.getExpirationType() )
+					sub.setExpirationType( lot.getExpirationType() ) ;
+				else 
+					sub.setExpirationType( lot.getProductOffering().getExpirationType() ) ;
+				sub.setLanguageId( lot.getProductOffering().getLanguageId() ) ;
+				sub.setConfOperatorAssistType(BigDecimal.valueOf(0)); 
+				sub.setDirectCallFlag('F') ;
+				sub.setOffplanAlertPlayed(BigDecimal.ZERO) ;
+				sub.setFirstBillcyclePlayed('F') ;
+				sub.setOnplanAlertPlayed(BigDecimal.ZERO) ;
+				sub.setBilledSequence(BigDecimal.ZERO) ;
+				sub.setConfOperatorAssistType(BigDecimal.ZERO) ;
+				sub.setBucketRefillWarningFlag('F') ;
+				sub.setBucketExhaustWarningFlag('F') ;
+				sub.setAutoPayFlag('F') ;
+				sub.setReceiveBillingEmailFlag('F') ;
+				sub.setOverrideDeptE911Address('F') ;
+				sub.setAgreedTo911TermsFlag('F') ;
+				sub.setFirstUseFeeState(BigDecimal.ZERO) ;
+							
+				session.save( sub ) ;
+	
+				/* tie subscriber to offering */
+				SubOfferingXref sxo = new SubOfferingXref() ;
+				sxo.setId( new SubOfferingXrefId( BigDecimal.valueOf( sub.getSubscriberId() ), offering.getOfferingId() ) ) ;
+				sxo.setPrimaryFlag('T') ;
+				session.save( sxo ) ;
+				
+				session.delete( pre ) ;		
+			}
 			
 			/* add the authorized ani */
 			
@@ -202,14 +220,7 @@ public class XtmlInterface {
 			authAni.setServiceProvider( sp ) ;
 			authAni.setStatus("0") ;
 			
-			session.save( authAni ) ;
-			session.delete( pre ) ;		
-			
-			/* last thing,tie subscriber to offering */
-			SubOfferingXref sxo = new SubOfferingXref() ;
-			sxo.setId( new SubOfferingXrefId( BigDecimal.valueOf( sub.getSubscriberId() ), offering.getOfferingId() ) ) ;
-			sxo.setPrimaryFlag('T') ;
-			session.save( sxo ) ;
+			session.save( authAni ) ;	
 									
 			transaction.commit() ;
 			
