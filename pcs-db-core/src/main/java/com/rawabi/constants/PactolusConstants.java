@@ -4,6 +4,14 @@ public class PactolusConstants {
 
 	public static final int SUCCESS = 0;
 	
+    //Subscriber expiration types
+	public static final int NO_EXPIRATION = 0;
+	public static final int LAST_USE_EXPIRATION = 1;
+	public static final int FIXED_DATE_EXPIRATION = 2;
+	public static final int FIRST_USE_EXPIRATION = 3;
+	public static final int DAYS_FROM_ACTIVATION = 4;
+	public static final int FIRST_USE_FIXED_DATE_EXPIRATION = 5;
+
 	// prepaid lot generation errors
 	public static final int LOT_GEN_ERROR_REPORT = -2;
 	public static final int LOT_GEN_ERROR_INVALID_RANGE = -3;

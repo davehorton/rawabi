@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
-  <version sce-version="422a4" prev-sce-version="422a4" last-mod-time="Monday, July 30, 2012 12:55:11"/>
+  <version sce-version="422a4" prev-sce-version="422a4" last-mod-time="Thursday, August 02, 2012 23:35:20"/>
   <events >
     <event name="CSRBeginAssignment" display="CSRBeginAssignment" >
       <parameter name="strACDControllerIP" type="string"/>
@@ -386,6 +386,7 @@
     <var name="s_nTREATMENT_CODE_AN_INIT" type="i4" >3</var>
     <var name="s_oAutoAniArray" type="object" ></var>
     <var name="s_strJavaClass" type="string" >com.rawabi.xtml.XtmlInterface</var>
+    <var name="s_lNumExpirationDays" type="i8" >30</var>
   </shared-vars>
   <functions >
     <function name="Main" start="1" event="Main" returns="void" >
@@ -1307,8 +1308,10 @@ Session.g_breturnFromMain=true;]]></script>
             <result name="Default" link="33" stubbed="1"/>
           </results>
           <scripts >
-            <script language="javascript" timing="first" ><![CDATA[Session.g_bAutoAniAccessNumber = isAutoAni( Session.g_oAPI.strAccessNumber) ;
-
+            <script language="javascript" timing="first" ><![CDATA[
+if( isAutoAni( Session.g_oAPI.strAccessNumber) && 0 != Session.g_oCallLegA.strFromUriUrlUser.indexOf("17") ) 
+	Session.g_bAutoAniAccessNumber = true ;
+	
 Session.g_nCurrentState = Session.s_nINITIALIZE_SESSION;
 
 ]]></script>
@@ -9657,6 +9660,7 @@ if(Session.g_oSUB.nSecondsAnnounce > 0) {
         <var name="f_strPlay0" type="string" ></var>
         <var name="strAutoAniList" type="string" ></var>
         <var name="nReturn" type="i4" >0</var>
+        <var name="strNumExpirationDays" type="string" ></var>
       </local-vars>
       <actions >
         <action id="1" plug-in="Pactolus.UserFunction.1" ><?xtml-editor x=18 y=30 ?>
@@ -9774,6 +9778,8 @@ if(Session.g_oSUB.nSecondsAnnounce > 0) {
             <parameter >f_strPlay0</parameter>
             <parameter >"auto-ani-list"</parameter>
             <parameter >strAutoAniList</parameter>
+            <parameter >"num-expiration-days"</parameter>
+            <parameter >strNumExpirationDays</parameter>
           </user-function>
           <results >
             <result name="Default" link="17" stubbed="0"/>
@@ -10028,6 +10034,10 @@ if( Session.strAutoAniList.length > 0 ) {
 		Server.logInfo("Access number " + s + " will be an auto ANI access number") ;
 		Session.s_oAutoAniArray[i] = s ;
 	}
+}
+
+if( Session.strNumExpirationDays.length > 0 ) {
+	Session.s_lNumExpirationDays = parseInt( Session.strNumExpirationDays ) ;
 }
 ]]></script>
           </scripts>
@@ -19247,6 +19257,7 @@ Session.bGotPin = false ;
             <parameter type="in" var-type="string" >strPin</parameter>
             <parameter type="in" var-type="string" >g_oAPI.strOriginationNumber</parameter>
             <parameter type="in" var-type="i8" >g_oAPI.lServiceProviderId</parameter>
+            <parameter type="in" var-type="i8" >s_lNumExpirationDays</parameter>
           </java>
           <results >
             <result name="Default" link="9" stubbed="0"/>
@@ -19256,21 +19267,20 @@ Session.bGotPin = false ;
             <result name="successfully activated" link="5" stubbed="0" >'Result'  == 'Success'
 AND nReturnCode == 0</result>
             <result name="pin previously activated" link="6" stubbed="0" >nReturnCode == -2</result>
-            <result name="pin not found" link="8" stubbed="0" >nReturnCode == -1
-</result>
+            <result name="pin not found" link="8" stubbed="0" >nReturnCode == -1</result>
           </results>
           <scripts >
             <script language="javascript" timing="first" ><![CDATA[Session.nReturnCode = -99 ;]]></script>
           </scripts>
         </action>
-        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=788 y=369 ?>
+        <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=945 y=322 ?>
           <return xmlns="www.pactolus.com:xtml:application" value="g_nCurrentState"/>
           <scripts >
             <script language="javascript" timing="first" ><![CDATA[Session.g_oSUB.strUserPin = Session.strPin ;
 Session.g_nCurrentState = Session.s_nSTATE_AUTH_PRPD_OR_POPD;]]></script>
           </scripts>
         </action>
-        <action id="6" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=527 y=413 ?>
+        <action id="6" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=614 y=438 ?>
           <!--account already active-->
           <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_oAPI.strLanguage" digits="" retry-count="0" clear-digits="0" terminating-digit="" quick-collect="0" digit-timer="" >
             <audio type="index" >338</audio>
@@ -19285,14 +19295,13 @@ Session.g_nCurrentState = Session.s_nSTATE_AUTH_PRPD_OR_POPD;]]></script>
         <action id="7" plug-in="Pactolus.Branch.1" ><?xtml-editor x=566 y=131 ?>
           <results >
             <result name="Default" link="1" stubbed="0"/>
-            <result name="retries exceeded" link="9" stubbed="0" >nRetries &gt;= 3
-</result>
+            <result name="retries exceeded" link="9" stubbed="0" >nRetries &gt;= 3</result>
           </results>
           <scripts >
             <script language="javascript" timing="first" ><![CDATA[Session.nRetries++ ;]]></script>
           </scripts>
         </action>
-        <action id="8" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=533 y=498 ?>
+        <action id="8" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=615 y=542 ?>
           <!--pin not found-->
           <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="0" return-immediate="0" digit-map="" language="g_oAPI.strLanguage" digits="" retry-count="0" clear-digits="0" terminating-digit="" quick-collect="0" digit-timer="" >
             <audio type="index" >502</audio>

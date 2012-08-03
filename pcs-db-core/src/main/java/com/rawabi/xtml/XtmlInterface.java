@@ -69,7 +69,8 @@ public class XtmlInterface {
 			String xtmlSessionId,
 			String pin,
 			String ani,
-			long serviceProviderId
+			long serviceProviderId,
+			long numExpirationDays
 			) {
 		
 		int rc = DB_ERROR ;
@@ -84,7 +85,10 @@ public class XtmlInterface {
 			logger.info("pin:               " + pin ) ;
 			logger.info("ani:               " + ani ) ;
 			logger.info("serviceProviderId: " + serviceProviderId) ;
+			logger.info("numExpirationDays: " + numExpirationDays) ;
 		
+			if( numExpirationDays < 30 ) numExpirationDays = 30 ;
+			
 			session = sessionFactory.openSession() ;	
 			
 			ServiceProvider sp = (ServiceProvider) session.load(ServiceProvider.class, BigDecimal.valueOf(serviceProviderId) ) ;
@@ -107,7 +111,13 @@ public class XtmlInterface {
 				if( null != sub ) {
 					bNewSubscriber = false ;
 					subServiceProviderId = sub.getServiceProviderId() ;
-					logger.error("Pin provided has already been activated: " + pin ) ;					
+					
+					/* we can make an existing subscriber an auth ani subscriber, but only if the subscriber doesn't already have an auth ani */
+					if( !sub.getSubAuthAnis().isEmpty() ) {
+						logger.error("This pin has already been used: " + pin) ;
+						return PIN_ALREADY_ACTIVE ;
+					}
+					logger.info("Pin provided has already been activated, but we will make the existing subscriber an auto-ani subscriber now: " + pin ) ;					
 				}
 				else {
 					logger.error("Invalid/Unknown pin: " + pin) ;
@@ -170,21 +180,34 @@ public class XtmlInterface {
 				sub.setFirstCallDate(null) ;
 				sub.setFirstUseDate(null) ;
 				sub.setLotId(lot.getLotId() ) ;
-				sub.setPin( pre.getPin() ) ;
+				
+				/* special requirement from Milan here: after registering the ANI, we do not want the pin to ever be able to be used again for pin dialing.
+				 * so we mangle it by adding a character.
+				 */
+				sub.setPin( pre.getPin() + "x" ) ;
+				
 				sub.setPinPassword( pre.getPinPassword() ) ;
 				sub.setServiceProviderId( sp.getServiceProviderId() ) ;
 				sub.setCurrencyId( offering.getCurrencyId() ) ;
 				sub.setCallingSvcId( svcId ) ;
 				sub.setActivationDate( pre.getActivationDate() ) ;
-				sub.setExpirationDate( lot.getExpirationDate() ) ; 
 				sub.setDisabledFlag('F') ;
 				sub.setBillingType( BigDecimal.valueOf(1) ) ;	//1=prepaid,2=postpaid,3=broadband
 				sub.setLotControlNumber( pre.getLotControlNumber() );
 				sub.setLotSeqNumber(pre.getLotSeqNumber()) ;
+				
+				/* special requirement from Milan here: regardless of what type expiration the lot has, the account will now have days from last use */
+				sub.setExpirationType(BigDecimal.valueOf( (long) PactolusConstants.LAST_USE_EXPIRATION) );
+				sub.setNumExpirationDays(BigDecimal.valueOf(numExpirationDays)) ;
+				
+				/*
 				if( null != lot.getExpirationType() )
 					sub.setExpirationType( lot.getExpirationType() ) ;
 				else 
 					sub.setExpirationType( lot.getProductOffering().getExpirationType() ) ;
+				sub.setExpirationDate( lot.getExpirationDate() ) ; 
+				*/
+				
 				sub.setLanguageId( lot.getProductOffering().getLanguageId() ) ;
 				sub.setConfOperatorAssistType(BigDecimal.valueOf(0)); 
 				sub.setDirectCallFlag('F') ;
@@ -210,6 +233,12 @@ public class XtmlInterface {
 				session.save( sxo ) ;
 				
 				session.delete( pre ) ;		
+			}
+			else {
+				/* special requirement from Milan here: regardless of what type expiration the lot has, the account will now have days from last use */
+				sub.setExpirationType(BigDecimal.valueOf( (long) PactolusConstants.LAST_USE_EXPIRATION) );
+				sub.setNumExpirationDays(BigDecimal.valueOf(numExpirationDays)) ;
+				session.save( sub ) ;
 			}
 			
 			/* add the authorized ani */

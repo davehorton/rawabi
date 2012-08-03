@@ -40,7 +40,7 @@ Test pins:
 		String ani = "5083084809" ;
 		Long spId = 10300L ;
 		
-		int rc = XtmlInterface.RegisterPrepaidAuthAni(xtmlSessionId, pin, ani, spId) ;
+		int rc = XtmlInterface.RegisterPrepaidAuthAni(xtmlSessionId, pin, ani, spId, 30L) ;
 
 	}
 
