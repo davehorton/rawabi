@@ -70,13 +70,16 @@ public class XtmlInterface {
 			String pin,
 			String ani,
 			long serviceProviderId,
-			long numExpirationDays
+			long numExpirationDays, 
+			StringBuffer newPin
 			) {
 		
 		int rc = DB_ERROR ;
 		
 		Session session = null ;
 		Transaction transaction = null ;
+		
+		newPin.setLength(0) ;
 		
 		try {
 			
@@ -199,15 +202,7 @@ public class XtmlInterface {
 				/* special requirement from Milan here: regardless of what type expiration the lot has, the account will now have days from last use */
 				sub.setExpirationType(BigDecimal.valueOf( (long) PactolusConstants.LAST_USE_EXPIRATION) );
 				sub.setNumExpirationDays(BigDecimal.valueOf(numExpirationDays)) ;
-				
-				/*
-				if( null != lot.getExpirationType() )
-					sub.setExpirationType( lot.getExpirationType() ) ;
-				else 
-					sub.setExpirationType( lot.getProductOffering().getExpirationType() ) ;
-				sub.setExpirationDate( lot.getExpirationDate() ) ; 
-				*/
-				
+								
 				sub.setLanguageId( lot.getProductOffering().getLanguageId() ) ;
 				sub.setConfOperatorAssistType(BigDecimal.valueOf(0)); 
 				sub.setDirectCallFlag('F') ;
@@ -235,6 +230,11 @@ public class XtmlInterface {
 				session.delete( pre ) ;		
 			}
 			else {
+				/* special requirement from Milan here: after registering the ANI, we do not want the pin to ever be able to be used again for pin dialing.
+				 * so we mangle it by adding a character.
+				 */
+
+				sub.setPin( pre.getPin() + "x" ) ;
 				/* special requirement from Milan here: regardless of what type expiration the lot has, the account will now have days from last use */
 				sub.setExpirationType(BigDecimal.valueOf( (long) PactolusConstants.LAST_USE_EXPIRATION) );
 				sub.setNumExpirationDays(BigDecimal.valueOf(numExpirationDays)) ;
@@ -253,7 +253,10 @@ public class XtmlInterface {
 									
 			transaction.commit() ;
 			
-			logger.info("pin was successfully activated") ;
+			newPin.append( sub.getPin() ) ;
+			
+			logger.info("pin was successfully activated, pin number has been changed to: " + newPin.toString() 
+					) ;
 			
 			rc = SUCCESS ;
 		

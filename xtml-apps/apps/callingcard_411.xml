@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
-  <version sce-version="422a4" prev-sce-version="422a4" last-mod-time="Thursday, August 02, 2012 23:35:20"/>
+  <version sce-version="422a4" prev-sce-version="422a4" last-mod-time="Tuesday, August 07, 2012 08:59:35"/>
   <events >
     <event name="CSRBeginAssignment" display="CSRBeginAssignment" >
       <parameter name="strACDControllerIP" type="string"/>
@@ -19224,6 +19224,7 @@ Session.g_nNumRetry++;]]></script>
         <var name="bGotPin" type="boolean" >0</var>
         <var name="nReturnCode" type="i4" >-99</var>
         <var name="nRetries" type="i4" >0</var>
+        <var name="strNewPin" type="string" ></var>
       </local-vars>
       <actions >
         <action id="1" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=100 y=122 ?>
@@ -19258,6 +19259,7 @@ Session.bGotPin = false ;
             <parameter type="in" var-type="string" >g_oAPI.strOriginationNumber</parameter>
             <parameter type="in" var-type="i8" >g_oAPI.lServiceProviderId</parameter>
             <parameter type="in" var-type="i8" >s_lNumExpirationDays</parameter>
+            <parameter type="inout" var-type="string" >strNewPin</parameter>
           </java>
           <results >
             <result name="Default" link="9" stubbed="0"/>
@@ -19276,7 +19278,7 @@ AND nReturnCode == 0</result>
         <action id="5" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=945 y=322 ?>
           <return xmlns="www.pactolus.com:xtml:application" value="g_nCurrentState"/>
           <scripts >
-            <script language="javascript" timing="first" ><![CDATA[Session.g_oSUB.strUserPin = Session.strPin ;
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oSUB.strUserPin = Session.strNewPin ;
 Session.g_nCurrentState = Session.s_nSTATE_AUTH_PRPD_OR_POPD;]]></script>
           </scripts>
         </action>
