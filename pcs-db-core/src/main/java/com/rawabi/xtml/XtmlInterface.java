@@ -28,8 +28,6 @@ public class XtmlInterface {
 	protected static final int PIN_SP_NOMATCH = -6 ;
 	protected static final int LOT_INVALID_STATE = -7 ;
 	
-	
-	
     private static Logger logger = Logger.getLogger(XtmlInterface.class);
 	
     static protected ApplicationContext applicationContext = new ClassPathXmlApplicationContext("beans.xml");
@@ -123,6 +121,14 @@ public class XtmlInterface {
 					logger.info("Pin provided has already been activated, but we will make the existing subscriber an auto-ani subscriber now: " + pin ) ;					
 				}
 				else {
+					/* since we mangle the pin after registering it, check for the mangled version of this pin */
+					sub = (Subscriber) session.createCriteria(Subscriber.class)
+							.add(Restrictions.eq("pin", manglePin( pin ) ) )
+							.uniqueResult() ;
+					if( null != sub ) {
+						logger.error("Pin provided has already been activated for a different ANI") ;
+						return PIN_ALREADY_ACTIVE ;
+					}
 					logger.error("Invalid/Unknown pin: " + pin) ;
 					return PIN_NOT_FOUND ;
 				}
@@ -187,7 +193,7 @@ public class XtmlInterface {
 				/* special requirement from Milan here: after registering the ANI, we do not want the pin to ever be able to be used again for pin dialing.
 				 * so we mangle it by adding a character.
 				 */
-				sub.setPin( pre.getPin() + "x" ) ;
+				sub.setPin( manglePin( pre.getPin() ) ) ;
 				
 				sub.setPinPassword( pre.getPinPassword() ) ;
 				sub.setServiceProviderId( sp.getServiceProviderId() ) ;
@@ -234,7 +240,7 @@ public class XtmlInterface {
 				 * so we mangle it by adding a character.
 				 */
 
-				sub.setPin( pre.getPin() + "x" ) ;
+				sub.setPin( manglePin( pre.getPin() ) ) ;
 				/* special requirement from Milan here: regardless of what type expiration the lot has, the account will now have days from last use */
 				sub.setExpirationType(BigDecimal.valueOf( (long) PactolusConstants.LAST_USE_EXPIRATION) );
 				sub.setNumExpirationDays(BigDecimal.valueOf(numExpirationDays)) ;
@@ -271,5 +277,8 @@ public class XtmlInterface {
 		return rc ;
 	}
 	
+	static protected String manglePin( String pin ) {
+		return pin + "x" ;
+	}
 
 }
