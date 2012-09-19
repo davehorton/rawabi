@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Mar 1, 2012 2:19:03 PM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.beachdog.primusCore.model.EvtPrepaidActivation" table="EVT_PREPAID_ACTIVATION" schema="PCSPROD">
+        <comment>Table to hold lot range activation records.</comment>
+        <id name="activationId" type="string">
+            <column name="ACTIVATION_ID" length="20" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="lot" class="com.beachdog.primusCore.model.Lot" fetch="select">
+            <column name="LOT_ID" precision="22" scale="0">
+                <comment>The lot_status (1-new, 2-processed, 3-activated, 4-cancelled, 5-error)</comment>
+            </column>
+        </many-to-one>
+        <many-to-one name="productOffering" class="com.beachdog.primusCore.model.ProductOffering" fetch="select">
+            <column name="OFFERING_ID" precision="22" scale="0" />
+        </many-to-one>
+        <property name="totalPins" type="big_decimal">
+            <column name="TOTAL_PINS" precision="22" scale="0" not-null="true">
+                <comment>total number of pins</comment>
+            </column>
+        </property>
+        <property name="status" type="big_decimal">
+            <column name="STATUS" precision="22" scale="0" not-null="true">
+                <comment>1. activate range, 2. suspend range, 3. deactivate range</comment>
+            </column>
+        </property>
+        <property name="timeStamp" type="date">
+            <column name="TIME_STAMP" length="7" />
+        </property>
+        <property name="unusedExpirationDate" type="date">
+            <column name="UNUSED_EXPIRATION_DATE" length="7">
+                <comment>date on which unused pins will be purged</comment>
+            </column>
+        </property>
+        <property name="expirationDate" type="date">
+            <column name="EXPIRATION_DATE" length="7">
+                <comment>pin expiration date</comment>
+            </column>
+        </property>
+        <property name="purgeDate" type="date">
+            <column name="PURGE_DATE" length="7">
+                <comment>date on which unused pins for this range were purged</comment>
+            </column>
+        </property>
+        <property name="startLotSeq" type="big_decimal">
+            <column name="START_LOT_SEQ" precision="22" scale="0">
+                <comment>starting sequence number for activation or deactivation</comment>
+            </column>
+        </property>
+        <property name="endLotSeq" type="big_decimal">
+            <column name="END_LOT_SEQ" precision="22" scale="0">
+                <comment>ending sequence number for activation or deactivation</comment>
+            </column>
+        </property>
+        <property name="initialBalance" type="big_decimal">
+            <column name="INITIAL_BALANCE" precision="22" scale="0">
+                <comment>starting balance</comment>
+            </column>
+        </property>
+        <property name="numPinsPurged" type="big_decimal">
+            <column name="NUM_PINS_PURGED" precision="22" scale="0">
+                <comment>number of pins purged</comment>
+            </column>
+        </property>
+        <property name="expirationType" type="big_decimal">
+            <column name="EXPIRATION_TYPE" precision="22" scale="0">
+                <comment>0 = no expiration, 1 = days from last use, 2 = fixed date, 3 = days from first use</comment>
+            </column>
+        </property>
+        <property name="numExpirationDays" type="big_decimal">
+            <column name="NUM_EXPIRATION_DAYS" precision="22" scale="0">
+                <comment>number of days from first/last use to expire pin</comment>
+            </column>
+        </property>
+        <property name="description" type="string">
+            <column name="DESCRIPTION" length="40">
+                <comment>A description given to the activation or deactivation event.</comment>
+            </column>
+        </property>
+        <set name="preActivatedSubscriberses" table="PRE_ACTIVATED_SUBSCRIBERS" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="ACTIVATION_ID" length="20">
+                    <comment>sequence generated unique key</comment>
+                </column>
+            </key>
+            <one-to-many class="com.beachdog.primusCore.model.PreActivatedSubscribers" />
+        </set>
+    </class>
+</hibernate-mapping>

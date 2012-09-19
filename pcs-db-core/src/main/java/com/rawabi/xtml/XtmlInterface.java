@@ -169,6 +169,12 @@ public class XtmlInterface {
 					logger.error("lot status is not valid for pin activation: " + lotStatus ) ;
 					return LOT_INVALID_STATE ;
 				}
+				
+				/* if there is an activation group for this pin, then retrieve it */
+				EvtPrepaidActivation activationGroup = null ;
+				if( null != pre.getActivationId() ) {
+					activationGroup = (EvtPrepaidActivation) session.load(EvtPrepaidActivation.class, pre.getActivationId() ) ;
+				}
 						
 				ProductOffering offering = lot.getProductOffering() ;
 				
@@ -206,8 +212,18 @@ public class XtmlInterface {
 				sub.setLotSeqNumber(pre.getLotSeqNumber()) ;
 				
 				/* special requirement from Milan here: regardless of what type expiration the lot has, the account will now have days from last use */
-				sub.setExpirationType(BigDecimal.valueOf( (long) PactolusConstants.LAST_USE_EXPIRATION) );
-				sub.setNumExpirationDays(BigDecimal.valueOf(numExpirationDays)) ;
+				//sub.setExpirationType(BigDecimal.valueOf( (long) PactolusConstants.LAST_USE_EXPIRATION) );
+				//sub.setNumExpirationDays(BigDecimal.valueOf(numExpirationDays)) ;
+				
+				/* ok, change request: set the expiration type and days from activation group if it exists, or lot if not */
+				if( null != activationGroup ) {
+					sub.setExpirationType( activationGroup.getExpirationType() ) ;
+					sub.setNumExpirationDays( activationGroup.getNumExpirationDays() ) ;
+				}
+				else {
+					sub.setExpirationType( lot.getExpirationType() ) ;
+					sub.setNumExpirationDays( lot.getNumExpirationDays() ) ;
+				}
 								
 				sub.setLanguageId( lot.getProductOffering().getLanguageId() ) ;
 				sub.setConfOperatorAssistType(BigDecimal.valueOf(0)); 
@@ -241,7 +257,12 @@ public class XtmlInterface {
 				 */
 
 				sub.setPin( manglePin( pre.getPin() ) ) ;
-				/* special requirement from Milan here: regardless of what type expiration the lot has, the account will now have days from last use */
+				
+				
+				
+				/* special requirement from Milan here: regardless of what type expiration the lot has, the account will now have days from last use 
+				 * note: this is different from how we treat new pins, I know.
+				 * */
 				sub.setExpirationType(BigDecimal.valueOf( (long) PactolusConstants.LAST_USE_EXPIRATION) );
 				sub.setNumExpirationDays(BigDecimal.valueOf(numExpirationDays)) ;
 				session.save( sub ) ;
