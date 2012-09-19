@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-<!-- Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1 -->
+<!-- Generated Sep 19, 2012 12:44:26 PM by Hibernate Tools 3.4.0.CR1 -->
 <hibernate-mapping>
     <class name="com.rawabi.model.Subscriber" table="SUBSCRIBER" schema="PCSPROD_411" dynamic-insert="true">
         <id name="subscriberId" type="long">
             <column name="SUBSCRIBER_ID" precision="22" scale="0" />
             <generator class="sequence">
-            	<param name="sequence">subscriber_seq</param>
+               <param name="sequence">subscriber_seq</param>
             </generator>
-        </id>
+		</id>
         <property name="offplanAlertPlayed" type="big_decimal">
             <column name="OFFPLAN_ALERT_PLAYED" precision="22" scale="0" not-null="true">
                 <comment>Number of times the off-plan alert prompt has been played for this subscriber.</comment>

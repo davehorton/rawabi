@@ -1,6 +1,6 @@
 package com.rawabi.model;
 
-// Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1
+// Generated Sep 19, 2012 12:44:25 PM by Hibernate Tools 3.4.0.CR1
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -11,6 +11,7 @@ import java.util.Date;
 public class PreActivatedSubscribers implements java.io.Serializable {
 
 	private BigDecimal subscriberId;
+	private EvtPrepaidActivation evtPrepaidActivation;
 	private ServiceProvider serviceProvider;
 	private Lot lot;
 	private String pin;
@@ -24,7 +25,6 @@ public class PreActivatedSubscribers implements java.io.Serializable {
 	private String confReslessPasscode;
 	private String lotControlNumber;
 	private String posEventId;
-	private String activationId;
 
 	public PreActivatedSubscribers() {
 	}
@@ -40,13 +40,15 @@ public class PreActivatedSubscribers implements java.io.Serializable {
 	}
 
 	public PreActivatedSubscribers(BigDecimal subscriberId,
+			EvtPrepaidActivation evtPrepaidActivation,
 			ServiceProvider serviceProvider, Lot lot, String pin,
 			String pinPassword, BigDecimal lotSeqNumber,
 			Character activationFlag, Character allowPinOnlyLoginFlag,
 			Character disabledFlag, Date activationDate,
 			String confReslessModPasscode, String confReslessPasscode,
-			String lotControlNumber, String posEventId, String activationId) {
+			String lotControlNumber, String posEventId) {
 		this.subscriberId = subscriberId;
+		this.evtPrepaidActivation = evtPrepaidActivation;
 		this.serviceProvider = serviceProvider;
 		this.lot = lot;
 		this.pin = pin;
@@ -60,7 +62,6 @@ public class PreActivatedSubscribers implements java.io.Serializable {
 		this.confReslessPasscode = confReslessPasscode;
 		this.lotControlNumber = lotControlNumber;
 		this.posEventId = posEventId;
-		this.activationId = activationId;
 	}
 
 	public BigDecimal getSubscriberId() {
@@ -69,6 +70,15 @@ public class PreActivatedSubscribers implements java.io.Serializable {
 
 	public void setSubscriberId(BigDecimal subscriberId) {
 		this.subscriberId = subscriberId;
+	}
+
+	public EvtPrepaidActivation getEvtPrepaidActivation() {
+		return this.evtPrepaidActivation;
+	}
+
+	public void setEvtPrepaidActivation(
+			EvtPrepaidActivation evtPrepaidActivation) {
+		this.evtPrepaidActivation = evtPrepaidActivation;
 	}
 
 	public ServiceProvider getServiceProvider() {
@@ -173,14 +183,6 @@ public class PreActivatedSubscribers implements java.io.Serializable {
 
 	public void setPosEventId(String posEventId) {
 		this.posEventId = posEventId;
-	}
-
-	public String getActivationId() {
-		return this.activationId;
-	}
-
-	public void setActivationId(String activationId) {
-		this.activationId = activationId;
 	}
 
 }

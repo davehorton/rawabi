@@ -76,6 +76,7 @@
         		<value>com/rawabi/model/Subscriber.hbm.xml</value>
         		<value>com/rawabi/model/SvcPrepaidCalling.hbm.xml</value>
         		<value>com/rawabi/model/SubOfferingXref.hbm.xml</value>
+          		<value>com/rawabi/model/EvtPrepaidActivation.hbm.xml</value> 
         	</list>
     	</property>
 		

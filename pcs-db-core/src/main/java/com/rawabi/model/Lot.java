@@ -1,6 +1,6 @@
 package com.rawabi.model;
 
-// Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1
+// Generated Sep 19, 2012 12:44:25 PM by Hibernate Tools 3.4.0.CR1
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -39,6 +39,8 @@ public class Lot implements java.io.Serializable {
 	private String pinPrefix;
 	private char custSerialnumFlag;
 	private char allowPinOnlyLoginFlag;
+	private Set<EvtPrepaidActivation> evtPrepaidActivations = new HashSet<EvtPrepaidActivation>(
+			0);
 	private Set<PreActivatedSubscribers> preActivatedSubscriberses = new HashSet<PreActivatedSubscribers>(
 			0);
 
@@ -73,6 +75,7 @@ public class Lot implements java.io.Serializable {
 			BigDecimal unusedExpDays, Date unusedExpDate, Date purgeDate,
 			BigDecimal numPinsPurged, String pinPrefix, char custSerialnumFlag,
 			char allowPinOnlyLoginFlag,
+			Set<EvtPrepaidActivation> evtPrepaidActivations,
 			Set<PreActivatedSubscribers> preActivatedSubscriberses) {
 		this.lotId = lotId;
 		this.serviceProvider = serviceProvider;
@@ -101,6 +104,7 @@ public class Lot implements java.io.Serializable {
 		this.pinPrefix = pinPrefix;
 		this.custSerialnumFlag = custSerialnumFlag;
 		this.allowPinOnlyLoginFlag = allowPinOnlyLoginFlag;
+		this.evtPrepaidActivations = evtPrepaidActivations;
 		this.preActivatedSubscriberses = preActivatedSubscriberses;
 	}
 
@@ -318,6 +322,15 @@ public class Lot implements java.io.Serializable {
 
 	public void setAllowPinOnlyLoginFlag(char allowPinOnlyLoginFlag) {
 		this.allowPinOnlyLoginFlag = allowPinOnlyLoginFlag;
+	}
+
+	public Set<EvtPrepaidActivation> getEvtPrepaidActivations() {
+		return this.evtPrepaidActivations;
+	}
+
+	public void setEvtPrepaidActivations(
+			Set<EvtPrepaidActivation> evtPrepaidActivations) {
+		this.evtPrepaidActivations = evtPrepaidActivations;
 	}
 
 	public Set<PreActivatedSubscribers> getPreActivatedSubscriberses() {

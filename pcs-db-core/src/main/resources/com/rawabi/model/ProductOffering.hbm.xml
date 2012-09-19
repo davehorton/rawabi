@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-<!-- Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1 -->
+<!-- Generated Sep 19, 2012 12:44:26 PM by Hibernate Tools 3.4.0.CR1 -->
 <hibernate-mapping>
     <class name="com.rawabi.model.ProductOffering" table="PRODUCT_OFFERING" schema="PCSPROD_411">
         <comment>Container class for bundling services and associating rated billing events to. A product offering has associated accounts. A product offering is essentially what
@@ -321,6 +321,12 @@
                 <column name="OFFERING_ID" precision="22" scale="0" />
             </key>
             <one-to-many class="com.rawabi.model.AccountActivity" />
+        </set>
+        <set name="evtPrepaidActivations" table="EVT_PREPAID_ACTIVATION" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="OFFERING_ID" precision="22" scale="0" />
+            </key>
+            <one-to-many class="com.rawabi.model.EvtPrepaidActivation" />
         </set>
         <set name="lots" table="LOT" inverse="true" lazy="true" fetch="select">
             <key>

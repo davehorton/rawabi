@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-<!-- Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1 -->
+<!-- Generated Sep 19, 2012 12:44:26 PM by Hibernate Tools 3.4.0.CR1 -->
 <hibernate-mapping>
     <class name="com.rawabi.model.Lot" table="LOT" schema="PCSPROD_411">
         <comment>The lot table will hold the information on the lot (group of pins), such as the lot information required to create a pin, product offering ID and initial dollar
@@ -114,7 +114,15 @@
             <column name="ALLOW_PIN_ONLY_LOGIN_FLAG" length="1" not-null="true">
                 <comment>Allow pin only login for subscribers associated with a specific lot.</comment>
             </column>
-        </property>
+        </property> 
+        <set name="evtPrepaidActivations" table="EVT_PREPAID_ACTIVATION" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="LOT_ID" precision="22" scale="0">
+                    <comment>The lot_status (1-new, 2-processed, 3-activated, 4-cancelled, 5-error)</comment>
+                </column>
+            </key>
+            <one-to-many class="com.rawabi.model.EvtPrepaidActivation" />
+        </set>
         <set name="preActivatedSubscriberses" table="PRE_ACTIVATED_SUBSCRIBERS" inverse="true" lazy="true" fetch="select">
             <key>
                 <column name="LOT_ID" precision="22" scale="0" not-null="true">

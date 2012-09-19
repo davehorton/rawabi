@@ -1,6 +1,6 @@
 package com.rawabi.model;
 
-// Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1
+// Generated Sep 19, 2012 12:44:25 PM by Hibernate Tools 3.4.0.CR1
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -83,6 +83,8 @@ public class ProductOffering implements java.io.Serializable {
 	private Set<SubOfferingXref> subOfferingXrefs = new HashSet<SubOfferingXref>(
 			0);
 	private Set<AccountActivity> accountActivities = new HashSet<AccountActivity>(
+			0);
+	private Set<EvtPrepaidActivation> evtPrepaidActivations = new HashSet<EvtPrepaidActivation>(
 			0);
 	private Set<Lot> lots = new HashSet<Lot>(0);
 	private Set<OfferingServiceXref> offeringServiceXrefs = new HashSet<OfferingServiceXref>(
@@ -168,7 +170,8 @@ public class ProductOffering implements java.io.Serializable {
 			BigDecimal billingLevel, BigDecimal timeReserveAmount,
 			BigDecimal currencyReserveAmount, String carrierCode, String name,
 			String description, Set<SubOfferingXref> subOfferingXrefs,
-			Set<AccountActivity> accountActivities, Set<Lot> lots,
+			Set<AccountActivity> accountActivities,
+			Set<EvtPrepaidActivation> evtPrepaidActivations, Set<Lot> lots,
 			Set<OfferingServiceXref> offeringServiceXrefs) {
 		this.offeringId = offeringId;
 		this.serviceProvider = serviceProvider;
@@ -240,6 +243,7 @@ public class ProductOffering implements java.io.Serializable {
 		this.description = description;
 		this.subOfferingXrefs = subOfferingXrefs;
 		this.accountActivities = accountActivities;
+		this.evtPrepaidActivations = evtPrepaidActivations;
 		this.lots = lots;
 		this.offeringServiceXrefs = offeringServiceXrefs;
 	}
@@ -802,6 +806,15 @@ public class ProductOffering implements java.io.Serializable {
 
 	public void setAccountActivities(Set<AccountActivity> accountActivities) {
 		this.accountActivities = accountActivities;
+	}
+
+	public Set<EvtPrepaidActivation> getEvtPrepaidActivations() {
+		return this.evtPrepaidActivations;
+	}
+
+	public void setEvtPrepaidActivations(
+			Set<EvtPrepaidActivation> evtPrepaidActivations) {
+		this.evtPrepaidActivations = evtPrepaidActivations;
 	}
 
 	public Set<Lot> getLots() {

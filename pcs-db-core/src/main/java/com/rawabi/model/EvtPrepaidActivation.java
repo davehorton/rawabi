@@ -1,6 +1,6 @@
 package com.rawabi.model;
 
-// Generated Mar 1, 2012 2:19:03 PM by Hibernate Tools 3.4.0.CR1
+// Generated Sep 19, 2012 12:44:25 PM by Hibernate Tools 3.4.0.CR1
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -16,19 +16,20 @@ public class EvtPrepaidActivation implements java.io.Serializable {
 	private Lot lot;
 	private ProductOffering productOffering;
 	private BigDecimal totalPins;
-	private BigDecimal status;
 	private Date timeStamp;
-	private Date unusedExpirationDate;
-	private Date expirationDate;
-	private Date purgeDate;
+	private BigDecimal status;
+	private String description;
 	private BigDecimal startLotSeq;
 	private BigDecimal endLotSeq;
+	private Date expirationDate;
+	private Date purgeDate;
 	private BigDecimal initialBalance;
 	private BigDecimal numPinsPurged;
+	private Date unusedExpirationDate;
 	private BigDecimal expirationType;
 	private BigDecimal numExpirationDays;
-	private String description;
-	private Set preActivatedSubscriberses = new HashSet(0);
+	private Set<PreActivatedSubscribers> preActivatedSubscriberses = new HashSet<PreActivatedSubscribers>(
+			0);
 
 	public EvtPrepaidActivation() {
 	}
@@ -42,28 +43,28 @@ public class EvtPrepaidActivation implements java.io.Serializable {
 
 	public EvtPrepaidActivation(String activationId, Lot lot,
 			ProductOffering productOffering, BigDecimal totalPins,
-			BigDecimal status, Date timeStamp, Date unusedExpirationDate,
-			Date expirationDate, Date purgeDate, BigDecimal startLotSeq,
-			BigDecimal endLotSeq, BigDecimal initialBalance,
-			BigDecimal numPinsPurged, BigDecimal expirationType,
-			BigDecimal numExpirationDays, String description,
-			Set preActivatedSubscriberses) {
+			Date timeStamp, BigDecimal status, String description,
+			BigDecimal startLotSeq, BigDecimal endLotSeq, Date expirationDate,
+			Date purgeDate, BigDecimal initialBalance,
+			BigDecimal numPinsPurged, Date unusedExpirationDate,
+			BigDecimal expirationType, BigDecimal numExpirationDays,
+			Set<PreActivatedSubscribers> preActivatedSubscriberses) {
 		this.activationId = activationId;
 		this.lot = lot;
 		this.productOffering = productOffering;
 		this.totalPins = totalPins;
-		this.status = status;
 		this.timeStamp = timeStamp;
-		this.unusedExpirationDate = unusedExpirationDate;
-		this.expirationDate = expirationDate;
-		this.purgeDate = purgeDate;
+		this.status = status;
+		this.description = description;
 		this.startLotSeq = startLotSeq;
 		this.endLotSeq = endLotSeq;
+		this.expirationDate = expirationDate;
+		this.purgeDate = purgeDate;
 		this.initialBalance = initialBalance;
 		this.numPinsPurged = numPinsPurged;
+		this.unusedExpirationDate = unusedExpirationDate;
 		this.expirationType = expirationType;
 		this.numExpirationDays = numExpirationDays;
-		this.description = description;
 		this.preActivatedSubscriberses = preActivatedSubscriberses;
 	}
 
@@ -99,14 +100,6 @@ public class EvtPrepaidActivation implements java.io.Serializable {
 		this.totalPins = totalPins;
 	}
 
-	public BigDecimal getStatus() {
-		return this.status;
-	}
-
-	public void setStatus(BigDecimal status) {
-		this.status = status;
-	}
-
 	public Date getTimeStamp() {
 		return this.timeStamp;
 	}
@@ -115,28 +108,20 @@ public class EvtPrepaidActivation implements java.io.Serializable {
 		this.timeStamp = timeStamp;
 	}
 
-	public Date getUnusedExpirationDate() {
-		return this.unusedExpirationDate;
+	public BigDecimal getStatus() {
+		return this.status;
 	}
 
-	public void setUnusedExpirationDate(Date unusedExpirationDate) {
-		this.unusedExpirationDate = unusedExpirationDate;
+	public void setStatus(BigDecimal status) {
+		this.status = status;
 	}
 
-	public Date getExpirationDate() {
-		return this.expirationDate;
+	public String getDescription() {
+		return this.description;
 	}
 
-	public void setExpirationDate(Date expirationDate) {
-		this.expirationDate = expirationDate;
-	}
-
-	public Date getPurgeDate() {
-		return this.purgeDate;
-	}
-
-	public void setPurgeDate(Date purgeDate) {
-		this.purgeDate = purgeDate;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public BigDecimal getStartLotSeq() {
@@ -155,6 +140,22 @@ public class EvtPrepaidActivation implements java.io.Serializable {
 		this.endLotSeq = endLotSeq;
 	}
 
+	public Date getExpirationDate() {
+		return this.expirationDate;
+	}
+
+	public void setExpirationDate(Date expirationDate) {
+		this.expirationDate = expirationDate;
+	}
+
+	public Date getPurgeDate() {
+		return this.purgeDate;
+	}
+
+	public void setPurgeDate(Date purgeDate) {
+		this.purgeDate = purgeDate;
+	}
+
 	public BigDecimal getInitialBalance() {
 		return this.initialBalance;
 	}
@@ -169,6 +170,14 @@ public class EvtPrepaidActivation implements java.io.Serializable {
 
 	public void setNumPinsPurged(BigDecimal numPinsPurged) {
 		this.numPinsPurged = numPinsPurged;
+	}
+
+	public Date getUnusedExpirationDate() {
+		return this.unusedExpirationDate;
+	}
+
+	public void setUnusedExpirationDate(Date unusedExpirationDate) {
+		this.unusedExpirationDate = unusedExpirationDate;
 	}
 
 	public BigDecimal getExpirationType() {
@@ -187,19 +196,12 @@ public class EvtPrepaidActivation implements java.io.Serializable {
 		this.numExpirationDays = numExpirationDays;
 	}
 
-	public String getDescription() {
-		return this.description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public Set getPreActivatedSubscriberses() {
+	public Set<PreActivatedSubscribers> getPreActivatedSubscriberses() {
 		return this.preActivatedSubscriberses;
 	}
 
-	public void setPreActivatedSubscriberses(Set preActivatedSubscriberses) {
+	public void setPreActivatedSubscriberses(
+			Set<PreActivatedSubscribers> preActivatedSubscriberses) {
 		this.preActivatedSubscriberses = preActivatedSubscriberses;
 	}
 

@@ -36,11 +36,12 @@ Test pins:
 	public static void main(String[] args) {
 
 		String xtmlSessionId = "1.1.foo@bar" ;
-		String pin = "491960950" ;
-		String ani = "5083084809" ;
+		String pin = "8660878233684" ;
+		String ani = "5083084899" ;
 		Long spId = 10300L ;
+		StringBuffer newPin = new StringBuffer() ;
 		
-		//int rc = XtmlInterface.RegisterPrepaidAuthAni(xtmlSessionId, pin, ani, spId, 30L) ;
+		int rc = XtmlInterface.RegisterPrepaidAuthAni(xtmlSessionId, pin, ani, spId, 30, newPin) ;
 
 	}
 

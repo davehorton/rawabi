@@ -19,4 +19,5 @@
 	<table-filter match-schema="PCSPROD_411" match-name="CURRENCY_REF"></table-filter>
 	<table-filter match-schema="PCSPROD_411" match-name="SUB_OFFERING_XREF"></table-filter>
 	<table-filter match-schema="PCSPROD_411" match-name="OFFERING_SERVICE_XREF"></table-filter>
+	<table-filter match-schema="PCSPROD_411" match-name="EVT_PREPAID_ACTIVATION"></table-filter>	
 </hibernate-reverse-engineering>

@@ -171,10 +171,7 @@ public class XtmlInterface {
 				}
 				
 				/* if there is an activation group for this pin, then retrieve it */
-				EvtPrepaidActivation activationGroup = null ;
-				if( null != pre.getActivationId() ) {
-					activationGroup = (EvtPrepaidActivation) session.load(EvtPrepaidActivation.class, pre.getActivationId() ) ;
-				}
+				EvtPrepaidActivation activationGroup = pre.getEvtPrepaidActivation()  ;
 						
 				ProductOffering offering = lot.getProductOffering() ;
 				

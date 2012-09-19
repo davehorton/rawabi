@@ -1,14 +1,19 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-<!-- Generated Jul 30, 2012 10:19:37 AM by Hibernate Tools 3.4.0.CR1 -->
+<!-- Generated Sep 19, 2012 12:44:26 PM by Hibernate Tools 3.4.0.CR1 -->
 <hibernate-mapping>
     <class name="com.rawabi.model.PreActivatedSubscribers" table="PRE_ACTIVATED_SUBSCRIBERS" schema="PCSPROD_411">
         <comment>This table holds the subscriber information for the pins generated from the lot by the batch utility</comment>
         <id name="subscriberId" type="big_decimal">
             <column name="SUBSCRIBER_ID" precision="22" scale="0" />
             <generator class="assigned" />
-        </id>
+        </id> 
+        <many-to-one name="evtPrepaidActivation" class="com.rawabi.model.EvtPrepaidActivation" fetch="select">
+            <column name="ACTIVATION_ID" length="20">
+                <comment>sequence generated unique key</comment>
+            </column>
+        </many-to-one>
         <many-to-one name="serviceProvider" class="com.rawabi.model.ServiceProvider" fetch="select">
             <column name="SERVICE_PROVIDER_ID" precision="22" scale="0" not-null="true" />
         </many-to-one>
@@ -64,11 +69,6 @@
         <property name="posEventId" type="string">
             <column name="POS_EVENT_ID" length="20">
                 <comment>Point of sale event id.</comment>
-            </column>
-        </property>
-        <property name="activationId" type="string">
-            <column name="ACTIVATION_ID" length="20">
-                <comment>sequence generated unique key</comment>
             </column>
         </property>
     </class>

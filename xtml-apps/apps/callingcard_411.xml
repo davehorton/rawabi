@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
-  <version sce-version="422a4" prev-sce-version="422a4" last-mod-time="Tuesday, August 07, 2012 08:59:35"/>
+  <version sce-version="422a4" prev-sce-version="422a4" last-mod-time="Wednesday, September 19, 2012 17:06:29"/>
   <events >
     <event name="CSRBeginAssignment" display="CSRBeginAssignment" >
       <parameter name="strACDControllerIP" type="string"/>
@@ -1309,8 +1309,10 @@ Session.g_breturnFromMain=true;]]></script>
           </results>
           <scripts >
             <script language="javascript" timing="first" ><![CDATA[
-if( isAutoAni( Session.g_oAPI.strAccessNumber) && 0 != Session.g_oCallLegA.strFromUriUrlUser.indexOf("17") ) 
+if( isAutoAni( Session.g_oAPI.strAccessNumber) && 0 != Session.g_oCallLegA.strFromUriUrlUser.indexOf("17") ) {
+	Server.logInfo("DH: " + Session.g_oAPI.strAccessNumber + " is an auto ANI access number") ;
 	Session.g_bAutoAniAccessNumber = true ;
+}
 	
 Session.g_nCurrentState = Session.s_nINITIALIZE_SESSION;
 
@@ -2871,7 +2873,7 @@ Server.logInfo("Session.g_bNullFlag <"+Session.g_bNullFlag+">");]]></script>
             <result name="Default" link="108" stubbed="0"/>
           </results>
         </action>
-        <action id="108" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=882 y=705 ?>
+        <action id="108" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=942 y=697 ?>
           <!--g_nCurrentState-->
           <return xmlns="www.pactolus.com:xtml:application" value="g_nCurrentState"/>
           <scripts >
@@ -2963,7 +2965,7 @@ AND g_oAPI.bCollectPinForCallback == false</result>
 Session.g_oAPI.bSharedAccessNumber=false;]]></script>
           </scripts>
         </action>
-        <action id="85" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=337 y=517 ?>
+        <action id="85" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=334 y=521 ?>
           <!--507-low balance-->
           <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_oAPI.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
             <audio type="index" >507</audio>
@@ -2973,6 +2975,7 @@ Session.g_oAPI.bSharedAccessNumber=false;]]></script>
             <result name="Success"/>
             <result name="Error"/>
             <result name="Timeout"/>
+            <result name="auto ANI" link="137" stubbed="0" >g_bAutoAniAccessNumber == true</result>
           </results>
           <scripts >
             <script language="javascript" timing="first" ><![CDATA[Session.g_nNumRetry = 0;]]></script>
@@ -3059,7 +3062,7 @@ AND g_oAPI.nPostPinPromptIndex &gt; 0</result>
             <result name="Timeout"/>
           </results>
         </action>
-        <action id="97" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=530 y=552 ?>
+        <action id="97" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=555 y=539 ?>
           <!--JAVA: PrepaidAPIGetRechargeSettings-->
           <function xmlns="www.pactolus.com:xtml:application" name="&quot;PrepaidAPIGetRechargeSettings&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
             <parameter >g_oAPI</parameter>
@@ -3179,6 +3182,8 @@ Session.g_oAPI.nStatePriorToCSR = Session.s_nSTATE_GET_PIN_PRPD_OR_POPD;]]></scr
             <result name="Get Dest" >f_nReturnCode == 0
 OR f_nReturnCode == 2</result>
             <result name="Get Pin Again" >f_nReturnCode == 6</result>
+            <result name="Recharge Auto ANI" link="137" stubbed="0" >f_nReturnCode == 1
+				AND g_bAutoAniAccessNumber == true</result>
             <result name="Recharge" >f_nReturnCode == 1</result>
             <result name="Play Reason" >f_nReturnCode == 3
 OR f_nReturnCode == 4
@@ -3614,7 +3619,9 @@ if(Session.g_oSUB.nSecondsAvailable <= 0) {
             <result name="Get Dest" link="119" stubbed="1" >f_nReturnCode == 0
 OR f_nReturnCode == 2</result>
             <result name="Get Pin Again" link="92" stubbed="1" >f_nReturnCode == 6</result>
-            <result name="Recharge" link="85" stubbed="1" >f_nReturnCode == 1</result>
+            <result name="Recharge Auto ANI" link="85" stubbed="0" >f_nReturnCode == 1
+AND g_bAutoAniAccessNumber == true</result>
+            <result name="Recharge" link="85" stubbed="0" >f_nReturnCode == 1</result>
             <result name="Play Reason" link="114" stubbed="1" >f_nReturnCode == 3
 OR f_nReturnCode == 4
 OR f_nReturnCode == 7
@@ -3851,6 +3858,20 @@ Session.g_oSUB.strOneStepDialingNumber = Session.g_oAPI.strOriginationNumber;]]>
             <script language="javascript" timing="last" ><![CDATA[if(Session.f_nReturnCode == 0){
 	
 }]]></script>
+          </scripts>
+        </action>
+        <action id="137" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1035 y=452 ?>
+          <!--AutoAniBalanceTransfer-->
+          <function xmlns="www.pactolus.com:xtml:application" name="&quot;AutoAniBalanceTransfer&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="138" stubbed="0"/>
+          </results>
+        </action>
+        <action id="138" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1237 y=464 ?>
+          <return xmlns="www.pactolus.com:xtml:application" value="g_nCurrentState"/>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_nCurrentState = Session.s_nGET_DESTINATION;
+]]></script>
           </scripts>
         </action>
       </actions>
@@ -7457,7 +7478,7 @@ else if (3 == Result.id)
         </action>
       </actions>
     </function>
-    <function name="BalanceTransfer" start="20" event="BalanceTransfer" returns="i4" >
+    <function name="AutoAniBalanceTransfer" start="1" event="AutoAniBalanceTransfer" returns="i4" >
       <local-vars >
         <var name="f_bExceedsBalXferTries" type="boolean" >0</var>
         <var name="f_nNumTries" type="i4" >0</var>
@@ -7468,25 +7489,18 @@ else if (3 == Result.id)
         <var name="nUnitPrompt" type="i4" >0</var>
       </local-vars>
       <actions >
-        <action id="20" plug-in="Pactolus.Branch.1" ><?xtml-editor x=19 y=42 ?>
-          <!--check rechargeable-->
-          <results >
-            <result name="Default" link="21" stubbed="0"/>
-            <result name="Rechargeable" link="1" stubbed="0" >g_oBALXFER.strBalanceTransferFlag match "T"</result>
-          </results>
-        </action>
-        <action id="1" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=179 y=185 ?>
+        <action id="1" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=51 y=35 ?>
           <!--Get donor pin-->
           <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(xxxxxxxxxxxxxxxx|x.T|x.#)&quot;" language="g_oAPI.strLanguage" digits="g_oBALXFER.strBalXferPin" retry-count="g_sMaxLoginAttempts" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
-            <audio type="index" >541</audio>
+            <audio type="index" >501</audio>
             <timeout-prompt type="index" >552</timeout-prompt>
           </play>
           <results >
-            <result name="Default" link="40" stubbed="1"/>
+            <result name="Default"/>
             <result name="Success" link="80" stubbed="0"/>
             <result name="Error"/>
             <result name="Timeout" link="59" stubbed="0"/>
-            <result name="Cancel" link="40" stubbed="1" >g_oBALXFER.strBalXferPin match "*"</result>
+            <result name="Cancel" >g_oBALXFER.strBalXferPin match "*"</result>
             <result name="Same Pin" link="74" stubbed="0" >g_oBALXFER.strBalXferPin match g_oSUB.strUserPin</result>
           </results>
           <scripts >
@@ -7518,25 +7532,11 @@ AND f_strDigit match "1"</result>
         <action id="18" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1417 y=533 ?>
           <!--"bal xfer was successful"-->
           <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_oAPI.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
-            <audio type="index" >545</audio>
             <audio type="index" >546</audio>
             <audio type="currency" unit="" >g_oSUB.fPrepaidBalance</audio>
           </play>
           <results >
-            <result name="Default" link="40" stubbed="1"/>
-            <result name="Success"/>
-            <result name="Error"/>
-            <result name="Timeout"/>
-          </results>
-        </action>
-        <action id="21" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=359 y=36 ?>
-          <!--"not allowed"-->
-          <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_oAPI.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
-            <audio type="index" >301</audio>
-            <audio type="index" >524</audio>
-          </play>
-          <results >
-            <result name="Default" link="40" stubbed="0"/>
+            <result name="Default" link="88" stubbed="0"/>
             <result name="Success"/>
             <result name="Error"/>
             <result name="Timeout"/>
@@ -7551,17 +7551,13 @@ AND f_strDigit match "1"</result>
             <audio type="index" >532</audio>
           </play>
           <results >
-            <result name="Default" link="40" stubbed="1"/>
+            <result name="Default"/>
             <result name="Success"/>
             <result name="Error"/>
             <result name="Timeout"/>
           </results>
         </action>
-        <action id="40" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=605 y=60 ?>
-          <!--return to main menu-->
-          <return xmlns="www.pactolus.com:xtml:application" value="s_nMAIN_MENU"/>
-        </action>
-        <action id="59" plug-in="Pactolus.Branch.1" ><?xtml-editor x=468 y=422 ?>
+        <action id="59" plug-in="Pactolus.Branch.1" ><?xtml-editor x=340 y=377 ?>
           <!--termination reason = 6-->
           <results >
             <result name="Default" link="78" stubbed="1"/>
@@ -7570,7 +7566,7 @@ AND f_strDigit match "1"</result>
             <script language="javascript" timing="first" ><![CDATA[Session.g_oAPI.nSessionTerminationReason = 6;]]></script>
           </scripts>
         </action>
-        <action id="74" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=339 y=597 ?>
+        <action id="74" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=194 y=536 ?>
           <!--invalid pin-->
           <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_oAPI.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
             <audio type="index" >502</audio>
@@ -7592,13 +7588,13 @@ Session.f_nNumTries++;]]></script>
             <audio type="index" >542</audio>
           </play>
           <results >
-            <result name="Default" link="40" stubbed="1"/>
+            <result name="Default"/>
             <result name="Success"/>
             <result name="Error"/>
             <result name="Timeout"/>
           </results>
         </action>
-        <action id="76" plug-in="Pactolus.Branch.1" ><?xtml-editor x=544 y=611 ?>
+        <action id="76" plug-in="Pactolus.Branch.1" ><?xtml-editor x=460 y=592 ?>
           <!--check retries-->
           <results >
             <result name="Default" link="1" stubbed="1"/>
@@ -7619,7 +7615,7 @@ Session.f_nNumTries++;]]></script>
             <result name="Default" link="77" stubbed="0"/>
           </results>
         </action>
-        <action id="80" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=495 y=181 ?>
+        <action id="80" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=426 y=148 ?>
           <!--PrepaidAPIValidateBalanceXfer-->
           <function xmlns="www.pactolus.com:xtml:application" name="&quot;PrepaidAPIValidateBalanceXfer&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
             <parameter >g_oAPI</parameter>
@@ -7629,7 +7625,7 @@ Session.f_nNumTries++;]]></script>
           </function>
           <results >
             <result name="Default" link="78" stubbed="0"/>
-            <result name="0 Valid" link="14" stubbed="0" >f_nReturnCode == 0</result>
+            <result name="0 Valid" link="83" stubbed="0" >f_nReturnCode == 0</result>
             <result name="bMaxAttempts" link="78" stubbed="0" >g_oBALXFER.bMaxAttempts == true</result>
             <result name="-2, -6, -12 Invalid" link="74" stubbed="1" >f_nReturnCode == -2
 OR f_nReturnCode == -6
@@ -7709,7 +7705,7 @@ js_enable_event();]]></script>
             <parameter >g_oBALXFER</parameter>
           </function>
           <results >
-            <result name="Default" link="40" stubbed="1"/>
+            <result name="Default"/>
           </results>
           <scripts >
             <script language="javascript" timing="first" ><![CDATA[js_disable_event();
@@ -7830,13 +7826,12 @@ js_enable_event();
         <action id="87" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1443 y=759 ?>
           <!--recharge was successful-->
           <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_oAPI.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
-            <audio type="index" >545</audio>
             <audio type="index" >546</audio>
             <audio type="number" >nBalance</audio>
             <audio type="index" >nUnitPrompt</audio>
           </play>
           <results >
-            <result name="Default" link="40" stubbed="1"/>
+            <result name="Default" link="88" stubbed="0"/>
             <result name="Success"/>
             <result name="Error"/>
             <result name="Timeout"/>
@@ -7852,6 +7847,9 @@ Session.nBalance = Math.ceil(Session.f_fBalance);
 
 Server.logInfo("Session.nBalance: " + Session.nBalance);]]></script>
           </scripts>
+        </action>
+        <action id="88" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1670 y=621 ?>
+          <return xmlns="www.pactolus.com:xtml:application" value=""/>
         </action>
       </actions>
     </function>
@@ -19321,6 +19319,404 @@ Session.g_nCurrentState = Session.s_nSTATE_AUTH_PRPD_OR_POPD;]]></script>
           <results >
             <result name="Default" link="2" stubbed="0"/>
           </results>
+        </action>
+      </actions>
+    </function>
+    <function name="BalanceTransfer" start="20" event="BalanceTransfer" returns="i4" >
+      <local-vars >
+        <var name="f_bExceedsBalXferTries" type="boolean" >0</var>
+        <var name="f_nNumTries" type="i4" >0</var>
+        <var name="f_nReturnCode" type="i4" >-50</var>
+        <var name="f_strDigit" type="string" ></var>
+        <var name="f_fBalance" type="float" >0</var>
+        <var name="nBalance" type="i4" >0</var>
+        <var name="nUnitPrompt" type="i4" >0</var>
+      </local-vars>
+      <actions >
+        <action id="20" plug-in="Pactolus.Branch.1" ><?xtml-editor x=19 y=42 ?>
+          <!--check rechargeable-->
+          <results >
+            <result name="Default" link="21" stubbed="0"/>
+            <result name="Rechargeable" link="1" stubbed="0" >g_oBALXFER.strBalanceTransferFlag match "T"</result>
+          </results>
+        </action>
+        <action id="1" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=179 y=185 ?>
+          <!--Get donor pin-->
+          <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(xxxxxxxxxxxxxxxx|x.T|x.#)&quot;" language="g_oAPI.strLanguage" digits="g_oBALXFER.strBalXferPin" retry-count="g_sMaxLoginAttempts" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >541</audio>
+            <timeout-prompt type="index" >552</timeout-prompt>
+          </play>
+          <results >
+            <result name="Default" link="40" stubbed="1"/>
+            <result name="Success" link="80" stubbed="0"/>
+            <result name="Error"/>
+            <result name="Timeout" link="59" stubbed="0"/>
+            <result name="Cancel" link="40" stubbed="1" >g_oBALXFER.strBalXferPin match "*"</result>
+            <result name="Same Pin" link="74" stubbed="0" >g_oBALXFER.strBalXferPin match g_oSUB.strUserPin</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oBALXFER.strBalXferPin = "";
+
+
+	]]></script>
+          </scripts>
+        </action>
+        <action id="14" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=821 y=253 ?>
+          <!--"This account has a balance of ...."-->
+          <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(x)&quot;" language="g_oAPI.strLanguage" digits="f_strDigit" retry-count="g_sMaxLoginAttempts" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >543</audio>
+            <audio type="currency" unit="" >g_oBALXFER.fBalXferBalance</audio>
+            <audio type="index" >3848</audio>
+            <audio type="index" >311</audio>
+            <audio type="index" >544</audio>
+            <timeout-prompt type="index" >552</timeout-prompt>
+          </play>
+          <results >
+            <result name="Default" link="81" stubbed="0"/>
+            <result name="Success" ><?xtml-editor visible=no?></result>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="Continue" link="83" stubbed="0" >'Result'  == 'Success'
+	AND f_strDigit match "1"</result>
+          </results>
+        </action>
+        <action id="18" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1417 y=533 ?>
+          <!--"bal xfer was successful"-->
+          <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_oAPI.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >545</audio>
+            <audio type="index" >546</audio>
+            <audio type="currency" unit="" >g_oSUB.fPrepaidBalance</audio>
+          </play>
+          <results >
+            <result name="Default" link="40" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="21" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=359 y=36 ?>
+          <!--"not allowed"-->
+          <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_oAPI.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >301</audio>
+            <audio type="index" >524</audio>
+          </play>
+          <results >
+            <result name="Default" link="40" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="24" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=842 y=573 ?>
+          <!--Exceeds max balance, not allowed-->
+          <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_oAPI.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >543</audio>
+            <audio type="currency" unit="" >g_oBALXFER.fBalXferBalance</audio>
+            <audio type="index" >3848</audio>
+            <audio type="index" >532</audio>
+          </play>
+          <results >
+            <result name="Default" link="40" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="40" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=605 y=60 ?>
+          <!--return to main menu-->
+          <return xmlns="www.pactolus.com:xtml:application" value="s_nMAIN_MENU"/>
+        </action>
+        <action id="59" plug-in="Pactolus.Branch.1" ><?xtml-editor x=468 y=422 ?>
+          <!--termination reason = 6-->
+          <results >
+            <result name="Default" link="78" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_oAPI.nSessionTerminationReason = 6;]]></script>
+          </scripts>
+        </action>
+        <action id="74" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=339 y=597 ?>
+          <!--invalid pin-->
+          <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_oAPI.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >502</audio>
+          </play>
+          <results >
+            <result name="Default" link="76" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_enable_event();
+	Session.f_nNumTries++;]]></script>
+          </scripts>
+        </action>
+        <action id="75" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=834 y=423 ?>
+          <!--Not allowed-->
+          <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_oAPI.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >542</audio>
+          </play>
+          <results >
+            <result name="Default" link="40" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+        </action>
+        <action id="76" plug-in="Pactolus.Branch.1" ><?xtml-editor x=544 y=611 ?>
+          <!--check retries-->
+          <results >
+            <result name="Default" link="1" stubbed="1"/>
+            <result name="Too many tries" link="78" stubbed="1" >f_nNumTries &gt;= g_oAPI.nMaxLoginAttempts</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="last" ><![CDATA[if (2 == Result.id)
+	{
+		Session.g_oAPI.nSessionTerminationReason = 13;
+	}]]></script>
+          </scripts>
+        </action>
+        <action id="77" plug-in="Standard.EndSession.1" ><?xtml-editor x=1186 y=177 ?></action>
+        <action id="78" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=827 y=133 ?>
+          <!--"PlayPromptAndHangup"-->
+          <function xmlns="www.pactolus.com:xtml:application" name="&quot;PlayPromptAndHangup&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="77" stubbed="0"/>
+          </results>
+        </action>
+        <action id="80" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=495 y=181 ?>
+          <!--PrepaidAPIValidateBalanceXfer-->
+          <function xmlns="www.pactolus.com:xtml:application" name="&quot;PrepaidAPIValidateBalanceXfer&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >g_oAPI</parameter>
+            <parameter >g_oSUB</parameter>
+            <parameter >g_oCC</parameter>
+            <parameter >g_oBALXFER</parameter>
+          </function>
+          <results >
+            <result name="Default" link="78" stubbed="0"/>
+            <result name="0 Valid" link="14" stubbed="0" >f_nReturnCode == 0</result>
+            <result name="bMaxAttempts" link="78" stubbed="0" >g_oBALXFER.bMaxAttempts == true</result>
+            <result name="-2, -6, -12 Invalid" link="74" stubbed="1" >f_nReturnCode == -2
+	OR f_nReturnCode == -6
+	OR f_nReturnCode == -12</result>
+            <result name="-3,-4,-5 Not Alloved" link="75" stubbed="0" >f_nReturnCode == -3
+	AND f_nReturnCode == -4
+	AND f_nReturnCode == -5</result>
+            <result name="-7 Max Balance" link="24" stubbed="0" >f_nReturnCode == -7</result>
+            <result name="-13 card has no $" link="84" stubbed="0" >f_nReturnCode == -13</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_disable_event();
+	Server.logInfo("*********JAVA START validateBalanceTransfer *********");
+	Server.logInfo("donor pin = " + Session.g_oBALXFER.strBalXferPin);]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("*********JAVA RETURN *********");
+	Server.logInfo("validate bal xfer returned " + Session.f_nReturnCode);
+	if (Session.f_nReturnCode != 0)
+	{
+		switch (Session.f_nReturnCode)
+		{
+			case -1:
+			case -99:
+				Session.g_nErrorMsgNumber = 1001; //db error
+				Session.g_oAPI.nSessionTerminationReason = 5;
+				Server.logError("ERROR: FAIL TO CALL JAVA VALIDATE BALANCE XFER, EXIT ON: " + Result.name);
+				Server.logError("ERROR: validate bal xfer returned " + Session.f_nReturnCode);				
+				break;
+			case -2:
+				Session.g_nErrorMsgNumber = 1010; //invalid subscriber
+				break;
+			case -3:
+				Session.g_nErrorMsgNumber = 2005; //not rechargable
+				break;
+			case -4:
+				Session.g_nErrorMsgNumber = 2004; //currency mismatch
+				break;
+			case -5:
+				Session.g_nErrorMsgNumber = 1011; //pin locked
+				break;
+			case -6:
+				Session.g_nErrorMsgNumber = 1005; //disable subscriber
+				break;
+			case -7:
+				Session.g_nErrorMsgNumber = 2006; //exceed max balance
+				break;
+			case -10:
+				Session.g_nErrorMsgNumber = 1014; //general error
+				Session.g_oAPI.nSessionTerminationReason = 5;
+				break;
+			case -14:
+				Session.g_nErrorMsgNumber = 1012; //max retires.
+				break;
+			case -50:
+				Session.g_nErrorMsgNumber = 1000; //jvm server error
+				Session.g_oAPI.nSessionTerminationReason = 5;
+				Server.logError("ERROR: FAIL TO CALL JAVA VALIDATE BALANCE XFER, EXIT ON: " + Result.name);
+				Server.logError("ERROR: validate bal xfer returned " + Session.f_nReturnCode);				
+				break;
+			default:
+				Session.g_nErrorMsgNumber = 0;
+				Server.logError("ERROR: FAIL TO CALL JAVA VALIDATE BALANCE XFER, EXIT ON: " + Result.name);
+				Server.logError("ERROR: validate bal xfer returned " + Session.f_nReturnCode);				
+				break;
+		}
+	} else {
+		Session.g_bBalXferPinLocked = true;
+	}
+
+
+	js_enable_event();]]></script>
+          </scripts>
+        </action>
+        <action id="81" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1100 y=263 ?>
+          <!--JAVA: PrepaidAPIUnlockPin-->
+          <function xmlns="www.pactolus.com:xtml:application" name="&quot;PrepaidAPIUnlockPin&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >g_oAPI</parameter>
+            <parameter >g_oBALXFER</parameter>
+          </function>
+          <results >
+            <result name="Default" link="40" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_disable_event();
+	Session.f_nReturnCode = -50;
+	Server.logInfo("*********JAVA START unlockPin() *********");]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("*********JAVA RETURN *********");
+	Server.logInfo("unlockPin returned " + Session.f_nReturnCode);
+	if (Session.f_nReturnCode != 0)
+	{
+		Server.logError("ERROR: FAIL TO UNLOCK PIN");
+		Server.logError("ERROR: unlockPin returned: " + Session.f_nReturnCode);
+	}
+
+
+	js_enable_event();]]></script>
+          </scripts>
+        </action>
+        <action id="82" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1350 y=395 ?>
+          <!--JAVA: PrepaidAPIUnlockPin-->
+          <function xmlns="www.pactolus.com:xtml:application" name="&quot;PrepaidAPIUnlockPin&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >g_oAPI</parameter>
+            <parameter >g_oBALXFER</parameter>
+          </function>
+          <results >
+            <result name="Default" link="78" stubbed="1"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_nReturnCode = -50;
+	Server.logInfo("*********JAVA START unlockPin() *********");]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("*********JAVA RETURN *********");
+	Server.logInfo("unlockPin returned " + Session.f_nReturnCode);
+	if (Session.f_nReturnCode != 0)
+	{
+		Server.logError("ERROR: FAIL TO UNLOCK PIN");
+		Server.logError("ERROR: unlockPin returned: " + Session.f_nReturnCode);
+	}
+
+	js_enable_event();]]></script>
+          </scripts>
+        </action>
+        <action id="83" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1090 y=398 ?>
+          <!--JAVA: PrepaidAPIBalanceXfer-->
+          <function xmlns="www.pactolus.com:xtml:application" name="&quot;PrepaidAPIBalanceXfer&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
+            <parameter >g_oAPI</parameter>
+            <parameter >g_oSUB</parameter>
+            <parameter >g_oBALXFER</parameter>
+          </function>
+          <results >
+            <result name="Default" link="82" stubbed="0"/>
+            <result name="0: Valid Pin" link="85" stubbed="0" >f_nReturnCode == 0</result>
+            <result name="-2: Invalid Pin" link="74" stubbed="1" >f_nReturnCode == -2</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[js_disable_event();
+	Session.f_nReturnCode = -50;
+	Server.logInfo("*********JAVA START transferBalance() *********");]]></script>
+            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("*********JAVA RETURN *********");
+	Server.logInfo("transferBalance returned " + Session.f_nReturnCode);
+	if (Session.f_nReturnCode != 0)
+	{
+		Server.logError("ERROR: FAIL TO CALL JAVA XFER BALANCE, EXIT ON: " + Result.name);
+		Server.logInfo("transferBalance returned " + Session.f_nReturnCode);	
+		switch (Session.f_nReturnCode)
+		{
+			case -1:
+				Session.g_nErrorMsgNumber = 1001; //db error
+				Session.g_oAPI.nSessionTerminationReason = 5;
+				break;
+			case -2:
+				Session.g_nErrorMsgNumber = 1010; //invalid pin
+				break;
+			case -10:
+				Session.g_nErrorMsgNumber = 1014; //general error
+				Session.g_oAPI.nSessionTerminationReason = 5;
+				break;
+			case -50:
+				Session.g_nErrorMsgNumber = 1000; //jvm server error
+				Session.g_oAPI.nSessionTerminationReason = 5;
+				break;
+			default:
+				Session.g_nErrorMsgNumber = 0;
+				break;
+		}
+	}
+
+	Session.g_bBalXferPinLocked = false;]]></script>
+          </scripts>
+        </action>
+        <action id="84" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=841 y=734 ?>
+          <!--zero balance card-->
+          <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_oAPI.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >543</audio>
+            <audio type="currency" unit="" >0</audio>
+            <audio type="index" >3848</audio>
+          </play>
+          <results >
+            <result name="Default" link="76" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_nNumTries++;]]></script>
+          </scripts>
+        </action>
+        <action id="85" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1183 y=732 ?>
+          <results >
+            <result name="Default" link="18" stubbed="0"/>
+            <result name="bAnnounceCurrencyAsUnits" link="87" stubbed="0" >g_oAPI.bAnnounceCurrencyAsUnits == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_fBalance = Session.g_oSUB.fPrepaidBalance;
+
+	js_enable_event();
+	]]></script>
+          </scripts>
+        </action>
+        <action id="87" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=1443 y=759 ?>
+          <!--recharge was successful-->
+          <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="" language="g_oAPI.strLanguage" digits="" retry-count="" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
+            <audio type="index" >545</audio>
+            <audio type="index" >546</audio>
+            <audio type="number" >nBalance</audio>
+            <audio type="index" >nUnitPrompt</audio>
+          </play>
+          <results >
+            <result name="Default" link="40" stubbed="1"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if(1 == Session.f_fBalance) {
+		Session.nUnitPrompt = 389; // Unit
+	} else {
+		Session.nUnitPrompt = 390; // Units
+	}
+
+	Session.nBalance = Math.ceil(Session.f_fBalance);
+
+	Server.logInfo("Session.nBalance: " + Session.nBalance);]]></script>
+          </scripts>
         </action>
       </actions>
     </function>
