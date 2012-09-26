@@ -1,6 +1,7 @@
 package com.rawabi.xtml;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.Properties;
 
 import org.hibernate.HibernateException;
@@ -27,6 +28,7 @@ public class XtmlInterface {
 	protected static final int INVALID_SP_ID = -5 ;
 	protected static final int PIN_SP_NOMATCH = -6 ;
 	protected static final int LOT_INVALID_STATE = -7 ;
+	protected static final int SERIAL_NUM_NOT_FOUND = -1 ;
 	
     private static Logger logger = Logger.getLogger(XtmlInterface.class);
 	
@@ -60,6 +62,58 @@ public class XtmlInterface {
         }                       
 
         return rc ;
+    }
+    
+    static public int GetCardSerialNumber( 
+    		String xtmlSessionId, 
+    		long subscriberId, 
+    		StringBuffer lotControlNumber,
+    		StringBuffer lotSequenceNumber ) {
+    	
+		Session session = null ;
+
+		lotControlNumber.setLength(0) ;
+		lotSequenceNumber.setLength(0) ;
+		int rc = SERIAL_NUM_NOT_FOUND ;
+
+		try {
+			
+			logger.info("GetCardSerialNumber----starting------") ;
+			logger.info("xtmlSessionId:     " + xtmlSessionId) ;
+			logger.info("subscriberId:      " + subscriberId) ;
+					
+			session = sessionFactory.openSession() ;	
+			
+			Subscriber sub = (Subscriber) session.load(Subscriber.class, BigDecimal.valueOf(subscriberId)) ;
+			if( null == sub ) {
+				logger.error("unknown subscriber id: " + subscriberId) ;
+			}
+			else {
+				String controlNumber = sub.getLotControlNumber() ;
+				BigDecimal seqNumber = sub.getLotSeqNumber() ;
+				if( null == controlNumber || null == seqNumber ) {
+					logger.error("subscriber does not have a serial number") ;
+				}
+				else {
+					lotControlNumber.append( controlNumber ) ;
+					DecimalFormat fmt = new DecimalFormat("00000000") ;
+					lotSequenceNumber.append( fmt.format( seqNumber.doubleValue() ) ) ;
+					rc = SUCCESS ;
+					
+					logger.info("lot control number: " + lotControlNumber.toString() ) ;
+					logger.info("lot sequence number: " + lotSequenceNumber.toString() ) ;
+				}
+			}
+  	
+		} catch( HibernateException e ) {
+			logger.error("Hibernate error", e) ;
+			rc = DB_ERROR ;
+		}
+		finally {
+			if( null != session ) session.close() ;
+		}
+		return rc ;
+  	
     }
 
 	
@@ -186,7 +240,7 @@ public class XtmlInterface {
 				
 				/* now create an entry in the subscriber table */
 				sub = new Subscriber() ;
-				sub.setSubscriberId( pre.getSubscriberId().longValue() ) ;
+				sub.setSubscriberId( pre.getSubscriberId() ) ;
 				sub.setCurrPrepaidBalance( lot.getInitialBalance() ) ;
 				sub.setInitialBalance( lot.getInitialBalance() ) ;
 				sub.setFirstCallDate(null) ;
@@ -242,7 +296,7 @@ public class XtmlInterface {
 	
 				/* tie subscriber to offering */
 				SubOfferingXref sxo = new SubOfferingXref() ;
-				sxo.setId( new SubOfferingXrefId( BigDecimal.valueOf( sub.getSubscriberId() ), offering.getOfferingId() ) ) ;
+				sxo.setId( new SubOfferingXrefId( sub.getSubscriberId(), offering.getOfferingId() ) ) ;
 				sxo.setPrimaryFlag('T') ;
 				session.save( sxo ) ;
 				
@@ -253,9 +307,10 @@ public class XtmlInterface {
 				 * so we mangle it by adding a character.
 				 */
 
-				sub.setPin( manglePin( pre.getPin() ) ) ;
-				
-				
+				transaction = session.beginTransaction() ;
+
+				sub.setPin( manglePin( pin ) ) ;
+								
 				
 				/* special requirement from Milan here: regardless of what type expiration the lot has, the account will now have days from last use 
 				 * note: this is different from how we treat new pins, I know.

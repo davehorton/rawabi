@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
-  <version sce-version="422a4" prev-sce-version="422a4" last-mod-time="Wednesday, September 19, 2012 17:06:29"/>
+  <version sce-version="422a4" prev-sce-version="422a4" last-mod-time="Wednesday, September 26, 2012 14:24:57"/>
   <events >
     <event name="CSRBeginAssignment" display="CSRBeginAssignment" >
       <parameter name="strACDControllerIP" type="string"/>
@@ -244,6 +244,9 @@
     <var name="g_strPinNumber" type="string" ></var>
     <var name="g_breturnFromMain" type="boolean" >0</var>
     <var name="g_bAutoAniAccessNumber" type="boolean" >0</var>
+    <var name="g_strStartAutoAniSerial" type="string" ></var>
+    <var name="g_strEndSerialAutoAni" type="string" ></var>
+    <var name="g_bHasSerialRange" type="boolean" >0</var>
   </global-vars>
   <shared-vars >
     <var name="s_strPrimaryPSX" type="string" >10.6.9.64</var>
@@ -1308,10 +1311,20 @@ Session.g_breturnFromMain=true;]]></script>
             <result name="Default" link="33" stubbed="1"/>
           </results>
           <scripts >
-            <script language="javascript" timing="first" ><![CDATA[
-if( isAutoAni( Session.g_oAPI.strAccessNumber) && 0 != Session.g_oCallLegA.strFromUriUrlUser.indexOf("17") ) {
+            <script language="javascript" timing="first" ><![CDATA[var start, end ;
+if( isAutoAni( Session.g_oAPI.strAccessNumber, start, end ) && 
+	0 != Session.g_oCallLegA.strFromUriUrlUser.indexOf("17") ) {
+	
 	Server.logInfo("DH: " + Session.g_oAPI.strAccessNumber + " is an auto ANI access number") ;
 	Session.g_bAutoAniAccessNumber = true ;
+	
+	if( start && end ) { 
+		Session.g_bHasSerialRange = true ;
+		Session.g_strStartAutoAniSerial = start ;
+		Session.g_strEndSerialAutoAni = end ;
+		Server.logInfo("start serial number: " + Session.g_strStartAutoAniSerial) ;
+		Server.logInfo("end serial number:   " + Session.g_strEndSerialAutoAni) ;
+	}
 }
 	
 Session.g_nCurrentState = Session.s_nINITIALIZE_SESSION;
@@ -2217,6 +2230,7 @@ Session.g_oAPI.nSessionTerminationReason = 11;]]></script>
         <var name="f_nReturnCode" type="i4" >-50</var>
         <var name="f_nLanguageMenuPrompt" type="i4" >4163</var>
         <var name="f_nInvalidAccessNumberPrompt" type="i4" >0</var>
+        <var name="strNull" type="string" ></var>
       </local-vars>
       <actions >
         <action id="85" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=36 y=48 ?>
@@ -2888,7 +2902,9 @@ Server.logInfo("Current State"+Session.g_nCurrentState);]]></script>
         </action>
         <action id="111" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=605 y=851 ?>
           <!--RegisterAutoAni-->
-          <function xmlns="www.pactolus.com:xtml:application" name="&quot;RegisterAuthAni&quot;" return="g_nCurrentState" external-function="0" library=""/>
+          <function xmlns="www.pactolus.com:xtml:application" name="&quot;RegisterAuthAni&quot;" return="g_nCurrentState" external-function="0" library="" >
+            <parameter >strNull</parameter>
+          </function>
           <results >
             <result name="Default" link="112" stubbed="0"/>
           </results>
@@ -2903,7 +2919,8 @@ Server.logInfo("Current State"+Session.g_nCurrentState);]]></script>
         <action id="113" plug-in="Pactolus.Branch.1" ><?xtml-editor x=265 y=800 ?>
           <results >
             <result name="Default" link="5" stubbed="0"/>
-            <result name="auto ANI access number" link="111" stubbed="0" >g_bAutoAniAccessNumber == true</result>
+            <result name="auto ANI access number" link="111" stubbed="0" >g_bAutoAniAccessNumber == true
+AND g_bHasSerialRange == false</result>
           </results>
         </action>
       </actions>
@@ -2916,6 +2933,9 @@ Server.logInfo("Current State"+Session.g_nCurrentState);]]></script>
         <var name="f_bNull" type="boolean" >0</var>
         <var name="f_strCollectedDigits" type="string" ></var>
         <var name="nAskForAniRegCount" type="i4" >0</var>
+        <var name="strLotControlNumber" type="string" ></var>
+        <var name="strLotSequenceNumber" type="string" ></var>
+        <var name="bSerialNumberInRange" type="boolean" >0</var>
       </local-vars>
       <actions >
         <action id="117" plug-in="Pactolus.Branch.1" ><?xtml-editor x=12 y=24 ?>
@@ -2925,7 +2945,7 @@ Server.logInfo("Current State"+Session.g_nCurrentState);]]></script>
 AND g_oAPI.bCollectPinForCallback == false</result>
           </results>
         </action>
-        <action id="15" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=1860 y=34 ?>
+        <action id="15" plug-in="Standard.FunctionReturn.1" ><?xtml-editor x=2105 y=40 ?>
           <!--g_nCurrentState-->
           <return xmlns="www.pactolus.com:xtml:application" value="g_nCurrentState"/>
         </action>
@@ -3432,7 +3452,7 @@ else
         </action>
         <action id="125" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1388 y=33 ?>
           <results >
-            <result name="Default" link="15" stubbed="0"/>
+            <result name="Default" link="139" stubbed="0"/>
             <result name="oAPI.bBlindCallback" link="126" stubbed="0" >g_oAPI.bBlindCallback == true</result>
           </results>
           <scripts >
@@ -3449,7 +3469,7 @@ else
 ]]></script>
           </scripts>
         </action>
-        <action id="126" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1493 y=161 ?>
+        <action id="126" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1684 y=140 ?>
           <!--psAPIAuthorizeDestination-->
           <function xmlns="www.pactolus.com:xtml:application" name="&quot;psAPIAuthorizeDestination&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
             <parameter >g_oAPI</parameter>
@@ -3566,7 +3586,7 @@ if (Session.f_nReturnCode != 0)
 Server.logInfo("g_oCallLegA.oRATE.fAlegMeteredRate" + Session.g_oCallLegA.oRATE.fAlegMeteredRate);]]></script>
           </scripts>
         </action>
-        <action id="129" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1699 y=170 ?>
+        <action id="129" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1905 y=132 ?>
           <!--StartALegTimer-->
           <function xmlns="www.pactolus.com:xtml:application" name="&quot;StartALegTimer&quot;" return="" external-function="0" library=""/>
           <results >
@@ -3616,7 +3636,7 @@ if(Session.g_oSUB.nSecondsAvailable <= 0) {
           </function>
           <results >
             <result name="Default" link="113" stubbed="1"/>
-            <result name="Get Dest" link="119" stubbed="1" >f_nReturnCode == 0
+            <result name="Get Dest" link="119" stubbed="0" >f_nReturnCode == 0
 OR f_nReturnCode == 2</result>
             <result name="Get Pin Again" link="92" stubbed="1" >f_nReturnCode == 6</result>
             <result name="Recharge Auto ANI" link="85" stubbed="0" >f_nReturnCode == 1
@@ -3872,6 +3892,85 @@ Session.g_oSUB.strOneStepDialingNumber = Session.g_oAPI.strOriginationNumber;]]>
           <scripts >
             <script language="javascript" timing="first" ><![CDATA[Session.g_nCurrentState = Session.s_nGET_DESTINATION;
 ]]></script>
+          </scripts>
+        </action>
+        <action id="139" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1677 y=28 ?>
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+            <result name="possible auto ANI" link="140" stubbed="0" >g_bAutoAniAccessNumber == true
+AND g_bHasSerialRange == true
+AND g_bValidateByANI == false</result>
+          </results>
+        </action>
+        <action id="140" plug-in="Pactolus.JavaStaticMethod.1" ><?xtml-editor x=1477 y=289 ?>
+          <!--GetCardSerialNumber-->
+          <java xmlns="www.pactolus.com:xtml:application" class="s_strJavaClass" method="&quot;GetCardSerialNumber&quot;" timeout="" return="" method-return-var="f_nReturnCode" method-return-type="0" >
+            <parameter type="in" var-type="string" >g_oAPI.strPlatformSessionId</parameter>
+            <parameter type="in" var-type="i8" >g_oSUB.lSubscriberId</parameter>
+            <parameter type="inout" var-type="string" >strLotControlNumber</parameter>
+            <parameter type="inout" var-type="string" >strLotSequenceNumber</parameter>
+          </java>
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+            <result name="Success"/>
+            <result name="Error"/>
+            <result name="Timeout"/>
+            <result name="found serial number" link="141" stubbed="0" >f_nReturnCode == 0</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.f_nReturnCode = -99 ;]]></script>
+          </scripts>
+        </action>
+        <action id="141" plug-in="Pactolus.Branch.1" ><?xtml-editor x=1746 y=372 ?>
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+            <result name="serial number in range" link="142" stubbed="0" >bSerialNumberInRange == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[var start = new String( Session.g_strStartAutoAniSerial );
+var end = new String( Session.g_strEndSerialAutoAni );
+
+var controlNumber = start.substr( 0, start.length - 8 ) ;
+var startSequenceNumber = start.substr( start.length - 8 ) ;
+var endSequenceNumber = end.substr( start.length - 8 ) ;
+
+Server.logInfo("DH: lot control number is " + Session.strLotControlNumber + " and sequence number is " + Session.strLotSequenceNumber ) ;
+Server.logInfo("DH: for this access number control number is " + controlNumber + 
+	" and start sequence number is " + start + " and end is " + end ) ;
+	
+if( controlNumber === Session.strLotControlNumber ) {
+	Server.logInfo("DH: the lot control number matches") ;
+	var seqBegin = parseFloat( startSequenceNumber ) ;	
+	var seqEnd = parseFloat ( endSequenceNumber ) ;
+	var seq = parseFloat( Session.strLotSequenceNumber ) ;
+	if( seqBegin <= seq && seq <= seqEnd ) {
+		Server.logInfo("DH: This pin is within the specified range") ;
+		Session.bSerialNumberInRange = true ;
+	}
+	else {
+		Server.logInfo("DH: This pin is not within the specified range") ;
+	}
+}
+else {
+	Server.logInfo("DH: the lot control number does not match") ;
+	Session.g_bAutoAniAccessNumber = false ;
+}
+
+
+
+]]></script>
+          </scripts>
+        </action>
+        <action id="142" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1991 y=453 ?>
+          <!--RegisterAuthAni-->
+          <function xmlns="www.pactolus.com:xtml:application" name="&quot;RegisterAuthAni&quot;" return="" external-function="0" library="" >
+            <parameter >g_oSUB.strUserPin</parameter>
+          </function>
+          <results >
+            <result name="Default" link="15" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Server.logInfo("Registering auth ANI for pin " + Session.g_oSUB.strUserPin ) ;]]></script>
           </scripts>
         </action>
       </actions>
@@ -6082,7 +6181,7 @@ Session.g_bDoNotEnableEvents = true;
             <script language="javascript" timing="first" ><![CDATA[Session.g_bDoNotEnableEvents = true;]]></script>
           </scripts>
         </action>
-        <action id="74" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=339 y=175 ?>
+        <action id="74" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=348 y=158 ?>
           <!--ProcessOnTimer-->
           <function xmlns="www.pactolus.com:xtml:application" name="&quot;ProcessOnTimer&quot;" return="f_nReturnCode" external-function="1" library="lib_utils.xml" >
             <parameter >nTimerId</parameter>
@@ -7496,7 +7595,7 @@ else if (3 == Result.id)
             <timeout-prompt type="index" >552</timeout-prompt>
           </play>
           <results >
-            <result name="Default"/>
+            <result name="Default" link="59" stubbed="0"/>
             <result name="Success" link="80" stubbed="0"/>
             <result name="Error"/>
             <result name="Timeout" link="59" stubbed="0"/>
@@ -7521,7 +7620,7 @@ else if (3 == Result.id)
             <timeout-prompt type="index" >552</timeout-prompt>
           </play>
           <results >
-            <result name="Default" link="81" stubbed="0"/>
+            <result name="Default" link="82" stubbed="0"/>
             <result name="Success" ><?xtml-editor visible=no?></result>
             <result name="Error"/>
             <result name="Timeout"/>
@@ -7551,7 +7650,7 @@ AND f_strDigit match "1"</result>
             <audio type="index" >532</audio>
           </play>
           <results >
-            <result name="Default"/>
+            <result name="Default" link="76" stubbed="0"/>
             <result name="Success"/>
             <result name="Error"/>
             <result name="Timeout"/>
@@ -7588,7 +7687,7 @@ Session.f_nNumTries++;]]></script>
             <audio type="index" >542</audio>
           </play>
           <results >
-            <result name="Default"/>
+            <result name="Default" link="76" stubbed="0"/>
             <result name="Success"/>
             <result name="Error"/>
             <result name="Timeout"/>
@@ -7698,31 +7797,6 @@ if (Session.f_nReturnCode != 0)
 js_enable_event();]]></script>
           </scripts>
         </action>
-        <action id="81" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1100 y=263 ?>
-          <!--JAVA: PrepaidAPIUnlockPin-->
-          <function xmlns="www.pactolus.com:xtml:application" name="&quot;PrepaidAPIUnlockPin&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
-            <parameter >g_oAPI</parameter>
-            <parameter >g_oBALXFER</parameter>
-          </function>
-          <results >
-            <result name="Default"/>
-          </results>
-          <scripts >
-            <script language="javascript" timing="first" ><![CDATA[js_disable_event();
-Session.f_nReturnCode = -50;
-Server.logInfo("*********JAVA START unlockPin() *********");]]></script>
-            <script language="javascript" timing="last" ><![CDATA[Server.logInfo("*********JAVA RETURN *********");
-Server.logInfo("unlockPin returned " + Session.f_nReturnCode);
-if (Session.f_nReturnCode != 0)
-{
-	Server.logError("ERROR: FAIL TO UNLOCK PIN");
-	Server.logError("ERROR: unlockPin returned: " + Session.f_nReturnCode);
-}
-
-
-js_enable_event();]]></script>
-          </scripts>
-        </action>
         <action id="82" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=1350 y=395 ?>
           <!--JAVA: PrepaidAPIUnlockPin-->
           <function xmlns="www.pactolus.com:xtml:application" name="&quot;PrepaidAPIUnlockPin&quot;" return="f_nReturnCode" external-function="1" library="lib_APISce.xml" >
@@ -7802,7 +7876,7 @@ Session.g_bBalXferPinLocked = false;]]></script>
             <audio type="index" >3848</audio>
           </play>
           <results >
-            <result name="Default" link="76" stubbed="1"/>
+            <result name="Default" link="76" stubbed="0"/>
             <result name="Success"/>
             <result name="Error"/>
             <result name="Timeout"/>
@@ -10022,17 +10096,7 @@ if(Session.f_strPlay0.length <= 0){
 	Session.s_bPinPlayZeroForOperator =  js_process_application_property(Session.f_strPlay0);
 }
 
-Session.s_oAutoAniArray.length = 0 ;
-if( Session.strAutoAniList.length > 0 ) {
-	var arr = Session.strAutoAniList.split(",") ;
-	for( var i = 0; i < arr.length; i++ ) {
-		var s = new String( arr[i] ) ;
-		s = trimString( s ) ;
-		
-		Server.logInfo("Access number " + s + " will be an auto ANI access number") ;
-		Session.s_oAutoAniArray[i] = s ;
-	}
-}
+parseAutoAniList( Session.strAutoAniList ) ;
 
 if( Session.strNumExpirationDays.length > 0 ) {
 	Session.s_lNumExpirationDays = parseInt( Session.strNumExpirationDays ) ;
@@ -12097,7 +12161,7 @@ if(Session.g_bOutOfMoney) {
           <!--SUCCESS?-->
           <results >
             <result name="Default" link="34" stubbed="1"/>
-            <result name="SUCCESS?" link="24" stubbed="0" >f_nReturnCode == s_sSUCCESS</result>
+            <result name="SUCCESS?" link="36" stubbed="0" >f_nReturnCode == s_sSUCCESS</result>
             <result name="Caller hung up" link="14" stubbed="1" >f_nReturnCode == s_sCALLERHUNGUP</result>
           </results>
           <scripts >
@@ -12137,7 +12201,7 @@ else if (3 == Result.id)
             <audio type="index" >337</audio>
           </play>
           <results >
-            <result name="Default" link="24" stubbed="1"/>
+            <result name="Default" link="24" stubbed="0"/>
             <result name="Success" ><?xtml-editor visible=no?></result>
             <result name="Error" ><?xtml-editor visible=no?></result>
             <result name="Timeout" ><?xtml-editor visible=no?></result>
@@ -12412,7 +12476,7 @@ if(Session.g_nReturnCode == 1) {
         <action id="31" plug-in="Pactolus.Branch.1" ><?xtml-editor x=959 y=536 ?>
           <results >
             <result name="Default" link="30" stubbed="0"/>
-            <result name="f_bLowBalance" link="24" stubbed="1" >f_bLowBalance == true</result>
+            <result name="f_bLowBalance" link="24" stubbed="0" >f_bLowBalance == true</result>
           </results>
           <scripts >
             <script language="javascript" timing="first" ><![CDATA[Session.f_bLowBalance = false;
@@ -12440,7 +12504,7 @@ if(Session.g_oAPI.strAllowZeroCostFlag == "F") {
         <action id="32" plug-in="Pactolus.Branch.1" ><?xtml-editor x=250 y=45 ?>
           <results >
             <result name="Default" link="35" stubbed="0"/>
-            <result name="bCurrentlyConnected" link="24" stubbed="1" >g_oMS.bCurrentlyConnected == true</result>
+            <result name="bCurrentlyConnected" link="36" stubbed="0" >g_oMS.bCurrentlyConnected == true</result>
           </results>
           <scripts >
             <script language="javascript" timing="first" ><![CDATA[// If the sesson ends now, it will be for a different reason because user will be prompted for DTMF
@@ -12462,6 +12526,23 @@ Session.g_bOutOfMoney = false;]]></script>
             <result name="Default" link="13" stubbed="0"/>
             <result name="bAppPropSuppressOnHold" link="10" stubbed="1" >g_oAPI.bSuppressOnHold == true</result>
           </results>
+        </action>
+        <action id="36" plug-in="Pactolus.Branch.1" ><?xtml-editor x=30 y=198 ?>
+          <results >
+            <result name="Default" link="24" stubbed="0"/>
+            <result name="auto ANI" link="37" stubbed="0" >g_bAutoAniAccessNumber == true</result>
+          </results>
+        </action>
+        <action id="37" plug-in="Standard.FunctionCall.1" ><?xtml-editor x=837 y=270 ?>
+          <!--AutoAniBalanceTransfer-->
+          <function xmlns="www.pactolus.com:xtml:application" name="&quot;AutoAniBalanceTransfer&quot;" return="" external-function="0" library=""/>
+          <results >
+            <result name="Default" link="30" stubbed="0"/>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[Session.g_nCurrentState = Session.s_nGET_DESTINATION;
+]]></script>
+          </scripts>
         </action>
       </actions>
     </function>
@@ -19216,7 +19297,10 @@ Session.g_nNumRetry++;]]></script>
         </action>
       </actions>
     </function>
-    <function name="RegisterAuthAni" start="1" event="BalanceTransfer" returns="i4" >
+    <function name="RegisterAuthAni" start="10" event="BalanceTransfer" returns="i4" >
+      <parameters >
+        <parameter name="strPinPassedIn" type="string" pass="byref"/>
+      </parameters>
       <local-vars >
         <var name="strPin" type="string" ></var>
         <var name="bGotPin" type="boolean" >0</var>
@@ -19225,6 +19309,18 @@ Session.g_nNumRetry++;]]></script>
         <var name="strNewPin" type="string" ></var>
       </local-vars>
       <actions >
+        <action id="10" plug-in="Pactolus.Branch.1" ><?xtml-editor x=35 y=16 ?>
+          <results >
+            <result name="Default" link="1" stubbed="0"/>
+            <result name="have pin" link="4" stubbed="0" >bGotPin == true</result>
+          </results>
+          <scripts >
+            <script language="javascript" timing="first" ><![CDATA[if( Session.strPinPassedIn.length > 0 ) {
+	Session.bGotPin = true ;
+	Session.strPin = Session.strPinPassedIn ;
+}]]></script>
+          </scripts>
+        </action>
         <action id="1" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=100 y=122 ?>
           <!--collect pin-->
           <play xmlns="www.pactolus.com:xtml:media" connection-id="g_oMS.strConnectionId" endpoint="g_oMS.strEndPoint" callid="g_oMS.strCallId" repeat="1" timeout="s_nTIMEOUT" ms-type="g_oMS.strType" returns="" start-play="1" interrupt="1" return-immediate="0" digit-map="&quot;(xxxxxxxxxxxxxxxx|x.T|x.#)&quot;" language="g_oAPI.strLanguage" digits="strPin" retry-count="g_sMaxLoginAttempts" clear-digits="1" terminating-digit="" quick-collect="0" digit-timer="" >
@@ -19277,7 +19373,13 @@ AND nReturnCode == 0</result>
           <return xmlns="www.pactolus.com:xtml:application" value="g_nCurrentState"/>
           <scripts >
             <script language="javascript" timing="first" ><![CDATA[Session.g_oSUB.strUserPin = Session.strNewPin ;
-Session.g_nCurrentState = Session.s_nSTATE_AUTH_PRPD_OR_POPD;]]></script>
+
+if( Session.strPinPassedIn.length > 0 ) {
+	Session.g_nCurrentState = Session.s_nGET_DESTINATION;
+}
+else {
+	Session.g_nCurrentState = Session.s_nSTATE_AUTH_PRPD_OR_POPD;
+}]]></script>
           </scripts>
         </action>
         <action id="6" plug-in="Pactolus.MGCPPlay.1" ><?xtml-editor x=614 y=438 ?>
@@ -19724,13 +19826,21 @@ Session.g_nCurrentState = Session.s_nSTATE_AUTH_PRPD_OR_POPD;]]></script>
   <script language="javascript" ><![CDATA[#include <javascript_utils.jsh>
 #include <dialing_plan_utils.jsh>
 
-function isAutoAni( phoneNumber ) {
+function isAutoAni( phoneNumber, &start, &end ) {
+	start = undefined ;
+	end = undefined ;
+	Server.lockSharedVariables() ;
 	for( var i = 0; i < Session.s_oAutoAniArray.length; i++ ) {
-		if( phoneNumber === Session.s_oAutoAniArray[i] ) {
-			Server.logInfo("DH: phone number " + phoneNumber + " is an auto ANI access number") ;
+		if( phoneNumber === Session.s_oAutoAniArray[i].accessNumber ) {
+			start = Session.s_oAutoAniArray[i].startSerial ;
+			end = Session.s_oAutoAniArray[i].endSerial ;			
+			Server.logInfo("DH: phone number " + phoneNumber + " is an auto ANI access number, start: " + 
+				start + " end: " + end ) ;
+			Server.unlockSharedVariables() ;
 			return true ;
 		}
 	}
+	Server.unlockSharedVariables() ;
 	Server.logInfo("DH: phone number " + phoneNumber + " is not an auto ANI access number") ;
 	return false ;
 }
@@ -19738,7 +19848,31 @@ function isAutoAni( phoneNumber ) {
 function trimString( str ) {
 	return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 }
-]]></script>
+
+function parseAutoAniList( sList ) {
+	var str = new String( sList ) ;
+	Session.s_oAutoAniArray.length = 0 ;
+	if( sList.length > 0 ) {
+		var arr = str.split(",") ;
+		for( var i = 0; i < arr.length; i++ ) {
+			var s = new String( arr[i] ) ;
+			s = trimString( s ) ;
+			
+			var arr2 = s.split(":") ;
+			if( 1 == arr2.length ) {	
+				Server.logInfo("Access number " + s + " will be an auto ANI access number") ;
+				Session.s_oAutoAniArray[i].accessNumber = arr2[0] ;
+			}
+			else if( 3 == arr2.length ) {
+				Server.logInfo("Access number " + arr2[0] + " may be an auto ANI access number; serial range " + 
+					arr2[1] + "-" + arr2[2] ) ; 
+				Session.s_oAutoAniArray[i].accessNumber = arr2[0] ;
+				Session.s_oAutoAniArray[i].startSerial = arr2[1] ;
+				Session.s_oAutoAniArray[i].endSerial = arr2[2] ;
+			}
+		}
+	}
+}]]></script>
   <properties >
     <property key="&quot;_english&quot;" value="G:/Software/downloads/prepaid_english.vox"/>
     <property key="&quot;en2&quot;" value="G:/Software/downloads/prepaid_english.vox"/>
