@@ -153,10 +153,10 @@ public class XtmlInterface {
 			}
 			
 			Boolean bNewSubscriber = true ;
-			//BigDecimal subServiceProviderId ;
 			Subscriber sub = null ;
 			PreActivatedSubscribers pre = (PreActivatedSubscribers)  session.createCriteria(PreActivatedSubscribers.class)
 					.add(Restrictions.eq("pin", pin))
+					.add(Restrictions.ne("disabledFlag", 'T'))
 					.createCriteria("serviceProvider")
 						.add(Restrictions.eq("serviceProviderId",  BigDecimal.valueOf(serviceProviderId)))
 					.uniqueResult() ;
@@ -164,12 +164,16 @@ public class XtmlInterface {
 				
 				sub = (Subscriber) session.createCriteria(Subscriber.class)
 						.add(Restrictions.eq("pin", pin))
+						.add(Restrictions.eq("disabledFlag", 'F'))
+						.add(Restrictions.or(
+								Restrictions.isNull("disabledReasonCode"), 
+								Restrictions.ne("disabledReasonCode", BigDecimal.valueOf(7L))
+						))
 						.add(Restrictions.eq("serviceProviderId",  BigDecimal.valueOf(serviceProviderId)))
 						.createCriteria("")
 						.uniqueResult() ;
 				if( null != sub ) {
 					bNewSubscriber = false ;
-					//subServiceProviderId = sub.getServiceProviderId() ;
 					
 					/* we can make an existing subscriber an auth ani subscriber, but only if the subscriber doesn't already have an auth ani */
 					if( !sub.getSubAuthAnis().isEmpty() ) {
@@ -191,18 +195,7 @@ public class XtmlInterface {
 					return PIN_NOT_FOUND ;
 				}
 			}
-			else {
-				//subServiceProviderId = pre.getServiceProvider().getServiceProviderId() ;
-			}
-			
-			/*
-			if( 0 != subServiceProviderId.compareTo( sp.getServiceProviderId() ) ) {
-				logger.error("Pin belongs to different service provider than access number; pin belongs to " + pre.getServiceProvider().getName() + 
-						" while access number belongs to service provider " + sp.getName() ) ;
-				return PIN_SP_NOMATCH ;
-			}
-			*/
-			
+						
 			/* make sure the phone number isn't already in the database for someone else */
 			SubAuthAni authAni = (SubAuthAni) session.createCriteria(SubAuthAni.class)
 					.add(Restrictions.eq("phoneNumber", ani))
@@ -273,7 +266,7 @@ public class XtmlInterface {
 				//sub.setNumExpirationDays(BigDecimal.valueOf(numExpirationDays)) ;
 				
 				/* ok, change request: set the expiration type and days from activation group if it exists, or lot if not */
-				if( null != activationGroup ) {
+				if( null != activationGroup && null != activationGroup.getExpirationType() ) {
 					sub.setExpirationType( activationGroup.getExpirationType() ) ;
 					sub.setNumExpirationDays( activationGroup.getNumExpirationDays() ) ;
 				}
