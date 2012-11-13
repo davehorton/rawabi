@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <xtml version="1.0" xmlns="urn:www.pactolus.com:xtml" >
-  <version sce-version="422a4" prev-sce-version="422a4" last-mod-time="Wednesday, September 26, 2012 14:24:57"/>
+  <version sce-version="422a4" prev-sce-version="422a4" last-mod-time="Thursday, September 27, 2012 10:59:04"/>
   <events >
     <event name="CSRBeginAssignment" display="CSRBeginAssignment" >
       <parameter name="strACDControllerIP" type="string"/>
@@ -1318,12 +1318,15 @@ if( isAutoAni( Session.g_oAPI.strAccessNumber, start, end ) &&
 	Server.logInfo("DH: " + Session.g_oAPI.strAccessNumber + " is an auto ANI access number") ;
 	Session.g_bAutoAniAccessNumber = true ;
 	
-	if( start && end ) { 
+	if( start != "none" ) { 
 		Session.g_bHasSerialRange = true ;
 		Session.g_strStartAutoAniSerial = start ;
 		Session.g_strEndSerialAutoAni = end ;
 		Server.logInfo("start serial number: " + Session.g_strStartAutoAniSerial) ;
 		Server.logInfo("end serial number:   " + Session.g_strEndSerialAutoAni) ;
+	}
+	else {
+		Session.g_bHasSerialRange = false ;
 	}
 }
 	
@@ -19827,8 +19830,6 @@ else {
 #include <dialing_plan_utils.jsh>
 
 function isAutoAni( phoneNumber, &start, &end ) {
-	start = undefined ;
-	end = undefined ;
 	Server.lockSharedVariables() ;
 	for( var i = 0; i < Session.s_oAutoAniArray.length; i++ ) {
 		if( phoneNumber === Session.s_oAutoAniArray[i].accessNumber ) {
@@ -19862,6 +19863,7 @@ function parseAutoAniList( sList ) {
 			if( 1 == arr2.length ) {	
 				Server.logInfo("Access number " + s + " will be an auto ANI access number") ;
 				Session.s_oAutoAniArray[i].accessNumber = arr2[0] ;
+				Session.s_oAutoAniArray[i].startSerial = Session.s_oAutoAniArray[i].endSerial = "none" ;
 			}
 			else if( 3 == arr2.length ) {
 				Server.logInfo("Access number " + arr2[0] + " may be an auto ANI access number; serial range " + 

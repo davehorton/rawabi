@@ -153,19 +153,23 @@ public class XtmlInterface {
 			}
 			
 			Boolean bNewSubscriber = true ;
-			BigDecimal subServiceProviderId ;
+			//BigDecimal subServiceProviderId ;
 			Subscriber sub = null ;
 			PreActivatedSubscribers pre = (PreActivatedSubscribers)  session.createCriteria(PreActivatedSubscribers.class)
 					.add(Restrictions.eq("pin", pin))
+					.createCriteria("serviceProvider")
+						.add(Restrictions.eq("serviceProviderId",  BigDecimal.valueOf(serviceProviderId)))
 					.uniqueResult() ;
 			if( null == pre ) {
 				
 				sub = (Subscriber) session.createCriteria(Subscriber.class)
 						.add(Restrictions.eq("pin", pin))
+						.add(Restrictions.eq("serviceProviderId",  BigDecimal.valueOf(serviceProviderId)))
+						.createCriteria("")
 						.uniqueResult() ;
 				if( null != sub ) {
 					bNewSubscriber = false ;
-					subServiceProviderId = sub.getServiceProviderId() ;
+					//subServiceProviderId = sub.getServiceProviderId() ;
 					
 					/* we can make an existing subscriber an auth ani subscriber, but only if the subscriber doesn't already have an auth ani */
 					if( !sub.getSubAuthAnis().isEmpty() ) {
@@ -188,14 +192,16 @@ public class XtmlInterface {
 				}
 			}
 			else {
-				subServiceProviderId = pre.getServiceProvider().getServiceProviderId() ;
+				//subServiceProviderId = pre.getServiceProvider().getServiceProviderId() ;
 			}
 			
+			/*
 			if( 0 != subServiceProviderId.compareTo( sp.getServiceProviderId() ) ) {
 				logger.error("Pin belongs to different service provider than access number; pin belongs to " + pre.getServiceProvider().getName() + 
 						" while access number belongs to service provider " + sp.getName() ) ;
 				return PIN_SP_NOMATCH ;
 			}
+			*/
 			
 			/* make sure the phone number isn't already in the database for someone else */
 			SubAuthAni authAni = (SubAuthAni) session.createCriteria(SubAuthAni.class)
@@ -240,7 +246,7 @@ public class XtmlInterface {
 				
 				/* now create an entry in the subscriber table */
 				sub = new Subscriber() ;
-				sub.setSubscriberId( pre.getSubscriberId() ) ;
+				sub.setSubscriberId( pre.getSubscriberId().longValue() ) ;
 				sub.setCurrPrepaidBalance( lot.getInitialBalance() ) ;
 				sub.setInitialBalance( lot.getInitialBalance() ) ;
 				sub.setFirstCallDate(null) ;
@@ -296,7 +302,7 @@ public class XtmlInterface {
 	
 				/* tie subscriber to offering */
 				SubOfferingXref sxo = new SubOfferingXref() ;
-				sxo.setId( new SubOfferingXrefId( sub.getSubscriberId(), offering.getOfferingId() ) ) ;
+				sxo.setId( new SubOfferingXrefId( BigDecimal.valueOf(sub.getSubscriberId()), offering.getOfferingId() ) ) ;
 				sxo.setPrimaryFlag('T') ;
 				session.save( sxo ) ;
 				

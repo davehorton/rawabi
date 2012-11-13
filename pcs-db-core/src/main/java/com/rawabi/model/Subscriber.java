@@ -12,7 +12,7 @@ import java.util.Set;
  */
 public class Subscriber implements java.io.Serializable {
 
-	private BigDecimal subscriberId;
+	private Long subscriberId;
 	private BigDecimal offplanAlertPlayed;
 	private char firstBillcyclePlayed;
 	private BigDecimal onplanAlertPlayed;
@@ -114,7 +114,7 @@ public class Subscriber implements java.io.Serializable {
 	public Subscriber() {
 	}
 
-	public Subscriber(BigDecimal subscriberId, BigDecimal offplanAlertPlayed,
+	public Subscriber(Long subscriberId, BigDecimal offplanAlertPlayed,
 			char firstBillcyclePlayed, BigDecimal onplanAlertPlayed,
 			BigDecimal billedSequence, BigDecimal initialBalance,
 			BigDecimal serviceProviderId, BigDecimal expirationType,
@@ -148,7 +148,7 @@ public class Subscriber implements java.io.Serializable {
 		this.firstUseFeeState = firstUseFeeState;
 	}
 
-	public Subscriber(BigDecimal subscriberId, BigDecimal offplanAlertPlayed,
+	public Subscriber(Long subscriberId, BigDecimal offplanAlertPlayed,
 			char firstBillcyclePlayed, BigDecimal onplanAlertPlayed,
 			Date nextMaintFee2Date, Date nextMaintFee3Date,
 			Date nextMonthlyBillingDate, BigDecimal billedSequence,
@@ -287,11 +287,11 @@ public class Subscriber implements java.io.Serializable {
 		this.subAuthAnis = subAuthAnis;
 	}
 
-	public BigDecimal getSubscriberId() {
+	public Long getSubscriberId() {
 		return this.subscriberId;
 	}
 
-	public void setSubscriberId(BigDecimal subscriberId) {
+	public void setSubscriberId(Long subscriberId) {
 		this.subscriberId = subscriberId;
 	}
 
